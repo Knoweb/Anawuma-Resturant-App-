@@ -22,6 +22,8 @@ FROM nginx:alpine
 # Copy built files
 COPY --from=build /app/build /usr/share/nginx/html
 
-# Copy custom nginx config if we had one (optional, default is fine for simple SPA)
+# Copy custom nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
