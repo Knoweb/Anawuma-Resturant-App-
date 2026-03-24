@@ -1,0 +1,188 @@
+/* ======================
+   SERVICES SECTION
+   ====================== */
+.services-section-landing {
+  padding: 100px 0;
+  background: linear-gradient(160deg, #edf0f7 0%, #e8ecf4 40%, #edf0f7 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.services-heading-wrap {
+  text-align: center;
+  max-width: 620px;
+  margin: 0 auto 56px;
+}
+
+.services-heading {
+  font-size: clamp(1.6rem, 2.8vw, 2.4rem);
+  font-weight: 800;
+  color: #1a202c;
+  line-height: 1.25;
+  margin-top: 14px;
+}
+
+/* ---- 4-column card grid ---- */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+/* ---- Individual Card ---- */
+.service-card {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  height: 310px;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark gradient overlay — fades on hover */
+.service-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.92) 100%);
+  z-index: 1;
+  transition: opacity 0.4s ease;
+}
+
+.service-card:hover::after {
+  opacity: 0;
+}
+
+/* Background image */
+.svc-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), filter 0.4s ease;
+}
+
+.service-card:hover .svc-img {
+  transform: scale(1.12);
+  filter: blur(4px);
+}
+
+/* Top-right icon badge */
+.svc-icon-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  transition: all 0.3s ease;
+}
+
+.service-card:hover .svc-icon-badge {
+  background: #43a047;
+  transform: rotate(12deg) scale(1.1);
+  opacity: 0;
+  filter: blur(4px);
+}
+
+.svc-icon-badge i {
+  font-size: 18px;
+  color: #729e72;
+  transition: color 0.3s ease;
+}
+
+.service-card:hover .svc-icon-badge i {
+  color: #fff;
+}
+
+/* Default title badge at bottom */
+.svc-title-badge {
+  position: absolute;
+  bottom: 18px;
+  left: 18px;
+  right: 18px;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  padding: 18px;
+  transition: all 0.4s ease;
+}
+
+.service-card:hover .svc-title-badge {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+  filter: blur(4px);
+}
+
+.svc-title-badge h4 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+  letter-spacing: 0.3px;
+}
+
+/* Hover description overlay */
+.svc-desc-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  z-index: 3;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.service-card:hover .svc-desc-overlay {
+  opacity: 1;
+  visibility: visible;
+}
+
+.svc-desc-overlay p {
+  font-size: 15.5px;
+  color: #fff;
+  line-height: 1.8;
+  text-align: center;
+  margin: 0;
+  transform: translateY(16px);
+  opacity: 0;
+  transition: all 0.4s ease 0.08s;
+}
+
+.service-card:hover .svc-desc-overlay p {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* ========================
+   RESPONSIVE
+   ======================== */
+@media (max-width: 1200px) {
+  .services-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .services-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .service-card {
+    height: 260px;
+  }
+}

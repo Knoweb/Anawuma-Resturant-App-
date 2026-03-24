@@ -1,0 +1,102 @@
+.about-page {
+  font-family: 'Inter', sans-serif;
+  padding-top: 80px; /* Offset for fixed navbar */
+  background-color: #fff;
+}
+
+/* Intro Section */
+.about-intro {
+  padding: 80px 0;
+}
+
+.about-image-wrapper {
+  position: relative;
+}
+
+.about-image-wrapper img {
+  border-radius: 12px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  width: 100%;
+}
+
+.about-text-block h5 {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+  color: #266668;
+}
+
+.about-text-block p {
+  line-height: 1.8;
+  color: #6c757d;
+}
+
+/* Core Values Section */
+.core-values {
+  background-color: #f8f9fa;
+  border-top: 1px solid #eaeaea;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.core-values h2 {
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.core-values-list {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.core-values-list li {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+  transition: transform 0.3s ease;
+}
+
+.core-values-list li:hover {
+  transform: translateY(-5px);
+}
+
+.value-icon i {
+  color: #266668;
+  font-size: 1.5rem;
+}
+
+/* How It Works Section */
+.how-it-works {
+  background-color: #fff;
+}
+
+.work-step {
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.work-step:hover {
+  box-shadow: 0 10px 20px rgba(45, 124, 126, 0.1);
+  border-color: #266668;
+  transform: translateY(-3px);
+}
+
+.step-icon {
+  background: #E6F0F0;
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #266668;
+  flex-shrink: 0;
+}
+
+.workflow-image img {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  width: 100%;
+  object-fit: contain;
+  max-height: 500px;
+}

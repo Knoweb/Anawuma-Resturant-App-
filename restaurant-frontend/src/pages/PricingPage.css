@@ -1,0 +1,201 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap');
+
+.pp-page {
+  min-height: 100vh;
+  background: #ffffff;
+}
+
+.pp-main {
+  padding-top: 92px;
+}
+
+.pp-spacer {
+  height: 0px;
+}
+
+.pp-pricing-section {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  padding: 60px 0 100px;
+  background: #3c827b; /* Matched the anawuma pricing dark teal */
+}
+
+.pp-title-wrap {
+  max-width: 760px;
+  margin: 0 auto 42px;
+  text-align: center;
+  color: #ffffff;
+}
+
+.pp-sub-title {
+  display: inline-block;
+  padding: 6px 20px;
+  background: #2b3b48;
+  border-radius: 4px;
+  letter-spacing: 0px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  color: #fff;
+  border: none;
+}
+
+.pp-title {
+  margin: 20px 0 12px;
+  font-size: clamp(1.8rem, 3.4vw, 2.5rem);
+  line-height: 1.2;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+}
+
+.pp-subtext {
+  display: none; /* Removed subtext according to screenshot */
+}
+
+.pp-discount-banner {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pp-state-box {
+  margin: 24px auto 0;
+  max-width: 540px;
+  padding: 16px;
+  border-radius: 12px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.94);
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.pp-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.pp-card {
+  background: #ffffff;
+  border-radius: 4px;
+  padding: 30px 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.pp-plan-title {
+  margin: 0;
+  color: #3e847c;
+  font-size: 1.1rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+}
+
+.pp-original-price {
+  margin: 14px 0 0;
+  color: #cb3f3f;
+  text-decoration: line-through;
+  font-size: 14px;
+}
+
+.pp-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 10px 0 16px;
+}
+
+.pp-price-value {
+  color: #1a202c;
+  font-size: 2.2rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+}
+
+.pp-price-period {
+  color: #4b5563;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+}
+
+.pp-plan-description {
+  margin: 0 0 20px;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.6;
+  font-family: 'Inter', sans-serif;
+  min-height: 80px;
+}
+
+.pp-plan-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 24px;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+  text-decoration: none;
+  background: transparent;
+  color: #1e293b;
+  font-weight: 600;
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s ease;
+}
+
+.pp-plan-btn:hover {
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+.pp-feature-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+}
+
+.pp-feature-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: #475569;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+}
+
+.pp-check {
+  color: #1e8e2f;
+  font-size: 14px;
+  margin-top: 2px;
+}
+
+.pp-bottom-link-wrap {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .pp-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .pp-pricing-section {
+    padding: 44px 0 80px;
+  }
+  .pp-grid {
+    grid-template-columns: 1fr;
+  }
+}

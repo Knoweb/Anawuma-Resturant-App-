@@ -1,0 +1,378 @@
+/* ======================
+   FOOTER
+   ====================== */
+
+/* -- CTA Banner -- */
+.footer-cta-banner {
+  background: #266668;
+  padding: 55px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Floating Shapes in CTA */
+.cta-shape-circle,
+.cta-shape-dots,
+.cta-shape-striped {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.cta-shape-circle {
+  top: 15%;
+  left: 10%;
+  animation: float-shape 6s ease-in-out infinite;
+  opacity: 0.5;
+}
+
+.cta-shape-dots {
+  bottom: 25px;
+  right: 32%;
+  animation: float-shape 5s ease-in-out infinite alternate;
+  opacity: 0.6;
+}
+
+.cta-shape-striped {
+  top: -65px;
+  right: 5%;
+  width: 200px;
+  animation: float-shape 8s ease-in-out infinite;
+  opacity: 0.5;
+}
+
+@keyframes float-shape {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-15px); }
+}
+
+.fcta-dot {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  bottom: 28px;
+  left: 5%;
+  pointer-events: none;
+}
+
+.fcta-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 2;
+}
+
+.fcta-text h2 {
+  font-family: 'Inter', 'Georgia', serif;
+  font-size: clamp(1.35rem, 2.5vw, 1.9rem);
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 10px;
+  line-height: 1.3;
+}
+
+.fcta-text p {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+  max-width: 520px;
+  line-height: 1.7;
+}
+
+.fcta-btns {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.fcta-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 13px 26px;
+  background: #fff;
+  color: #266668;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 50px;
+  text-decoration: none;
+  border: 2px solid #fff;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.fcta-btn-primary:hover {
+  background: transparent;
+  color: #fff;
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+.fcta-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 12px 24px;
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 50px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.fcta-btn-outline:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: #fff;
+  color: #fff;
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+/* ==============================
+   Footer Body — Light Grey like the reference
+   ============================== */
+.landing-footer {
+  background: #f5f7fa;
+  position: relative;
+  overflow: hidden;
+}
+
+.footer-body {
+  padding: 60px 0 0;
+  border-top: 1px solid #e2e8f0;
+  position: relative;
+  z-index: 2;
+}
+
+/* 3-column grid: Logo | About+QuickLinks | Get in Touch */
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1.5fr 2fr;
+  gap: 50px;
+  padding-bottom: 50px;
+  border-bottom: 1px solid #e2e8f0;
+  align-items: start;
+}
+
+/* Logo col */
+.footer-logo {
+  height: 44px;
+  width: auto;
+  display: block;
+  margin-bottom: 18px;
+}
+
+.footer-social {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.footer-social a {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #266668;
+  font-size: 13px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.footer-social a:hover {
+  background: #266668;
+  color: #fff;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(45,124,126,0.3);
+}
+
+/* Col group — About + Quick Links side by side */
+.footer-col-group {
+  display: flex;
+  gap: 48px;
+}
+
+/* Column titles */
+.footer-col-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: #1a202c;
+  margin-bottom: 18px;
+  position: relative;
+}
+
+/* Links */
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li {
+  margin-bottom: 11px;
+}
+
+.footer-links li a {
+  font-size: 14px;
+  color: #4a5568;
+  text-decoration: none;
+  transition: color 0.2s ease, transform 0.2s ease;
+  display: inline-block;
+}
+
+.footer-links li a:hover {
+  color: #266668;
+  transform: translateX(3px);
+}
+
+/* Quick Links two-column layout */
+.footer-links-two-col {
+  display: flex;
+  gap: 32px;
+}
+
+/* Get in Touch — Grouped Office contacts */
+.footer-contact-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-contact-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13.5px;
+  color: #4a5568;
+  margin-bottom: 6px;
+  line-height: 1.6;
+}
+
+.footer-contact-list li i {
+  color: #266668;
+  margin-top: 3px;
+  flex-shrink: 0;
+  width: 15px;
+  font-size: 13px;
+}
+
+.footer-contact-list li.contact-office-label {
+  margin-top: 14px;
+  margin-bottom: 5px;
+  font-weight: 700;
+  color: #1a202c;
+  font-size: 13.5px;
+}
+
+.footer-contact-list li.contact-office-label:first-child {
+  margin-top: 0;
+}
+
+.footer-contact-list li a {
+  color: #4a5568;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-contact-list li a:hover {
+  color: #266668;
+}
+
+/* Copyright */
+.footer-copyright {
+  padding: 20px 0;
+  text-align: center;
+  background: #edf0f5;
+  margin-top: 0;
+}
+
+.footer-copyright p {
+  font-size: 13px;
+  color: #718096;
+  margin: 0;
+}
+
+.footer-copyright a {
+  color: #266668;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-copyright a:hover {
+  color: #1d5a5c;
+}
+
+/* Green Glow */
+.footer-bg-decor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.footer-green-glow {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(45, 124, 126, 0.08) 0%, transparent 70%);
+}
+
+/* Logo col needs relative */
+.logo-col {
+  position: relative;
+}
+
+/* ========================
+   RESPONSIVE
+   ======================== */
+@media (max-width: 1100px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+
+  .footer-col-group {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 700px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .footer-col-group {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .fcta-inner {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .fcta-btns {
+    justify-content: center;
+  }
+}

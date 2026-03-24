@@ -1,0 +1,211 @@
+/* ======================
+   HOW IT WORKS SECTION
+   ====================== */
+.how-it-works-section {
+  padding: 100px 0;
+  background: linear-gradient(160deg, #edf0f7 0%, #e8ecf5 50%, #edf0f7 100%);
+  overflow: hidden;
+}
+
+.hiw-heading-wrap {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto 60px;
+}
+
+.hiw-heading {
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-weight: 800;
+  color: #1a202c;
+  line-height: 1.25;
+  margin-top: 12px;
+}
+
+/* ---- Grid ---- */
+.hiw-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+/* ---- Card ---- */
+.hiw-card {
+  position: relative;
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+  border: 1px solid #e8ecf5;
+  border-top: 4px solid var(--ce, #43a047); /* Theme color from card class */
+  overflow: hidden;
+  text-align: center;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+}
+
+.hiw-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 0;
+  background: var(--ce);
+  opacity: 0;
+  transition: all 0.4s ease;
+  z-index: -1;
+}
+
+.hiw-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 50px rgba(67, 160, 71, 0.15);
+  border-color: var(--ce);
+}
+
+.hiw-card:hover::before {
+  height: 100%;
+  opacity: 0.05;
+}
+
+/* Color variables per step */
+.item-scan    { --cs: #c8e6c9; --ce: #66bb6a; }
+.item-order   { --cs: #a5d6a7; --ce: #4caf50; }
+.item-confirm { --cs: #81c784; --ce: #43a047; }
+.item-cook    { --cs: #66bb6a; --ce: #388e3c; }
+.item-update  { --cs: #4caf50; --ce: #2e7d32; }
+.item-deliver { --cs: #43a047; --ce: #1b5e20; }
+
+/* Step number badge */
+.hiw-step-num {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  background: var(--ce, #43a047);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(67, 160, 71, 0.35);
+  z-index: 2;
+  transition: all 0.4s ease;
+}
+
+.hiw-card:hover .hiw-step-num {
+  transform: scale(1.1);
+  box-shadow: 0 6px 15px rgba(67, 160, 71, 0.45);
+}
+
+/* Icon */
+.hiw-icon-wrap {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #43a047, #2e7d32);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 6px 20px rgba(67, 160, 71, 0.3);
+  transition: all 0.4s ease;
+}
+
+.hiw-card:hover .hiw-icon-wrap {
+  transform: rotate(5deg) scale(1.1);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.22);
+}
+
+.hiw-icon-wrap i {
+  font-size: 28px;
+  color: #fff;
+}
+
+/* Content */
+.hiw-content {
+  position: relative;
+  z-index: 1;
+}
+
+.hiw-content h4 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+  transition: color 0.3s ease;
+}
+
+.hiw-card:hover .hiw-content h4 {
+  color: var(--ce);
+}
+
+.hiw-subtitle {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ce);
+  margin-bottom: 12px;
+}
+
+.hiw-content p {
+  font-size: 15px;
+  line-height: 1.75;
+  color: #666;
+  margin: 0;
+}
+
+/* CTA Row */
+.hiw-cta-row {
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 8px;
+  margin-top: 10px;
+}
+
+.solutions-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 28px;
+  background: linear-gradient(135deg, #43a047, #2e7d32);
+  color: #fff;
+  font-size: 15.5px;
+  font-weight: 600;
+  border-radius: 50px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(67, 160, 71, 0.35);
+}
+
+.solutions-cta-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(67, 160, 71, 0.5);
+  color: #fff;
+  text-decoration: none;
+}
+
+/* ========================
+   RESPONSIVE
+   ======================== */
+@media (max-width: 991px) {
+  .hiw-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .hiw-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hiw-cta-row {
+    justify-content: center;
+    padding: 0;
+  }
+}

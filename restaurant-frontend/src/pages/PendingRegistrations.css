@@ -1,0 +1,194 @@
+/* Pending Registrations - Old Project Professional Style Theme */
+
+.pending-requests-container {
+  padding: 2rem 1.5rem;
+  background: #f5f6fa;
+  min-height: 100vh;
+}
+
+.pending-requests-container h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  font-family: "Lato", sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+}
+
+.loading .spinner-border {
+  color: #2980b9;
+  width: 3rem;
+  height: 3rem;
+}
+
+.no-requests {
+  text-align: center;
+  padding: 3rem;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  color: #7f8c8d;
+}
+
+.requests-table-wrapper {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.requests-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Lato", sans-serif;
+}
+
+.requests-table thead {
+  background: #ecf0f1;
+}
+
+.requests-table thead tr {
+  border-bottom: 2px solid #bdc3c7;
+}
+
+.requests-table thead th {
+  padding: 1rem 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.requests-table tbody tr {
+  border-bottom: 1px solid #ecf0f1;
+  transition: background-color 0.2s ease;
+}
+
+.requests-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.requests-table tbody td {
+  padding: 1rem 0.75rem;
+  vertical-align: middle;
+  color: #2c3e50;
+  font-size: 0.9rem;
+}
+
+.requests-table tbody strong {
+  display: block;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+}
+
+.requests-table tbody img {
+  border-radius: 6px;
+  border: 2px solid #ecf0f1;
+  transition: transform 0.2s ease;
+}
+
+.requests-table tbody img:hover {
+  transform: scale(1.05);
+}
+
+/* Action Buttons */
+.requests-table tbody button {
+  font-family: "Lato", sans-serif;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.85rem;
+  margin-right: 0.5rem;
+}
+
+.requests-table tbody button:last-child {
+  margin-right: 0;
+}
+
+/* Approve Button */
+.requests-table tbody button[style*="background: #266668"],
+.approve-btn {
+  background: #27ae60 !important;
+  color: #ffffff !important;
+}
+
+.requests-table tbody button[style*="background: #266668"]:hover,
+.approve-btn:hover {
+  background: #229954 !important;
+  box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
+}
+
+/* Reject Button */
+.requests-table tbody button[style*="background: #dc3545"],
+.reject-btn {
+  background: #e74c3c !important;
+  color: #ffffff !important;
+}
+
+.requests-table tbody button[style*="background: #dc3545"]:hover,
+.reject-btn:hover {
+  background: #c0392b !important;
+  box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+}
+
+/* Feature Flags Badge */
+.feature-flags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.feature-flag {
+  display: inline-block;
+  background: #ecf0f1;
+  color: #2c3e50;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.feature-flag.enabled {
+  background: #d5f4e6;
+  color: #27ae60;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .pending-requests-container {
+    padding: 1rem;
+  }
+
+  .pending-requests-container h2 {
+    font-size: 1.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .requests-table {
+    font-size: 0.85rem;
+  }
+
+  .requests-table thead th,
+  .requests-table tbody td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .requests-table tbody button {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.75rem;
+  }
+}

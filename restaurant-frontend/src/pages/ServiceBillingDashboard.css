@@ -1,0 +1,450 @@
+/* ============================================================
+   Service & Billing Dashboard – Styles
+   ============================================================ */
+
+/* ── Layout ── */
+.content-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* ── Section ── */
+.billing-section {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  padding: 1.25rem 1.5rem;
+}
+
+.section-heading {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+/* ── Ready Orders Grid ── */
+.ready-orders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.ready-order-card {
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  background: #fafafa;
+  transition: box-shadow .15s;
+}
+
+.ready-order-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,.1);
+}
+
+.roc-header {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.roc-order-no {
+  font-weight: 700;
+  font-size: .95rem;
+}
+
+.roc-age {
+  font-size: .8rem;
+}
+
+.roc-meta {
+  display: flex;
+  gap: .75rem;
+  font-size: .85rem;
+  color: #555;
+}
+
+.roc-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-top: 1px solid #eee;
+  padding-top: .5rem;
+  font-size: .85rem;
+}
+
+.roc-items li {
+  display: flex;
+  justify-content: space-between;
+  padding: 1px 0;
+}
+
+.roc-total {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #2563eb;
+  text-align: right;
+  border-top: 1px dashed #ddd;
+  padding-top: .4rem;
+}
+
+.roc-actions {
+  display: flex;
+  gap: .5rem;
+  margin-top: .25rem;
+}
+
+/* ── WhatsApp button ── */
+.btn-whatsapp {
+  background-color: #25d366;
+  color: #fff;
+  border-color: #25d366;
+}
+.btn-whatsapp:hover {
+  background-color: #1da951;
+  border-color: #1da951;
+  color: #fff;
+}
+
+/* ── WS Badge ── */
+.ws-badge {
+  font-size: .8rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ── Invoice Table ── */
+.invoice-table th {
+  font-size: .82rem;
+  font-weight: 600;
+  background: #f7f8fa;
+}
+
+.invoice-table td {
+  vertical-align: middle;
+  font-size: .875rem;
+}
+
+/* ── Filters ── */
+.invoice-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  align-items: center;
+}
+
+.filter-field {
+  width: auto;
+  min-width: 130px;
+}
+
+/* ── Cashier to Accountant transfer toolbar ── */
+.transfer-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.transfer-date {
+  width: auto;
+  min-width: 170px;
+}
+
+/* ── Modals ── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 1rem;
+}
+
+.invoice-modal,
+.create-invoice-modal {
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.invoice-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .85rem 1.25rem;
+  border-bottom: 1px solid #eee;
+}
+
+.invoice-modal-header h5 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.invoice-modal-body {
+  overflow-y: auto;
+  padding: 1.25rem;
+  flex: 1;
+}
+
+.invoice-modal-footer {
+  padding: .85rem 1.25rem;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: .5rem;
+  flex-wrap: wrap;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  font-size: 1rem;
+  padding: 2px 6px;
+}
+.btn-icon:hover { color: #333; }
+
+/* ── Create Invoice Form ── */
+.ci-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .4rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.ci-input-row label {
+  flex: 1;
+}
+
+.ci-input {
+  width: 130px;
+  text-align: right;
+}
+
+.ci-value {
+  font-weight: 600;
+}
+
+.ci-grand-total {
+  font-weight: 700;
+  font-size: 1.05rem;
+  border-top: 2px solid #333;
+  margin-top: .25rem;
+}
+
+.ci-total {
+  color: #2563eb;
+  font-size: 1.1rem;
+}
+
+/* ── Printable Invoice ── */
+.printable-invoice {
+  font-family: 'Courier New', monospace;
+  font-size: .85rem;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: .5rem;
+}
+
+.pi-header {
+  text-align: center;
+  margin-bottom: .75rem;
+}
+
+.pi-restaurant {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.pi-title {
+  font-weight: 600;
+  font-size: .9rem;
+  letter-spacing: 2px;
+  margin: .25rem 0;
+  border-top: 1px dashed #666;
+  border-bottom: 1px dashed #666;
+  padding: .2rem 0;
+}
+
+.pi-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: .78rem;
+  gap: .5rem;
+  flex-wrap: wrap;
+}
+
+.pi-items {
+  width: 100%;
+  border-collapse: collapse;
+  margin: .75rem 0;
+  font-size: .8rem;
+}
+
+.pi-items th {
+  border-bottom: 1px solid #333;
+  padding: 2px 0;
+  font-weight: 600;
+}
+
+.pi-items td {
+  padding: 2px 0;
+}
+
+.pi-center { text-align: center; }
+.pi-right  { text-align: right; }
+
+.pi-note {
+  color: #666;
+  font-size: .75rem;
+}
+
+.pi-totals {
+  border-top: 1px solid #666;
+  padding-top: .4rem;
+  font-size: .85rem;
+}
+
+.pi-total-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 1px 0;
+}
+
+.pi-discount { color: #c00; }
+
+.pi-grand-total {
+  font-weight: 700;
+  font-size: .95rem;
+  border-top: 2px solid #333;
+  margin-top: .25rem;
+  padding-top: .25rem;
+}
+
+.pi-footer {
+  text-align: center;
+  margin-top: .75rem;
+  font-size: .78rem;
+  border-top: 1px dashed #666;
+  padding-top: .4rem;
+  letter-spacing: .5px;
+}
+
+/* ── Toast ── */
+.billing-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  padding: .75rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: .9rem;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  animation: slideUp .25s ease-out;
+  box-shadow: 0 4px 16px rgba(0,0,0,.18);
+  max-width: 340px;
+}
+
+.billing-toast-success {
+  background: #e6f7ee;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.billing-toast-error {
+  background: #fff5f5;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* ── Print-only styles ── */
+@media print {
+  @page {
+    margin: 10mm;
+  }
+
+  body.billing-invoice-print-mode {
+    margin: 0 !important;
+    background: #fff !important;
+  }
+
+  /* Keep layout tree intact and only reveal the invoice node. */
+  body.billing-invoice-print-mode * {
+    visibility: hidden !important;
+  }
+
+  body.billing-invoice-print-mode #printable-invoice,
+  body.billing-invoice-print-mode #printable-invoice * {
+    visibility: visible !important;
+  }
+
+  body.billing-invoice-print-mode .printable-invoice {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: #fff;
+    max-width: 100%;
+    padding: 1rem;
+    margin: 0;
+  }
+}
+
+/* ── Mobile ── */
+@media (max-width: 576px) {
+  .ready-orders-grid {
+    grid-template-columns: 1fr;
+  }
+  .invoice-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .transfer-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filter-field {
+    width: 100%;
+  }
+  .transfer-date {
+    width: 100%;
+  }
+  .invoice-modal, .create-invoice-modal {
+    max-height: 95vh;
+  }
+}

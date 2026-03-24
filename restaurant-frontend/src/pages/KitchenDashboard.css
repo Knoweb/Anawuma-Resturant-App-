@@ -1,0 +1,286 @@
+/* Kitchen Dashboard - Old Project Professional Style Theme */
+
+.kd-header {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #ffffff;
+}
+
+.kd-title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffffff;
+  font-family: "Lato", sans-serif;
+}
+
+.kd-subtitle {
+  margin: 0.5rem 0 0;
+  color: #ecf0f1;
+  font-size: 0.9rem;
+  font-family: "Lato", sans-serif;
+}
+
+.kd-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.kd-live-pill {
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  animation: pulse 2s infinite;
+}
+
+.kd-live-pill.online {
+  background: #1abc9c;
+  color: #fff;
+}
+
+.kd-live-pill.offline {
+  background: #e74c3c;
+  color: #fff;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.kd-stat-card {
+  border-radius: 8px;
+  color: #ffffff;
+  padding: 1.5rem;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-left: 5px solid;
+}
+
+.kd-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.kd-stat-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.9;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.kd-stat-value {
+  font-size: 2.5rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.kd-stat-new {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  border-left-color: #2980b9;
+}
+
+.kd-stat-accepted {
+  background: linear-gradient(135deg, #f39c12, #d68910);
+  border-left-color: #d68910;
+}
+
+.kd-stat-cooking {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  border-left-color: #c0392b;
+}
+
+.kd-stat-ready {
+  background: linear-gradient(135deg, #1abc9c, #16a085);
+  border-left-color: #16a085;
+}
+
+.kd-stat-total {
+  background: linear-gradient(135deg, #9b59b6, #8e44ad);
+  border-left-color: #8e44ad;
+}
+
+.kd-stat-urgent {
+  background: linear-gradient(135deg, #e67e22, #d35400);
+  border-left-color: #d35400;
+}
+
+.kd-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+  padding: 0;
+}
+
+.kd-actions .btn {
+  font-family: "Lato", sans-serif;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 0.5rem 1.25rem;
+  transition: all 0.3s ease;
+}
+
+.kd-actions .btn-primary {
+  background: #2980b9;
+  border-color: #2980b9;
+}
+
+.kd-actions .btn-primary:hover {
+  background: #3498db;
+  border-color: #3498db;
+}
+
+.kd-actions .btn-outline-secondary {
+  color: #34495e;
+  border-color: #bdc3c7;
+}
+
+.kd-actions .btn-outline-secondary:hover {
+  background: #34495e;
+  border-color: #34495e;
+  color: #fff;
+}
+
+.kd-status-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 6px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.kd-status-new {
+  background: #dfe6e9;
+  color: #2d3436;
+}
+
+.kd-status-accepted {
+  background: #fdcb6e;
+  color: #2d3436;
+}
+
+.kd-status-cooking {
+  background: #ff7675;
+  color: #ffffff;
+}
+
+.kd-status-ready {
+  background: #00b894;
+  color: #ffffff;
+}
+
+.kd-status-default {
+  background: #95a5a6;
+  color: #ffffff;
+}
+
+.kd-footnote {
+  color: #7f8c8d;
+  font-size: 0.85rem;
+  margin-top: 1rem;
+  font-family: "Lato", sans-serif;
+}
+
+/* Table Styling */
+.table {
+  font-family: "Lato", sans-serif;
+  margin-bottom: 0;
+}
+
+.table thead {
+  background: #ecf0f1;
+}
+
+.table thead th {
+  color: #2c3e50;
+  font-weight: 600;
+  border: none;
+  padding: 1rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+.table tbody td {
+  vertical-align: middle;
+  padding: 0.85rem 0.75rem;
+  border-color: #ecf0f1;
+}
+
+.table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+/* Card Styling */
+.card {
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.card-header {
+  background: #ecf0f1;
+  border: none;
+  padding: 1rem 1.25rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+/* Spinner */
+.spinner-border {
+  color: #2980b9;
+}
+
+.text-muted {
+  color: #95a5a6 !important;
+}
+
+@media (max-width: 768px) {
+  .kd-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.5rem;
+  }
+
+  .kd-header-actions {
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  .kd-title {
+    font-size: 1.5rem;
+  }
+
+  .kd-stat-value {
+    font-size: 2rem;
+  }
+
+  .kd-actions {
+    gap: 0.5rem;
+  }
+
+  .kd-actions .btn {
+    padding: 0.4rem 0.85rem;
+    font-size: 0.85rem;
+  }
+}

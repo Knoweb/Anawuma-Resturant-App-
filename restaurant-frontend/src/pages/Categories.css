@@ -1,0 +1,91 @@
+.page-title {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.category-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.category-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+.category-card-image {
+  height: 220px;
+  overflow: hidden;
+}
+
+.category-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.category-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.category-text {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #666;
+}
+
+.btn-explore-items {
+  background-color: #00cdff !important;
+  color: #000 !important;
+  font-weight: 600;
+  border: none;
+  padding: 0.75rem;
+  font-size: 1.1rem;
+}
+
+.btn-explore-items:hover {
+  background-color: #00b8e6 !important;
+}
+
+.btn-edit-category {
+  background-color: #ffc107 !important;
+  border: none;
+  color: #000;
+  font-weight: 500;
+}
+
+.btn-edit-category:hover {
+  background-color: #e0ac08 !important;
+}
+
+.btn-delete-category {
+  background-color: #dc3545 !important;
+  border: none;
+  color: #fff;
+  font-weight: 500;
+}
+
+.btn-delete-category:hover {
+  background-color: #c82333 !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 1.5rem;
+  }
+}
+
+.category-image-placeholder {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  font-size: 0.9rem;
+  font-weight: 500;
+  height: 100%;
+}

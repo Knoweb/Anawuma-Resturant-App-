@@ -1,0 +1,164 @@
+/* Super Admin Login - Anawuma style */
+
+.sa-login-page {
+  min-height: 100vh;
+  background: #3dbea3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 2rem 1rem;
+}
+
+/* Logo at top */
+.sa-logo {
+  position: absolute;
+  top: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.sa-logo img {
+  height: 60px;
+  width: auto;
+  filter: brightness(0) invert(1);
+}
+
+/* Floating decoration blobs (clouds / shapes) */
+.sa-deco {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  pointer-events: none;
+  animation: floatUp 6s ease-in-out infinite;
+}
+
+.sa-deco-1 { width: 120px; height: 60px; border-radius: 30px; top: 22%; left: 12%; animation-delay: 0s; }
+.sa-deco-2 { width: 80px;  height: 40px; border-radius: 20px; top: 18%; left: 28%; animation-delay: 1s; }
+.sa-deco-3 { width: 100px; height: 50px; border-radius: 25px; top: 15%; right: 22%; animation-delay: 0.5s; }
+.sa-deco-4 { width: 70px;  height: 35px; border-radius: 18px; top: 22%; right: 12%; animation-delay: 1.5s; }
+.sa-deco-5 { width: 18px;  height: 18px; top: 30%; right: 18%; animation-delay: 2s; }
+.sa-deco-6 { width: 14px;  height: 14px; top: 35%; left: 10%; animation-delay: 2.5s; }
+
+@keyframes floatUp {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
+}
+
+/* Card */
+.sa-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 2.5rem 2.5rem 2rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  position: relative;
+  z-index: 5;
+  margin-top: 5rem;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.sa-card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1.5rem;
+  font-family: 'Lato', sans-serif;
+}
+
+/* Inputs */
+.sa-input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f3f4f6;
+  font-size: 0.95rem;
+  color: #111827;
+  outline: none;
+  font-family: 'Lato', sans-serif;
+  transition: border-color 0.2s, background 0.2s;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.sa-input:focus {
+  border-color: #3dbea3;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(61, 190, 163, 0.15);
+}
+
+.sa-password-wrap {
+  position: relative;
+  margin-bottom: 1.25rem;
+}
+
+.sa-password-wrap .sa-input {
+  margin-bottom: 0;
+  padding-right: 2.8rem;
+}
+
+.sa-toggle-pw {
+  position: absolute;
+  right: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  font-size: 1rem;
+}
+
+.sa-toggle-pw:hover { color: #6b7280; }
+
+/* Login button */
+.sa-btn {
+  background: #3b96e0;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Lato', sans-serif;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.sa-btn:hover:not(:disabled) {
+  background: #2980b9;
+  transform: translateY(-1px);
+}
+
+.sa-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Bottom link */
+.sa-back-link {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-family: 'Lato', sans-serif;
+}
+
+.sa-back-link a {
+  color: #3dbea3;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.sa-back-link a:hover { text-decoration: underline; }

@@ -1,0 +1,118 @@
+/* ======================
+   CTA / CONTACT SECTION
+   ====================== */
+.cta-section {
+  background: #266668;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Full-width split layout — no container wrapper */
+.cta-inner-full {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  min-height: 380px;
+}
+
+/* Left: text side */
+.cta-text {
+  padding: 70px 60px 70px 80px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Decorative glow */
+.cta-section::before {
+  content: '';
+  position: absolute;
+  width: 450px;
+  height: 450px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.07), transparent 70%);
+  top: -150px;
+  left: -80px;
+  pointer-events: none;
+}
+
+.cta-heading {
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.25;
+  margin-bottom: 20px;
+}
+
+.cta-body {
+  font-size: 16px;
+  line-height: 1.85;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 32px;
+  max-width: 480px;
+}
+
+/* White outlined button like reference */
+.cta-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: transparent;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 2px solid #fff;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.cta-link-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  transform: translateY(-2px);
+  color: #fff;
+  text-decoration: none;
+}
+
+/* Right: photo fills right half */
+.cta-img-wrap {
+  height: 100%;
+  min-height: 380px;
+  overflow: hidden;
+  position: relative;
+}
+
+.cta-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  filter: brightness(0.9);
+}
+
+/* ========================
+   RESPONSIVE
+   ======================== */
+@media (max-width: 900px) {
+  .cta-inner-full {
+    grid-template-columns: 1fr;
+  }
+
+  .cta-text {
+    padding: 50px 32px;
+    text-align: center;
+  }
+
+  .cta-body {
+    margin: 0 auto 28px;
+  }
+
+  .cta-link-btn {
+    margin: 0 auto;
+  }
+
+  .cta-img-wrap {
+    min-height: 240px;
+  }
+}

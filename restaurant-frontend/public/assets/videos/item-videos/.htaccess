@@ -1,0 +1,11 @@
+<FilesMatch "\.(mp4|webm|ogg|mov|avi|mkv)$">
+    AddType video/mp4 .mp4
+    AddType video/webm .webm
+    AddType video/ogg .ogg
+    AddType video/quicktime .mov
+    AddType video/x-msvideo .avi
+    AddType video/x-matroska .mkv
+    
+    # Allow video playback in browser
+    Header set Content-Disposition "inline"
+</FilesMatch>

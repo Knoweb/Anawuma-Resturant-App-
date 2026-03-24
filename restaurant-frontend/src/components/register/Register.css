@@ -1,0 +1,339 @@
+/* ================================
+   REGISTER PAGE — Register.css
+   prefix: reg-
+   ================================ */
+
+/* Page wrapper */
+.reg-page {
+  min-height: 100vh;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Space below fixed navbar */
+.reg-main {
+  flex: 1;
+  padding: 110px 0 80px;
+  background: #fff;
+}
+
+.reg-container {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ---- Badge + Heading ---- */
+.reg-heading-wrap {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.reg-badge {
+  display: inline-block;
+  padding: 5px 20px;
+  border: 1.5px solid #266668;
+  color: #266668;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-radius: 50px;
+  margin-bottom: 18px;
+  text-transform: uppercase;
+}
+
+.reg-heading {
+  font-size: clamp(1.6rem, 3vw, 2.3rem);
+  font-weight: 700;
+  color: #1a1a2e;
+  line-height: 1.3;
+  margin: 0;
+}
+
+/* ---- Two-column layout ---- */
+.reg-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: flex-start;
+}
+
+/* ================================
+   FORM COLUMN
+   ================================ */
+.reg-form-col {
+  width: 100%;
+}
+
+/* ---- Form ---- */
+.reg-form {
+  width: 100%;
+}
+
+/* Two-field rows */
+.reg-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+/* Full-width row */
+.reg-row-full {
+  margin-bottom: 20px;
+}
+
+/* Field wrapper */
+.reg-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.reg-field label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #3a4555;
+  margin-bottom: 7px;
+  letter-spacing: 0.2px;
+}
+
+.reg-field input[type='text'],
+.reg-field input[type='email'],
+.reg-field input[type='password'],
+.reg-field input[type='time'],
+.reg-field input[type='file'] {
+  width: 100%;
+  padding: 9px 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid #c9d2da;
+  font-size: 14.5px;
+  color: #222;
+  outline: none;
+  transition: border-color 0.2s ease;
+  border-radius: 0;
+  box-sizing: border-box;
+}
+
+.reg-field input:focus {
+  border-bottom-color: #266668;
+}
+
+/* Password wrap (position the eye toggle) */
+.reg-pwd-wrap {
+  position: relative;
+}
+
+.reg-pwd-wrap input {
+  padding-right: 32px;
+}
+
+.reg-eye-toggle {
+  position: absolute;
+  right: 0;
+  bottom: 10px;
+  cursor: pointer;
+  color: #8a96a3;
+  font-size: 15px;
+  transition: color 0.2s;
+}
+
+.reg-eye-toggle:hover {
+  color: #266668;
+}
+
+/* Logo upload helper text */
+.reg-upload-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #3a4555;
+  margin-bottom: 7px;
+  letter-spacing: 0.2px;
+}
+
+.reg-upload-label a {
+  color: #266668;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.reg-upload-label a:hover {
+  text-decoration: underline;
+}
+
+.reg-upload-hint {
+  font-size: 12.5px;
+  color: #8a94a0;
+  margin-top: 4px;
+}
+
+/* Feature selection */
+.reg-feature-box {
+  border: 1px solid #d9e0e7;
+  border-radius: 10px;
+  padding: 14px 16px;
+  background: #fbfdff;
+}
+
+.reg-feature-title {
+  margin: 0 0 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #3a4555;
+}
+
+.reg-feature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 18px;
+}
+
+.reg-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: #506070;
+  cursor: pointer;
+}
+
+.reg-feature-item input {
+  accent-color: #266668;
+}
+
+/* File input */
+.reg-field input[type='file'] {
+  padding: 6px 0;
+  font-size: 13px;
+  color: #555;
+  cursor: pointer;
+}
+
+/* ---- Messages ---- */
+.reg-success {
+  background: #eefbf2;
+  border: 1px solid #b7e6c5;
+  color: #1c7a36;
+  font-size: 13.5px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-bottom: 14px;
+}
+
+.reg-error {
+  background: #fff3f3;
+  border: 1px solid #f5c6c6;
+  color: #c0392b;
+  font-size: 13.5px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-bottom: 14px;
+}
+
+/* ---- Submit Button ---- */
+.reg-submit-btn {
+  display: inline-block;
+  margin-top: 28px;
+  padding: 13px 38px;
+  background: #266668;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.25s ease, transform 0.2s ease;
+  letter-spacing: 0.3px;
+}
+
+.reg-submit-btn:hover {
+  background: #225f61;
+  transform: translateY(-1px);
+}
+
+.reg-submit-btn:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ---- Login link ---- */
+.reg-login-text {
+  margin-top: 16px;
+  font-size: 13.5px;
+  color: #6c757d;
+}
+
+.reg-login-text a {
+  color: #266668;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.reg-login-text a:hover {
+  text-decoration: underline;
+}
+
+/* ================================
+   ILLUSTRATION COLUMN
+   ================================ */
+.reg-illus-col {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 10px;
+}
+
+.reg-illus {
+  width: 100%;
+  max-width: 500px;
+}
+
+.reg-illus-img {
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  object-fit: cover;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* ================================
+   RESPONSIVE
+   ================================ */
+@media (max-width: 900px) {
+  .reg-body {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .reg-illus-col {
+    order: -1;
+  }
+
+  .reg-illus {
+    max-width: 420px;
+  }
+}
+
+@media (max-width: 600px) {
+  .reg-main {
+    padding: 90px 0 60px;
+  }
+
+  .reg-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .reg-submit-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .reg-feature-grid {
+    grid-template-columns: 1fr;
+  }
+}

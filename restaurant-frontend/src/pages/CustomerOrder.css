@@ -1,0 +1,499 @@
+/* Customer Order Page */
+.customer-order-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #266668 0%, #1a4648 100%);
+  padding-bottom: 20px;
+}
+
+/* Header */
+.customer-header {
+  background: #fff;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.customer-header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: #333;
+}
+
+.cart-toggle-btn {
+  position: relative;
+  font-weight: 600;
+}
+
+/* Content Layout */
+.customer-content {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Categories Sidebar */
+.categories-sidebar {
+  width: 250px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  height: fit-content;
+  position: sticky;
+  top: 100px;
+}
+
+.categories-sidebar h5 {
+  margin-bottom: 15px;
+  color: #333;
+  font-weight: 600;
+}
+
+.category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.category-item {
+  padding: 12px 15px;
+  border: 2px solid #e0e0e0;
+  background: #fff;
+  border-radius: 8px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 500;
+  color: #555;
+}
+
+.category-item:hover {
+  border-color: #266668;
+  background: #f8f9ff;
+  transform: translateX(5px);
+}
+
+.category-item.active {
+  background: linear-gradient(135deg, #266668 0%, #1a4648 100%);
+  color: #fff;
+  border-color: #266668;
+  box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+}
+
+/* Food Items Section */
+.food-items-section {
+  flex: 1;
+}
+
+.food-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.food-item-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.food-item-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.food-item-image {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background: #f0f0f0;
+}
+
+.food-item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.food-item-body {
+  padding: 15px;
+}
+
+.food-item-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.food-item-description {
+  font-size: 0.9rem;
+  color: #777;
+  margin-bottom: 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.food-item-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.food-item-price {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #266668;
+}
+
+/* Cart Drawer */
+.cart-drawer {
+  position: fixed;
+  right: -450px;
+  top: 0;
+  width: 450px;
+  height: 100vh;
+  background: #fff;
+  box-shadow: -5px 0 25px rgba(0,0,0,0.2);
+  transition: right 0.4s ease;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.cart-drawer.open {
+  right: 0;
+}
+
+.cart-header {
+  padding: 20px;
+  border-bottom: 2px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #266668 0%, #1a4648 100%);
+  color: #fff;
+}
+
+.cart-header h4 {
+  margin: 0;
+}
+
+.cart-header .btn-close {
+  filter: invert(1);
+}
+
+.cart-body {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.cart-items {
+  padding: 20px;
+  flex: 1;
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  background: #f9f9f9;
+}
+
+.cart-item-info {
+  flex: 1;
+}
+
+.cart-item-info h6 {
+  margin: 0 0 5px 0;
+  color: #333;
+  font-weight: 600;
+}
+
+.cart-item-price {
+  font-size: 0.9rem;
+  color: #266668;
+  font-weight: 600;
+  margin: 0;
+}
+
+.cart-item-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.qty-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.qty-controls button {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qty-display {
+  min-width: 30px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.empty-cart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #999;
+  padding: 40px;
+  text-align: center;
+}
+
+.cart-footer {
+  padding: 20px;
+  border-top: 2px solid #f0f0f0;
+  background: #f9f9f9;
+}
+
+.order-inputs {
+  margin-bottom: 15px;
+}
+
+.cart-total {
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.cart-total h5 {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cart-total span {
+  color: #266668;
+  font-size: 1.5rem;
+}
+
+.cart-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Empty/No Items */
+.no-items {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #fff;
+  text-align: center;
+}
+
+.no-items i {
+  opacity: 0.7;
+}
+
+/* Loading Screen */
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  color: #fff;
+  font-size: 1.2rem;
+  gap: 20px;
+}
+
+.loading-screen .spinner-border {
+  width: 4rem;
+  height: 4rem;
+  border-width: 5px;
+  color: #fff !important;
+}
+
+/* Order Success Screen */
+.order-success-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+  color: #fff;
+  text-align: center;
+  animation: slideUp 0.6s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.success-icon {
+  font-size: 5rem;
+  color: #28a745;
+  margin-bottom: 20px;
+  animation: scaleIn 0.5s ease;
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
+.order-success-screen h1 {
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+  font-weight: 700;
+}
+
+.order-details-card {
+  background: #fff;
+  color: #333;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  max-width: 500px;
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+.order-details-card h3 {
+  color: #266668;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.order-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9ff;
+  border-radius: 8px;
+}
+
+.order-info {
+  text-align: left;
+  border-top: 2px solid #f0f0f0;
+  padding-top: 20px;
+}
+
+.order-info p {
+  margin: 10px 0;
+  font-size: 1.1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-info .badge {
+  font-size: 0.9rem;
+}
+
+.success-message {
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+  max-width: 500px;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .customer-content {
+    flex-direction: column;
+  }
+
+  .categories-sidebar {
+    width: 100%;
+    position: static;
+  }
+
+  .category-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .category-item {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 150px;
+  }
+
+  .food-items-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+
+  .cart-drawer {
+    width: 100%;
+    right: -100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .customer-header h1 {
+    font-size: 1.3rem;
+  }
+
+  .food-items-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .order-success-screen h1 {
+    font-size: 1.8rem;
+  }
+
+  .order-number {
+    font-size: 1.5rem;
+  }
+}

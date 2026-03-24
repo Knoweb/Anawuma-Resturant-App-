@@ -1,0 +1,11 @@
+{
+  "tableNo": "T-1",
+  "notes": "Test order with API key authentication",
+  "items": [
+    {
+      "foodItemId": 50,
+      "qty": 2,
+      "notes": "No ice"
+    }
+  ]
+}

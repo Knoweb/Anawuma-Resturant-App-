@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Restaurant QR Codes - Mobile Testing</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 { color: #333; text-align: center; }
+    .info-box {
+      background: #e3f2fd;
+      border: 1px solid #2196f3;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+    .qr-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 30px;
+      margin: 20px 0;
+    }
+    .qr-card {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .qr-card h3 {
+      margin: 0 0 20px 0;
+      color: #333;
+    }
+    .qr-card img {
+      width: 100%;
+      max-width: 300px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+    }
+    .qr-card p {
+      font-size: 12px;
+      color: #666;
+      margin-top: 15px;
+      word-break: break-all;
+      font-family: monospace;
+    }
+    .print-button {
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 10px 5px;
+      font-size: 14px;
+    }
+    .print-button:hover { background: #45a049; }
+    .test-info {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 20px 0;
+    }
+    @media print {
+      body { background: white; }
+      .info-box, .test-info { border: none; background: white; }
+      button { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <h1>🏪 Restaurant QR Codes - Mobile Testing</h1>
+  
+  <div class="info-box">
+    <h2>📱 How to Use</h2>
+    <ol>
+      <li>Open this page on your laptop</li>
+      <li>Make sure phone is on same WiFi network</li>
+      <li>Print this page OR scan from screen</li>
+      <li>Use phone camera to scan QR code</li>
+      <li>Should open ordering page automatically</li>
+    </ol>
+  </div>
+
+  <div class="test-info">
+    <strong>⚠️ Important:</strong> Both phone and laptop must be on the same WiFi network!<br>
+    <strong>Laptop IP:</strong> 192.168.8.101:3001
+  </div>
+
+  <div class="qr-container">
+    <div class="qr-card">
+      <h3>📍 Table T-1</h3>
+      <img src="qr_mobile_Table_T1.png" alt="QR Code for Table T-1">
+      <p>Restaurant: SeaSpray Café</p>
+      <button class="print-button" onclick="window.print()">🖨️ Print This QR</button>
+    </div>
+
+    <div class="qr-card">
+      <h3>📍 Table T-2</h3>
+      <img src="qr_mobile_Table_T2.png" alt="QR Code for Table T-2">
+      <p>Restaurant: SeaSpray Café</p>
+      <button class="print-button" onclick="window.print()">🖨️ Print This QR</button>
+    </div>
+
+    <div class="qr-card">
+      <h3>📍 Table T-3</h3>
+      <img src="qr_mobile_Table_T3.png" alt="QR Code for Table T-3">
+      <p>Restaurant: SeaSpray Café</p>
+      <button class="print-button" onclick="window.print()">🖨️ Print This QR</button>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <h2>🧪 Alternative: Manual URLs</h2>
+    <p>If you can't scan, type these URLs directly in phone browser:</p>
+    <ul style="font-family: monospace; font-size: 12px;">
+      <li>Table T-1: http://192.168.8.101:3001/qr/9ef1760341f428a417b453ed4e376d2ab932dcfb0932d2fdcd3d53ad0773359a</li>
+      <li>Table T-2: http://192.168.8.101:3001/qr/36a80a20b993118587cb82b3d61cec26896d6b8ac201f19f30e628d9fc969bb2</li>
+      <li>Table T-3: http://192.168.8.101:3001/qr/0638e494b224f0efc55ada3a5912615802151518f7bab22d2da8d97cfaa803f3</li>
+    </ul>
+  </div>
+
+  <div class="info-box" style="background: #f3e5f5; border-color: #9c27b0;">
+    <h2>✅ Testing Checklist</h2>
+    <input type="checkbox"> Phone shows menu page<br>
+    <input type="checkbox"> Can scroll through food items<br>
+    <input type="checkbox"> Can add items to cart<br>
+    <input type="checkbox"> Can enter customer name<br>
+    <input type="checkbox"> Can place order<br>
+    <input type="checkbox"> Order number displays<br>
+    <input type="checkbox"> Order appears in kitchen system<br>
+  </div>
+
+  <script>
+    console.log('✅ Local IP: 192.168.8.101');
+    console.log('✅ Frontend: http://192.168.8.101:3001');
+    console.log('✅ Test with phone on same WiFi network');
+  </script>
+</body>
+</html>

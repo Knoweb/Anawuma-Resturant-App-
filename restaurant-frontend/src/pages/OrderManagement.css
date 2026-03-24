@@ -1,0 +1,298 @@
+.order-management-container {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.customer-info-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.customer-name {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.customer-phone {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+}
+
+.phone-input-container .form-control {
+  border: 1px solid #ced4da !important;
+  height: 38px !important;
+  font-size: 14px !important;
+}
+
+.page-header {
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.page-header h2 {
+  color: #2c3e50;
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.page-header h2 i {
+  color: #3498db;
+}
+
+/* Filter Bar */
+.filter-bar {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: none;
+}
+
+.filter-bar .card-body {
+  padding: 20px;
+}
+
+.filter-bar .form-label {
+  font-weight: 500;
+  color: #495057;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.filter-bar .form-select,
+.filter-bar .form-control {
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ced4da;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.filter-bar .form-select:focus,
+.filter-bar .form-control:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+.filter-bar .btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.filter-bar .btn-primary {
+  background-color: #3498db;
+  border-color: #3498db;
+}
+
+.filter-bar .btn-primary:hover {
+  background-color: #2980b9;
+  border-color: #2980b9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+}
+
+.filter-bar .btn-secondary {
+  background-color: #95a5a6;
+  border-color: #95a5a6;
+}
+
+.filter-bar .btn-secondary:hover {
+  background-color: #7f8c8d;
+  border-color: #7f8c8d;
+  transform: translateY(-1px);
+}
+
+/* Orders Table */
+.card {
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.table-responsive {
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table thead {
+  background: linear-gradient(135deg, #266668 0%, #1a4648 100%);
+  color: white;
+}
+
+.table thead th {
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 15px;
+  border: none;
+  white-space: nowrap;
+}
+
+.table tbody tr {
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.table tbody tr:hover {
+  background-color: #f8f9fa;
+  transform: scale(1.01);
+}
+
+.table tbody td {
+  padding: 15px;
+  vertical-align: middle;
+  font-size: 14px;
+  color: #495057;
+  border-bottom: 1px solid #e9ecef;
+}
+
+/* Badges */
+.badge {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+}
+
+.badge-warning {
+  background-color: #f39c12;
+  color: white;
+}
+
+.badge-info {
+  background-color: #3498db;
+  color: white;
+}
+
+.badge-primary {
+  background-color: #9b59b6;
+  color: white;
+}
+
+.badge-success {
+  background-color: #27ae60;
+  color: white;
+}
+
+.badge-danger {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.badge-secondary {
+  background-color: #95a5a6;
+  color: white;
+}
+
+/* Action Buttons */
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 13px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.btn-info {
+  background-color: #3498db;
+  border-color: #3498db;
+  color: white;
+}
+
+.btn-info:hover {
+  background-color: #2980b9;
+  border-color: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.4);
+}
+
+.btn-danger {
+  background-color: #e74c3c;
+  border-color: #e74c3c;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #c0392b;
+  border-color: #c0392b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.4);
+}
+
+/* Loading & Empty States */
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+.text-muted {
+  color: #6c757d !important;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .filter-bar .col-md-2 {
+    margin-bottom: 10px;
+  }
+  
+  .filter-bar .d-flex {
+    justify-content: flex-start;
+  }
+  
+  .filter-bar .btn {
+    margin-bottom: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .order-management-container {
+    padding: 15px;
+  }
+  
+  .page-header h2 {
+    font-size: 24px;
+  }
+  
+  .table {
+    font-size: 13px;
+  }
+  
+  .table thead th,
+  .table tbody td {
+    padding: 10px;
+  }
+  
+  .btn-sm {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 576px) {
+  .page-header h2 {
+    font-size: 20px;
+  }
+  
+  .filter-bar .card-body {
+    padding: 15px;
+  }
+  
+  .table {
+    font-size: 12px;
+  }
+  
+  .badge {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+}

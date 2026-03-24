@@ -1,0 +1,811 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
+import apiClient from '../api/apiClient';
+import { useWebSocket } from '../hooks/useWebSocket';
+import Swal from 'sweetalert2';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+import './CustomerQROrder.css';
+
+const normalizeWhatsAppNumber = (phone) => {
+  if (!phone) return '';
+
+  let cleaned = String(phone).trim().replace(/[^\d+]/g, '');
+  if (cleaned.startsWith('+')) {
+    cleaned = cleaned.slice(1);
+  }
+  cleaned = cleaned.replace(/\D/g, '');
+
+  if (cleaned.startsWith('00')) {
+    cleaned = cleaned.slice(2);
+  }
+
+  if (!cleaned) return '';
+  if (cleaned.startsWith('94')) return cleaned;
+  if (cleaned.startsWith('0')) return `94${cleaned.slice(1)}`;
+  if (cleaned.length === 9) return `94${cleaned}`;
+  return cleaned;
+};
+
+const CustomerQROrder = () => {
+  const { tableKey } = useParams();
+  const [tableInfo, setTableInfo] = useState(null);
+  const [menus, setMenus] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [foodItems, setFoodItems] = useState([]);
+  const [filteredItems, setFilteredItems] = useState([]);
+  const [selectedMenu, setSelectedMenu] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [cart, setCart] = useState([]);
+  const [customerName, setCustomerName] = useState('');
+  const [whatsappNumber, setWhatsappNumber] = useState('');
+  const [orderNotes, setOrderNotes] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [showCart, setShowCart] = useState(false);
+  const [orderSuccess, setOrderSuccess] = useState(null);
+  const [showStatusScreen, setShowStatusScreen] = useState(false);
+  const [isCancelled, setIsCancelled] = useState(false);
+  const [currentOrderStatus, setCurrentOrderStatus] = useState(null);
+  const [shownNotifications, setShownNotifications] = useState(new Set());
+  const { subscribe, connected } = useWebSocket();
+
+  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+
+  // Request notification permission on mount
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  // Helper to show notifications (Toast + Browser)
+  // Helper to show notifications (Toast + Browser)
+  const showNotification = useCallback((title, message, type = 'info') => {
+    // Browser notification
+    if ('Notification' in window && Notification.permission === 'granted') {
+      const notification = new Notification(title, {
+        body: message,
+        icon: '/logo192.png',
+        badge: '/logo192.png',
+        vibrate: [200, 100, 200],
+        tag: 'order-update'
+      });
+
+      // Auto-close after 5 seconds
+      setTimeout(() => notification.close(), 5000);
+
+      // Play sound (optional)
+      try {
+        const audio = new Audio('/notification.mp3');
+        audio.play().catch(() => { });
+      } catch (e) { }
+    }
+
+    // Also show SweetAlert notification
+    Swal.fire({
+      title: title,
+      text: message,
+      icon: type,
+      timer: 4000,
+      showConfirmButton: false,
+      toast: true,
+      position: 'top-end'
+    });
+  }, []);
+
+  // Refresh order status logic
+  const refreshOrderStatus = useCallback(async () => {
+    if (!orderSuccess || !orderSuccess.orderId) return;
+    
+    try {
+      const response = await apiClient.get(
+        `/orders/track/${orderSuccess.orderId}`,
+        {
+          headers: {
+            'x-table-key': tableKey
+          }
+        }
+      );
+
+      const newStatus = response.data.status;
+
+      setCurrentOrderStatus(prevStatus => {
+        if (newStatus !== prevStatus) {
+          setShownNotifications(prevNotifications => {
+            if (!prevNotifications.has(newStatus)) {
+              if (newStatus === 'ACCEPTED') {
+                showNotification(
+                  'Order Accepted! 👨‍🍳',
+                  `Your order #${orderSuccess.orderNo} has been accepted by the kitchen.`,
+                  'success'
+                );
+              } else if (newStatus === 'READY') {
+                showNotification(
+                  'Order Ready! 🍽️',
+                  `Your order #${orderSuccess.orderNo} is ready! We'll bring it to your table shortly.`,
+                  'success'
+                );
+              } else if (newStatus === 'CANCELLED') {
+                showNotification(
+                  'Order Cancelled ❌',
+                  `Your order #${orderSuccess.orderNo} has been cancelled. Please contact staff for assistance.`,
+                  'error'
+                );
+              }
+              return new Set(prevNotifications).add(newStatus);
+            }
+            return prevNotifications;
+          });
+        }
+        return newStatus;
+      });
+    } catch (error) {
+      console.error('Error fetching order status:', error);
+    }
+  }, [orderSuccess, tableKey, showNotification]);
+
+  // Real-time listener for order status updates
+  useEffect(() => {
+    if (!connected || !orderSuccess) return;
+
+    const unsubscribe = subscribe('order:status-update', (updatedOrder) => {
+      // Only refresh if the update is for THIS specific order
+      if (updatedOrder && updatedOrder.orderId === orderSuccess.orderId) {
+        console.log('WS: Order status updated for current order!', updatedOrder.status);
+        refreshOrderStatus();
+      }
+    });
+
+    return () => unsubscribe();
+  }, [connected, subscribe, orderSuccess, refreshOrderStatus]);
+
+  // Occasional polling fallback (safety first)
+  useEffect(() => {
+    let pollInterval;
+
+    if (orderSuccess && orderSuccess.orderId) {
+      setCurrentOrderStatus(orderSuccess.status);
+      
+      // Fallback poll every 2 minutes
+      pollInterval = setInterval(refreshOrderStatus, 120000);
+    }
+
+    return () => {
+      if (pollInterval) clearInterval(pollInterval);
+    };
+  }, [orderSuccess, refreshOrderStatus]);
+
+  const fetchTableInfo = useCallback(async () => {
+    try {
+      const response = await apiClient.get(`/qr/resolve/${tableKey}`);
+      setTableInfo(response.data);
+      return response.data.restaurantId;
+    } catch (error) {
+      console.error('Error resolving QR code:', error);
+      Swal.fire('Error', 'Invalid QR code. Please scan again.', 'error');
+      throw error;
+    }
+  }, [API_URL, tableKey]);
+
+  const fetchMenuData = useCallback(async (restaurantId) => {
+    try {
+      const [menusRes, categoriesRes, foodItemsRes] = await Promise.all([
+        apiClient.get(`/menus/all?restaurantId=${restaurantId}`),
+        apiClient.get(`/categories?restaurantId=${restaurantId}`),
+        apiClient.get(`/food-items?restaurantId=${restaurantId}`),
+      ]);
+
+      // Filter data by restaurant
+      const restaurantMenus = (menusRes.data || []).filter(
+        menu => menu.restaurantId === restaurantId
+      );
+      const restaurantCategories = categoriesRes.data || [];
+      const restaurantFoodItems = (foodItemsRes.data || []).filter(
+        item => item.restaurantId === restaurantId
+      );
+
+      setMenus(restaurantMenus);
+      setCategories(restaurantCategories);
+      setFoodItems(restaurantFoodItems);
+      setFilteredItems(restaurantFoodItems);
+    } catch (error) {
+      console.error('Error fetching menu data:', error);
+      Swal.fire('Error', 'Failed to load menu. Please try again.', 'error');
+    }
+  }, [API_URL]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const restaurantId = await fetchTableInfo();
+        await fetchMenuData(restaurantId);
+      } catch (error) {
+        // Error already handled in fetchTableInfo
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (tableKey) {
+      loadData();
+    } else {
+      Swal.fire('Error', 'Invalid QR code.', 'error');
+      setLoading(false);
+    }
+  }, [tableKey, fetchTableInfo, fetchMenuData]);
+
+  useEffect(() => {
+    let filtered = foodItems;
+
+    if (selectedMenu) {
+      // Filter by menu: categories belonging to this menu
+      const menuCategoryIds = categories
+        .filter(cat => cat.menuId === selectedMenu)
+        .map(cat => cat.categoryId);
+
+      filtered = filtered.filter(item => menuCategoryIds.includes(item.categoryId));
+
+      if (selectedCategory) {
+        filtered = filtered.filter(item => item.categoryId === selectedCategory);
+      }
+    }
+
+    setFilteredItems(filtered);
+  }, [selectedMenu, selectedCategory, foodItems, categories]);
+
+  const addToCart = (item) => {
+    const existingItem = cart.find(cartItem => cartItem.foodItemId === item.foodItemId);
+    if (existingItem) {
+      setCart(cart.map(cartItem =>
+        cartItem.foodItemId === item.foodItemId
+          ? { ...cartItem, qty: cartItem.qty + 1 }
+          : cartItem
+      ));
+    } else {
+      setCart([...cart, {
+        foodItemId: item.foodItemId,
+        name: item.itemName,
+        price: parseFloat(item.price),
+        qty: 1,
+        notes: ''
+      }]);
+    }
+    setShowCart(true);
+  };
+
+  const updateCartItemQty = (foodItemId, delta) => {
+    setCart(cart.map(item =>
+      item.foodItemId === foodItemId
+        ? { ...item, qty: Math.max(1, item.qty + delta) }
+        : item
+    ).filter(item => item.qty > 0));
+  };
+
+  const removeFromCart = (foodItemId) => {
+    setCart(cart.filter(item => item.foodItemId !== foodItemId));
+  };
+
+  const updateCartItemNotes = (foodItemId, notes) => {
+    setCart(cart.map(item =>
+      item.foodItemId === foodItemId ? { ...item, notes } : item
+    ));
+  };
+
+  const calculateTotal = () => {
+    return cart.reduce((sum, item) => sum + (item.price * item.qty), 0).toFixed(2);
+  };
+
+  const placeOrder = async () => {
+    if (cart.length === 0) {
+      Swal.fire('Validation Error', 'Please add at least one item to your order', 'warning');
+      return;
+    }
+
+    if (!customerName.trim()) {
+      Swal.fire('Validation Error', 'Please enter your name', 'warning');
+      return;
+    }
+
+    const normalizedWhatsapp = normalizeWhatsAppNumber(whatsappNumber);
+
+    if (!normalizedWhatsapp || normalizedWhatsapp.length < 10 || normalizedWhatsapp.length > 15) {
+      Swal.fire('Validation Error', 'Please enter a valid WhatsApp number', 'warning');
+      return;
+    }
+
+    try {
+      const orderPayload = {
+        customerName: customerName.trim(),
+        whatsappNumber: normalizedWhatsapp,
+        notes: orderNotes.trim() || null,
+        items: cart.map(item => ({
+          foodItemId: item.foodItemId,
+          qty: item.qty,
+          notes: item.notes || null
+        }))
+      };
+
+      const response = await apiClient.post(
+        `/orders`,
+        orderPayload,
+        {
+          headers: {
+            'x-table-key': tableKey,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      // Success
+      setOrderSuccess(response.data);
+      setShowStatusScreen(true);
+      setCart([]);
+      setOrderNotes('');
+      setShowCart(false);
+
+    } catch (error) {
+      console.error('Order error:', error);
+      const errorMsg = error.response?.data?.message || 'Failed to place order. Please try again.';
+      Swal.fire('Order Failed', errorMsg, 'error');
+    }
+  };
+
+  const startNewOrder = () => {
+    setOrderSuccess(null);
+    setCurrentOrderStatus(null);
+    setCustomerName('');
+    setWhatsappNumber('');
+    setSelectedMenu(null);
+    setSelectedCategory(null);
+    setShownNotifications(new Set());
+  };
+
+  // Get status badge color and icon
+  const getStatusDisplay = (status) => {
+    const displays = {
+      'NEW': { color: 'primary', icon: 'fa-clock', text: 'Order Received' },
+      'ACCEPTED': { color: 'info', icon: 'fa-check-circle', text: 'Kitchen Accepted' },
+      'COOKING': { color: 'warning', icon: 'fa-fire', text: 'Being Prepared' },
+      'READY': { color: 'success', icon: 'fa-check-double', text: 'Ready to Serve' },
+      'SERVED': { color: 'success', icon: 'fa-utensils', text: 'Served' },
+      'CANCELLED': { color: 'danger', icon: 'fa-times-circle', text: 'Cancelled' }
+    };
+    return displays[status] || displays['NEW'];
+  };
+
+  // Logic to determine what to show in the main content area
+  const renderMainContent = () => {
+    if (orderSuccess && showStatusScreen) {
+      const statusDisplay = getStatusDisplay(currentOrderStatus || orderSuccess.status);
+      const isCancelled = (currentOrderStatus || orderSuccess.status) === 'CANCELLED';
+
+      return (
+        <div className="order-success-screen fade-in">
+          <div className={`success-icon ${isCancelled ? 'cancelled-icon' : ''}`}>
+            <i className={`fas ${isCancelled ? 'fa-times-circle' : 'fa-check-circle'}`}></i>
+          </div>
+          <h1>{isCancelled ? 'Order Cancelled' : 'Order Placed Successfully!'}</h1>
+          <div className="order-details-card">
+            <h3>Order Number</h3>
+            <div className="order-number">{orderSuccess.orderNo}</div>
+
+            {/* Real-time Status Tracker */}
+            <div className="order-status-tracker mt-4">
+              <h5>Order Status</h5>
+              <div className={`status-badge badge bg-${statusDisplay.color} pulse-animation`}>
+                <i className={`fas ${statusDisplay.icon} me-2`}></i>
+                {statusDisplay.text}
+              </div>
+
+              {/* Status Progress */}
+              <div className="status-timeline mt-3">
+                <div className={`timeline-step ${['NEW', 'ACCEPTED', 'COOKING', 'READY', 'SERVED'].indexOf(currentOrderStatus || orderSuccess.status) >= 0 ? 'completed' : ''}`}>
+                  <i className="fas fa-check-circle"></i>
+                  <span>Received</span>
+                </div>
+                <div className={`timeline-step ${['ACCEPTED', 'COOKING', 'READY', 'SERVED'].indexOf(currentOrderStatus || orderSuccess.status) >= 0 ? 'completed' : ''}`}>
+                  <i className="fas fa-thumbs-up"></i>
+                  <span>Accepted</span>
+                </div>
+                <div className={`timeline-step ${['COOKING', 'READY', 'SERVED'].indexOf(currentOrderStatus || orderSuccess.status) >= 0 ? 'completed' : ''}`}>
+                  <i className="fas fa-fire"></i>
+                  <span>Cooking</span>
+                </div>
+                <div className={`timeline-step ${['READY', 'SERVED'].indexOf(currentOrderStatus || orderSuccess.status) >= 0 ? 'completed' : ''}`}>
+                  <i className="fas fa-bell"></i>
+                  <span>Ready</span>
+                </div>
+                <div className={`timeline-step ${currentOrderStatus === 'SERVED' ? 'completed' : ''}`}>
+                  <i className="fas fa-utensils"></i>
+                  <span>Served</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="order-info mt-4">
+              <p><strong>Table:</strong> {tableInfo?.tableNo || orderSuccess.tableNo}</p>
+              <p><strong>Restaurant:</strong> {tableInfo?.restaurantName}</p>
+              <p><strong>Total:</strong> Rs. {orderSuccess.totalAmount}</p>
+            </div>
+          </div>
+
+          {currentOrderStatus === 'READY' && (
+            <div className="alert alert-success mt-3">
+              <i className="fas fa-check-circle me-2"></i>
+              <strong>Your order is ready!</strong> Our staff will bring it to your table shortly.
+            </div>
+          )}
+
+          {currentOrderStatus === 'CANCELLED' && (
+            <div className="alert alert-danger mt-3">
+              <i className="fas fa-times-circle me-2"></i>
+              <strong>Order Cancelled!</strong> Your order has been cancelled. Please contact our staff for assistance.
+            </div>
+          )}
+
+          {currentOrderStatus === 'SERVED' && (
+            <div className="alert alert-info mt-3">
+              <i className="fas fa-smile me-2"></i>
+              <strong>Enjoy your meal!</strong> Thank you for dining with us.
+            </div>
+          )}
+
+          <p className="success-message">
+            {currentOrderStatus === 'CANCELLED'
+              ? 'Please contact our staff if you have any questions.'
+              : currentOrderStatus === 'SERVED'
+                ? 'Thank you! We hope you enjoy your meal.'
+                : currentOrderStatus === 'READY'
+                  ? 'Your food will be served shortly!'
+                  : 'We\'ll notify you when your order status changes!'}
+          </p>
+
+          <div className="d-flex flex-column gap-3">
+            <button className="btn btn-outline-secondary w-100" onClick={() => setShowStatusScreen(false)} style={{ padding: '14px', borderRadius: 'var(--radius-btn)', fontWeight: '700' }}>
+              <i className="fas fa-utensils me-2"></i> Back to Menu
+            </button>
+            <button className="place-another-btn" onClick={startNewOrder}>
+              <i className="fas fa-plus me-2"></i> Place Another Order
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    if (!selectedMenu) {
+      return (
+        <div className="menu-selection-container fade-in">
+          <div className="section-title">
+            <h2>Welcome</h2>
+            <p>Please select a menu to start ordering</p>
+          </div>
+          <div className="menu-grid">
+            {menus.map(menu => (
+              <div
+                key={menu.menuId}
+                className="menu-option-card"
+                onClick={() => setSelectedMenu(menu.menuId)}
+              >
+                <div className="menu-option-icon">
+                  {menu.imageUrl ? (
+                    <img src={getImageUrl(menu.imageUrl)} alt={menu.menuName} className="menu-thumb" />
+                  ) : (
+                    <i className={
+                      (menu.menuName || '').toLowerCase().includes('breakfast') ? 'fas fa-coffee' :
+                        (menu.menuName || '').toLowerCase().includes('lunch') ? 'fas fa-sun' :
+                          (menu.menuName || '').toLowerCase().includes('dinner') ? 'fas fa-moon' :
+                            'fas fa-hamburger'
+                    }></i>
+                  )}
+                </div>
+                <h3>{menu.menuName}</h3>
+                <p>{menu.description || 'View our selection of dishes'}</p>
+                <span className="select-btn">Select <i className="fas fa-arrow-right"></i></span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="items-view-container">
+        {/* Category Navigation - Horizontal Scroll */}
+        <div className="category-nav-container slide-in-top">
+          <button
+            className={`back-to-menus`}
+            onClick={() => {
+              setSelectedMenu(null);
+              setSelectedCategory(null);
+            }}
+          >
+            <i className="fas fa-chevron-left"></i>
+          </button>
+          <div className="horizontal-categories">
+            <button
+              className={`category-pill ${!selectedCategory ? 'active' : ''}`}
+              onClick={() => setSelectedCategory(null)}
+            >
+              All
+            </button>
+            {categories
+              .filter(cat => cat.menuId === selectedMenu)
+              .map(category => (
+                <button
+                  key={category.categoryId}
+                  className={`category-pill ${selectedCategory === category.categoryId ? 'active' : ''}`}
+                  onClick={() => setSelectedCategory(category.categoryId)}
+                >
+                  {category.categoryName}
+                </button>
+              ))}
+          </div>
+        </div>
+
+        {/* Food Items Grid */}
+        <div className="food-items-section-modern fade-in">
+          <div className="items-header">
+            <h3>{categories.find(c => c.categoryId === selectedCategory)?.categoryName || 'All Items'}</h3>
+            <span className="items-count">{filteredItems.length} items available</span>
+          </div>
+
+          <div className="food-grid-modern">
+            {filteredItems.map(item => {
+              // Try multiple image fields from backend (imageUrl1 is primary)
+              const displayImage = item.imageUrl1 || item.imageUrl || item.imageUrl2;
+              
+              return (
+                <div key={item.foodItemId} className="modern-food-card">
+                  <div className="card-image-wrapper">
+                    {displayImage ? (
+                      <img src={getImageUrl(displayImage)} alt={item.itemName} />
+                    ) : (
+                      <div className="h-100 d-flex align-items-center justify-content-center text-muted card-image-placeholder">
+                        <i className="fas fa-utensils fa-3x opacity-25"></i>
+                      </div>
+                    )}
+                    <div className="price-tag">Rs. {parseFloat(item.price).toFixed(0)}</div>
+                  </div>
+                  <div className="card-content">
+                    <h4>{item.itemName}</h4>
+                    <p>{item.description}</p>
+                    <button
+                      className="add-to-cart-modern"
+                      onClick={() => addToCart(item)}
+                    >
+                      <i className="fas fa-plus"></i> Add to Order
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="customer-qr-order-container">
+        <div className="loading-screen">
+          <div className="spinner-border text-light" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p>Loading menu...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!tableInfo) {
+    return (
+      <div className="customer-qr-order-container">
+        <div className="error-screen">
+          <i className="fas fa-exclamation-triangle fa-3x mb-3"></i>
+          <h2>Invalid QR Code</h2>
+          <p>Please scan a valid QR code from your table.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Helper to resolve image URL
+  const getImageUrl = (url) => {
+    if (!url) return null;
+    return url; // Now handled automatically by apiClient interceptor
+  };
+
+  return (
+    <div className="customer-qr-order-container">
+      {/* Premium Elegant Header */}
+      <header className={`customer-header-v2 ${selectedMenu ? 'header-scrolled' : ''}`}>
+        <div className="header-container">
+          <div className="restaurant-brand-v2">
+            {tableInfo?.logo ? (
+              <img src={tableInfo.logo} alt={tableInfo.restaurantName} className="brand-logo-v2" />
+            ) : (
+              <div className="brand-placeholder-v2">
+                <i className="fas fa-utensils"></i>
+              </div>
+            )}
+            <div className="brand-text-v2">
+              <h1 className="hotel-name-v2">{tableInfo.restaurantName}</h1>
+              <div className="room-badge-v2">
+                <i className="fas fa-door-open"></i>
+                <span>Room {tableInfo.tableNo || tableInfo.roomNo}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="cart-trigger-v2" onClick={() => setShowCart(true)}>
+            <div className={`cart-btn-v2 ${cart.length > 0 ? 'pulse' : ''}`}>
+              <i className="fas fa-shopping-bag"></i>
+              {cart.length > 0 && <span className="cart-badge-v2">{cart.length}</span>}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Modern Bottom Navigation */}
+      <nav className="mobile-bottom-nav">
+        <button 
+          className={`nav-item ${!showStatusScreen ? 'active' : ''}`}
+          onClick={() => setShowStatusScreen(false)}
+        >
+          <i className="fas fa-utensils"></i>
+          <span>Menu</span>
+        </button>
+        <button 
+          className={`nav-item ${showStatusScreen ? 'active' : ''} ${orderSuccess ? 'has-active-order' : ''}`}
+          onClick={() => {
+            if (orderSuccess) {
+              setShowStatusScreen(true);
+            } else {
+              Swal.fire({
+                title: 'No Active Order',
+                text: 'You haven\'t placed an order yet.',
+                icon: 'info',
+                toast: true,
+                position: 'bottom',
+                timer: 3000,
+                showConfirmButton: false
+              });
+            }
+          }}
+        >
+          <div className="track-icon-wrapper">
+            <i className="fas fa-receipt"></i>
+            {orderSuccess && <span className="notification-dot"></span>}
+          </div>
+          <span>Track Order</span>
+        </button>
+      </nav>
+
+      {/* Main Content Area */}
+      {/* Main Content Area */}
+      <main className="customer-main-content">
+        {renderMainContent()}
+      </main>
+
+      {/* Cart Drawer */}
+      <div className={`cart-drawer ${showCart ? 'open' : ''}`}>
+        <div className="cart-header">
+          <h4><i className="fas fa-shopping-cart me-2" style={{marginRight: '8px'}}></i> Your Order</h4>
+          <button className="btn-close" onClick={() => setShowCart(false)} style={{fontSize: '1.5rem', opacity: 0.7}}>
+            <i className="fas fa-times"></i>
+          </button>
+        </div>
+        <div className="cart-body">
+          {cart.length === 0 ? (
+            <div className="empty-cart-modern">
+              <i className="fas fa-shopping-basket"></i>
+              <p>Your cart is empty</p>
+            </div>
+          ) : (
+            <div className="cart-items">
+              {cart.map(item => (
+                <div key={item.foodItemId} className="cart-item-modern">
+                  <div className="cart-item-info" style={{ flex: 1, paddingRight: '10px' }}>
+                    <h5>{item.name}</h5>
+                    <p>Rs. {parseFloat(item.price).toFixed(0)}</p>
+                    <input
+                      type="text"
+                      className="form-control form-control-sm mt-2"
+                      placeholder="Special instructions..."
+                      value={item.notes}
+                      onChange={(e) => updateCartItemNotes(item.foodItemId, e.target.value)}
+                      style={{ borderRadius: '8px', fontSize: '0.85rem' }}
+                    />
+                  </div>
+                  <div className="cart-item-controls" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+                    <button
+                      className="remove-btn"
+                      onClick={() => removeFromCart(item.foodItemId)}
+                    >
+                      <i className="fas fa-trash"></i>
+                    </button>
+                    <div className="qty-controls">
+                      <button onClick={() => updateCartItemQty(item.foodItemId, -1)}>
+                        <i className="fas fa-minus"></i>
+                      </button>
+                      <span>{item.qty}</span>
+                      <button onClick={() => updateCartItemQty(item.foodItemId, 1)}>
+                        <i className="fas fa-plus"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {cart.length > 0 && (
+          <div className="cart-footer">
+            <div className="order-inputs">
+              <div className="table-info-display mb-3">
+                <i className="fas fa-chair me-2"></i>
+                <strong>Table:</strong> {tableInfo.tableNo}
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label">Your Name <span className="text-danger">*</span></label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Enter your name"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                />
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label">WhatsApp Number <span className="text-danger">*</span></label>
+                <PhoneInput
+                  country={'lk'}
+                  value={whatsappNumber}
+                  onChange={setWhatsappNumber}
+                  inputStyle={{ width: '100%' }}
+                  containerClass="phone-input-container"
+                  placeholder="Enter WhatsApp Number"
+                  enableSearch={true}
+                />
+                <small className="text-muted">We'll send your bill to this WhatsApp number.</small>
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label">Order Notes (Optional)</label>
+                <textarea
+                  className="form-control"
+                  rows="2"
+                  placeholder="Any special requests?"
+                  value={orderNotes}
+                  onChange={(e) => setOrderNotes(e.target.value)}
+                ></textarea>
+              </div>
+            </div>
+
+            <div className="cart-total">
+              <h5>Total: <span>Rs. {parseFloat(calculateTotal()).toFixed(0)}</span></h5>
+            </div>
+
+            <button
+              className="btn btn-lg w-100 text-white"
+              onClick={placeOrder}
+              style={{ borderRadius: '8px', background: 'var(--primary-color)', border: 'none', fontWeight: '700', padding: '14px', fontSize: '1.05rem', boxShadow: '0 4px 12px rgba(38, 102, 104, 0.2)' }}
+            >
+              <i className="fas fa-check me-2"></i> Place Order
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Cart Overlay */}
+      {showCart && <div className="cart-overlay" onClick={() => setShowCart(false)}></div>}
+    </div>
+  );
+};
+
+export default CustomerQROrder;

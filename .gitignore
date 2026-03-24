@@ -1,0 +1,35 @@
+# Root .gitignore for Restaurant App
+
+# Node.js
+node_modules/
+dist/
+build/
+.npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Project specific
+restaurant-backend-nestjs/node_modules/
+restaurant-backend-nestjs/dist/
+restaurant-backend-nestjs/uploads/
+restaurant-frontend/node_modules/
+restaurant-frontend/build/
+restaurant-frontend/dist/
