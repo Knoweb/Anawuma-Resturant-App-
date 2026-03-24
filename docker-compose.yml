@@ -16,6 +16,7 @@ services:
       - mysql_data:/var/lib/mysql
 
   backend:
+    image: ${DOCKER_USERNAME:-local}/anawuma-backend:latest
     build:
       context: ./restaurant-backend-nestjs
       dockerfile: Dockerfile
@@ -38,6 +39,7 @@ services:
       - ./restaurant-backend-nestjs/uploads:/app/uploads
 
   frontend:
+    image: ${DOCKER_USERNAME:-local}/anawuma-frontend:latest
     build:
       context: ./restaurant-frontend
       dockerfile: Dockerfile
