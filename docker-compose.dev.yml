@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./restaurant-backend-nestjs
+      dockerfile: Dockerfile
+    environment:
+      - API_URL=http://localhost:3000/api
+
+  frontend:
+    build:
+      context: ./restaurant-frontend
+      dockerfile: Dockerfile
+      args:
+        - REACT_APP_API_URL=http://localhost:3000/api
