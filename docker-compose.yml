@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  database:
+    image: mysql:8.0
+    container_name: anawuma_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-restaurant_db}
+      MYSQL_USER: ${DB_USERNAME:-user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  backend:
+    build:
+      context: ./restaurant-backend-nestjs
+      dockerfile: Dockerfile
+    container_name: anawuma_backend
+    restart: always
+    environment:
+      - DB_TYPE=mysql
+      - DB_HOST=database
+      - DB_PORT=3306
+      - DB_USERNAME=${DB_USERNAME:-user}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+      - DB_DATABASE=${DB_DATABASE:-restaurant_db}
+      - JWT_SECRET=${JWT_SECRET:-your_super_secret_jwt_key}
+      - PORT=3000
+    depends_on:
+      - database
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./restaurant-backend-nestjs/uploads:/app/uploads
+
+  frontend:
+    build:
+      context: ./restaurant-frontend
+      dockerfile: Dockerfile
+      args:
+        - REACT_APP_API_URL=${REACT_APP_API_URL:-http://localhost:3000/api}
+    container_name: anawuma_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  mysql_data:
