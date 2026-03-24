@@ -17,6 +17,11 @@ const shouldAllowOrigin = (origin: string | undefined, allowedOrigins: string[])
     return true;
   }
 
+  // If allowedOrigins is empty or contains '*', allow all.
+  if (allowedOrigins.length === 0 || allowedOrigins.includes('*')) {
+    return true;
+  }
+
   if (allowedOrigins.includes(origin)) {
     return true;
   }
