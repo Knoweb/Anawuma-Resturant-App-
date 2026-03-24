@@ -21,14 +21,14 @@ jobs:
         with:
           context: ./restaurant-backend-nestjs
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/anawuma-backend:latest
+          tags: "${{ secrets.DOCKER_USERNAME }}/anawuma-backend:latest"
 
       - name: Build and Push Frontend
         uses: docker/build-push-action@v4
         with:
           context: ./restaurant-frontend
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/anawuma-frontend:latest
+          tags: "${{ secrets.DOCKER_USERNAME }}/anawuma-frontend:latest"
           build-args: |
             REACT_APP_API_URL=http://${{ secrets.HOST_IP }}:3000/api
 
