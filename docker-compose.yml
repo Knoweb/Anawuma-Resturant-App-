@@ -17,9 +17,6 @@ services:
 
   backend:
     image: ${DOCKER_USERNAME:-local}/anawuma-backend:latest
-    build:
-      context: ./restaurant-backend-nestjs
-      dockerfile: Dockerfile
     container_name: anawuma_backend
     restart: always
     environment:
@@ -40,11 +37,6 @@ services:
 
   frontend:
     image: ${DOCKER_USERNAME:-local}/anawuma-frontend:latest
-    build:
-      context: ./restaurant-frontend
-      dockerfile: Dockerfile
-      args:
-        - REACT_APP_API_URL=${REACT_APP_API_URL:-http://localhost:3000/api}
     container_name: anawuma_frontend
     restart: always
     depends_on:
