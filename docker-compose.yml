@@ -7,8 +7,8 @@ services:
     restart: always
     environment:
       MYSQL_DATABASE: ${DB_DATABASE:-restaurant_db}
-      MYSQL_USER: ${DB_USERNAME:-user}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
+      # If DB_USERNAME is NOT root, MySQL will create a regular user.
+      # But since we use root, we only need the root password.
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password}
     ports:
       - "3306:3306"
