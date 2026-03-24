@@ -25,6 +25,7 @@ code {
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 8px;
+
   height: 8px;
 }
 
@@ -46,6 +47,7 @@ code {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -56,6 +58,7 @@ code {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -110,7 +113,7 @@ code {
 
 /* Global Content Wrapper (Dashboard pages) */
 .content-wrapper {
-  padding-top: 5rem !important; /* Offset for fixed navbar (70px) */
+  padding-top: 5rem !important;
+  /* Offset for fixed navbar (70px) */
   min-height: calc(100vh - 70px);
 }
-
