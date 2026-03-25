@@ -115,9 +115,11 @@ function ManageRestaurants() {
   const handleUpdate = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
+    const expiryDate = formData.get('subscription_expiry_date');
+    
     const updateData = {
       subscriptionStatus: formData.get('subscription_status'),
-      subscriptionExpiryDate: formData.get('subscription_expiry_date'),
+      ...(expiryDate ? { subscriptionExpiryDate: expiryDate } : { subscriptionExpiryDate: null }),
       enableHousekeeping: formData.get('enable_housekeeping') === 'on',
       enableKds: formData.get('enable_kds') === 'on',
       enableReports: formData.get('enable_reports') === 'on',
