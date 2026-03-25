@@ -633,8 +633,8 @@ const CustomerQROrder = () => {
             <div className="brand-text-v2">
               <h1 className="hotel-name-v2">{tableInfo.restaurantName}</h1>
               <div className="room-badge-v2">
-                <i className="fas fa-door-open"></i>
-                <span>Room {tableInfo.tableNo || tableInfo.roomNo}</span>
+                <i className="fas fa-chair"></i>
+                <span>Table {tableInfo.tableNo || tableInfo.roomNo}</span>
               </div>
             </div>
           </div>
