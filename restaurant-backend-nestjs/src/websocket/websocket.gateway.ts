@@ -11,54 +11,11 @@ import {
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 
-const isPrivateIpv4 = (hostname: string): boolean => {
-  return (
-    /^10\./.test(hostname)
-    || /^192\.168\./.test(hostname)
-    || /^172\.(1[6-9]|2\d|3[0-1])\./.test(hostname)
-  );
-};
 
-const configuredOrigins = (process.env.CORS_ORIGIN || '')
-  .split(',')
-  .map((origin) => origin.trim())
-  .filter(Boolean);
-
-const shouldAllowOrigin = (origin: string | undefined): boolean => {
-  if (!origin) {
-    return true;
-  }
-
-  if (configuredOrigins.includes(origin)) {
-    return true;
-  }
-
-  try {
-    const parsedOrigin = new URL(origin);
-    const hostname = parsedOrigin.hostname;
-    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
-
-    // Allow frontend dev servers from local/private-network hosts on port 3001.
-    if ((isLocalhost || isPrivateIpv4(hostname)) && parsedOrigin.port === '3001') {
-      return true;
-    }
-  } catch {
-    return false;
-  }
-
-  return false;
-};
 
 @WebSocketGateway({
   cors: {
-    origin: (origin, callback) => {
-      if (shouldAllowOrigin(origin)) {
-        callback(null, true);
-        return;
-      }
-
-      callback(new Error(`Not allowed by CORS: ${origin}`), false);
-    },
+    origin: ['http://152.42.179.36', 'http://localhost:3000', 'http://localhost:3001'],
     credentials: true,
     methods: ['GET', 'POST'],
   },
