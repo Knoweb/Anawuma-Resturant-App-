@@ -7,15 +7,10 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Enable CORS securely by reflecting the exact origin
+  // Enable CORS with explicit IP whitelist
   app.enableCors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) {
-         return callback(null, true);
-      }
-      return callback(null, origin);
-    },
+    origin: ['http://152.42.179.36', 'http://localhost:3000', 'http://localhost:3001'],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
   
