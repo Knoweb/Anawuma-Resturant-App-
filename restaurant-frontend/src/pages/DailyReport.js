@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Sidebar from '../components/common/Sidebar';
+import Navbar from '../components/common/Navbar';
 import apiClient from '../api/apiClient';
 import Swal from 'sweetalert2';
 import './DailyReport.css';
@@ -104,9 +105,10 @@ function DailyReport() {
   };
 
   return (
-    <div className="page-container">
+    <div className="dashboard-layout">
       <Sidebar />
       <div className="main-content">
+        <Navbar />
         <div className="daily-report-container">
           {/* Header */}
           <div className="report-header no-print">
