@@ -183,43 +183,23 @@ const CustomerQROrder = ({ isManual = false }) => {
   const fetchTableInfo = useCallback(async () => {
     try {
       if (isManual) {
-        // Fetch current user's restaurant profile
+        // For manual orders, use user data from auth store directly - NO extra API calls
         if (!user || !user.restaurantId) {
           throw new Error('User not logged in or restaurant ID missing');
         }
 
-        // Try to use cached data from store if available
-        const restaurantName = user.restaurantName || user.restaurant?.restaurantName;
-        const logo = user.restaurantLogo || user.restaurant?.logo;
+        // Use whatever name is available - never fail
+        const restaurantName = user.restaurantName ||
+          user.restaurant?.restaurantName ||
+          'Restaurant';
+        const logo = user.restaurantLogo || user.restaurant?.logo || null;
 
-        if (restaurantName) {
-           setTableInfo({
-             restaurantId: user.restaurantId,
-             restaurantName: restaurantName,
-             logo: logo,
-             isManual: true
-           });
-           return user.restaurantId;
-        }
-
-        // Fallback to API call if store doesn't have names
-        try {
-          const restResponse = await apiClient.get(`/restaurant/${user.restaurantId}`);
-          setTableInfo({
-            restaurantId: user.restaurantId,
-            restaurantName: restResponse.data.data.restaurantName,
-            logo: restResponse.data.data.logo,
-            isManual: true
-          });
-        } catch (apiErr) {
-          console.warn('Silent fallback for restaurant profile:', apiErr.message);
-          // Minimum viable fallback to keep the UI running
-          setTableInfo({
-             restaurantId: user.restaurantId,
-             restaurantName: user.restaurantName || 'Restaurant',
-             isManual: true
-           });
-        }
+        setTableInfo({
+          restaurantId: user.restaurantId,
+          restaurantName,
+          logo,
+          isManual: true
+        });
         return user.restaurantId;
       }
 
@@ -229,10 +209,9 @@ const CustomerQROrder = ({ isManual = false }) => {
         setTableInfo(response.data);
       } else if (roomKey) {
         response = await apiClient.get(`/qr/room/resolve/${roomKey}`);
-        // Backend returns { success: true, data: { roomNo, restaurantId, restaurantName } }
         setTableInfo({
           ...response.data.data,
-          tableNo: response.data.data.roomNo, // Reuse tableNo field for UI consistency
+          tableNo: response.data.data.roomNo,
           isRoom: true
         });
       }
@@ -240,20 +219,34 @@ const CustomerQROrder = ({ isManual = false }) => {
       return response.data.data?.restaurantId || response.data.restaurantId;
     } catch (error) {
       console.error('Error resolving QR code:', error);
+      if (isManual && user?.restaurantId) {
+        // Last resort: never leave the user stranded
+        setTableInfo({ restaurantId: user.restaurantId, restaurantName: 'Restaurant', isManual: true });
+        return user.restaurantId;
+      }
       if (!isManual) Swal.fire('Error', 'Invalid QR code. Please scan again.', 'error');
       throw error;
     }
-  }, [tableKey, roomKey, isManual]);
+  }, [tableKey, roomKey, isManual, user]);
 
   const fetchMenuData = useCallback(async (restaurantId) => {
     try {
+      // Get token for authenticated requests
+      let authHeaders = {};
+      try {
+        const authData = localStorage.getItem('auth-storage');
+        if (authData) {
+          const { state } = JSON.parse(authData);
+          if (state?.token) authHeaders['Authorization'] = `Bearer ${state.token}`;
+        }
+      } catch (e) { /* ignore */ }
+
       const [menusRes, categoriesRes, foodItemsRes] = await Promise.all([
-        apiClient.get(`/menus/all?restaurantId=${restaurantId}`),
-        apiClient.get(`/categories?restaurantId=${restaurantId}`),
-        apiClient.get(`/food-items?restaurantId=${restaurantId}`),
+        apiClient.get(`/menus/all?restaurantId=${restaurantId}`, { headers: authHeaders }),
+        apiClient.get(`/categories?restaurantId=${restaurantId}`, { headers: authHeaders }),
+        apiClient.get(`/food-items?restaurantId=${restaurantId}`, { headers: authHeaders }),
       ]);
 
-      // Filter data by restaurant
       const restaurantMenus = (menusRes.data || []).filter(
         menu => menu.restaurantId === restaurantId
       );
@@ -268,9 +261,11 @@ const CustomerQROrder = ({ isManual = false }) => {
       setFilteredItems(restaurantFoodItems);
     } catch (error) {
       console.error('Error fetching menu data:', error);
-      Swal.fire('Error', 'Failed to load menu. Please try again.', 'error');
+      if (error?.response?.status !== 401) {
+        Swal.fire('Error', 'Failed to load menu. Please try again.', 'error');
+      }
     }
-  }, [API_URL]);
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
