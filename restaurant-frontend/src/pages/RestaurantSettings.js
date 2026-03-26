@@ -266,11 +266,11 @@ function RestaurantSettings() {
   const modules = [
     {
       key: 'enableHousekeeping',
-      icon: 'fas fa-broom',
+      icon: 'fas fa-concierge-bell',
       iconClass: 'housekeeping',
-      title: 'Housekeeping Module',
+      title: 'Room Orders Module',
       description:
-        'Enable Housekeeping management for hotels. Track cleaning tasks, room status, and staff assignments.',
+        'Enable Room Orders management for hotels. Track customer room orders, room status, and staff assignments.',
     },
     {
       key: 'enableKds',
