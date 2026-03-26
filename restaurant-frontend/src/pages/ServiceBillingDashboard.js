@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/common/Navbar';
 import Sidebar from '../components/common/Sidebar';
 import { billingAPI } from '../api/apiClient';
@@ -272,6 +273,7 @@ const ServiceBillingDashboard = ({
   cashierTab = 'queue',
 }) => {
   const { user } = useAuthStore();
+  const navigate = useNavigate();
   const { subscribe, connected } = useWebSocket();
   const isCashierDashboard = user?.role === 'cashier';
   const resolvedCashierTab = isCashierDashboard ? cashierTab : 'queue';
@@ -743,6 +745,14 @@ const ServiceBillingDashboard = ({
                 >
                   <i className="fas fa-sync-alt me-1"></i>Refresh
                 </button>
+                {isCashierDashboard && (
+                  <button
+                    className="btn btn-sm btn-primary"
+                    onClick={() => navigate('/cashier/manual-order')}
+                  >
+                    <i className="fas fa-plus-circle me-1"></i>Create Manual Order
+                  </button>
+                )}
               </div>
             </div>
           </div>

@@ -56,6 +56,31 @@ export class OrdersController {
     return this.ordersService.create(orderData, restaurantId);
   }
 
+  @Post('manual')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.CASHIER)
+  createManual(@Request() req, @Body() createOrderDto: CreateOrderDto) {
+    const restaurantId = req.user.restaurantId;
+    
+    if (!createOrderDto.items || createOrderDto.items.length === 0) {
+      throw new BadRequestException('Order must contain at least one item');
+    }
+
+    // Manual orders must specify tableNo or roomNo
+    if (!createOrderDto.tableNo && !createOrderDto.roomNo) {
+      throw new BadRequestException('Table or Room number is required for manual orders');
+    }
+
+    // For manual orders from cashier dashboard, we use a distinct orderType if provided, 
+    // or default to MANUAL_CASHIER
+    const orderData = { 
+      ...createOrderDto, 
+      orderType: createOrderDto.orderType || 'MANUAL_CASHIER' as any
+    };
+
+    return this.ordersService.create(orderData, restaurantId);
+  }
+
   @Get()
   @SkipThrottle() // Skip rate limiting for authenticated GET requests
   @UseGuards(JwtAuthGuard, RolesGuard)

@@ -308,7 +308,15 @@ const OrderManagement = () => {
                           )}
                         </div>
                       </td>
-                      <td>{order.tableNo}</td>
+                      <td>
+                        {order.tableNo ? (
+                          <span className="badge bg-dark">{order.tableNo}</span>
+                        ) : order.roomNo ? (
+                          <span className="badge bg-info">Room {order.roomNo}</span>
+                        ) : (
+                          <span className="badge bg-secondary">N/A</span>
+                        )}
+                      </td>
                       <td>
                         <span className={`badge ${getStatusBadgeClass(order.status)}`}>
                           {order.status}

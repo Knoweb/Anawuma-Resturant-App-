@@ -27,7 +27,7 @@ const normalizeWhatsAppNumber = (phone) => {
   return cleaned;
 };
 
-const CustomerQROrder = () => {
+const CustomerQROrder = ({ isManual = false }) => {
   const { tableKey, roomKey } = useParams();
   const [tableInfo, setTableInfo] = useState(null);
   const [menus, setMenus] = useState([]);
@@ -42,6 +42,8 @@ const CustomerQROrder = () => {
   const [orderNotes, setOrderNotes] = useState('');
   const [loading, setLoading] = useState(true);
   const [showCart, setShowCart] = useState(false);
+  const [manualTableNo, setManualTableNo] = useState('');
+  const [manualOrderType, setManualOrderType] = useState('TABLE');
   const [orderSuccess, setOrderSuccess] = useState(null);
   const [showStatusScreen, setShowStatusScreen] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
@@ -178,6 +180,23 @@ const CustomerQROrder = () => {
 
   const fetchTableInfo = useCallback(async () => {
     try {
+      if (isManual) {
+        // Fetch current user's restaurant profile
+        const response = await apiClient.get('/restaurant/settings');
+        // We also need restaurant logo/name which might be in /restaurant/:id
+        // But /restaurant/settings gives enough for now. Let's try to get full profile if possible.
+        const user = JSON.parse(localStorage.getItem('user'));
+        const restResponse = await apiClient.get(`/restaurant/${user.restaurantId}`);
+        
+        setTableInfo({
+          restaurantId: user.restaurantId,
+          restaurantName: restResponse.data.data.restaurantName,
+          logo: restResponse.data.data.logo,
+          isManual: true
+        });
+        return user.restaurantId;
+      }
+
       let response;
       if (tableKey) {
         response = await apiClient.get(`/qr/resolve/${tableKey}`);
@@ -195,10 +214,10 @@ const CustomerQROrder = () => {
       return response.data.data?.restaurantId || response.data.restaurantId;
     } catch (error) {
       console.error('Error resolving QR code:', error);
-      Swal.fire('Error', 'Invalid QR code. Please scan again.', 'error');
+      if (!isManual) Swal.fire('Error', 'Invalid QR code. Please scan again.', 'error');
       throw error;
     }
-  }, [tableKey, roomKey]);
+  }, [tableKey, roomKey, isManual]);
 
   const fetchMenuData = useCallback(async (restaurantId) => {
     try {
@@ -268,13 +287,13 @@ const CustomerQROrder = () => {
       }
     };
 
-    if (tableKey || roomKey) {
+    if (tableKey || roomKey || isManual) {
       loadData();
     } else {
       Swal.fire('Error', 'Invalid QR code.', 'error');
       setLoading(false);
     }
-  }, [tableKey, roomKey, fetchTableInfo, fetchMenuData]);
+  }, [tableKey, roomKey, isManual, fetchTableInfo, fetchMenuData]);
 
   useEffect(() => {
     let filtered = foodItems;
@@ -343,22 +362,27 @@ const CustomerQROrder = () => {
       return;
     }
 
-    if (!customerName.trim()) {
+    if (isManual && !manualTableNo.trim()) {
+      Swal.fire('Validation Error', `Please enter a ${manualOrderType === 'ROOM' ? 'Room' : 'Table'} number`, 'warning');
+      return;
+    }
+
+    if (!isManual && !customerName.trim()) {
       Swal.fire('Validation Error', 'Please enter your name', 'warning');
       return;
     }
 
-    const normalizedWhatsapp = normalizeWhatsAppNumber(whatsappNumber);
+    const normalizedWhatsapp = whatsappNumber ? normalizeWhatsAppNumber(whatsappNumber) : '';
 
-    if (!normalizedWhatsapp || normalizedWhatsapp.length < 10 || normalizedWhatsapp.length > 15) {
+    if (!isManual && (!normalizedWhatsapp || normalizedWhatsapp.length < 10 || normalizedWhatsapp.length > 15)) {
       Swal.fire('Validation Error', 'Please enter a valid WhatsApp number', 'warning');
       return;
     }
 
     try {
       const orderPayload = {
-        customerName: customerName.trim(),
-        whatsappNumber: normalizedWhatsapp,
+        customerName: customerName.trim() || 'Manual Order',
+        whatsappNumber: normalizedWhatsapp || null,
         notes: orderNotes.trim() || null,
         items: cart.map(item => ({
           foodItemId: item.foodItemId,
@@ -370,11 +394,24 @@ const CustomerQROrder = () => {
       const headers = {
         'Content-Type': 'application/json'
       };
-      if (tableKey) headers['x-table-key'] = tableKey;
-      if (roomKey) headers['x-room-key'] = roomKey;
+
+      let endpoint = '/orders';
+      
+      if (isManual) {
+        endpoint = '/orders/manual';
+        orderPayload.orderType = 'MANUAL_CASHIER';
+        if (manualOrderType === 'ROOM') {
+          orderPayload.roomNo = manualTableNo;
+        } else {
+          orderPayload.tableNo = manualTableNo;
+        }
+      } else {
+        if (tableKey) headers['x-table-key'] = tableKey;
+        if (roomKey) headers['x-room-key'] = roomKey;
+      }
 
       const response = await apiClient.post(
-        `/orders`,
+        endpoint,
         orderPayload,
         {
           headers
@@ -686,8 +723,14 @@ const CustomerQROrder = () => {
             <div className="brand-text-v2">
               <h1 className="hotel-name-v2">{tableInfo.restaurantName}</h1>
                <div className="room-badge-v2">
-                <i className={`fas ${tableInfo?.isRoom ? 'fa-concierge-bell' : 'fa-chair'}`}></i>
-                <span>{tableInfo?.isRoom ? 'Room' : 'Table'} {tableInfo?.tableNo || tableInfo?.roomNo}</span>
+                <i className={`fas ${tableInfo?.isRoom || manualOrderType === 'ROOM' ? 'fa-concierge-bell' : 'fa-chair'}`}></i>
+                <span>
+                  {isManual ? (
+                    `${manualOrderType === 'ROOM' ? 'Room' : 'Table'} ${manualTableNo || '?'}`
+                  ) : (
+                    `${tableInfo?.isRoom ? 'Room' : 'Table'} ${tableInfo?.tableNo || tableInfo?.roomNo}`
+                  )}
+                </span>
               </div>
             </div>
           </div>
@@ -799,8 +842,39 @@ const CustomerQROrder = () => {
           <div className="cart-footer">
             <div className="order-inputs">
                <div className="table-info-display mb-3">
-                <i className={`fas ${tableInfo?.isRoom ? 'fa-concierge-bell' : 'fa-chair'} me-2`}></i>
-                <strong>{tableInfo?.isRoom ? 'Room' : 'Table'}:</strong> {tableInfo?.tableNo || tableInfo?.roomNo}
+                {isManual ? (
+                  <div className="manual-table-select">
+                    <label className="form-label">Order For <span className="text-danger">*</span></label>
+                    <div className="d-flex gap-2 mb-2">
+                      <button 
+                        className={`btn btn-sm ${manualOrderType === 'TABLE' ? 'btn-primary' : 'btn-outline-primary'}`}
+                        onClick={() => setManualOrderType('TABLE')}
+                        style={{ flex: 1 }}
+                      >
+                        Table
+                      </button>
+                      <button 
+                        className={`btn btn-sm ${manualOrderType === 'ROOM' ? 'btn-primary' : 'btn-outline-primary'}`}
+                        onClick={() => setManualOrderType('ROOM')}
+                        style={{ flex: 1 }}
+                      >
+                        Room
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder={`Enter ${manualOrderType === 'ROOM' ? 'Room' : 'Table'} Number`}
+                      value={manualTableNo}
+                      onChange={(e) => setManualTableNo(e.target.value)}
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <i className={`fas ${tableInfo?.isRoom ? 'fa-concierge-bell' : 'fa-chair'} me-2`}></i>
+                    <strong>{tableInfo?.isRoom ? 'Room' : 'Table'}:</strong> {tableInfo?.tableNo || tableInfo?.roomNo}
+                  </>
+                )}
               </div>
 
               <div className="mb-3">

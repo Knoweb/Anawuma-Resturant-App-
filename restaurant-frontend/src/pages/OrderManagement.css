@@ -19,6 +19,7 @@
   display: flex;
   align-items: center;
   font-size: 12px;
+
 }
 
 .phone-input-container .form-control {
@@ -244,11 +245,11 @@
   .filter-bar .col-md-2 {
     margin-bottom: 10px;
   }
-  
+
   .filter-bar .d-flex {
     justify-content: flex-start;
   }
-  
+
   .filter-bar .btn {
     margin-bottom: 10px;
   }
@@ -258,20 +259,20 @@
   .order-management-container {
     padding: 15px;
   }
-  
+
   .page-header h2 {
     font-size: 24px;
   }
-  
+
   .table {
     font-size: 13px;
   }
-  
+
   .table thead th,
   .table tbody td {
     padding: 10px;
   }
-  
+
   .btn-sm {
     padding: 4px 8px;
     font-size: 12px;
@@ -282,15 +283,15 @@
   .page-header h2 {
     font-size: 20px;
   }
-  
+
   .filter-bar .card-body {
     padding: 15px;
   }
-  
+
   .table {
     font-size: 12px;
   }
-  
+
   .badge {
     font-size: 10px;
     padding: 4px 8px;

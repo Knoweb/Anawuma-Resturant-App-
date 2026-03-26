@@ -21,6 +21,7 @@ export enum OrderStatus {
 export enum OrderType {
   TABLE = 'TABLE',
   ROOM = 'ROOM',
+  MANUAL_CASHIER = 'MANUAL_CASHIER',
 }
 
 @Entity('kitchen_orders_tbl')

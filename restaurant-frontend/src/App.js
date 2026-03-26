@@ -145,6 +145,16 @@ function App() {
             <Route path="/accountant-login" element={<AccountantLogin />} />
             <Route path="/qr/:tableKey" element={<CustomerQROrder />} />
             <Route path="/room/:roomKey" element={<CustomerQROrder />} />
+            <Route
+              path="/cashier/manual-order"
+              element={
+                <PrivateRoute>
+                  <RoleRoute allowedRoles={['cashier', 'admin', 'super_admin']}>
+                    <CustomerQROrder isManual={true} />
+                  </RoleRoute>
+                </PrivateRoute>
+              }
+            />
 
             {/* Default Authenticated Dashboard */}
             <Route
