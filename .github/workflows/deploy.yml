@@ -21,6 +21,7 @@ jobs:
         with:
           context: ./restaurant-backend-nestjs
           push: true
+          no-cache: true
           tags: "${{ secrets.DOCKER_USERNAME }}/anawuma-backend:latest"
 
       - name: Build and Push Frontend
@@ -28,9 +29,11 @@ jobs:
         with:
           context: ./restaurant-frontend
           push: true
+          no-cache: true
           tags: "${{ secrets.DOCKER_USERNAME }}/anawuma-frontend:latest"
           build-args: |
             REACT_APP_API_URL=http://${{ secrets.HOST_IP }}:3000/api
+            CACHEBUST=${{ github.run_id }}
 
   deploy:
     needs: build
@@ -64,7 +67,9 @@ jobs:
             echo "REACT_APP_API_URL=http://${{ secrets.HOST_IP }}:3000/api" >> .env
             echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" >> .env
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+            docker-compose down || true
+            docker rmi ${{ secrets.DOCKER_USERNAME }}/anawuma-backend:latest || true
+            docker rmi ${{ secrets.DOCKER_USERNAME }}/anawuma-frontend:latest || true
             docker-compose pull
-            docker rm -f anawuma_frontend anawuma_backend anawuma_db || true
             docker-compose up -d
             docker image prune -f
