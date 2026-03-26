@@ -362,7 +362,7 @@ function Dashboard() {
                               return (
                                 <tr key={order.orderId}>
                                   <td><span className="badge bg-primary">#{order.orderNo}</span></td>
-                                  <td>{order.tableNo || 'N/A'}</td>
+                                  <td>{order.tableNo || (order.roomNo ? `Room ${order.roomNo}` : 'N/A')}</td>
                                   <td>{order.itemCount} item{order.itemCount !== 1 ? 's' : ''}</td>
                                   <td>${parseFloat(order.totalAmount).toFixed(2)}</td>
                                   <td><span className={`badge bg-${statusBadge.class}`}>{statusBadge.label}</span></td>

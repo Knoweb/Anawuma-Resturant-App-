@@ -27,6 +27,7 @@ const OrderHistory = () => {
     from: getTodayDate(),
     to: getTodayDate(),
     tableNo: '',
+    roomNo: '',
     orderNo: ''
   });
 
@@ -54,6 +55,7 @@ const OrderHistory = () => {
       if (activeFilters.from) params.from = activeFilters.from;
       if (activeFilters.to) params.to = activeFilters.to;
       if (activeFilters.tableNo) params.tableNo = activeFilters.tableNo;
+      if (activeFilters.roomNo) params.roomNo = activeFilters.roomNo;
       if (activeFilters.orderNo) params.orderNo = activeFilters.orderNo;
 
       const response = await apiClient.get('/orders', { params });
@@ -109,6 +111,7 @@ const OrderHistory = () => {
       from: getTodayDate(),
       to: getTodayDate(),
       tableNo: '',
+      roomNo: '',
       orderNo: ''
     };
     setFilters(clearedFilters);
@@ -266,6 +269,17 @@ const OrderHistory = () => {
                 onChange={(e) => handleFilterChange('tableNo', e.target.value)}
               />
             </div>
+            
+            <div className="col-md-2">
+              <label className="form-label">Room No</label>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="e.g., R-101"
+                value={filters.roomNo}
+                onChange={(e) => handleFilterChange('roomNo', e.target.value)}
+              />
+            </div>
 
             <div className="col-md-2">
               <label className="form-label">Order No</label>
@@ -319,7 +333,7 @@ const OrderHistory = () => {
                 <thead>
                   <tr>
                     <th>Order No</th>
-                    <th>Table</th>
+                    <th>Table/Room</th>
                     <th>Status</th>
                     <th>Items</th>
                     <th>Total Amount</th>
@@ -334,7 +348,13 @@ const OrderHistory = () => {
                         <strong>{order.orderNo}</strong>
                       </td>
                       <td>
-                        <span className="badge bg-dark">{order.tableNo}</span>
+                        {order.tableNo ? (
+                          <span className="badge bg-dark">{order.tableNo}</span>
+                        ) : order.roomNo ? (
+                          <span className="badge bg-info">Room {order.roomNo}</span>
+                        ) : (
+                          <span className="badge bg-secondary">N/A</span>
+                        )}
                       </td>
                       <td>
                         <span className={`badge ${getStatusBadgeClass(order.status)}`}>
