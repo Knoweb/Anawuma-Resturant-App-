@@ -569,7 +569,7 @@ function App() {
               path="/accountant/dashboard"
               element={
                 <PrivateRoute>
-                  <RoleRoute allowedRoles={['accountant', 'super_admin']}>
+                  <RoleRoute allowedRoles={['accountant', 'super_admin', 'admin']}>
                     <AccountantDashboard />
                   </RoleRoute>
                 </PrivateRoute>

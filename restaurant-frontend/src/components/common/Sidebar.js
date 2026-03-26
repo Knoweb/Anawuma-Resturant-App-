@@ -119,7 +119,7 @@ function Sidebar() {
   const canAccessKitchen = (isSuperAdmin || isAdmin || isKitchen) && isKdsEnabled;
   const canAccessKitchenDashboard = (isKitchen || isSuperAdmin) && isKdsEnabled;
   const canAccessCashierDashboard = isCashier && isCashierEnabled;
-  const canAccessAccountantDashboard = isAccountant && isAccountantEnabled;
+  const canAccessAccountantDashboard = (isAccountant || isSuperAdmin || isAdmin) && isAccountantEnabled;
   const canAccessHousekeeping = (isSuperAdmin || isAdmin || isHousekeeper) && isHousekeepingEnabled;
   const canAccessReports = (canAccessAdminFeatures || isAccountant) && isReportsEnabled;
   const dashboardPath = isKitchen
