@@ -358,14 +358,7 @@ function Sidebar() {
             </li>
           )}
 
-          {isAdmin && (
-            <li className={isActive('/my-hotel')}>
-              <Link to="/my-hotel" onClick={closeSubmenus}>
-                <i className="fas fa-hotel"></i>
-                <span>Hotel Profile</span>
-              </Link>
-            </li>
-          )}
+
 
           {/* Super Admin Only */}
           {isSuperAdmin && (
@@ -416,6 +409,15 @@ function Sidebar() {
               </li>
             </ul>
           </li>
+
+          {isAdmin && (
+            <li className={isActive('/my-hotel')}>
+              <Link to="/my-hotel" onClick={closeSubmenus}>
+                <i className="fas fa-hotel"></i>
+                <span>Hotel Profile</span>
+              </Link>
+            </li>
+          )}
         </ul>
       </div>
       <button
