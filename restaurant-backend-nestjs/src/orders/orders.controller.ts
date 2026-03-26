@@ -59,7 +59,7 @@ export class OrdersController {
   @Get()
   @SkipThrottle() // Skip rate limiting for authenticated GET requests
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.KITCHEN)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.KITCHEN, UserRole.HOUSEKEEPER)
   @Header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
   @Header('Pragma', 'no-cache')
   @Header('Expires', '0')
@@ -71,7 +71,7 @@ export class OrdersController {
   @Get(':id')
   @SkipThrottle() // Skip rate limiting for authenticated requests
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.KITCHEN)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.KITCHEN, UserRole.HOUSEKEEPER)
   findOne(@Param('id', ParseIntPipe) id: number, @Request() req) {
     const restaurantId = req.user.restaurantId;
     return this.ordersService.findOne(id, restaurantId);
@@ -116,7 +116,7 @@ export class OrdersController {
   @Patch(':id/status')
   @SkipThrottle() // Skip rate limiting for authenticated requests
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.KITCHEN)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.KITCHEN, UserRole.HOUSEKEEPER)
   updateStatus(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateOrderStatusDto: UpdateOrderStatusDto,

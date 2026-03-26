@@ -26,7 +26,7 @@ import OrderHistory from './pages/OrderHistory';
 import RestaurantSettings from './pages/RestaurantSettings';
 import Profile from './pages/Profile';
 import ChangePassword from './pages/ChangePassword';
-import HousekeepingMessages from './pages/HousekeepingMessages';
+import RoomOrderManagement from './pages/RoomOrderManagement';
 import RoomQRCodes from './pages/RoomQRCodes';
 import GenerateRoomQRCodes from './pages/GenerateRoomQRCodes';
 import GuestRequestForm from './pages/GuestRequestForm';
@@ -323,7 +323,7 @@ function App() {
                 <PrivateRoute>
                   <RoleRoute allowedRoles={['admin', 'super_admin', 'housekeeper']}>
                     <FeatureRoute requiredFeature="HOUSEKEEPING">
-                      <HousekeepingMessages />
+                      <RoomOrderManagement />
                     </FeatureRoute>
                   </RoleRoute>
                 </PrivateRoute>

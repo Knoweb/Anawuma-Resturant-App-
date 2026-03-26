@@ -289,7 +289,7 @@ function Sidebar() {
             </li>
           )}
 
-          {/* Housekeeping Section - Housekeepers + Admin */}
+          {/* Room Orders Section - Housekeepers + Admin */}
           {canAccessHousekeeping && (
             <li className={`has-submenu ${menuStates.housekeeping ? 'open' : ''}`}>
               <a href="#" onClick={(e) => { e.preventDefault(); toggleMenu('housekeeping'); }}>
@@ -300,8 +300,8 @@ function Sidebar() {
               <ul className="submenu" style={{ display: menuStates.housekeeping ? 'block' : 'none' }}>
                 <li className={isActive('/housekeeping/messages')}>
                   <Link to="/housekeeping/messages">
-                    <i className="fas fa-envelope"></i>
-                    Messages
+                    <i className="fas fa-list-ul"></i>
+                    Track Orders
                   </Link>
                 </li>
                 <li className={isActive('/housekeeping/room-qr')}>

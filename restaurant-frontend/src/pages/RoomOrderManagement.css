@@ -1,0 +1,250 @@
+/* Room Order Management Page Styles */
+
+.room-order-mgmt-container {
+  padding: 2.5rem;
+  max-width: 1550px;
+  margin: 0 auto;
+}
+
+/* Header Card */
+.page-header-card {
+  background: linear-gradient(135deg, #1e3c72 0%, #1a4648 100%);
+  color: white;
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(38, 102, 104, 0.25);
+  margin-bottom: 2.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.page-header-card h2 {
+  font-weight: 800;
+  font-size: 2.2rem;
+  letter-spacing: -0.5px;
+}
+
+.refresh-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  font-weight: 600;
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+}
+
+.refresh-btn:hover {
+  background: white;
+  color: #1a4648;
+  transform: translateY(-2px);
+}
+
+.status-pill {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-online i { color: #00ff88; text-shadow: 0 0 10px #00ff88; }
+.status-offline i { color: #ff4d4d; }
+
+/* Filters Card */
+.filters-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2.5rem;
+  border: 1px solid #f0f0f0;
+}
+
+.filters-card .form-label {
+  font-weight: 700;
+  color: #1a4648;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filters-card .form-select,
+.filters-card .form-control {
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  border: 2px solid #edf2f7;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.filters-card .form-select:focus,
+.filters-card .form-control:focus {
+  border-color: #266668;
+  box-shadow: 0 0 0 4px rgba(38, 102, 104, 0.1);
+}
+
+.search-input-wrap {
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a0aec0;
+}
+
+.search-input-wrap .form-control {
+  padding-left: 2.8rem;
+}
+
+/* Orders Container */
+.orders-container {
+  background: white;
+  border-radius: 20px;
+  border: 1px solid #f0f0f0;
+  overflow: hidden;
+  min-height: 500px;
+}
+
+/* Table */
+.orders-table { margin: 0; }
+.orders-table thead { background: #f8fafc; }
+
+.orders-table th {
+  padding: 1.5rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.order-row {
+  transition: all 0.3s ease;
+}
+
+.order-row:hover {
+  background-color: #f8fafc;
+  transform: scale(1.002);
+}
+
+.orders-table td {
+  padding: 1.5rem 1rem;
+  vertical-align: middle;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.order-no {
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 800;
+  color: #1a4648;
+  background: #f1f5f9;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.room-badge {
+  background: #e6fffa;
+  color: #2c7a7b;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.customer-info .name { font-weight: 700; color: #1a4648; font-size: 1rem; }
+.customer-info .phone { opacity: 0.8; font-weight: 500; }
+
+.items-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 350px;
+}
+
+.item-pill {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: 1px solid #e2e8f0;
+}
+
+.amount {
+  font-weight: 800;
+  color: #1a4648;
+  font-size: 1.1rem;
+}
+
+/* Status Badges - New Premium Look */
+.badge {
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 0.7rem;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.badge-new { background: #fffaf0; color: #dd6b20; border: 1px solid #feebc8; }
+.badge-accepted { background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
+.badge-cooking { background: #fdf2f2; color: #9b1c1c; border: 1px solid #fbd5d5; }
+.badge-ready { background: #f0fff4; color: #2f855a; border: 1px solid #c6f6d5; box-shadow: 0 0 10px rgba(72, 187, 120, 0.2); }
+.badge-served { background: #f7fafc; color: #4a5568; border: 1px solid #edf2f7; opacity: 0.7; }
+.badge-cancelled { background: #fff5f5; color: #c53030; border: 1px solid #fed7d7; text-decoration: line-through; }
+
+/* Buttons & Actions */
+.action-btn {
+  border-radius: 8px;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Modal Styling via Swal */
+.swal2-popup {
+  border-radius: 20px !important;
+  font-family: inherit !important;
+}
+
+.swal2-title {
+  color: #1a4648 !important;
+  font-weight: 800 !important;
+}
+
+/* Animations */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in { animation: slideIn 0.6s ease-out; }
+.slide-in { animation: slideIn 0.5s ease-out; }
+
+/* Mobile Optimization */
+@media (max-width: 1024px) {
+  .room-order-mgmt-container { padding: 1.5rem; }
+  .items-list { max-width: 200px; }
+  .action-btn { font-size: 0.8rem; padding: 0.4rem 0.8rem; }
+}
