@@ -121,6 +121,8 @@ export class DashboardService {
         orderId: order.orderId,
         orderNo: order.orderNo,
         tableNo: order.tableNo,
+        roomNo: order.roomNo,
+        orderType: order.orderType,
         itemCount: order.orderItems?.length || 0,
         totalAmount: order.totalAmount,
         status: order.status,
