@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import apiClient from '../api/apiClient';
 import { useWebSocket } from '../hooks/useWebSocket';
+import { useAuthStore } from '../store/authStore';
 import Swal from 'sweetalert2';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
@@ -182,10 +183,11 @@ const CustomerQROrder = ({ isManual = false }) => {
     try {
       if (isManual) {
         // Fetch current user's restaurant profile
-        const response = await apiClient.get('/restaurant/settings');
-        // We also need restaurant logo/name which might be in /restaurant/:id
-        // But /restaurant/settings gives enough for now. Let's try to get full profile if possible.
-        const user = JSON.parse(localStorage.getItem('user'));
+        const { user } = useAuthStore.getState();
+        if (!user || !user.restaurantId) {
+          throw new Error('User not logged in or restaurant ID missing');
+        }
+
         const restResponse = await apiClient.get(`/restaurant/${user.restaurantId}`);
         
         setTableInfo({
@@ -694,8 +696,12 @@ const CustomerQROrder = ({ isManual = false }) => {
       <div className="customer-qr-order-container">
         <div className="error-screen">
           <i className="fas fa-exclamation-triangle fa-3x mb-3"></i>
-          <h2>Invalid QR Code</h2>
-           <p>Please scan a valid QR code from your table or room.</p>
+          <h2>{isManual ? 'Connection Error' : 'Invalid QR Code'}</h2>
+           <p>
+             {isManual 
+               ? 'Unable to load your restaurant profile. Please check your connection or try logging in again.' 
+               : 'Please scan a valid QR code from your table or room.'}
+           </p>
         </div>
       </div>
     );
