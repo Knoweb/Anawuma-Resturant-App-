@@ -204,15 +204,7 @@ function Sidebar() {
             </>
           )}
 
-          {/* Accountant Dashboard Link */}
-          {canAccessAccountantDashboard && (
-            <li className={isActive('/accountant/dashboard')}>
-              <Link to="/accountant/dashboard" onClick={closeSubmenus}>
-                <i className="fas fa-calculator"></i>
-                <span>Accountant Dashboard</span>
-              </Link>
-            </li>
-          )}
+
 
           {/* Offers Section - Admin Only */}
           {canAccessAdminFeatures && (
@@ -322,6 +314,16 @@ function Sidebar() {
                   </Link>
                 </li>
               </ul>
+            </li>
+          )}
+
+          {/* Accountant Dashboard Link */}
+          {canAccessAccountantDashboard && (
+            <li className={isActive('/accountant/dashboard')}>
+              <Link to="/accountant/dashboard" onClick={closeSubmenus}>
+                <i className="fas fa-calculator"></i>
+                <span>Accountant Dashboard</span>
+              </Link>
             </li>
           )}
 
