@@ -290,8 +290,8 @@ function Sidebar() {
           {canAccessHousekeeping && (
             <li className={`has-submenu ${menuStates.housekeeping ? 'open' : ''}`}>
               <a href="#" onClick={(e) => { e.preventDefault(); toggleMenu('housekeeping'); }}>
-                <i className="fas fa-broom"></i>
-                <span>Room Service</span>
+                <i className="fas fa-concierge-bell"></i>
+                <span>Room Orders</span>
                 <i className={`fas fa-chevron-${menuStates.housekeeping ? 'down' : 'right'} submenu-arrow`}></i>
               </a>
               <ul className="submenu" style={{ display: menuStates.housekeeping ? 'block' : 'none' }}>
