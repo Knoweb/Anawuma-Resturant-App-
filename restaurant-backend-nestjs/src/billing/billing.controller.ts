@@ -49,11 +49,13 @@ const BILLING_ROLES: UserRole[] = [
 const CASHIER_TRANSFER_ROLES: UserRole[] = [
   UserRole.CASHIER,
   UserRole.SUPER_ADMIN,
+  UserRole.ADMIN,
 ];
 
 const ACCOUNTANT_REVIEW_ROLES: UserRole[] = [
-  'accountant' as UserRole,
+  UserRole.ACCOUNTANT,
   UserRole.SUPER_ADMIN,
+  UserRole.ADMIN,
 ];
 
 @SkipThrottle()
