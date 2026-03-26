@@ -183,24 +183,24 @@ const CustomerQROrder = ({ isManual = false }) => {
   const fetchTableInfo = useCallback(async () => {
     try {
       if (isManual) {
-        // For manual orders, use user data from auth store directly - NO extra API calls
-        if (!user || !user.restaurantId) {
+        // Read user from store at call time - NOT as a dependency to avoid re-render loops
+        const currentUser = useAuthStore.getState()?.user;
+        if (!currentUser || !currentUser.restaurantId) {
           throw new Error('User not logged in or restaurant ID missing');
         }
 
-        // Use whatever name is available - never fail
-        const restaurantName = user.restaurantName ||
-          user.restaurant?.restaurantName ||
+        const restaurantName = currentUser.restaurantName ||
+          currentUser.restaurant?.restaurantName ||
           'Restaurant';
-        const logo = user.restaurantLogo || user.restaurant?.logo || null;
+        const logo = currentUser.restaurantLogo || currentUser.restaurant?.logo || null;
 
         setTableInfo({
-          restaurantId: user.restaurantId,
+          restaurantId: currentUser.restaurantId,
           restaurantName,
           logo,
           isManual: true
         });
-        return user.restaurantId;
+        return currentUser.restaurantId;
       }
 
       let response;
@@ -219,15 +219,15 @@ const CustomerQROrder = ({ isManual = false }) => {
       return response.data.data?.restaurantId || response.data.restaurantId;
     } catch (error) {
       console.error('Error resolving QR code:', error);
-      if (isManual && user?.restaurantId) {
-        // Last resort: never leave the user stranded
-        setTableInfo({ restaurantId: user.restaurantId, restaurantName: 'Restaurant', isManual: true });
-        return user.restaurantId;
+      const currentUser = useAuthStore.getState()?.user;
+      if (isManual && currentUser?.restaurantId) {
+        setTableInfo({ restaurantId: currentUser.restaurantId, restaurantName: 'Restaurant', isManual: true });
+        return currentUser.restaurantId;
       }
       if (!isManual) Swal.fire('Error', 'Invalid QR code. Please scan again.', 'error');
       throw error;
     }
-  }, [tableKey, roomKey, isManual, user]);
+  }, [tableKey, roomKey, isManual]); // NO 'user' dependency - prevents infinite re-render
 
   const fetchMenuData = useCallback(async (restaurantId) => {
     try {
