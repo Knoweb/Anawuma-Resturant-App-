@@ -291,7 +291,7 @@ const RoomOrderManagement = () => {
                           <div className="items-list">
                             {order.orderItems?.map((item, idx) => (
                               <div key={idx} className="item-pill">
-                                {item.quantity}x {item.foodItem?.name}
+                                {item.qty || item.quantity || 1}x {item.itemName || item.foodItem?.itemName || 'Item'}
                               </div>
                             ))}
                           </div>
@@ -341,7 +341,7 @@ const RoomOrderManagement = () => {
                                       <hr/>
                                       <p><strong>Items:</strong></p>
                                       <ul>
-                                        ${order.orderItems.map(i => `<li>${i.quantity}x ${i.foodItem?.name}</li>`).join('')}
+                                        ${order.orderItems.map(i => `<li>${i.qty || i.quantity || 1}x ${i.itemName || i.foodItem?.itemName || 'Item'}</li>`).join('')}
                                       </ul>
                                     </div>
                                   `,
