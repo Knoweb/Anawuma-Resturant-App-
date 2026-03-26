@@ -144,7 +144,7 @@ function App() {
             <Route path="/cashier-login" element={<CashierLogin />} />
             <Route path="/accountant-login" element={<AccountantLogin />} />
             <Route path="/qr/:tableKey" element={<CustomerQROrder />} />
-            <Route path="/room/:roomKey" element={<GuestRequestForm />} />
+            <Route path="/room/:roomKey" element={<CustomerQROrder />} />
 
             {/* Default Authenticated Dashboard */}
             <Route

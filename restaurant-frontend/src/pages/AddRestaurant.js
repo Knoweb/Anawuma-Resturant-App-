@@ -280,7 +280,7 @@ function AddRestaurant() {
                   checked={formData.enableHousekeeping}
                   onChange={handleChange}
                 />
-                <label className="form-check-label">QR Housekeeping System</label>
+                <label className="form-check-label">Room Order System</label>
               </div>
               <div className="form-check">
                 <input

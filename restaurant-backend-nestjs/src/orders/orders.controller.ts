@@ -34,20 +34,24 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
-  @UseGuards(TableKeyGuard) // Secure public endpoint with table key
+  @UseGuards(TableKeyGuard) // Secure public endpoint with QR key (Table or Room)
   @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 requests per 60 seconds
   create(@Req() req, @Body() createOrderDto: CreateOrderDto) {
-    // restaurantId and tableNo come from TableKeyGuard (attached to req)
-    const restaurantId = req.restaurantId;
-    const tableNo = req.tableNo;
+    // restaurantId, tableNo/roomNo, and orderType come from TableKeyGuard (attached to req)
+    const { restaurantId, tableNo, roomNo, orderType } = req;
     
     // Validate items array is not empty
     if (!createOrderDto.items || createOrderDto.items.length === 0) {
       throw new BadRequestException('Order must contain at least one item');
     }
 
-    // Override tableNo from the QR code (more secure than client input)
-    const orderData = { ...createOrderDto, tableNo };
+    // Override tableNo/roomNo/orderType from the guard (more secure than client input)
+    const orderData = { 
+      ...createOrderDto, 
+      tableNo, 
+      roomNo, 
+      orderType 
+    };
 
     return this.ordersService.create(orderData, restaurantId);
   }
@@ -91,13 +95,17 @@ export class OrdersController {
   // Public endpoint for customers to track their order
   @Get('track/:id')
   @SkipThrottle()
-  async trackOrder(@Param('id', ParseIntPipe) id: number, @Headers('x-table-key') tableKey: string) {
-    if (!tableKey) {
-      throw new HttpException('Table key is required', HttpStatus.UNAUTHORIZED);
+  async trackOrder(
+    @Param('id', ParseIntPipe) id: number, 
+    @Headers('x-table-key') tableKey: string,
+    @Headers('x-room-key') roomKey: string
+  ) {
+    if (!tableKey && !roomKey) {
+      throw new HttpException('QR key is required', HttpStatus.UNAUTHORIZED);
     }
     
-    // Verify table key and get order
-    const order = await this.ordersService.trackOrderByTableKey(id, tableKey);
+    // Verify QR key and get order
+    const order = await this.ordersService.trackOrderByQrKey(id, tableKey, roomKey);
     if (!order) {
       throw new HttpException('Order not found or unauthorized', HttpStatus.NOT_FOUND);
     }

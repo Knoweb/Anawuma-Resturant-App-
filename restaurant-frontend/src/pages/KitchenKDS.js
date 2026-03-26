@@ -633,7 +633,7 @@ const KitchenKDS = () => {
           <h2 style="margin:0 0 8px 0;">Customer Bill</h2>
           <div style="margin-bottom:14px;font-size:14px;">
             <div><strong>Order No:</strong> ${escapeHtml(order.orderNo || '-')}</div>
-            <div><strong>Table:</strong> ${escapeHtml(order.tableNo || '-')}</div>
+            <div><strong>${order.orderType === 'ROOM' ? 'Room' : 'Table'}:</strong> ${escapeHtml(order.roomNo || order.tableNo || '-')}</div>
             <div><strong>Customer:</strong> ${escapeHtml(order.customerName || '-')}</div>
             <div><strong>Date:</strong> ${new Date().toLocaleString()}</div>
           </div>
@@ -946,10 +946,11 @@ const KitchenKDS = () => {
         <div className="card-header d-flex justify-content-between align-items-center">
           <div>
             <strong className="order-number">{order.orderNo}</strong>
-            {order.tableNo && (
-              <span className="badge bg-primary ms-2">
-                <i className="fas fa-table me-1"></i>
-                {order.tableNo}
+            {(order.tableNo || order.roomNo) && (
+              <span className={`badge ${order.orderType === 'ROOM' ? 'bg-info' : 'bg-primary'} ms-2`}>
+                <i className={`fas ${order.orderType === 'ROOM' ? 'fa-concierge-bell' : 'fa-table'} me-1`}></i>
+                {order.orderType === 'ROOM' ? 'Room ' : 'Table '}
+                {order.roomNo || order.tableNo}
               </span>
             )}
           </div>
@@ -1131,12 +1132,12 @@ const KitchenKDS = () => {
             </div>
             <div className="col-md-4">
               <div className="info-card">
-                <label className="text-muted small mb-1">Table Number</label>
+                <label className="text-muted small mb-1">{selectedOrder.orderType === 'ROOM' ? 'Room' : 'Table'} Number</label>
                 <div className="h5 mb-0">
-                  {selectedOrder.tableNo ? (
+                  {selectedOrder.roomNo || selectedOrder.tableNo ? (
                     <>
-                      <i className="fas fa-table me-2 text-primary"></i>
-                      {selectedOrder.tableNo}
+                      <i className={`fas ${selectedOrder.orderType === 'ROOM' ? 'fa-concierge-bell' : 'fa-table'} me-2 text-primary`}></i>
+                      {selectedOrder.roomNo || selectedOrder.tableNo}
                     </>
                   ) : (
                     <span className="text-muted">-</span>

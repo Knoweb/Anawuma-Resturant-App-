@@ -1,5 +1,5 @@
 import { IsOptional, IsEnum, IsString, Matches } from 'class-validator';
-import { OrderStatus } from '../entities/order.entity';
+import { OrderStatus, OrderType } from '../entities/order.entity';
 
 export class QueryOrdersDto {
   @IsOptional()
@@ -25,6 +25,14 @@ export class QueryOrdersDto {
   @IsOptional()
   @IsString()
   tableNo?: string;
+
+  @IsOptional()
+  @IsString()
+  roomNo?: string;
+
+  @IsOptional()
+  @IsEnum(OrderType)
+  orderType?: OrderType;
 
   @IsOptional()
   @IsString()

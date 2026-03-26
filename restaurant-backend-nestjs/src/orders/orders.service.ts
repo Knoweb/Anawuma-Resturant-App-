@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Order, OrderStatus } from './entities/order.entity';
+import { Order, OrderStatus, OrderType } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { FoodItem } from '../food-items/entities/food-item.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -10,6 +10,7 @@ import { QueryOrdersDto } from './dto/query-orders.dto';
 import { KitchenDashboardQueryDto } from './dto/kitchen-dashboard-query.dto';
 import { WebsocketGateway } from '../websocket/websocket.gateway';
 import { TableQrService } from '../table-qr/table-qr.service';
+import { RoomQrService } from '../room-qr/room-qr.service';
 import {
   isLikelyWhatsAppNumber,
   normalizeWhatsAppNumber,
@@ -26,10 +27,11 @@ export class OrdersService {
     private foodItemsRepository: Repository<FoodItem>,
     private websocketGateway: WebsocketGateway,
     private tableQrService: TableQrService,
+    private roomQrService: RoomQrService,
   ) {}
 
   async create(createOrderDto: CreateOrderDto, restaurantId: number) {
-    const { tableNo, customerName, whatsappNumber, notes, items } = createOrderDto;
+    const { tableNo, roomNo, orderType, customerName, whatsappNumber, notes, items } = createOrderDto;
 
     // Normalize WhatsApp number if provided
     const normalizedWhatsapp = whatsappNumber 
@@ -92,6 +94,8 @@ export class OrdersService {
     const order = this.ordersRepository.create({
       orderNo,
       tableNo,
+      roomNo,
+      orderType: orderType || (roomNo ? OrderType.ROOM : OrderType.TABLE),
       customerName,
       whatsappNumber: normalizedWhatsapp,
       notes,
@@ -106,6 +110,7 @@ export class OrdersService {
     console.log('🔔 ORDER CREATED - Preparing to emit WebSocket event');
     console.log('Order ID:', savedOrder.orderId);
     console.log('Order No:', savedOrder.orderNo);
+    console.log('Type:', savedOrder.orderType);
     console.log('Restaurant ID:', savedOrder.restaurantId);
 
     // Emit real-time notification for new order
@@ -113,6 +118,8 @@ export class OrdersService {
       orderId: savedOrder.orderId,
       orderNo: savedOrder.orderNo,
       tableNo: savedOrder.tableNo,
+      roomNo: savedOrder.roomNo,
+      orderType: savedOrder.orderType,
       totalAmount: savedOrder.totalAmount,
       itemCount: savedOrder.orderItems.length,
       status: savedOrder.status,
@@ -127,7 +134,7 @@ export class OrdersService {
   }
 
   async findAll(restaurantId: number, queryDto: QueryOrdersDto = {}) {
-    const { status, from, to, tableNo, orderNo } = queryDto;
+    const { status, from, to, tableNo, roomNo, orderType, orderNo } = queryDto;
 
     const query = this.ordersRepository
       .createQueryBuilder('order')
@@ -161,6 +168,18 @@ export class OrdersService {
       query.andWhere('order.tableNo LIKE :tableNo', {
         tableNo: `%${tableNo}%`,
       });
+    }
+
+    // Room number partial match
+    if (roomNo) {
+      query.andWhere('order.roomNo LIKE :roomNo', {
+        roomNo: `%${roomNo}%`,
+      });
+    }
+
+    // Order type filter
+    if (orderType) {
+      query.andWhere('order.orderType = :orderType', { orderType });
     }
 
     // Order number partial match
@@ -305,27 +324,39 @@ export class OrdersService {
     return { message: 'Order deleted successfully' };
   }
 
-  // Track order by table key (for customers)
-  async trackOrderByTableKey(orderId: number, tableKey: string) {
-    const tableQr = await this.tableQrService.findByTableKey(tableKey);
+  // Track order by QR key (for customers/guests)
+  async trackOrderByQrKey(orderId: number, tableKey?: string, roomKey?: string) {
+    let restaurantId: number;
+    let tableNo: string | null = null;
+    let roomNo: string | null = null;
 
-    if (!tableQr) {
+    if (tableKey) {
+      const tableQr = await this.tableQrService.findByTableKey(tableKey);
+      if (!tableQr) return null;
+      restaurantId = tableQr.restaurantId;
+      tableNo = tableQr.tableNo;
+    } else if (roomKey) {
+      const roomQr = await this.roomQrService.findByRoomKey(roomKey);
+      if (!roomQr) return null;
+      restaurantId = roomQr.restaurantId;
+      roomNo = roomQr.roomNo;
+    } else {
       return null;
     }
 
-    // Get order and verify it belongs to this table/restaurant
-    const order = await this.ordersRepository
+    // Get order and verify it belongs to this table/room and restaurant
+    const query = this.ordersRepository
       .createQueryBuilder('order')
       .leftJoinAndSelect('order.orderItems', 'orderItems')
       .where('order.orderId = :orderId', { orderId })
-      .andWhere('order.restaurantId = :restaurantId', { 
-        restaurantId: tableQr.restaurantId 
-      })
-      .andWhere('order.tableNo = :tableNo', { 
-        tableNo: tableQr.tableNo 
-      })
-      .getOne();
+      .andWhere('order.restaurantId = :restaurantId', { restaurantId });
 
-    return order;
+    if (tableKey) {
+      query.andWhere('order.tableNo = :tableNo', { tableNo });
+    } else {
+      query.andWhere('order.roomNo = :roomNo', { roomNo });
+    }
+
+    return await query.getOne();
   }
 }

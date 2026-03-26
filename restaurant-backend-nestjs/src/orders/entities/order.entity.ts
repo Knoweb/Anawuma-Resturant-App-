@@ -18,6 +18,11 @@ export enum OrderStatus {
   CANCELLED = 'CANCELLED',
 }
 
+export enum OrderType {
+  TABLE = 'TABLE',
+  ROOM = 'ROOM',
+}
+
 @Entity('kitchen_orders_tbl')
 export class Order {
   @PrimaryGeneratedColumn({ name: 'order_id' })
@@ -41,6 +46,17 @@ export class Order {
 
   @Column({ name: 'table_no', type: 'varchar', length: 50, nullable: true })
   tableNo: string;
+
+  @Column({ name: 'room_no', type: 'varchar', length: 50, nullable: true })
+  roomNo: string;
+
+  @Column({
+    type: 'enum',
+    enum: OrderType,
+    default: OrderType.TABLE,
+    name: 'order_type',
+  })
+  orderType: OrderType;
 
   @Column({ type: 'text', nullable: true })
   notes: string;

@@ -204,9 +204,9 @@ const HousekeepingMessages = () => {
           <div>
             <h2 className="mb-1">
               <i className="fas fa-envelope me-2"></i>
-              Housekeeping Requests
+              Room Service Requests
             </h2>
-            <p className="text-muted mb-0">Manage guest requests and housekeeping tasks</p>
+            <p className="text-muted mb-0">Manage guest requests and room service tasks</p>
           </div>
           <div className="d-flex align-items-center gap-3">
             <button

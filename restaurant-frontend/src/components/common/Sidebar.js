@@ -358,26 +358,6 @@ function Sidebar() {
             </li>
           )}
 
-
-
-          {/* Super Admin Only */}
-          {isSuperAdmin && (
-            <>
-              <li className={isActive('/restaurants')}>
-                <Link to="/restaurants" onClick={closeSubmenus}>
-                  <i className="fas fa-building"></i>
-                  <span>Restaurants</span>
-                </Link>
-              </li>
-              <li className={isActive('/admins')}>
-                <Link to="/admins" onClick={closeSubmenus}>
-                  <i className="fas fa-user-shield"></i>
-                  <span>Admins</span>
-                </Link>
-              </li>
-            </>
-          )}
-
           {canAccessAdminFeatures && (
             <li className={isActive('/settings/restaurant')}>
               <Link to="/settings/restaurant" onClick={closeSubmenus}>
@@ -387,7 +367,7 @@ function Sidebar() {
             </li>
           )}
 
-          {/* Settings */}
+          {/* User Settings */}
           <li className={`has-submenu ${menuStates.settings ? 'open' : ''}`}>
             <a href="#" onClick={(e) => { e.preventDefault(); toggleMenu('settings'); }}>
               <i className="fas fa-user-cog"></i>
@@ -409,6 +389,24 @@ function Sidebar() {
               </li>
             </ul>
           </li>
+
+          {/* Super Admin Only */}
+          {isSuperAdmin && (
+            <>
+              <li className={isActive('/restaurants')}>
+                <Link to="/restaurants" onClick={closeSubmenus}>
+                  <i className="fas fa-building"></i>
+                  <span>Restaurants</span>
+                </Link>
+              </li>
+              <li className={isActive('/admins')}>
+                <Link to="/admins" onClick={closeSubmenus}>
+                  <i className="fas fa-user-shield"></i>
+                  <span>Admins</span>
+                </Link>
+              </li>
+            </>
+          )}
 
           {isAdmin && (
             <li className={isActive('/my-hotel')}>

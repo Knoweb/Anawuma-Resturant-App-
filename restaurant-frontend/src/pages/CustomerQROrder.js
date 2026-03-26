@@ -28,7 +28,7 @@ const normalizeWhatsAppNumber = (phone) => {
 };
 
 const CustomerQROrder = () => {
-  const { tableKey } = useParams();
+  const { tableKey, roomKey } = useParams();
   const [tableInfo, setTableInfo] = useState(null);
   const [menus, setMenus] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -58,7 +58,6 @@ const CustomerQROrder = () => {
     }
   }, []);
 
-  // Helper to show notifications (Toast + Browser)
   // Helper to show notifications (Toast + Browser)
   const showNotification = useCallback((title, message, type = 'info') => {
     // Browser notification
@@ -98,12 +97,14 @@ const CustomerQROrder = () => {
     if (!orderSuccess || !orderSuccess.orderId) return;
     
     try {
+      const headers = {};
+      if (tableKey) headers['x-table-key'] = tableKey;
+      if (roomKey) headers['x-room-key'] = roomKey;
+
       const response = await apiClient.get(
         `/orders/track/${orderSuccess.orderId}`,
         {
-          headers: {
-            'x-table-key': tableKey
-          }
+          headers
         }
       );
 
@@ -122,7 +123,7 @@ const CustomerQROrder = () => {
               } else if (newStatus === 'READY') {
                 showNotification(
                   'Order Ready! 🍽️',
-                  `Your order #${orderSuccess.orderNo} is ready! We'll bring it to your table shortly.`,
+                  `Your order #${orderSuccess.orderNo} is ready! We'll bring it to your room shortly.`,
                   'success'
                 );
               } else if (newStatus === 'CANCELLED') {
@@ -142,7 +143,7 @@ const CustomerQROrder = () => {
     } catch (error) {
       console.error('Error fetching order status:', error);
     }
-  }, [orderSuccess, tableKey, showNotification]);
+  }, [orderSuccess, tableKey, roomKey, showNotification]);
 
   // Real-time listener for order status updates
   useEffect(() => {
@@ -177,15 +178,27 @@ const CustomerQROrder = () => {
 
   const fetchTableInfo = useCallback(async () => {
     try {
-      const response = await apiClient.get(`/qr/resolve/${tableKey}`);
-      setTableInfo(response.data);
-      return response.data.restaurantId;
+      let response;
+      if (tableKey) {
+        response = await apiClient.get(`/qr/resolve/${tableKey}`);
+        setTableInfo(response.data);
+      } else if (roomKey) {
+        response = await apiClient.get(`/qr/room/resolve/${roomKey}`);
+        // Backend returns { success: true, data: { roomNo, restaurantId, restaurantName } }
+        setTableInfo({
+          ...response.data.data,
+          tableNo: response.data.data.roomNo, // Reuse tableNo field for UI consistency
+          isRoom: true
+        });
+      }
+
+      return response.data.data?.restaurantId || response.data.restaurantId;
     } catch (error) {
       console.error('Error resolving QR code:', error);
       Swal.fire('Error', 'Invalid QR code. Please scan again.', 'error');
       throw error;
     }
-  }, [API_URL, tableKey]);
+  }, [tableKey, roomKey]);
 
   const fetchMenuData = useCallback(async (restaurantId) => {
     try {
@@ -220,20 +233,48 @@ const CustomerQROrder = () => {
         setLoading(true);
         const restaurantId = await fetchTableInfo();
         await fetchMenuData(restaurantId);
+
+        // Restore active order for this table/room
+        const currentKey = tableKey || roomKey;
+        const savedOrder = localStorage.getItem(`active_order_${currentKey}`);
+        if (savedOrder) {
+          try {
+            const orderData = JSON.parse(savedOrder);
+            setOrderSuccess(orderData);
+            setCustomerName(orderData.customerName || '');
+            setWhatsappNumber(orderData.whatsappNumber || '');
+            
+            const headers = {};
+            if (tableKey) headers['x-table-key'] = tableKey;
+            if (roomKey) headers['x-room-key'] = roomKey;
+
+            // Try to fetch latest status
+            apiClient.get(`/orders/track/${orderData.orderId}`, {
+              headers
+            }).then(resp => {
+              if (resp.data.status === 'SERVED' || resp.data.status === 'CANCELLED') {
+                localStorage.removeItem(`active_order_${currentKey}`);
+              }
+              setCurrentOrderStatus(resp.data.status);
+            }).catch(err => console.error('Error verifying restored order:', err));
+          } catch (e) {
+            console.error('Error parsing saved order:', e);
+          }
+        }
       } catch (error) {
-        // Error already handled in fetchTableInfo
+        // Error already handled
       } finally {
         setLoading(false);
       }
     };
 
-    if (tableKey) {
+    if (tableKey || roomKey) {
       loadData();
     } else {
       Swal.fire('Error', 'Invalid QR code.', 'error');
       setLoading(false);
     }
-  }, [tableKey, fetchTableInfo, fetchMenuData]);
+  }, [tableKey, roomKey, fetchTableInfo, fetchMenuData]);
 
   useEffect(() => {
     let filtered = foodItems;
@@ -326,19 +367,30 @@ const CustomerQROrder = () => {
         }))
       };
 
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+      if (tableKey) headers['x-table-key'] = tableKey;
+      if (roomKey) headers['x-room-key'] = roomKey;
+
       const response = await apiClient.post(
         `/orders`,
         orderPayload,
         {
-          headers: {
-            'x-table-key': tableKey,
-            'Content-Type': 'application/json'
-          }
+          headers
         }
       );
 
       // Success
-      setOrderSuccess(response.data);
+      const orderData = {
+        ...response.data,
+        customerName: customerName.trim(),
+        whatsappNumber: normalizedWhatsapp
+      };
+      
+      setOrderSuccess(orderData);
+      localStorage.setItem(`active_order_${tableKey || roomKey}`, JSON.stringify(orderData));
+      
       setShowStatusScreen(true);
       setCart([]);
       setOrderNotes('');
@@ -352,6 +404,7 @@ const CustomerQROrder = () => {
   };
 
   const startNewOrder = () => {
+    localStorage.removeItem(`active_order_${tableKey || roomKey}`);
     setOrderSuccess(null);
     setCurrentOrderStatus(null);
     setCustomerName('');
@@ -424,7 +477,7 @@ const CustomerQROrder = () => {
             </div>
 
             <div className="order-info mt-4">
-              <p><strong>Table:</strong> {tableInfo?.tableNo || orderSuccess.tableNo}</p>
+              <p><strong>{tableInfo?.isRoom ? 'Room' : 'Table'}:</strong> {tableInfo?.tableNo || orderSuccess.tableNo || orderSuccess.roomNo}</p>
               <p><strong>Restaurant:</strong> {tableInfo?.restaurantName}</p>
               <p><strong>Total:</strong> Rs. {orderSuccess.totalAmount}</p>
             </div>
@@ -433,7 +486,7 @@ const CustomerQROrder = () => {
           {currentOrderStatus === 'READY' && (
             <div className="alert alert-success mt-3">
               <i className="fas fa-check-circle me-2"></i>
-              <strong>Your order is ready!</strong> Our staff will bring it to your table shortly.
+               <strong>Your order is ready!</strong> Our staff will bring it to your {tableInfo?.isRoom ? 'room' : 'table'} shortly.
             </div>
           )}
 
@@ -605,7 +658,7 @@ const CustomerQROrder = () => {
         <div className="error-screen">
           <i className="fas fa-exclamation-triangle fa-3x mb-3"></i>
           <h2>Invalid QR Code</h2>
-          <p>Please scan a valid QR code from your table.</p>
+           <p>Please scan a valid QR code from your table or room.</p>
         </div>
       </div>
     );
@@ -632,9 +685,9 @@ const CustomerQROrder = () => {
             )}
             <div className="brand-text-v2">
               <h1 className="hotel-name-v2">{tableInfo.restaurantName}</h1>
-              <div className="room-badge-v2">
-                <i className="fas fa-chair"></i>
-                <span>Table {tableInfo.tableNo || tableInfo.roomNo}</span>
+               <div className="room-badge-v2">
+                <i className={`fas ${tableInfo?.isRoom ? 'fa-concierge-bell' : 'fa-chair'}`}></i>
+                <span>{tableInfo?.isRoom ? 'Room' : 'Table'} {tableInfo?.tableNo || tableInfo?.roomNo}</span>
               </div>
             </div>
           </div>
@@ -745,9 +798,9 @@ const CustomerQROrder = () => {
         {cart.length > 0 && (
           <div className="cart-footer">
             <div className="order-inputs">
-              <div className="table-info-display mb-3">
-                <i className="fas fa-chair me-2"></i>
-                <strong>Table:</strong> {tableInfo.tableNo}
+               <div className="table-info-display mb-3">
+                <i className={`fas ${tableInfo?.isRoom ? 'fa-concierge-bell' : 'fa-chair'} me-2`}></i>
+                <strong>{tableInfo?.isRoom ? 'Room' : 'Table'}:</strong> {tableInfo?.tableNo || tableInfo?.roomNo}
               </div>
 
               <div className="mb-3">

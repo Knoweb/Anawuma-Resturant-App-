@@ -32,7 +32,7 @@ const formatRole = (role) => {
   const labels = {
     admin: 'Admin',
     super_admin: 'Super Admin',
-    housekeeper: 'Housekeeper',
+    housekeeper: 'Room Service',
     kitchen: 'Kitchen',
     cashier: 'Cashier',
     accountant: 'Accountant',
@@ -145,7 +145,7 @@ function RestaurantProfile() {
             ${restaurant.enableKds ? '<option value="kitchen">Kitchen</option>' : ''}
             ${restaurant.enableCashier ? '<option value="cashier">Cashier</option>' : ''}
             ${restaurant.enableAccountant ? '<option value="accountant">Accountant</option>' : ''}
-            ${restaurant.enableHousekeeping ? '<option value="housekeeper">Housekeeper</option>' : ''}
+            ${restaurant.enableHousekeeping ? '<option value="housekeeper">Room Service Staff</option>' : ''}
           </select>
         </div>
       `,
@@ -315,7 +315,7 @@ function RestaurantProfile() {
 
   const privileges = [
     'QR Menu System',
-    restaurant.enableHousekeeping && 'QR Housekeeping System',
+    restaurant.enableHousekeeping && 'Room Order System',
     restaurant.enableKds && 'Kitchen Display System',
     restaurant.enableReports && 'Reports & Analytics',
     restaurant.enableAccountant && 'Accountant Management',

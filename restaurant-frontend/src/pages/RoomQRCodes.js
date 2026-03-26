@@ -25,7 +25,7 @@ const RoomQRCodes = () => {
         Swal.fire({
           icon: 'error',
           title: 'Feature Disabled',
-          text: 'Housekeeping module is disabled for your restaurant',
+          text: 'Room Orders module is disabled for your restaurant',
         });
       } else {
         Swal.fire({

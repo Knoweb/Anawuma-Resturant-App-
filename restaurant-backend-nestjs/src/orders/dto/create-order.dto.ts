@@ -1,5 +1,6 @@
 import { IsInt, IsNotEmpty, IsOptional, IsString, IsArray, ValidateNested, Min, Max, ArrayMaxSize } from 'class-validator';
 import { Type } from 'class-transformer';
+import { OrderType } from '../entities/order.entity';
 
 export class CreateOrderItemDto {
   @IsInt()
@@ -21,6 +22,14 @@ export class CreateOrderDto {
   @IsString()
   @IsOptional()
   tableNo?: string;
+
+  @IsString()
+  @IsOptional()
+  roomNo?: string;
+
+  @IsString()
+  @IsOptional()
+  orderType?: OrderType;
 
   @IsString()
   @IsOptional()
