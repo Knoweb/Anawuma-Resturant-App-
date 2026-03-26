@@ -24,7 +24,7 @@ export class RolesGuard implements CanActivate {
       throw new ForbiddenException('User role not found');
     }
 
-    const hasRole = requiredRoles.some((role) => user.role === role);
+    const hasRole = requiredRoles.some((role) => user.role.toLowerCase() === role.toLowerCase());
 
     if (!hasRole) {
       throw new ForbiddenException(

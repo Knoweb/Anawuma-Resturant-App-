@@ -106,6 +106,8 @@ export class AuthController {
         email: req.user.email,
         role: req.user.role,
         restaurantId: req.user.restaurantId,
+        restaurantName: (user as any).restaurant?.restaurantName,
+        restaurantLogo: (user as any).restaurant?.logo,
         type: req.user.type,
         restaurantSettings,
         ...user,

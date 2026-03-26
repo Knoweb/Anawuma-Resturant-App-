@@ -51,6 +51,7 @@ const CustomerQROrder = ({ isManual = false }) => {
   const [currentOrderStatus, setCurrentOrderStatus] = useState(null);
   const [shownNotifications, setShownNotifications] = useState(new Set());
   const { subscribe, connected } = useWebSocket();
+  const { user, isAuthenticated } = useAuthStore();
 
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
@@ -183,23 +184,25 @@ const CustomerQROrder = ({ isManual = false }) => {
     try {
       if (isManual) {
         // Fetch current user's restaurant profile
-        const { user } = useAuthStore.getState();
         if (!user || !user.restaurantId) {
           throw new Error('User not logged in or restaurant ID missing');
         }
 
         // Try to use cached data from store if available
-        if (user.restaurantName) {
+        const restaurantName = user.restaurantName || user.restaurant?.restaurantName;
+        const logo = user.restaurantLogo || user.restaurant?.logo;
+
+        if (restaurantName) {
            setTableInfo({
              restaurantId: user.restaurantId,
-             restaurantName: user.restaurantName,
-             logo: user.restaurantLogo,
+             restaurantName: restaurantName,
+             logo: logo,
              isManual: true
            });
            return user.restaurantId;
         }
 
-        // Fallback to API call if store doesn't have names (e.g. fresh first login)
+        // Fallback to API call if store doesn't have names
         try {
           const restResponse = await apiClient.get(`/restaurant/${user.restaurantId}`);
           setTableInfo({
@@ -209,11 +212,11 @@ const CustomerQROrder = ({ isManual = false }) => {
             isManual: true
           });
         } catch (apiErr) {
-          console.error('Error fetching restaurant data:', apiErr);
-          // Minimum viable fallback
+          console.warn('Silent fallback for restaurant profile:', apiErr.message);
+          // Minimum viable fallback to keep the UI running
           setTableInfo({
              restaurantId: user.restaurantId,
-             restaurantName: 'Restaurant',
+             restaurantName: user.restaurantName || 'Restaurant',
              isManual: true
            });
         }
