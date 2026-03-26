@@ -375,8 +375,16 @@ const CustomerQROrder = ({ isManual = false }) => {
     ));
   };
 
+  const calculateSubtotal = () => {
+    return cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+  };
+
+  const calculateServiceCharge = () => {
+    return calculateSubtotal() * 0.1;
+  };
+
   const calculateTotal = () => {
-    return cart.reduce((sum, item) => sum + (item.price * item.qty), 0).toFixed(2);
+    return (calculateSubtotal() + calculateServiceCharge()).toFixed(2);
   };
 
   const placeOrder = async () => {
@@ -539,7 +547,20 @@ const CustomerQROrder = ({ isManual = false }) => {
             <div className="order-info mt-4">
               <p><strong>{tableInfo?.isRoom ? 'Room' : 'Table'}:</strong> {tableInfo?.tableNo || orderSuccess.tableNo || orderSuccess.roomNo}</p>
               <p><strong>Restaurant:</strong> {tableInfo?.restaurantName}</p>
-              <p><strong>Total:</strong> Rs. {orderSuccess.totalAmount}</p>
+              <div className="billing-breakdown mt-3 border-top pt-2">
+                <div className="d-flex justify-content-between mb-1">
+                  <span className="text-muted small">Subtotal:</span>
+                  <span className="small">Rs. {orderSuccess.subtotal || (orderSuccess.totalAmount / 1.1).toFixed(0)}</span>
+                </div>
+                <div className="d-flex justify-content-between mb-1">
+                  <span className="text-muted small">Service Charge (10%):</span>
+                  <span className="small">Rs. {orderSuccess.serviceCharge || (orderSuccess.totalAmount - (orderSuccess.totalAmount / 1.1)).toFixed(0)}</span>
+                </div>
+                <div className="d-flex justify-content-between mt-1 fw-bold">
+                  <span>Grand Total:</span>
+                  <span>Rs. {orderSuccess.totalAmount}</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -942,7 +963,18 @@ const CustomerQROrder = ({ isManual = false }) => {
             </div>
 
             <div className="cart-total">
-              <h5>Total: <span>Rs. {parseFloat(calculateTotal()).toFixed(0)}</span></h5>
+               <div className="d-flex justify-content-between mb-1 text-muted small">
+                 <span>Subtotal:</span>
+                 <span>Rs. {calculateSubtotal().toFixed(0)}</span>
+               </div>
+               <div className="d-flex justify-content-between mb-2 text-muted small">
+                 <span>Service Charge (10%):</span>
+                 <span>Rs. {calculateServiceCharge().toFixed(0)}</span>
+               </div>
+               <div className="d-flex justify-content-between fw-bold h5 mb-0">
+                 <span>Total:</span>
+                 <span>Rs. {parseFloat(calculateTotal()).toFixed(0)}</span>
+               </div>
             </div>
 
             <button

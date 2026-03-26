@@ -62,7 +62,7 @@ export class OrdersService {
     );
 
     // Calculate totals and prepare order items
-    let totalAmount = 0;
+    let subtotal = 0;
     const orderItems: Partial<OrderItem>[] = [];
 
     for (const item of items) {
@@ -75,7 +75,7 @@ export class OrdersService {
 
       const unitPrice = parseFloat(foodItem.price.toString());
       const lineTotal = unitPrice * item.qty;
-      totalAmount += lineTotal;
+      subtotal += lineTotal;
 
       orderItems.push({
         foodItemId: item.foodItemId,
@@ -86,6 +86,10 @@ export class OrdersService {
         notes: item.notes,
       });
     }
+
+    // Calculate service charge (10%)
+    const serviceCharge = subtotal * 0.1;
+    const totalAmount = subtotal + serviceCharge;
 
     // Generate order number (simple timestamp-based for MVP)
     const orderNo = `ORD-${Date.now()}`;
@@ -99,6 +103,8 @@ export class OrdersService {
       customerName,
       whatsappNumber: normalizedWhatsapp,
       notes,
+      subtotal,
+      serviceCharge,
       totalAmount,
       restaurantId,
       status: OrderStatus.NEW,

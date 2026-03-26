@@ -62,6 +62,12 @@ export class Order {
   @Column({ type: 'text', nullable: true })
   notes: string;
 
+  @Column({ name: 'subtotal', type: 'decimal', precision: 10, scale: 2, default: 0 })
+  subtotal: number;
+
+  @Column({ name: 'service_charge', type: 'decimal', precision: 10, scale: 2, default: 0 })
+  serviceCharge: number;
+
   @Column({ name: 'total_amount', type: 'decimal', precision: 10, scale: 2, default: 0 })
   totalAmount: number;
 

@@ -37,7 +37,14 @@ export class BillingService {
     adminId?: number,
     overrides: Partial<Invoice> = {},
   ): Invoice {
-    const subtotal = parseFloat(order.totalAmount.toString());
+    const subtotal = order.subtotal && parseFloat(order.subtotal.toString()) > 0 
+      ? parseFloat(order.subtotal.toString()) 
+      : parseFloat(order.totalAmount.toString());
+    
+    // Default service charge from order, or 0 if legacy
+    const serviceCharge = order.serviceCharge ? parseFloat(order.serviceCharge.toString()) : 0;
+    const finalTotal = parseFloat(order.totalAmount.toString());
+
     const today = new Date();
     const datePart = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
     const invoiceNumber = `INV-${datePart}-${order.orderId}`;
@@ -60,9 +67,9 @@ export class BillingService {
       orderItemsJson: orderItemsSnapshot,
       subtotal,
       taxAmount: 0,
-      serviceCharge: 0,
+      serviceCharge,
       discountAmount: 0,
-      totalAmount: subtotal,
+      totalAmount: finalTotal,
       invoiceStatus: InvoiceStatus.PENDING,
       isPrinted: false,
       isSentToCashier: false,
@@ -200,13 +207,23 @@ export class BillingService {
       return existing;
     }
 
-    const subtotal = parseFloat(order.totalAmount.toString());
+    const subtotal = order.subtotal && parseFloat(order.subtotal.toString()) > 0 
+      ? parseFloat(order.subtotal.toString()) 
+      : parseFloat(order.totalAmount.toString());
+
     const tax = parseFloat(taxAmount.toString());
-    const charge = parseFloat(serviceCharge.toString());
+    
+    // If serviceCharge is explicitly provided in DTO (override), use it. 
+    // Otherwise use the one calculated at order time.
+    const charge = dto.serviceCharge !== undefined 
+      ? parseFloat(serviceCharge.toString()) 
+      : (order.serviceCharge ? parseFloat(order.serviceCharge.toString()) : 0);
+
     const discount = parseFloat(discountAmount.toString());
     const total = subtotal + tax + charge - discount;
 
     const invoice = this.buildInvoiceSnapshot(order, adminId, {
+      subtotal,
       taxAmount: tax,
       serviceCharge: charge,
       discountAmount: discount,
