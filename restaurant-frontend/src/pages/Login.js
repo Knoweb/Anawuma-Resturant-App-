@@ -68,6 +68,26 @@ function Login() {
           throw new Error('Invalid login response from server.');
         }
 
+        // Restrict this login page to Restaurant Admins only
+        const normalizedRole = user.role?.toString().trim().toLowerCase();
+        if (normalizedRole !== 'admin') {
+          // Show error and do NOT log them in
+          const roleLoginPages = {
+            'cashier': '/cashier/login',
+            'kitchen': '/kitchen/login',
+            'accountant': '/accountant/login',
+            'super_admin': '/super-admin/login',
+            'superadmin': '/super-admin/login',
+          };
+          const correctPage = roleLoginPages[normalizedRole] || '/login';
+          Swal.fire({
+            icon: 'error',
+            title: 'Access Denied',
+            html: `This login page is for <strong>Restaurant Admins only</strong>.<br/>Please use your designated login page.${correctPage !== '/login' ? `<br/><a href="${correctPage}" style="color:#004FEB;">Go to your login page →</a>` : ''}`,
+          });
+          return;
+        }
+
         login(user, access_token);
 
         const authStorageData = {
@@ -81,13 +101,6 @@ function Login() {
 
         localStorage.setItem('auth-storage', JSON.stringify(authStorageData));
 
-        const redirectPath = getRedirectPathByRole(user.role);
-
-        console.log('Login successful');
-        console.log('User:', user);
-        console.log('Role:', user.role);
-        console.log('Redirecting to:', redirectPath);
-
         Swal.fire({
           icon: 'success',
           title: 'Login Successful!',
@@ -97,8 +110,7 @@ function Login() {
           timer: 1500,
           timerProgressBar: true,
           didClose: () => {
-            // Force page reload with new URL
-            window.location.href = redirectPath;
+            window.location.href = '/my-hotel';
           }
         });
       } else {
