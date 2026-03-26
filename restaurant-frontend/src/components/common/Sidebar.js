@@ -84,10 +84,13 @@ function Sidebar() {
   }, []);
 
   const isActive = (path, exact = true) => {
+    const normalizedPath = location.pathname.replace(/\/$/, '') || '/';
+    const normalizedTarget = path.replace(/\/$/, '') || '/';
+
     if (exact) {
-      return location.pathname === path && !location.search ? 'active' : '';
+      return normalizedPath === normalizedTarget ? 'active' : '';
     }
-    return location.pathname === path ? 'active' : '';
+    return normalizedPath.startsWith(normalizedTarget) ? 'active' : '';
   };
 
   const isQueryActive = (path, search) => {
