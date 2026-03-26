@@ -73,9 +73,9 @@ function Login() {
         if (normalizedRole !== 'admin') {
           // Show error and do NOT log them in
           const roleLoginPages = {
-            'cashier': '/cashier/login',
-            'kitchen': '/kitchen/login',
-            'accountant': '/accountant/login',
+            'cashier': '/cashier-login',
+            'kitchen': '/kitchen-login',
+            'accountant': '/accountant-login',
             'super_admin': '/super-admin/login',
             'superadmin': '/super-admin/login',
           };
