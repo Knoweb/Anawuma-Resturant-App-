@@ -188,14 +188,35 @@ const CustomerQROrder = ({ isManual = false }) => {
           throw new Error('User not logged in or restaurant ID missing');
         }
 
-        const restResponse = await apiClient.get(`/restaurant/${user.restaurantId}`);
-        
-        setTableInfo({
-          restaurantId: user.restaurantId,
-          restaurantName: restResponse.data.data.restaurantName,
-          logo: restResponse.data.data.logo,
-          isManual: true
-        });
+        // Try to use cached data from store if available
+        if (user.restaurantName) {
+           setTableInfo({
+             restaurantId: user.restaurantId,
+             restaurantName: user.restaurantName,
+             logo: user.restaurantLogo,
+             isManual: true
+           });
+           return user.restaurantId;
+        }
+
+        // Fallback to API call if store doesn't have names (e.g. fresh first login)
+        try {
+          const restResponse = await apiClient.get(`/restaurant/${user.restaurantId}`);
+          setTableInfo({
+            restaurantId: user.restaurantId,
+            restaurantName: restResponse.data.data.restaurantName,
+            logo: restResponse.data.data.logo,
+            isManual: true
+          });
+        } catch (apiErr) {
+          console.error('Error fetching restaurant data:', apiErr);
+          // Minimum viable fallback
+          setTableInfo({
+             restaurantId: user.restaurantId,
+             restaurantName: 'Restaurant',
+             isManual: true
+           });
+        }
         return user.restaurantId;
       }
 

@@ -192,7 +192,7 @@ export class RestaurantsController {
   }
 
   @Get(':id')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CASHIER)
   async findOne(@Param('id') id: string) {
     const restaurant = await this.restaurantsService.findById(+id);
     return {
