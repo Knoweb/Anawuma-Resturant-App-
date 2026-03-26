@@ -79,6 +79,9 @@ export const WebSocketProvider = ({ children }) => {
     setConnected(false);
   }, [clearConnectTimer, clearRetryTimer]);
 
+  const userRef = useRef(user);
+  useEffect(() => { userRef.current = user; }, [user]);
+
   useEffect(() => {
     const API_URL = (() => {
       const envApiUrl = (
@@ -98,7 +101,6 @@ export const WebSocketProvider = ({ children }) => {
           return envApiUrl.replace(/\/api\/?$/, '');
         }
 
-        // Use the same host as the frontend when accessed from LAN/IP.
         const protocol = window.location.protocol || 'http:';
         return `${protocol}//${host}:3000`;
       }
@@ -156,7 +158,6 @@ export const WebSocketProvider = ({ children }) => {
         return;
       }
 
-      // Component may have unmounted during the async health check — bail out.
       if (disposed) return;
 
       hasLoggedUnavailableRef.current = false;
@@ -177,10 +178,12 @@ export const WebSocketProvider = ({ children }) => {
         }
 
         setConnected(true);
-        if (user) {
+        // Read latest user from ref - no dependency needed
+        const currentUser = userRef.current;
+        if (currentUser) {
           newSocket.emit('authenticate', {
-            userId: user.id,
-            role: user.role,
+            userId: currentUser.id,
+            role: currentUser.role,
           });
         }
       });
@@ -221,9 +224,6 @@ export const WebSocketProvider = ({ children }) => {
       newSocket.connect();
     };
 
-    // In React StrictMode (development), effects mount, cleanup, and remount once.
-    // Deferring the initial connect lets the first cleanup cancel it, preventing
-    // a websocket upgrade from being torn down mid-handshake and logging a browser error.
     connectTimeoutRef.current = window.setTimeout(() => {
       connectTimeoutRef.current = null;
       void connectSocket();
@@ -234,7 +234,7 @@ export const WebSocketProvider = ({ children }) => {
       clearConnectTimer();
       disconnectSocket();
     };
-  }, [user, clearConnectTimer, disconnectSocket]);
+  }, [clearConnectTimer, disconnectSocket]); // Removed 'user' - use userRef instead
 
   const subscribe = useCallback((event, callback) => {
     if (socket) {
