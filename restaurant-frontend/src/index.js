@@ -24,7 +24,28 @@ const queryClient = new QueryClient({
   },
 });
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+// Fix: SweetAlert2 sets aria-hidden="true" on #root when a dialog opens.
+// If any element inside #root still has focus, the browser logs an accessibility
+// warning. This observer blurs the active element before aria-hidden takes effect.
+const rootEl = document.getElementById('root');
+if (rootEl) {
+  const ariaHiddenObserver = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (
+        mutation.attributeName === 'aria-hidden' &&
+        rootEl.getAttribute('aria-hidden') === 'true' &&
+        document.activeElement &&
+        document.activeElement !== document.body &&
+        rootEl.contains(document.activeElement)
+      ) {
+        document.activeElement.blur();
+      }
+    });
+  });
+  ariaHiddenObserver.observe(rootEl, { attributes: true, attributeFilter: ['aria-hidden'] });
+}
+
+const root = ReactDOM.createRoot(rootEl || document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
