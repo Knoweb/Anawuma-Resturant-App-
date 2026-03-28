@@ -104,6 +104,9 @@ const CustomerQROrder = ({ isManual = false }) => {
       const headers = {};
       if (tableKey) headers['x-table-key'] = tableKey;
       if (roomKey) headers['x-room-key'] = roomKey;
+      // Always include auth token - required for cashier manual orders
+      const authToken = useAuthStore.getState()?.token;
+      if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
 
       const response = await apiClient.get(
         `/orders/track/${orderSuccess.orderId}`,
@@ -267,6 +270,13 @@ const CustomerQROrder = ({ isManual = false }) => {
     }
   }, []);
 
+  // Clear any stale 'active_order_undefined' that could accumulate from previous manual order sessions
+  useEffect(() => {
+    if (isManual) {
+      localStorage.removeItem('active_order_undefined');
+    }
+  }, [isManual]);
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -275,8 +285,10 @@ const CustomerQROrder = ({ isManual = false }) => {
         await fetchMenuData(restaurantId);
 
         // Restore active order for this table/room
+        // Skip for manual orders (currentKey=undefined) to prevent stale 'active_order_undefined'
+        // entries from triggering unauthenticated /orders/track calls → 401 → login redirect.
         const currentKey = tableKey || roomKey;
-        const savedOrder = localStorage.getItem(`active_order_${currentKey}`);
+        const savedOrder = currentKey ? localStorage.getItem(`active_order_${currentKey}`) : null;
         if (savedOrder) {
           try {
             const orderData = JSON.parse(savedOrder);
@@ -287,6 +299,9 @@ const CustomerQROrder = ({ isManual = false }) => {
             const headers = {};
             if (tableKey) headers['x-table-key'] = tableKey;
             if (roomKey) headers['x-room-key'] = roomKey;
+            // Include auth token so cashier track calls succeed
+            const authToken = useAuthStore.getState()?.token;
+            if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
 
             // Try to fetch latest status
             apiClient.get(`/orders/track/${orderData.orderId}`, {
