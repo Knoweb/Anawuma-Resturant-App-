@@ -651,8 +651,19 @@ const KitchenKDS = () => {
               ${itemsMarkup}
             </tbody>
           </table>
-          <div style="margin-top:16px;text-align:right;font-size:18px;font-weight:700;">
-            Grand Total: ${formatBillCurrency(order.totalAmount)}
+          <div style="margin-top:16px;text-align:right;font-size:14px;border-top:1px solid #ddd;padding-top:10px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+              <span style="color:#555;">Subtotal:</span>
+              <span>${formatBillCurrency(order.subtotal || (order.totalAmount / 1.1))}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+              <span style="color:#555;">Service Charge (10%):</span>
+              <span>${formatBillCurrency(order.serviceCharge || (order.totalAmount - order.totalAmount / 1.1))}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:700;border-top:2px solid #222;padding-top:8px;">
+              <span>Grand Total:</span>
+              <span>${formatBillCurrency(order.totalAmount)}</span>
+            </div>
           </div>
           <div style="margin-top:24px;font-size:13px;color:#555;text-align:center;">Thank you!</div>
           </div>
@@ -859,13 +870,17 @@ const KitchenKDS = () => {
       })
       .join('\n');
 
+    const subtotal = parseFloat(order.subtotal || order.totalAmount / 1.1).toFixed(2);
+    const serviceCharge = parseFloat(order.serviceCharge || (order.totalAmount - order.totalAmount / 1.1)).toFixed(2);
     const message =
       `Hello ${order.customerName || ''} 👋\n` +
       `Here is your bill for order #${order.orderNo}.\n\n` +
       `Order ID: #${order.orderNo}\n` +
       `Table: ${order.tableNo || '-'}\n\n` +
       `Items:\n${itemsList}\n\n` +
-      `Total: Rs. ${parseFloat(order.totalAmount).toFixed(2)}\n\n` +
+      `Subtotal: Rs. ${subtotal}\n` +
+      `Service Charge (10%): Rs. ${serviceCharge}\n` +
+      `*Total: Rs. ${parseFloat(order.totalAmount).toFixed(2)}*\n\n` +
       `Thank you for ordering with us 🍔`;
 
     const encodedMessage = encodeURIComponent(message);
