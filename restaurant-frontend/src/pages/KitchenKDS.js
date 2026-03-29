@@ -557,9 +557,9 @@ const KitchenKDS = () => {
           .bill-btn:active { transform: scale(0.95); }
           .bill-btn-download { display: none; }
           .bill-btn-print { background: #198754; color: #fff; flex-grow: 1; }
-          .bill-btn-cashier { display: none; }
+          .bill-btn-cashier { background: #fd7e14; color: #fff; flex-grow: 1; }
           .bill-btn-whatsapp { display: none; }
-          .bill-btn-back { background: #6c757d; color: #fff; width: 60px; font-size: 24px; display: flex; align-items: center; justify-content: center; }
+          .bill-btn-back { background: #6c757d; color: #fff; width: 60px; }
           .bill-btn:disabled { opacity: 0.6; cursor: wait; }
           .bill-hint { color: #555; font-size: 13px; margin: 10px 0; text-align: center; font-weight: bold; }
           .bill-status {
@@ -592,10 +592,11 @@ const KitchenKDS = () => {
         <div class="bill-wrap">
           <div class="bill-actions">
             <button id="printBillBtn" class="bill-btn bill-btn-print" type="button" title="Print Bill"><i class="fas fa-print me-2"></i>Print Bill</button>
-            <button id="backToKdsBtn" class="bill-btn bill-btn-back" type="button" title="Close"><i class="fas fa-times"></i></button>
+            {order.status !== 'ACCEPTED' && (
+              <button id="sendToCashierBtn" class="bill-btn bill-btn-cashier" type="button" title="Send to Cashier"><i class="fas fa-cash-register me-2"></i>Send to Cashier</button>
+            )}
+            <button id="backToKdsBtn" class="bill-btn bill-btn-back" type="button" title="Return to KDS"><i class="fas fa-times"></i></button>
           </div>
-          <div id="billStatus" class="bill-status" role="status" aria-live="polite"></div>
-          <div id="billContent">
           <div id="billStatus" class="bill-status" role="status" aria-live="polite"></div>
           <div id="billContent">
           <h2 style="margin:0 0 8px 0;">Customer Bill</h2>
@@ -641,9 +642,19 @@ const KitchenKDS = () => {
           (function () {
             const runtimeMessageType = ${JSON.stringify(messageType)};
             const printBtn = document.getElementById('printBillBtn');
+            const cashierBtn = document.getElementById('sendToCashierBtn');
             const backBtn = document.getElementById('backToKdsBtn');
             const billContent = document.getElementById('billContent');
             const billStatus = document.getElementById('billStatus');
+            const fileName = ${JSON.stringify(`Bill-${String(order.orderNo || 'order')}.pdf`)};
+
+            const defaultCashierIcon = cashierBtn ? cashierBtn.innerHTML : '';
+            let hasPrinted = false;
+            let hasSentToCashier = false;
+
+            const refreshBackButtonState = () => {
+              backBtn.disabled = false; // Always allow closing now
+            };
 
             const setStatus = (message, tone) => {
               if (!billStatus) return;
@@ -653,16 +664,23 @@ const KitchenKDS = () => {
               billStatus.style.display = 'block';
             };
 
-            const notifyAndClose = () => {
+            const notifyAndClose = ({ continueToWhatsApp = false, sendToCashier = false } = {}) => {
+              const requiredActionsCompleted = hasPrinted && hasSentToCashier;
+
               try {
                 if (window.opener && !window.opener.closed) {
                   window.opener.postMessage({
                     type: runtimeMessageType,
-                    action: 'close',
+                    action: continueToWhatsApp ? 'continueToWhatsApp' : undefined,
+                    continueToWhatsApp: !!continueToWhatsApp,
+                    sendToCashier: !!sendToCashier,
+                    requiredActionsCompleted,
+                    hasPrinted,
+                    hasSentToCashier,
                   }, window.location.origin);
                 }
               } catch (_error) {
-                // Ignore.
+                // Ignore cross-window post errors.
               }
               window.close();
             };
@@ -671,7 +689,56 @@ const KitchenKDS = () => {
               notifyAndClose();
             });
 
-            // Sent to Cashier logic removed as per requirement.
+            if (cashierBtn) {
+              cashierBtn.addEventListener('click', function () {
+                if (cashierBtn.disabled) return;
+
+                cashierBtn.disabled = true;
+                cashierBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                setStatus('Sending bill to cashier...', 'info');
+
+                try {
+                  if (window.opener && !window.opener.closed) {
+                    window.opener.postMessage({
+                      type: runtimeMessageType,
+                      action: 'sendToCashier',
+                    }, window.location.origin);
+                    return;
+                  }
+                } catch (_error) {
+                  // Ignore and show generic failure below.
+                }
+
+                cashierBtn.disabled = false;
+                cashierBtn.innerHTML = defaultCashierIcon;
+                setStatus('Failed to contact KDS page. Keep this tab open and try again.', 'error');
+              });
+
+              window.addEventListener('message', function (event) {
+                if (event.origin !== window.location.origin) return;
+                if (event.data?.type !== runtimeMessageType) return;
+                if (event.data?.action !== 'cashierResult') return;
+
+                if (event.data?.success) {
+                  const successMessage = event.data?.message || 'Payment details sent to cashier.';
+                  setStatus(successMessage, 'success');
+                  // Keep button disabled permanently on success to prevent duplicate sends
+                  cashierBtn.disabled = true;
+                  cashierBtn.innerHTML = '<i class="fas fa-check"></i>';
+                  hasSentToCashier = true;
+                  refreshBackButtonState();
+                  alert(successMessage);
+                  return;
+                }
+
+                // Re-enable button only on error so user can retry
+                cashierBtn.disabled = false;
+                cashierBtn.innerHTML = defaultCashierIcon;
+                const errorMessage = event.data?.message || 'Failed to send payment details to cashier.';
+                setStatus(errorMessage, 'error');
+                alert(errorMessage);
+              });
+            }
 
             // Removed download script block as per requirement (No Download option)
 
@@ -683,8 +750,11 @@ const KitchenKDS = () => {
             });
 
             window.addEventListener('afterprint', function () {
-              setStatus('Print completed.', 'success');
+              setStatus('Print completed. Continue with cashier or tap Return to KDS when ready.', 'success');
+              // Re-enable print button for potential retry
               printBtn.disabled = false;
+              hasPrinted = true;
+              refreshBackButtonState();
             });
 
 

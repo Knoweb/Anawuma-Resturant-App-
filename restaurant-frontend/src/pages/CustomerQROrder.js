@@ -108,8 +108,12 @@ const CustomerQROrder = ({ isManual = false }) => {
       const authToken = useAuthStore.getState()?.token;
       if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
 
+      const endpoint = isManual 
+        ? `/orders/${orderSuccess.orderId}`
+        : `/orders/track/${orderSuccess.orderId}`;
+
       const response = await apiClient.get(
-        `/orders/track/${orderSuccess.orderId}`,
+        endpoint,
         {
           headers
         }
@@ -304,7 +308,11 @@ const CustomerQROrder = ({ isManual = false }) => {
             if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
 
             // Try to fetch latest status
-            apiClient.get(`/orders/track/${orderData.orderId}`, {
+            const endpoint = isManual 
+              ? `/orders/${orderData.orderId}`
+              : `/orders/track/${orderData.orderId}`;
+
+            apiClient.get(endpoint, {
               headers
             }).then(resp => {
               if (resp.data.status === 'SERVED' || resp.data.status === 'CANCELLED') {
