@@ -237,7 +237,7 @@ const KitchenKDS = () => {
         break;
       case 'READY':
         nextStatus = 'SERVED';
-        actionText = 'Hand over to Cashier';
+        actionText = 'Served';
         break;
       default:
         return;
@@ -797,8 +797,8 @@ const KitchenKDS = () => {
           };
         case 'READY':
           return {
-            text: 'Hand over to Cashier',
-            icon: 'fa-paper-plane',
+            text: 'Served',
+            icon: 'fa-concierge-bell',
             color: 'primary',
           };
         default:
