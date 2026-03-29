@@ -264,6 +264,9 @@ const KitchenKDS = () => {
              billingAPI.createInvoiceForOrder(order.orderId).catch(err => {
                console.error('Auto-bill generation failed:', err);
              });
+
+             // Auto-open print bill window for immediate hard copy (Requirement: Print when accepting)
+             printOrderBill({ ...order, status: 'ACCEPTED' });
           }
 
           if (currentStatus === 'READY') {
