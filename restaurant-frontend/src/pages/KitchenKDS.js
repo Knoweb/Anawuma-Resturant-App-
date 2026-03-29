@@ -258,8 +258,16 @@ const KitchenKDS = () => {
       if (result.isConfirmed) {
         const updated = await updateOrderStatus(order.orderId, nextStatus);
 
-        if (updated && currentStatus === 'READY') {
-          const servedOrder = { ...order, status: 'SERVED' };
+        if (updated) {
+          // If we just accepted the order, auto-generate the bill in the background (Requirement: auto-generate on accept)
+          if (currentStatus === 'NEW') {
+             billingAPI.createInvoiceForOrder(order.orderId).catch(err => {
+               console.error('Auto-bill generation failed:', err);
+             });
+          }
+
+          if (currentStatus === 'READY') {
+            const servedOrder = { ...order, status: 'SERVED' };
 
           // Simplified: Just hand over to cashier directly as per new workflow.
           // The kitchen can still print the bill separately using the new card button.
@@ -279,8 +287,9 @@ const KitchenKDS = () => {
           }
         }
       }
-    });
-  };
+    }
+  });
+};
 
   const handleCancelOrder = (orderId, orderNo) => {
     Swal.fire({
