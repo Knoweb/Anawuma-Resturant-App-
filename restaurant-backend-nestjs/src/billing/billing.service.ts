@@ -752,6 +752,20 @@ export class BillingService {
     restaurantId: number,
   ): Promise<Invoice> {
     const invoice = await this.findOneInvoice(invoiceId, restaurantId);
+
+    // Final closing safety checks: Ensure bill was printed and sent to WhatsApp (if applicable)
+    if (!invoice.isPrinted) {
+      throw new BadRequestException(
+        'The bill must be printed (hard copy) before it can be closed.',
+      );
+    }
+
+    if (invoice.whatsappNumber && !invoice.isSentWhatsapp) {
+      throw new BadRequestException(
+        'The bill must be sent via WhatsApp before it can be closed.',
+      );
+    }
+
     invoice.invoiceStatus = InvoiceStatus.PAID;
     const savedInvoice = await this.invoicesRepository.save(invoice);
     return this.hydrateOrderNo(savedInvoice);

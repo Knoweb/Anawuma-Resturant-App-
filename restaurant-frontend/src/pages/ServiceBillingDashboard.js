@@ -120,29 +120,75 @@ function PrintableInvoice({ invoice, restaurantName }) {
 // Invoice Detail Modal
 // ---------------------------------------------------------------------------
 
-function InvoiceModal({ invoice, restaurantName, onClose, onMarkServed, onMarkPaid }) {
+function InvoiceModal({ invoice, restaurantName, onClose, onMarkServed, onMarkPaid, isCashierDashboard }) {
   const printRef = useRef();
+  const [printing, setPrinting] = useState(false);
+  const [sendingWhatsapp, setSendingWhatsapp] = useState(false);
+
+  // Use local state to track actions in current session if backend hasn't updated yet
+  const [isPrinted, setIsPrinted] = useState(!!invoice.isPrinted);
+  const [isSentWhatsapp, setIsSentWhatsapp] = useState(!!invoice.isSentWhatsapp);
 
   const handlePrint = async () => {
-    if (invoice.onBeforePrint) {
-      await invoice.onBeforePrint();
-    }
-    const printModeClass = 'billing-invoice-print-mode';
-    const cleanupPrintMode = () => {
-      document.body.classList.remove(printModeClass);
-    };
+    setPrinting(true);
+    try {
+      if (invoice.onBeforePrint) {
+        await invoice.onBeforePrint();
+      }
 
-    document.body.classList.add(printModeClass);
-    window.addEventListener('afterprint', cleanupPrintMode, { once: true });
-    window.print();
-    window.setTimeout(cleanupPrintMode, 1000);
+      // Record print action in backend
+      await billingAPI.markInvoicePrinted(invoice.invoiceId);
+      setIsPrinted(true);
+
+      const printModeClass = 'billing-invoice-print-mode';
+      const cleanupPrintMode = () => {
+        document.body.classList.remove(printModeClass);
+      };
+
+      document.body.classList.add(printModeClass);
+      window.addEventListener('afterprint', cleanupPrintMode, { once: true });
+      window.print();
+      window.setTimeout(cleanupPrintMode, 1000);
+    } catch (err) {
+      console.error('Print recording failed:', err);
+    } finally {
+      setPrinting(false);
+    }
   };
+
+  const handleWhatsApp = async () => {
+    if (!invoice.whatsappNumber) return;
+    setSendingWhatsapp(true);
+    try {
+      await billingAPI.markWhatsappSent(invoice.invoiceId);
+      setIsSentWhatsapp(true);
+
+      const phone = normalizeWhatsAppNumber(invoice.whatsappNumber);
+      const itemLines = (Array.isArray(invoice.orderItemsJson) ? invoice.orderItemsJson : [])
+        .map((i) => `  • ${i.itemName} x${i.qty}`)
+        .join('\n');
+      
+      const msg = `🧾 *Invoice: ${invoice.invoiceNumber}*\nOrder No: ${invoice.orderNo || '–'}\nTable: ${invoice.tableNo || '–'}\n\n${itemLines}\n\n*Total: ${formatCurrency(invoice.totalAmount)}*\n\nThank you!`;
+      
+      window.open(`https://api.whatsapp.com/send?phone=${phone.replace('+', '')}&text=${encodeURIComponent(msg)}`, '_blank');
+    } catch (err) {
+      console.error('WhatsApp recording failed:', err);
+    } finally {
+      setSendingWhatsapp(false);
+    }
+  };
+
+  const canMarkPaid = isPrinted && (!invoice.whatsappNumber || isSentWhatsapp);
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="invoice-modal" onClick={(e) => e.stopPropagation()}>
         <div className="invoice-modal-header">
-          <h5>Invoice #{invoice.invoiceNumber}</h5>
+          <div className="d-flex align-items-center gap-2">
+             <h5>Invoice #{invoice.invoiceNumber}</h5>
+             {isPrinted && <span className="badge bg-success small"><i className="fas fa-print me-1"></i>Printed</span>}
+             {isSentWhatsapp && <span className="badge bg-success small"><i className="fab fa-whatsapp me-1"></i>WhatsApp Sent</span>}
+          </div>
           <button className="btn-icon" onClick={onClose}>
             <i className="fas fa-times"></i>
           </button>
@@ -153,21 +199,40 @@ function InvoiceModal({ invoice, restaurantName, onClose, onMarkServed, onMarkPa
         </div>
 
         <div className="invoice-modal-footer">
+          <div className="flex-grow-1 text-start small text-muted">
+            {!isPrinted && <div><i className="fas fa-info-circle me-1"></i>Print hard copy first.</div>}
+            {invoice.whatsappNumber && !isSentWhatsapp && <div><i className="fas fa-info-circle me-1"></i>Send via WhatsApp first.</div>}
+          </div>
+          
           <button className="btn btn-outline-secondary btn-sm" onClick={onClose}>
             Close
           </button>
+
           {invoice.invoiceStatus === 'PENDING' && (
-            <button className="btn btn-success btn-sm" onClick={onMarkPaid}>
+            <button 
+              className="btn btn-success btn-sm" 
+              onClick={onMarkPaid}
+              disabled={!canMarkPaid}
+              title={!canMarkPaid ? "Please complete Print and WhatsApp steps first" : ""}
+            >
               <i className="fas fa-check-circle me-1"></i>Mark Paid
             </button>
           )}
-          {onMarkServed && (
-            <button className="btn btn-primary btn-sm" onClick={onMarkServed}>
-              <i className="fas fa-concierge-bell me-1"></i>Mark Served
+
+          {isCashierDashboard && invoice.whatsappNumber && (
+            <button 
+              className="btn btn-success btn-sm" 
+              onClick={handleWhatsApp}
+              disabled={sendingWhatsapp}
+            >
+              <i className="fab fa-whatsapp me-1"></i>
+              {sendingWhatsapp ? 'Sending...' : 'WhatsApp'}
             </button>
           )}
-          <button className="btn btn-dark btn-sm" onClick={handlePrint}>
-            <i className="fas fa-print me-1"></i>Print
+
+          <button className="btn btn-dark btn-sm" onClick={handlePrint} disabled={printing}>
+            <i className="fas fa-print me-1"></i>
+            {printing ? 'Printing...' : 'Print'}
           </button>
         </div>
       </div>
@@ -1075,6 +1140,7 @@ const ServiceBillingDashboard = ({
             onBeforePrint: isCashierDashboard ? () => handleCashierPrint(viewInvoice) : undefined,
           }}
           restaurantName={restaurantName}
+          isCashierDashboard={isCashierDashboard}
           onClose={() => setViewInvoice(null)}
           onMarkServed={
             !isCashierDashboard && viewInvoice.orderId

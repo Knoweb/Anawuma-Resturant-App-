@@ -237,7 +237,7 @@ const KitchenKDS = () => {
         break;
       case 'READY':
         nextStatus = 'SERVED';
-        actionText = 'Mark as Served';
+        actionText = 'Hand over to Cashier';
         break;
       default:
         return;
@@ -260,64 +260,22 @@ const KitchenKDS = () => {
 
         if (updated && currentStatus === 'READY') {
           const servedOrder = { ...order, status: 'SERVED' };
-          const hasWhatsApp = !!normalizeWhatsAppNumber(order.whatsappNumber);
 
-          await Swal.fire({
+          // Simplified: Just hand over to cashier directly as per new workflow.
+          // The kitchen can still print the bill separately using the new card button.
+          const cashierHandoverResult = await Swal.fire({
             icon: 'success',
-            title: 'Order marked as served',
-            text: hasWhatsApp
-              ? 'Open the bill, then download, print, send it to cashier, and finally tap WhatsApp to return to KDS.'
-              : 'Open the bill, then download, print, and send it to cashier.',
-            showCancelButton: false,
+            title: 'Order Completed in Kitchen',
+            text: 'Do you want to send this bill to the Cashier desk now?',
+            showCancelButton: true,
             confirmButtonColor: '#0d6efd',
-            confirmButtonText: 'Open Bill',
+            confirmButtonText: 'Send to Cashier',
+            cancelButtonText: 'Later',
             allowOutsideClick: false,
-            allowEscapeKey: false,
           });
 
-          clearSwalBackdropArtifacts();
-          let billActionState = await printOrderBill(servedOrder);
-
-          while (!billActionState.requiredActionsCompleted) {
-            const retryResult = await Swal.fire({
-              icon: 'warning',
-              title: 'Bill actions incomplete',
-              text: 'You must complete Print and Send to Cashier before returning to KDS. Reopen bill actions now?',
-              showCancelButton: true,
-              confirmButtonColor: '#0d6efd',
-              cancelButtonColor: '#6c757d',
-              confirmButtonText: 'Reopen Bill Actions',
-              cancelButtonText: 'Cancel',
-              allowOutsideClick: false,
-              allowEscapeKey: false,
-            });
-
-            if (!retryResult.isConfirmed) {
-              return;
-            }
-
-            clearSwalBackdropArtifacts();
-            billActionState = await printOrderBill(servedOrder);
-          }
-
-          if (!billActionState.continueToWhatsApp || !hasWhatsApp) {
-            return;
-          }
-
-          const whatsAppStepResult = await Swal.fire({
-            icon: 'info',
-            title: 'Step 2 of 2',
-            text: 'Now send this bill to the customer on WhatsApp.',
-            showCancelButton: false,
-            confirmButtonColor: '#198754',
-            confirmButtonText: 'Send Bill on WhatsApp',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-          });
-
-          if (whatsAppStepResult.isConfirmed) {
-            clearSwalBackdropArtifacts();
-            sendWhatsAppBill(servedOrder);
+          if (cashierHandoverResult.isConfirmed) {
+            await sendPaymentDetailsToCashier(servedOrder);
           }
         }
       }
@@ -585,19 +543,19 @@ const KitchenKDS = () => {
           .bill-btn { border: 0; border-radius: 6px; padding: 14px 16px; cursor: pointer; font-size: 20px; transition: all 0.2s; }
           .bill-btn:hover { transform: scale(1.1); }
           .bill-btn:active { transform: scale(0.95); }
-          .bill-btn-download { background: #0d6efd; color: #fff; }
-          .bill-btn-print { background: #198754; color: #fff; }
-          .bill-btn-cashier { background: #fd7e14; color: #fff; }
-          .bill-btn-whatsapp { background: #25D366; color: #fff; }
-          .bill-btn-back { background: #6c757d; color: #fff; }
+          .bill-btn-download { display: none; }
+          .bill-btn-print { background: #198754; color: #fff; flex-grow: 1; }
+          .bill-btn-cashier { background: #fd7e14; color: #fff; flex-grow: 1; }
+          .bill-btn-whatsapp { display: none; }
+          .bill-btn-back { background: #6c757d; color: #fff; width: 60px; }
           .bill-btn:disabled { opacity: 0.6; cursor: wait; }
-          .bill-hint { color: #555; font-size: 12px; margin-bottom: 10px; text-align: right; }
+          .bill-hint { color: #555; font-size: 13px; margin: 10px 0; text-align: center; font-weight: bold; }
           .bill-status {
             display: none;
-            margin-bottom: 10px;
-            text-align: right;
-            font-size: 12px;
-            padding: 8px 10px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 13px;
+            padding: 10px;
             border-radius: 6px;
           }
           .bill-status-info { background: #e7f1ff; color: #0a58ca; }
@@ -616,18 +574,17 @@ const KitchenKDS = () => {
             }
           }
         </style>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
       </head>
       <body>
         <div class="bill-wrap">
           <div class="bill-actions">
-            <button id="downloadPdfBtn" class="bill-btn bill-btn-download" type="button" title="Download PDF"><i class="fas fa-download"></i></button>
-            <button id="printBillBtn" class="bill-btn bill-btn-print" type="button" title="Print"><i class="fas fa-print"></i></button>
-            <button id="sendToCashierBtn" class="bill-btn bill-btn-cashier" type="button" title="Send to Cashier"><i class="fas fa-check"></i></button>
-            <button id="backToWhatsappBtn" class="bill-btn bill-btn-whatsapp" type="button" title="Return to KDS"><i class="fab fa-whatsapp"></i></button>
+            <button id="printBillBtn" class="bill-btn bill-btn-print" type="button" title="Print Bill"><i class="fas fa-print me-2"></i>Print Bill</button>
+            <button id="sendToCashierBtn" class="bill-btn bill-btn-cashier" type="button" title="Send to Cashier"><i class="fas fa-cash-register me-2"></i>Send to Cashier</button>
+            <button id="backToKdsBtn" class="bill-btn bill-btn-back" type="button" title="Return to KDS"><i class="fas fa-times"></i></button>
           </div>
-          <div class="bill-hint">Download is optional. You must complete Print and Send to Cashier, then tap Return to KDS.</div>
+          <div id="billStatus" class="bill-status" role="status" aria-live="polite"></div>
+          <div id="billContent">
           <div id="billStatus" class="bill-status" role="status" aria-live="polite"></div>
           <div id="billContent">
           <h2 style="margin:0 0 8px 0;">Customer Bill</h2>
@@ -672,10 +629,9 @@ const KitchenKDS = () => {
         <script>
           (function () {
             const runtimeMessageType = ${JSON.stringify(messageType)};
-            const downloadBtn = document.getElementById('downloadPdfBtn');
             const printBtn = document.getElementById('printBillBtn');
             const cashierBtn = document.getElementById('sendToCashierBtn');
-            const backBtn = document.getElementById('backToWhatsappBtn');
+            const backBtn = document.getElementById('backToKdsBtn');
             const billContent = document.getElementById('billContent');
             const billStatus = document.getElementById('billStatus');
             const fileName = ${JSON.stringify(`Bill-${String(order.orderNo || 'order')}.pdf`)};
@@ -719,15 +675,8 @@ const KitchenKDS = () => {
               window.close();
             };
 
-            refreshBackButtonState();
-
             backBtn.addEventListener('click', function () {
-              if (!hasPrinted || !hasSentToCashier) {
-                setStatus('Complete Print and Send to Cashier before returning to KDS.', 'error');
-                return;
-              }
-
-              notifyAndClose({ continueToWhatsApp: true });
+              notifyAndClose();
             });
 
             cashierBtn.addEventListener('click', function () {
@@ -779,38 +728,7 @@ const KitchenKDS = () => {
               alert(errorMessage);
             });
 
-            downloadBtn.addEventListener('click', async function () {
-              downloadBtn.disabled = true;
-              downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-              setStatus('Downloading bill PDF...', 'info');
-
-              try {
-                if (window.html2pdf) {
-                  await window
-                    .html2pdf()
-                    .set({
-                      margin: 8,
-                      filename: fileName,
-                      image: { type: 'jpeg', quality: 0.98 },
-                      html2canvas: { scale: 2, useCORS: true },
-                      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                    })
-                    .from(billContent)
-                    .save();
-
-                  setStatus('Bill downloaded successfully. You can now print or continue.', 'success');
-                  return;
-                }
-
-                throw new Error('html2pdf library unavailable');
-              } catch (_error) {
-                setStatus('PDF download is unavailable. Opening print dialog instead.', 'error');
-                window.print();
-              } finally {
-                downloadBtn.disabled = false;
-                downloadBtn.innerHTML = defaultDownloadIcon;
-              }
-            });
+            // Removed download script block as per requirement (No Download option)
 
             printBtn.addEventListener('click', function () {
               setStatus('Opening print dialog...', 'info');
@@ -941,9 +859,9 @@ const KitchenKDS = () => {
           };
         case 'READY':
           return {
-            text: 'Mark Served',
-            icon: 'fa-utensils',
-            color: 'success',
+            text: 'Hand over to Cashier',
+            icon: 'fa-paper-plane',
+            color: 'primary',
           };
         default:
           return null;
@@ -1040,6 +958,19 @@ const KitchenKDS = () => {
             >
               <i className={`fas ${statusButton.icon} me-1`}></i>
               {statusButton.text}
+            </button>
+          )}
+
+          {['ACCEPTED', 'COOKING', 'READY'].includes(status) && (
+            <button
+              className="btn btn-outline-primary btn-sm kds-action-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                printOrderBill(order);
+              }}
+              title="Print Customer Bill"
+            >
+              <i className="fas fa-print"></i>
             </button>
           )}
 
