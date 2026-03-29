@@ -4,6 +4,7 @@ import apiClient from '../api/apiClient';
 import { useWebSocket } from '../hooks/useWebSocket';
 import Sidebar from '../components/common/Sidebar';
 import Navbar from '../components/common/Navbar';
+import { useAuthStore } from '../store/authStore';
 import './RoomOrderManagement.css';
 
 const RoomOrderManagement = () => {
@@ -19,12 +20,20 @@ const RoomOrderManagement = () => {
     roomNo: '',
   });
 
+  const { user } = useAuthStore();
+
   // Fetch restaurant profile
   useEffect(() => {
-    apiClient.get('/restaurants/profile')
-      .then(res => setRestaurantProfile(res.data))
+    if (!user?.restaurantId) return;
+
+    apiClient.get(`/restaurant/${user.restaurantId}`)
+      .then(res => {
+        if (res.data.success) {
+          setRestaurantProfile(res.data.data);
+        }
+      })
       .catch(err => console.error('Error fetching restaurant profile:', err));
-  }, []);
+  }, [user?.restaurantId]);
 
   // Fetch orders
   const fetchOrders = useCallback(async () => {
