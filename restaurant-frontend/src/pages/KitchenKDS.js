@@ -961,7 +961,7 @@ const KitchenKDS = () => {
             </button>
           )}
 
-          {['ACCEPTED', 'COOKING', 'READY'].includes(status) && (
+          {status === 'ACCEPTED' && (
             <button
               className="btn btn-outline-primary btn-sm kds-action-btn"
               onClick={(e) => {
