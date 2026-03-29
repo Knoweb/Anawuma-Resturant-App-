@@ -165,10 +165,10 @@ function InvoiceModal({ invoice, restaurantName, onClose, onMarkServed, onMarkPa
 
       const phone = normalizeWhatsAppNumber(invoice.whatsappNumber);
       const itemLines = (Array.isArray(invoice.orderItemsJson) ? invoice.orderItemsJson : [])
-        .map((i) => `  • ${i.itemName} x${i.qty}`)
+        .map((i) => `  • ${i.itemName} x${i.qty} - ${formatCurrency(i.lineTotal)}`)
         .join('\n');
       
-      const msg = `🧾 *Invoice: ${invoice.invoiceNumber}*\nOrder No: ${invoice.orderNo || '–'}\nTable: ${invoice.tableNo || '–'}\n\n${itemLines}\n\n*Total: ${formatCurrency(invoice.totalAmount)}*\n\nThank you!`;
+      const msg = `Hello ${invoice.customerName || ''} 👋\nHere is your bill for order #${invoice.orderNo || invoice.orderId}.\n\nOrder ID: ${invoice.orderNo || invoice.orderId}\nInvoice No: ${invoice.invoiceNumber}\n${invoice.roomNo ? `Room: ${invoice.roomNo}` : `Table: ${invoice.tableNo || '–'}`}\n\nItems:\n${itemLines}\n\nSubtotal: ${formatCurrency(invoice.subtotal)}\nService Charge (10%): ${formatCurrency(invoice.serviceCharge)}\n*Total: ${formatCurrency(invoice.totalAmount)}*\n\nThank you for ordering with us 🍔`;
       
       window.open(`https://api.whatsapp.com/send?phone=${phone.replace('+', '')}&text=${encodeURIComponent(msg)}`, '_blank');
     } catch (err) {
