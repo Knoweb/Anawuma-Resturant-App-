@@ -592,9 +592,6 @@ const KitchenKDS = () => {
         <div class="bill-wrap">
           <div class="bill-actions">
             <button id="printBillBtn" class="bill-btn bill-btn-print" type="button" title="Print Bill"><i class="fas fa-print me-2"></i>Print Bill</button>
-            {order.status !== 'ACCEPTED' && (
-              <button id="sendToCashierBtn" class="bill-btn bill-btn-cashier" type="button" title="Send to Cashier"><i class="fas fa-cash-register me-2"></i>Send to Cashier</button>
-            )}
             <button id="backToKdsBtn" class="bill-btn bill-btn-back" type="button" title="Return to KDS"><i class="fas fa-times"></i></button>
           </div>
           <div id="billStatus" class="bill-status" role="status" aria-live="polite"></div>
@@ -648,98 +645,29 @@ const KitchenKDS = () => {
             const billStatus = document.getElementById('billStatus');
             const fileName = ${JSON.stringify(`Bill-${String(order.orderNo || 'order')}.pdf`)};
 
-            const defaultCashierIcon = cashierBtn ? cashierBtn.innerHTML : '';
-            let hasPrinted = false;
-            let hasSentToCashier = false;
-
-            const refreshBackButtonState = () => {
-              backBtn.disabled = false; // Always allow closing now
-            };
-
             const setStatus = (message, tone) => {
               if (!billStatus) return;
-
               billStatus.textContent = message;
               billStatus.className = 'bill-status bill-status-' + tone;
               billStatus.style.display = 'block';
             };
 
-            const notifyAndClose = ({ continueToWhatsApp = false, sendToCashier = false } = {}) => {
-              const requiredActionsCompleted = hasPrinted && hasSentToCashier;
+            const refreshBackButtonState = () => {
+              if (backBtn) backBtn.disabled = false;
+            };
 
-              try {
-                if (window.opener && !window.opener.closed) {
-                  window.opener.postMessage({
-                    type: runtimeMessageType,
-                    action: continueToWhatsApp ? 'continueToWhatsApp' : undefined,
-                    continueToWhatsApp: !!continueToWhatsApp,
-                    sendToCashier: !!sendToCashier,
-                    requiredActionsCompleted,
-                    hasPrinted,
-                    hasSentToCashier,
-                  }, window.location.origin);
-                }
-              } catch (_error) {
-                // Ignore cross-window post errors.
-              }
+            const notifyAndClose = () => {
               window.close();
             };
 
-            backBtn.addEventListener('click', function () {
-              notifyAndClose();
-            });
-
-            if (cashierBtn) {
-              cashierBtn.addEventListener('click', function () {
-                if (cashierBtn.disabled) return;
-
-                cashierBtn.disabled = true;
-                cashierBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                setStatus('Sending bill to cashier...', 'info');
-
-                try {
-                  if (window.opener && !window.opener.closed) {
-                    window.opener.postMessage({
-                      type: runtimeMessageType,
-                      action: 'sendToCashier',
-                    }, window.location.origin);
-                    return;
-                  }
-                } catch (_error) {
-                  // Ignore and show generic failure below.
-                }
-
-                cashierBtn.disabled = false;
-                cashierBtn.innerHTML = defaultCashierIcon;
-                setStatus('Failed to contact KDS page. Keep this tab open and try again.', 'error');
-              });
-
-              window.addEventListener('message', function (event) {
-                if (event.origin !== window.location.origin) return;
-                if (event.data?.type !== runtimeMessageType) return;
-                if (event.data?.action !== 'cashierResult') return;
-
-                if (event.data?.success) {
-                  const successMessage = event.data?.message || 'Payment details sent to cashier.';
-                  setStatus(successMessage, 'success');
-                  // Keep button disabled permanently on success to prevent duplicate sends
-                  cashierBtn.disabled = true;
-                  cashierBtn.innerHTML = '<i class="fas fa-check"></i>';
-                  hasSentToCashier = true;
-                  refreshBackButtonState();
-                  alert(successMessage);
-                  return;
-                }
-
-                // Re-enable button only on error so user can retry
-                cashierBtn.disabled = false;
-                cashierBtn.innerHTML = defaultCashierIcon;
-                const errorMessage = event.data?.message || 'Failed to send payment details to cashier.';
-                setStatus(errorMessage, 'error');
-                alert(errorMessage);
+            if (backBtn) {
+              backBtn.addEventListener('click', function () {
+                notifyAndClose();
               });
             }
 
+            // Send to Cashier logic removed from print window as per requirement
+            
             // Removed download script block as per requirement (No Download option)
 
             printBtn.addEventListener('click', function () {
@@ -750,11 +678,9 @@ const KitchenKDS = () => {
             });
 
             window.addEventListener('afterprint', function () {
-              setStatus('Print completed. Continue with cashier or tap Return to KDS when ready.', 'success');
+              setStatus('Print completed. You may now close this window.', 'success');
               // Re-enable print button for potential retry
               printBtn.disabled = false;
-              hasPrinted = true;
-              refreshBackButtonState();
             });
 
 
