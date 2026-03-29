@@ -38,24 +38,59 @@ const KitchenKDS = () => {
   // Play notification sound for new orders
   const playNotificationSound = useCallback(() => {
     try {
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      
+      // If the browser suspended the audio context (standard for auto-play policy), 
+      // we can't play until a user gesture. We'll try to resume if it's suspended
+      // but it only works if triggered by a click. 
+      // This is handled by a global listener below.
+      if (audioCtx.state === 'suspended') {
+        // Just return if still suspended, avoids the annoying console warning
+        return; 
+      }
+
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
       
       oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
+      gainNode.connect(audioCtx.destination);
       
       oscillator.frequency.value = 800; // Frequency in Hz
       oscillator.type = 'sine';
       
-      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+      gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
       
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.5);
+      oscillator.start(audioCtx.currentTime);
+      oscillator.stop(audioCtx.currentTime + 0.5);
     } catch (error) {
-      console.warn('Could not play notification sound:', error);
+      // Silently ignore to avoid console clutter - standard behavior for blocked audio
     }
+  }, []);
+
+  // Standard workaround to "unlock" audio in browsers:
+  // Resume the AudioContext upon the very first user interaction with the page.
+  useEffect(() => {
+    const resumeAudio = () => {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      // Remove listener after first interaction
+      window.removeEventListener('click', resumeAudio);
+      window.removeEventListener('keydown', resumeAudio);
+      window.removeEventListener('touchstart', resumeAudio);
+    };
+
+    window.addEventListener('click', resumeAudio);
+    window.addEventListener('keydown', resumeAudio);
+    window.addEventListener('touchstart', resumeAudio);
+    
+    return () => {
+      window.removeEventListener('click', resumeAudio);
+      window.removeEventListener('keydown', resumeAudio);
+      window.removeEventListener('touchstart', resumeAudio);
+    };
   }, []);
 
   const fetchAllOrders = useCallback(async () => {
