@@ -719,17 +719,17 @@ const CustomerQROrder = ({ isManual = false }) => {
           </button>
           <div className="horizontal-categories">
             <button
-              className={`category-pill ${!selectedCategory ? 'active' : ''}`}
+              className={`category-nav-pill ${!selectedCategory ? 'active' : ''}`}
               onClick={() => setSelectedCategory(null)}
             >
-              All
+              All Items
             </button>
             {categories
               .filter(cat => cat.menuId === selectedMenu)
               .map(category => (
                 <button
                   key={category.categoryId}
-                  className={`category-pill ${selectedCategory === category.categoryId ? 'active' : ''}`}
+                  className={`category-nav-pill ${selectedCategory === category.categoryId ? 'active' : ''}`}
                   onClick={() => setSelectedCategory(category.categoryId)}
                 >
                   {category.categoryName}
