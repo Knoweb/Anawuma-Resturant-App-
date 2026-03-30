@@ -810,14 +810,6 @@ const ServiceBillingDashboard = ({
                 >
                   <i className="fas fa-sync-alt me-1"></i>Refresh
                 </button>
-                {isCashierDashboard && (
-                  <button
-                    className="btn btn-sm btn-primary"
-                    onClick={() => navigate('/cashier/manual-order')}
-                  >
-                    <i className="fas fa-plus-circle me-1"></i>Create Manual Order
-                  </button>
-                )}
               </div>
             </div>
           </div>
