@@ -629,122 +629,108 @@ const CustomerQROrder = ({ isManual = false }) => {
       );
     }
 
-    if (!selectedMenu) {
-      return (
-        <div className="slider-container-yellow fade-in">
-          <div className="section-title w-100 text-center mb-4 px-4">
-            <h1 className="fw-900 text-dark" style={{ fontSize: '3rem' }}>Welcome</h1>
-            <p className="text-dark opacity-75">Please select a menu to start ordering</p>
-          </div>
-          
-          <div className="menu-grid-yellow">
-            {menus.map(menu => (
-              <div
-                key={menu.menuId}
-                className="modern-category-card"
-                onClick={() => setSelectedMenu(menu.menuId)}
-              >
-                <h2 className="category-title-red">- {menu.menuName} -</h2>
-                <div className="card-media-wrapper">
-                  {menu.imageUrl ? (
-                    <img src={getImageUrl(menu.imageUrl)} alt={menu.menuName} className="menu-thumb" />
-                  ) : (
-                    <div className="h-100 d-flex align-items-center justify-content-center bg-light opacity-50">
-                      <i className="fas fa-utensils fa-4x"></i>
-                    </div>
-                  )}
-                  <div className="media-overlay">
-                    <button className="media-btn" onClick={(e) => { e.stopPropagation(); Swal.fire('Coming Soon', 'Menu overview is being prepared!', 'info'); }}>Explore</button>
-                    <button className="media-btn" onClick={(e) => { e.stopPropagation(); setSelectedMenu(menu.menuId); }}>Select</button>
-                  </div>
-                </div>
-                <button className="about-btn-dark" onClick={() => setSelectedMenu(menu.menuId)}>
-                  About
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    }
+    // Prepare Unified Filter Tabs (Menus + Categories)
+    // We show Menus first, then Categories as requested.
+    const filterTabs = [
+      { id: 'all', name: 'All', type: 'all' },
+      ...menus.map(m => ({ id: m.menuId, name: m.menuName, type: 'menu' })),
+      ...categories.map(c => ({ id: c.categoryId, name: c.categoryName, type: 'category' }))
+    ];
+
+    const currentTabId = selectedCategory || selectedMenu || 'all';
+    const currentTabType = selectedCategory ? 'category' : (selectedMenu ? 'menu' : 'all');
 
     return (
-      <div className="items-view-container">
-        {/* Sticky Category Bar with Underline Animation */}
-        <div className="category-nav-sticky">
-          <div className="nav-header-row">
-            <button className="nav-back-btn" onClick={() => { setSelectedMenu(null); setSelectedCategory(null); }}>
-              <i className="fas fa-arrow-left"></i>
-            </button>
-            <div className="nav-title-modern">
-              {menus.find(m => m.menuId === selectedMenu)?.menuName || 'Our Menu'}
-            </div>
-          </div>
-          
-          <div className="horizontal-category-scroller">
-            <button
-              className={`category-nav-btn ${!selectedCategory ? 'active' : ''}`}
-              onClick={() => setSelectedCategory(null)}
-            >
-              <span>All</span>
-              {!selectedCategory && (
-                <motion.div layoutId="activeCategory" className="nav-underline" />
-              )}
-            </button>
-            {categories
-              .filter(cat => cat.menuId === selectedMenu)
-              .map(category => (
+      <div className="modern-browse-view">
+        {/* Modern Horizontal Filter Bar */}
+        <div className="category-nav-sticky shadow-sm">
+          <div className="horizontal-category-scroller hide-scrollbar">
+            {filterTabs.map((tab) => {
+              const isActive = (tab.type === currentTabType && tab.id === currentTabId);
+              
+              return (
                 <button
-                  key={category.categoryId}
-                  className={`category-nav-btn ${selectedCategory === category.categoryId ? 'active' : ''}`}
-                  onClick={() => setSelectedCategory(category.categoryId)}
+                  key={`${tab.type}-${tab.id}`}
+                  className={`category-nav-btn ${isActive ? 'active' : ''}`}
+                  onClick={() => {
+                    if (tab.type === 'all') {
+                      setSelectedMenu(null);
+                      setSelectedCategory(null);
+                    } else if (tab.type === 'menu') {
+                      setSelectedMenu(tab.id);
+                      setSelectedCategory(null);
+                    } else {
+                      setSelectedCategory(tab.id);
+                      const cat = categories.find(c => c.categoryId === tab.id);
+                      if (cat) setSelectedMenu(cat.menuId);
+                    }
+                  }}
                 >
-                  <span>{category.categoryName}</span>
-                  {selectedCategory === category.categoryId && (
-                    <motion.div layoutId="activeCategory" className="nav-underline" />
+                  <span>{tab.name}</span>
+                  {isActive && (
+                    <motion.div 
+                      layoutId="navTabIndicator" 
+                      className="nav-underline"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
                   )}
                 </button>
-              ))}
+              );
+            })}
           </div>
         </div>
 
-        {/* Food Items Grid */}
-        <div className="food-items-section-modern fade-in">
-          <div className="items-header">
-            <h3>{categories.find(c => c.categoryId === selectedCategory)?.categoryName || 'All Items'}</h3>
-            <span className="items-count">{filteredItems.length} items available</span>
+        {/* Main Feed */}
+        <div className="food-items-section-modern px-3 py-4">
+          <div className="items-header mb-4">
+            <h2 className="fw-900" style={{ fontSize: '1.8rem', color: '#111' }}>
+              {currentTabType === 'all' ? 'Our Specialties' : filterTabs.find(t => t.id === currentTabId && t.type === currentTabType)?.name}
+            </h2>
+            <span className="text-muted">{filteredFoodItems.length} items available</span>
           </div>
 
           <div className="food-grid-modern">
-            {filteredItems.map(item => {
-              // Try multiple image fields from backend (imageUrl1 is primary)
-              const displayImage = item.imageUrl1 || item.imageUrl || item.imageUrl2;
-              
-              return (
-                <div key={item.foodItemId} className="modern-food-card">
+            <AnimatePresence mode="popLayout">
+              {filteredFoodItems.map((item) => (
+                <motion.div 
+                  key={item.foodId} 
+                  className="modern-food-card"
+                  layout
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                >
                   <div className="card-image-wrapper">
-                    {displayImage ? (
-                      <img src={getImageUrl(displayImage)} alt={item.itemName} />
+                    {item.imageUrl ? (
+                      <img src={getImageUrl(item.imageUrl)} alt={item.foodName} loading="lazy" />
                     ) : (
-                      <div className="h-100 d-flex align-items-center justify-content-center text-muted card-image-placeholder">
-                        <i className="fas fa-utensils fa-3x opacity-25"></i>
+                      <div className="h-100 d-flex align-items-center justify-content-center bg-light">
+                        <i className="fas fa-utensils fa-2x opacity-20"></i>
                       </div>
                     )}
-                    <div className="price-tag">Rs. {parseFloat(item.price).toFixed(0)}</div>
+                    <div className="price-badge">Rs. {Number(item.price).toFixed(0)}</div>
                   </div>
                   <div className="card-content">
-                    <h4>{item.itemName}</h4>
-                    <p>{item.description}</p>
-                    <button
-                      className="add-to-cart-modern"
+                    <h4>{item.foodName}</h4>
+                    <p className="line-clamp-2">{item.description || 'Freshly prepared specialty dish.'}</p>
+                    <button 
+                      className="add-to-cart-btn-v2"
                       onClick={() => addToCart(item)}
                     >
-                      <i className="fas fa-plus"></i> Add to Order
+                      <i className="fas fa-plus"></i> ADD TO CART
                     </button>
                   </div>
-                </div>
-              );
-            })}
+                </motion.div>
+              ))}
+            </AnimatePresence>
+            
+            {filteredFoodItems.length === 0 && (
+              <div className="w-100 text-center py-5 opacity-40">
+                <i className="fas fa-search-minus fa-3x mb-3"></i>
+                <p>No dishes found in this category.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
