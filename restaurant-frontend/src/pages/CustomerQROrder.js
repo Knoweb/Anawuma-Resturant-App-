@@ -669,8 +669,7 @@ const CustomerQROrder = ({ isManual = false }) => {
                     </div>
 
                     <div className="media-overlay">
-                      <button className="media-btn" onClick={(e) => { e.stopPropagation(); Swal.fire('Explore', 'View our full category catalog below.', 'info'); }}>Explore</button>
-                      <button className="media-btn" onClick={(e) => { e.stopPropagation(); setSelectedMenu(menu.menuId); }}>Select</button>
+                      <button className="media-btn w-100" onClick={(e) => { e.stopPropagation(); setSelectedMenu(menu.menuId); }}>Select</button>
                     </div>
                   </div>
                 </div>
