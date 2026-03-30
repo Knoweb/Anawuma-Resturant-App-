@@ -51,7 +51,7 @@ function Navbar() {
         message: `Order ${order.orderNo} from Table ${order.tableNo}`,
         amount: order.totalAmount,
         time: new Date().toLocaleTimeString(),
-        icon: 'shopping-cart',
+        icon: 'receipt',
         color: 'success'
       };
 
@@ -61,13 +61,16 @@ function Navbar() {
     const unsubscribeStatusUpdate = subscribe('order:status-update', (order) => {
       setNotificationCount(prev => prev + 1);
 
-      // Add to notification history
-      const statusColors = {
-        'READY': 'warning',
-        'SERVED': 'success',
-        'COMPLETED': 'success',
-        'CANCELLED': 'danger'
+      const statusMeta = {
+        'ACCEPTED': { icon: 'check-circle', color: 'info' },
+        'COOKING': { icon: 'fire', color: 'info' },
+        'READY': { icon: 'bell', color: 'warning' },
+        'SERVED': { icon: 'check-double', color: 'success' },
+        'COMPLETED': { icon: 'clipboard-check', color: 'success' },
+        'CANCELLED': { icon: 'times-circle', color: 'danger' }
       };
+
+      const meta = statusMeta[order.status] || { icon: 'info-circle', color: 'info' };
 
       const newNotif = {
         id: Date.now(),
@@ -75,8 +78,8 @@ function Navbar() {
         title: 'Order Updated',
         message: `Order ${order.orderNo} is ${order.status}`,
         time: new Date().toLocaleTimeString(),
-        icon: 'info-circle',
-        color: statusColors[order.status] || 'info'
+        icon: meta.icon,
+        color: meta.color
       };
 
       setNotifications(prev => [newNotif, ...prev].slice(0, 10)); // Keep last 10
