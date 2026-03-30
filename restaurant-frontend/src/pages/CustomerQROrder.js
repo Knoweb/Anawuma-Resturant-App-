@@ -686,14 +686,14 @@ const CustomerQROrder = ({ isManual = false }) => {
             <h2 className="fw-900" style={{ fontSize: '1.8rem', color: '#111' }}>
               {currentTabType === 'all' ? 'Our Specialties' : filterTabs.find(t => t.id === currentTabId && t.type === currentTabType)?.name}
             </h2>
-            <span className="text-muted">{filteredFoodItems.length} items available</span>
+            <span className="text-muted">{filteredItems.length} items available</span>
           </div>
 
           <div className="food-grid-modern">
             <AnimatePresence mode="popLayout">
-              {filteredFoodItems.map((item) => (
+              {filteredItems.map((item) => (
                 <motion.div 
-                  key={item.foodId} 
+                  key={item.foodItemId} 
                   className="modern-food-card"
                   layout
                   initial={{ opacity: 0, y: 10 }}
@@ -703,7 +703,7 @@ const CustomerQROrder = ({ isManual = false }) => {
                 >
                   <div className="card-image-wrapper">
                     {item.imageUrl ? (
-                      <img src={getImageUrl(item.imageUrl)} alt={item.foodName} loading="lazy" />
+                      <img src={getImageUrl(item.imageUrl)} alt={item.itemName} loading="lazy" />
                     ) : (
                       <div className="h-100 d-flex align-items-center justify-content-center bg-light">
                         <i className="fas fa-utensils fa-2x opacity-20"></i>
@@ -712,7 +712,7 @@ const CustomerQROrder = ({ isManual = false }) => {
                     <div className="price-badge">Rs. {Number(item.price).toFixed(0)}</div>
                   </div>
                   <div className="card-content">
-                    <h4>{item.foodName}</h4>
+                    <h4>{item.itemName}</h4>
                     <p className="line-clamp-2">{item.description || 'Freshly prepared specialty dish.'}</p>
                     <button 
                       className="add-to-cart-btn-v2"
@@ -725,7 +725,7 @@ const CustomerQROrder = ({ isManual = false }) => {
               ))}
             </AnimatePresence>
             
-            {filteredFoodItems.length === 0 && (
+            {filteredItems.length === 0 && (
               <div className="w-100 text-center py-5 opacity-40">
                 <i className="fas fa-search-minus fa-3x mb-3"></i>
                 <p>No dishes found in this category.</p>
