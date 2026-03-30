@@ -133,6 +133,8 @@ function Sidebar() {
         ? '/accountant/dashboard'
         : '/dashboard';
 
+  const canAccessManualOrder = (isCashier || isAdmin || isSuperAdmin) && isCashierEnabled;
+
   return (
     <>
       <div className="sidebar" id="sidebar">
@@ -180,6 +182,15 @@ function Sidebar() {
               <Link to={dashboardPath} onClick={closeSubmenus}>
                 <i className="fas fa-home"></i>
                 <span>Dashboard</span>
+              </Link>
+            </li>
+          )}
+
+          {canAccessManualOrder && (
+            <li className={isActive('/cashier/manual-order')}>
+              <Link to="/cashier/manual-order" onClick={closeSubmenus}>
+                <i className="fas fa-plus-circle"></i>
+                <span>Create Manual Order</span>
               </Link>
             </li>
           )}
