@@ -402,25 +402,28 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .modern-category-card {
-  background: #FFD100;
+  background: transparent;
   border: none;
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 85vw; /* Width for the slider effect */
+  width: 85vw; 
   max-width: 400px;
   flex-shrink: 0;
   scroll-snap-align: center;
+  padding: 10px;
 }
 
 .category-title-red {
-  color: #FF0000;
-  font-size: 2.2rem;
-  font-weight: 900;
-  margin-bottom: 15px;
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 20px;
   text-align: center;
-  font-family: 'Poppins', serif;
-  letter-spacing: 2px;
+  font-family: inherit;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 }
 
 .card-media-wrapper {

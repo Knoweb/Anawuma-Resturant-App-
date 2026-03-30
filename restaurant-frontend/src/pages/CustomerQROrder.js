@@ -517,6 +517,20 @@ const CustomerQROrder = ({ isManual = false }) => {
   };
 
   // Logic to determine what to show in the main content area
+  const getModernName = (name) => {
+    const map = {
+      'Noodles': 'Oriental Wok',
+      'Fried Rice': 'Golden Grains',
+      'Rice and Curry': 'Signature Platters',
+      'Beverages': 'Liquid Luxury',
+      'Desserts': 'Sweet Elegance',
+      'Appetizers': 'Gourmet Starts',
+      'Soups': 'Warm Essence',
+      'Quick Bites': 'Snack Artisans'
+    };
+    return map[name] || name;
+  };
+
   const renderMainContent = () => {
     if (orderSuccess && showStatusScreen) {
       const statusDisplay = getStatusDisplay(currentOrderStatus || orderSuccess.status);
@@ -641,7 +655,7 @@ const CustomerQROrder = ({ isManual = false }) => {
               const menuCats = categories.filter(c => c.menuId === menu.menuId);
               return (
                 <div key={menu.menuId} className="modern-category-card">
-                  <h2 className="category-title-red">- {menu.menuName} -</h2>
+                  <h2 className="category-title-red">{getModernName(menu.menuName)}</h2>
                   <div className="card-media-wrapper" onClick={() => setSelectedMenu(menu.menuId)}>
                     {menu.imageUrl ? (
                       <img src={getImageUrl(menu.imageUrl)} alt={menu.menuName} className="menu-thumb" />
@@ -717,7 +731,7 @@ const CustomerQROrder = ({ isManual = false }) => {
           <div className="menu-grid-yellow">
             {menuCategories.map(category => (
               <div key={category.categoryId} id={`cat-card-${category.categoryId}`} className="modern-category-card">
-                <h2 className="category-title-red">- {category.categoryName} -</h2>
+                <h2 className="category-title-red">{getModernName(category.categoryName)}</h2>
                 <div className="card-media-wrapper" onClick={() => setSelectedCategory(category.categoryId)}>
                   {category.imageUrl ? (
                     <img src={getImageUrl(category.imageUrl)} alt={category.categoryName} />
