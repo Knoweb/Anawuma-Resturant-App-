@@ -664,6 +664,41 @@ const CustomerQROrder = ({ isManual = false }) => {
       );
     }
 
+    if (selectedMenu && !selectedCategory) {
+      const menuCategories = categories.filter(cat => cat.menuId === selectedMenu);
+      
+      return (
+        <div className="menu-grid-yellow fade-in">
+          <div className="w-100 d-flex justify-content-start mb-3" style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            <button className="back-to-menus" onClick={() => setSelectedMenu(null)}>
+              <i className="fas fa-chevron-left"></i>
+            </button>
+          </div>
+          {menuCategories.map(category => (
+            <div key={category.categoryId} className="modern-category-card">
+              <h2 className="category-title-red">- {category.categoryName} -</h2>
+              <div className="card-media-wrapper" onClick={() => setSelectedCategory(category.categoryId)}>
+                {category.imageUrl ? (
+                  <img src={getImageUrl(category.imageUrl)} alt={category.categoryName} />
+                ) : (
+                  <div className="h-100 d-flex align-items-center justify-content-center bg-light">
+                    <i className="fas fa-utensils fa-4x opacity-25"></i>
+                  </div>
+                )}
+                <div className="media-overlay">
+                  <button className="media-btn" onClick={(e) => { e.stopPropagation(); Swal.fire('Coming Soon', 'Photo gallery is being prepared!', 'info'); }}>Photo</button>
+                  <button className="media-btn" onClick={(e) => { e.stopPropagation(); Swal.fire('Coming Soon', 'Video gallery is being prepared!', 'info'); }}>Video</button>
+                </div>
+              </div>
+              <button className="about-btn-dark" onClick={() => setSelectedCategory(category.categoryId)}>
+                About
+              </button>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
     return (
       <div className="items-view-container">
         {/* Category Navigation - Horizontal Scroll */}
@@ -671,7 +706,6 @@ const CustomerQROrder = ({ isManual = false }) => {
           <button
             className={`back-to-menus`}
             onClick={() => {
-              setSelectedMenu(null);
               setSelectedCategory(null);
             }}
           >

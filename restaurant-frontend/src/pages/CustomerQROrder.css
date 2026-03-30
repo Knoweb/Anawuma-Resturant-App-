@@ -313,6 +313,107 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 2px 6px rgba(38, 102, 104, 0.2);
 }
 
+/* --- Yellow Modern Category Cards --- */
+.menu-grid-yellow {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 40px;
+  padding: 20px;
+  background: #FFD100; /* Vibrant Yellow */
+  min-height: 100vh;
+}
+
+.modern-category-card {
+  background: #FFD100;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.category-title-red {
+  color: #FF0000;
+  font-size: 2.2rem;
+  font-weight: 900;
+  margin-bottom: 15px;
+  text-align: center;
+  font-family: 'Poppins', serif;
+  letter-spacing: 2px;
+}
+
+.card-media-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border: 4px solid #fff;
+}
+
+.card-media-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.media-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  height: 60px;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px);
+}
+
+.media-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #FFD100;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  font-family: serif;
+}
+
+.media-btn:first-child {
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.media-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.about-btn-dark {
+  width: 100%;
+  margin-top: 5px;
+  padding: 15px;
+  background: #333;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.4rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  font-family: serif;
+  transition: all 0.2s;
+}
+
+.about-btn-dark:hover {
+  background: #222;
+  transform: translateY(-2px);
+}
+
 /* --- Category Navigation --- */
 .category-nav-container {
   background: #fff;
