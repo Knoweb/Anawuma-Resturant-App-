@@ -13,7 +13,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - ./db_data:/var/lib/mysql
 
   backend:
     image: ${DOCKER_USERNAME:-local}/anawuma-backend:latest
@@ -44,5 +44,4 @@ services:
     ports:
       - "80:80"
 
-volumes:
-  mysql_data:
+
