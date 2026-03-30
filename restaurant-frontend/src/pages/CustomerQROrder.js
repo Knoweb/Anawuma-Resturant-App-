@@ -630,36 +630,36 @@ const CustomerQROrder = ({ isManual = false }) => {
 
     if (!selectedMenu) {
       return (
-        <div className="menu-selection-container fade-in">
-          <div className="section-title">
-            <h2>Welcome</h2>
-            <p>Please select a menu to start ordering</p>
+        <div className="menu-grid-yellow fade-in">
+          <div className="section-title w-100 text-center mb-5">
+            <h1 className="fw-900 text-dark" style={{ fontSize: '3rem' }}>Welcome</h1>
+            <p className="text-dark opacity-75">Please select a menu to start ordering</p>
           </div>
-          <div className="menu-grid">
-            {menus.map(menu => (
-              <div
-                key={menu.menuId}
-                className="menu-option-card"
-                onClick={() => setSelectedMenu(menu.menuId)}
-              >
-                <div className="menu-option-icon">
-                  {menu.imageUrl ? (
-                    <img src={getImageUrl(menu.imageUrl)} alt={menu.menuName} className="menu-thumb" />
-                  ) : (
-                    <i className={
-                      (menu.menuName || '').toLowerCase().includes('breakfast') ? 'fas fa-coffee' :
-                        (menu.menuName || '').toLowerCase().includes('lunch') ? 'fas fa-sun' :
-                          (menu.menuName || '').toLowerCase().includes('dinner') ? 'fas fa-moon' :
-                            'fas fa-hamburger'
-                    }></i>
-                  )}
+          {menus.map(menu => (
+            <div
+              key={menu.menuId}
+              className="modern-category-card"
+              onClick={() => setSelectedMenu(menu.menuId)}
+            >
+              <h2 className="category-title-red">- {menu.menuName} -</h2>
+              <div className="card-media-wrapper">
+                {menu.imageUrl ? (
+                  <img src={getImageUrl(menu.imageUrl)} alt={menu.menuName} className="menu-thumb" />
+                ) : (
+                  <div className="h-100 d-flex align-items-center justify-content-center bg-light opacity-50">
+                    <i className="fas fa-utensils fa-4x"></i>
+                  </div>
+                )}
+                <div className="media-overlay">
+                  <button className="media-btn" onClick={(e) => { e.stopPropagation(); Swal.fire('Coming Soon', 'Menu overview is being prepared!', 'info'); }}>Explore</button>
+                  <button className="media-btn" onClick={(e) => { e.stopPropagation(); setSelectedMenu(menu.menuId); }}>Select</button>
                 </div>
-                <h3>{menu.menuName}</h3>
-                <p>{menu.description || 'View our selection of dishes'}</p>
-                <span className="select-btn">Select <i className="fas fa-arrow-right"></i></span>
               </div>
-            ))}
-          </div>
+              <button className="about-btn-dark" onClick={() => setSelectedMenu(menu.menuId)}>
+                About
+              </button>
+            </div>
+          ))}
         </div>
       );
     }
