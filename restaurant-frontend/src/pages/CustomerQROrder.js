@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import apiClient from '../api/apiClient';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAuthStore } from '../store/authStore';
@@ -629,108 +628,153 @@ const CustomerQROrder = ({ isManual = false }) => {
       );
     }
 
-    // Prepare Unified Filter Tabs (Menus + Categories)
-    // We show Menus first, then Categories as requested.
-    const filterTabs = [
-      { id: 'all', name: 'All', type: 'all' },
-      ...menus.map(m => ({ id: m.menuId, name: m.menuName, type: 'menu' })),
-      ...categories.map(c => ({ id: c.categoryId, name: c.categoryName, type: 'category' }))
-    ];
+    if (!selectedMenu) {
+      return (
+        <div className="slider-container-yellow fade-in">
+          <div className="section-title w-100 text-center mb-4 px-4">
+            <h1 className="fw-900 text-dark" style={{ fontSize: '3rem' }}>Welcome</h1>
+            <p className="text-dark opacity-75">Please select a menu to start ordering</p>
+          </div>
+          
+          <div className="menu-grid-yellow">
+            {menus.map(menu => (
+              <div
+                key={menu.menuId}
+                className="modern-category-card"
+                onClick={() => setSelectedMenu(menu.menuId)}
+              >
+                <h2 className="category-title-red">- {menu.menuName} -</h2>
+                <div className="card-media-wrapper">
+                  {menu.imageUrl ? (
+                    <img src={getImageUrl(menu.imageUrl)} alt={menu.menuName} className="menu-thumb" />
+                  ) : (
+                    <div className="h-100 d-flex align-items-center justify-content-center bg-light opacity-50">
+                      <i className="fas fa-utensils fa-4x"></i>
+                    </div>
+                  )}
+                  <div className="media-overlay">
+                    <button className="media-btn" onClick={(e) => { e.stopPropagation(); Swal.fire('Coming Soon', 'Menu overview is being prepared!', 'info'); }}>Explore</button>
+                    <button className="media-btn" onClick={(e) => { e.stopPropagation(); setSelectedMenu(menu.menuId); }}>Select</button>
+                  </div>
+                </div>
+                <button className="about-btn-dark" onClick={() => setSelectedMenu(menu.menuId)}>
+                  About
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
 
-    const currentTabId = selectedCategory || selectedMenu || 'all';
-    const currentTabType = selectedCategory ? 'category' : (selectedMenu ? 'menu' : 'all');
+    if (selectedMenu && !selectedCategory) {
+      const menuCategories = categories.filter(cat => cat.menuId === selectedMenu);
+      
+      return (
+        <div className="slider-container-yellow fade-in">
+          <div className="w-100 d-flex justify-content-start mb-4 px-4" style={{ maxWidth: '1200px' }}>
+            <button className="back-to-menus" onClick={() => setSelectedMenu(null)}>
+              <i className="fas fa-chevron-left"></i>
+            </button>
+          </div>
+
+          <div className="menu-grid-yellow">
+            {menuCategories.map(category => (
+              <div key={category.categoryId} className="modern-category-card">
+                <h2 className="category-title-red">- {category.categoryName} -</h2>
+                <div className="card-media-wrapper" onClick={() => setSelectedCategory(category.categoryId)}>
+                  {category.imageUrl ? (
+                    <img src={getImageUrl(category.imageUrl)} alt={category.categoryName} />
+                  ) : (
+                    <div className="h-100 d-flex align-items-center justify-content-center bg-light">
+                      <i className="fas fa-utensils fa-4x opacity-25"></i>
+                    </div>
+                  )}
+                  <div className="media-overlay">
+                    <button className="media-btn" onClick={(e) => { e.stopPropagation(); Swal.fire('Coming Soon', 'Photo gallery is being prepared!', 'info'); }}>Photo</button>
+                    <button className="media-btn" onClick={(e) => { e.stopPropagation(); Swal.fire('Coming Soon', 'Video gallery is being prepared!', 'info'); }}>Video</button>
+                  </div>
+                </div>
+                <button className="about-btn-dark" onClick={() => setSelectedCategory(category.categoryId)}>
+                  About
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
 
     return (
-      <div className="modern-browse-view">
-        {/* Modern Horizontal Filter Bar */}
-        <div className="category-nav-sticky shadow-sm">
-          <div className="horizontal-category-scroller hide-scrollbar">
-            {filterTabs.map((tab) => {
-              const isActive = (tab.type === currentTabType && tab.id === currentTabId);
-              
-              return (
+      <div className="items-view-container">
+        {/* Category Navigation - Horizontal Scroll */}
+        <div className="category-nav-container slide-in-top">
+          <button
+            className={`back-to-menus`}
+            onClick={() => {
+              setSelectedCategory(null);
+            }}
+          >
+            <i className="fas fa-chevron-left"></i>
+          </button>
+          <div className="horizontal-categories">
+            <button
+              className={`category-pill ${!selectedCategory ? 'active' : ''}`}
+              onClick={() => setSelectedCategory(null)}
+            >
+              All
+            </button>
+            {categories
+              .filter(cat => cat.menuId === selectedMenu)
+              .map(category => (
                 <button
-                  key={`${tab.type}-${tab.id}`}
-                  className={`category-nav-btn ${isActive ? 'active' : ''}`}
-                  onClick={() => {
-                    if (tab.type === 'all') {
-                      setSelectedMenu(null);
-                      setSelectedCategory(null);
-                    } else if (tab.type === 'menu') {
-                      setSelectedMenu(tab.id);
-                      setSelectedCategory(null);
-                    } else {
-                      setSelectedCategory(tab.id);
-                      const cat = categories.find(c => c.categoryId === tab.id);
-                      if (cat) setSelectedMenu(cat.menuId);
-                    }
-                  }}
+                  key={category.categoryId}
+                  className={`category-pill ${selectedCategory === category.categoryId ? 'active' : ''}`}
+                  onClick={() => setSelectedCategory(category.categoryId)}
                 >
-                  <span>{tab.name}</span>
-                  {isActive && (
-                    <motion.div 
-                      layoutId="navTabIndicator" 
-                      className="nav-underline"
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                    />
-                  )}
+                  {category.categoryName}
                 </button>
-              );
-            })}
+              ))}
           </div>
         </div>
 
-        {/* Main Feed */}
-        <div className="food-items-section-modern px-3 py-4">
-          <div className="items-header mb-4">
-            <h2 className="fw-900" style={{ fontSize: '1.8rem', color: '#111' }}>
-              {currentTabType === 'all' ? 'Our Specialties' : filterTabs.find(t => t.id === currentTabId && t.type === currentTabType)?.name}
-            </h2>
-            <span className="text-muted">{filteredItems.length} items available</span>
+        {/* Food Items Grid */}
+        <div className="food-items-section-modern fade-in">
+          <div className="items-header">
+            <h3>{categories.find(c => c.categoryId === selectedCategory)?.categoryName || 'All Items'}</h3>
+            <span className="items-count">{filteredItems.length} items available</span>
           </div>
 
           <div className="food-grid-modern">
-            <AnimatePresence mode="popLayout">
-              {filteredItems.map((item) => (
-                <motion.div 
-                  key={item.foodItemId} 
-                  className="modern-food-card"
-                  layout
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                >
+            {filteredItems.map(item => {
+              // Try multiple image fields from backend (imageUrl1 is primary)
+              const displayImage = item.imageUrl1 || item.imageUrl || item.imageUrl2;
+              
+              return (
+                <div key={item.foodItemId} className="modern-food-card">
                   <div className="card-image-wrapper">
-                    {item.imageUrl ? (
-                      <img src={getImageUrl(item.imageUrl)} alt={item.itemName} loading="lazy" />
+                    {displayImage ? (
+                      <img src={getImageUrl(displayImage)} alt={item.itemName} />
                     ) : (
-                      <div className="h-100 d-flex align-items-center justify-content-center bg-light">
-                        <i className="fas fa-utensils fa-2x opacity-20"></i>
+                      <div className="h-100 d-flex align-items-center justify-content-center text-muted card-image-placeholder">
+                        <i className="fas fa-utensils fa-3x opacity-25"></i>
                       </div>
                     )}
-                    <div className="price-badge">Rs. {Number(item.price).toFixed(0)}</div>
+                    <div className="price-tag">Rs. {parseFloat(item.price).toFixed(0)}</div>
                   </div>
                   <div className="card-content">
                     <h4>{item.itemName}</h4>
-                    <p className="line-clamp-2">{item.description || 'Freshly prepared specialty dish.'}</p>
-                    <button 
-                      className="add-to-cart-btn-v2"
+                    <p>{item.description}</p>
+                    <button
+                      className="add-to-cart-modern"
                       onClick={() => addToCart(item)}
                     >
-                      <i className="fas fa-plus"></i> ADD TO CART
+                      <i className="fas fa-plus"></i> Add to Order
                     </button>
                   </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-            
-            {filteredItems.length === 0 && (
-              <div className="w-100 text-center py-5 opacity-40">
-                <i className="fas fa-search-minus fa-3x mb-3"></i>
-                <p>No dishes found in this category.</p>
-              </div>
-            )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -769,17 +813,17 @@ const CustomerQROrder = ({ isManual = false }) => {
   // Helper to resolve image URL
   const getImageUrl = (url) => {
     if (!url) return null;
-    return url;
+    return url; // Now handled automatically by apiClient interceptor
   };
 
   return (
     <div className="customer-qr-order-container">
       {/* Premium Elegant Header */}
-      <header className="customer-header-v2">
+      <header className={`customer-header-v2 ${selectedMenu ? 'header-scrolled' : ''}`}>
         <div className="header-container">
           <div className="restaurant-brand-v2">
             {tableInfo?.logo ? (
-              <img src={getImageUrl(tableInfo.logo)} alt={tableInfo.restaurantName} className="brand-logo-v2" />
+              <img src={tableInfo.logo} alt={tableInfo.restaurantName} className="brand-logo-v2" />
             ) : (
               <div className="brand-placeholder-v2">
                 <i className="fas fa-utensils"></i>
@@ -787,7 +831,7 @@ const CustomerQROrder = ({ isManual = false }) => {
             )}
             <div className="brand-text-v2">
               <h1 className="hotel-name-v2">{tableInfo.restaurantName}</h1>
-              <div className="room-badge-v2">
+               <div className="room-badge-v2">
                 <i className={`fas ${tableInfo?.isRoom || manualOrderType === 'ROOM' ? 'fa-concierge-bell' : 'fa-chair'}`}></i>
                 <span>
                   {isManual ? (
@@ -803,18 +847,13 @@ const CustomerQROrder = ({ isManual = false }) => {
           <div className="cart-trigger-v2" onClick={() => setShowCart(true)}>
             <div className={`cart-btn-v2 ${cart.length > 0 ? 'pulse' : ''}`}>
               <i className="fas fa-shopping-bag"></i>
-              {cart.length > 0 && <span className="cart-badge-v2">{cart.reduce((sum, item) => sum + item.qty, 0)}</span>}
+              {cart.length > 0 && <span className="cart-badge-v2">{cart.length}</span>}
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content Area */}
-      <main className="customer-main-content">
-        {renderMainContent()}
-      </main>
-
-      {/* Modern Fixed Bottom Navigation */}
+      {/* Modern Bottom Navigation */}
       <nav className="mobile-bottom-nav">
         <button 
           className={`nav-item ${!showStatusScreen ? 'active' : ''}`}
@@ -849,11 +888,17 @@ const CustomerQROrder = ({ isManual = false }) => {
         </button>
       </nav>
 
+      {/* Main Content Area */}
+      {/* Main Content Area */}
+      <main className="customer-main-content">
+        {renderMainContent()}
+      </main>
+
       {/* Cart Drawer */}
       <div className={`cart-drawer ${showCart ? 'open' : ''}`}>
         <div className="cart-header">
-          <h4>Your Order</h4>
-          <button className="btn-close" onClick={() => setShowCart(false)}>
+          <h4><i className="fas fa-shopping-cart me-2" style={{marginRight: '8px'}}></i> Your Order</h4>
+          <button className="btn-close" onClick={() => setShowCart(false)} style={{fontSize: '1.5rem', opacity: 0.7}}>
             <i className="fas fa-times"></i>
           </button>
         </div>
@@ -867,26 +912,33 @@ const CustomerQROrder = ({ isManual = false }) => {
             <div className="cart-items">
               {cart.map(item => (
                 <div key={item.foodItemId} className="cart-item-modern">
-                  <div className="cart-item-info" style={{ flex: 1 }}>
+                  <div className="cart-item-info" style={{ flex: 1, paddingRight: '10px' }}>
                     <h5>{item.name}</h5>
                     <p>Rs. {parseFloat(item.price).toFixed(0)}</p>
                     <input
                       type="text"
                       className="form-control form-control-sm mt-2"
-                      placeholder="Instructions..."
+                      placeholder="Special instructions..."
                       value={item.notes}
                       onChange={(e) => updateCartItemNotes(item.foodItemId, e.target.value)}
-                      style={{ fontSize: '0.8rem', borderRadius: '8px' }}
+                      style={{ borderRadius: '8px', fontSize: '0.85rem' }}
                     />
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-                    <button className="remove-btn" onClick={() => removeFromCart(item.foodItemId)}>
-                      <i className="fas fa-trash-alt"></i>
+                  <div className="cart-item-controls" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+                    <button
+                      className="remove-btn"
+                      onClick={() => removeFromCart(item.foodItemId)}
+                    >
+                      <i className="fas fa-trash"></i>
                     </button>
                     <div className="qty-controls">
-                      <button onClick={() => updateCartItemQty(item.foodItemId, -1)}>-</button>
+                      <button onClick={() => updateCartItemQty(item.foodItemId, -1)}>
+                        <i className="fas fa-minus"></i>
+                      </button>
                       <span>{item.qty}</span>
-                      <button onClick={() => updateCartItemQty(item.foodItemId, 1)}>+</button>
+                      <button onClick={() => updateCartItemQty(item.foodItemId, 1)}>
+                        <i className="fas fa-plus"></i>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -897,36 +949,101 @@ const CustomerQROrder = ({ isManual = false }) => {
 
         {cart.length > 0 && (
           <div className="cart-footer">
-            <div className="cart-total-section mb-4">
-              <div className="d-flex justify-content-between mb-1 small text-muted">
-                <span>Subtotal</span>
-                <span>Rs. {calculateSubtotal().toFixed(0)}</span>
+            <div className="order-inputs">
+               <div className="table-info-display mb-3">
+                {isManual ? (
+                  <div className="manual-table-select">
+                    <label className="form-label">Order For <span className="text-danger">*</span></label>
+                    <div className="d-flex gap-2 mb-2">
+                      <button 
+                        className={`btn btn-sm ${manualOrderType === 'TABLE' ? 'btn-primary' : 'btn-outline-primary'}`}
+                        onClick={() => setManualOrderType('TABLE')}
+                        style={{ flex: 1 }}
+                      >
+                        Table
+                      </button>
+                      <button 
+                        className={`btn btn-sm ${manualOrderType === 'ROOM' ? 'btn-primary' : 'btn-outline-primary'}`}
+                        onClick={() => setManualOrderType('ROOM')}
+                        style={{ flex: 1 }}
+                      >
+                        Room
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder={`Enter ${manualOrderType === 'ROOM' ? 'Room' : 'Table'} Number`}
+                      value={manualTableNo}
+                      onChange={(e) => setManualTableNo(e.target.value)}
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <i className={`fas ${tableInfo?.isRoom ? 'fa-concierge-bell' : 'fa-chair'} me-2`}></i>
+                    <strong>{tableInfo?.isRoom ? 'Room' : 'Table'}:</strong> {tableInfo?.tableNo || tableInfo?.roomNo}
+                  </>
+                )}
               </div>
-              <div className="d-flex justify-content-between mb-3 fw-bold h5">
-                <span>Total</span>
-                <span>Rs. {parseFloat(calculateTotal()).toFixed(0)}</span>
+
+              <div className="mb-3">
+                <label className="form-label">Your Name <span className="text-danger">*</span></label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Enter your name"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                />
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label">WhatsApp Number <span className="text-danger">*</span></label>
+                <PhoneInput
+                  country={'lk'}
+                  value={whatsappNumber}
+                  onChange={setWhatsappNumber}
+                  inputStyle={{ width: '100%' }}
+                  containerClass="phone-input-container"
+                  placeholder="Enter WhatsApp Number"
+                  enableSearch={true}
+                />
+                <small className="text-muted">We'll send your bill to this WhatsApp number.</small>
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label">Order Notes (Optional)</label>
+                <textarea
+                  className="form-control"
+                  rows="2"
+                  placeholder="Any special requests?"
+                  value={orderNotes}
+                  onChange={(e) => setOrderNotes(e.target.value)}
+                ></textarea>
               </div>
             </div>
 
-            <div className="order-form-mini mb-4">
-               {isManual && (
-                <div className="mb-3">
-                  <div className="d-flex gap-2 mb-2">
-                    <button className={`btn btn-sm w-100 ${manualOrderType === 'TABLE' ? 'btn-primary' : 'btn-outline-primary'}`} style={{borderRadius:'10px'}} onClick={() => setManualOrderType('TABLE')}>Table</button>
-                    <button className={`btn btn-sm w-100 ${manualOrderType === 'ROOM' ? 'btn-primary' : 'btn-outline-primary'}`} style={{borderRadius:'10px'}} onClick={() => setManualOrderType('ROOM')}>Room</button>
-                  </div>
-                  <input type="text" className="form-control" placeholder="No." value={manualTableNo} onChange={(e) => setManualTableNo(e.target.value)} />
-                </div>
-              )}
-              <input type="text" className="form-control mb-2" placeholder="Your Name" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
-              <PhoneInput country={'lk'} value={whatsappNumber} onChange={setWhatsappNumber} containerClass="mb-2" inputStyle={{width:'100%'}} />
+            <div className="cart-total">
+               <div className="d-flex justify-content-between mb-1 text-muted small">
+                 <span>Subtotal:</span>
+                 <span>Rs. {calculateSubtotal().toFixed(0)}</span>
+               </div>
+               <div className="d-flex justify-content-between mb-2 text-muted small">
+                 <span>Service Charge (10%):</span>
+                 <span>Rs. {calculateServiceCharge().toFixed(0)}</span>
+               </div>
+               <div className="d-flex justify-content-between fw-bold h5 mb-0">
+                 <span>Total:</span>
+                 <span>Rs. {parseFloat(calculateTotal()).toFixed(0)}</span>
+               </div>
             </div>
 
             <button
-              className="add-to-cart-btn-v2 w-100 py-3"
+              className="btn btn-lg w-100 text-white"
               onClick={placeOrder}
+              style={{ borderRadius: '8px', background: 'var(--primary-color)', border: 'none', fontWeight: '700', padding: '14px', fontSize: '1.05rem', boxShadow: '0 4px 12px rgba(38, 102, 104, 0.2)' }}
             >
-              <i className="fas fa-check me-2"></i> CONFIRM ORDER
+              <i className="fas fa-check me-2"></i> Place Order
             </button>
           </div>
         )}
