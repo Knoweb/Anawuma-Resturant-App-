@@ -668,7 +668,11 @@ const CustomerQROrder = ({ isManual = false }) => {
                       ))}
                     </div>
 
-                    <div className="media-overlay">
+                    <div className="media-overlay flex-column">
+                      <div className="d-flex w-100 mb-1">
+                        <button className="media-btn w-50" onClick={(e) => { e.stopPropagation(); Swal.fire('Coming Soon', 'Photo gallery is being prepared!', 'info'); }}>Photo</button>
+                        <button className="media-btn w-50" onClick={(e) => { e.stopPropagation(); Swal.fire('Coming Soon', 'Video gallery is being prepared!', 'info'); }}>Video</button>
+                      </div>
                       <button className="media-btn w-100" onClick={(e) => { e.stopPropagation(); setSelectedMenu(menu.menuId); }}>Select</button>
                     </div>
                   </div>

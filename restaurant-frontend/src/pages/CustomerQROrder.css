@@ -314,11 +314,20 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .slider-container-yellow {
-  background: #FFD100;
+  background: #266668;
   min-height: 100vh;
   padding: 20px 0 40px 0;
   display: flex;
   flex-direction: column;
+}
+
+.slider-container-yellow .section-title h1 {
+  color: #fff !important;
+}
+
+.slider-container-yellow .section-title p {
+  color: #fff !important;
+  opacity: 0.8;
 }
 
 .category-quick-nav {
