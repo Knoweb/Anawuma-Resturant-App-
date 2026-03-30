@@ -13,7 +13,7 @@ PROJECT_DIR="."
 BACKUP_DIR="$PROJECT_DIR/backups"
 DATABASE_NAME="restaurant_db"
 CONTAINER_NAME="anawuma_db"
-MYSQL_ROOT_PASSWORD="root_password" # Ensure this matches your .env or docker-compose.yml
+MYSQL_ROOT_PASSWORD="7154$La1" # Ensure this matches your .env or docker-compose.yml
 
 # 2. ENSURE BACKUP DIRECTORY EXISTS
 mkdir -p "$BACKUP_DIR"
