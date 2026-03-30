@@ -650,27 +650,28 @@ const CustomerQROrder = ({ isManual = false }) => {
                         <i className="fas fa-utensils fa-4x"></i>
                       </div>
                     )}
+                    
+                    {/* Category Buttons ON TOP of Image */}
+                    <div className="category-row-overlay">
+                      {menuCats.map(cat => (
+                        <button 
+                          key={cat.categoryId} 
+                          className="quick-nav-btn py-1 px-3" 
+                          style={{ fontSize: '0.75rem' }}
+                          onClick={() => {
+                            setSelectedMenu(menu.menuId);
+                            setSelectedCategory(cat.categoryId);
+                          }}
+                        >
+                          {cat.categoryName}
+                        </button>
+                      ))}
+                    </div>
+
                     <div className="media-overlay">
                       <button className="media-btn" onClick={(e) => { e.stopPropagation(); Swal.fire('Explore', 'View our full category catalog below.', 'info'); }}>Explore</button>
                       <button className="media-btn" onClick={(e) => { e.stopPropagation(); setSelectedMenu(menu.menuId); }}>Select</button>
                     </div>
-                  </div>
-                  
-                  {/* Category Buttons under Menu Card */}
-                  <div className="d-flex flex-wrap gap-2 justify-content-center mt-3 px-2">
-                    {menuCats.map(cat => (
-                      <button 
-                        key={cat.categoryId} 
-                        className="quick-nav-btn py-1 px-3" 
-                        style={{ fontSize: '0.75rem' }}
-                        onClick={() => {
-                          setSelectedMenu(menu.menuId);
-                          setSelectedCategory(cat.categoryId);
-                        }}
-                      >
-                        {cat.categoryName}
-                      </button>
-                    ))}
                   </div>
                 </div>
               );
