@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import apiClient from '../api/apiClient';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAuthStore } from '../store/authStore';
@@ -667,72 +668,41 @@ const CustomerQROrder = ({ isManual = false }) => {
       );
     }
 
-    if (selectedMenu && !selectedCategory) {
-      const menuCategories = categories.filter(cat => cat.menuId === selectedMenu);
-      
-      return (
-        <div className="slider-container-yellow fade-in">
-          <div className="w-100 d-flex justify-content-start mb-4 px-4" style={{ maxWidth: '1200px' }}>
-            <button className="back-to-menus" onClick={() => setSelectedMenu(null)}>
-              <i className="fas fa-chevron-left"></i>
-            </button>
-          </div>
-
-          <div className="menu-grid-yellow">
-            {menuCategories.map(category => (
-              <div key={category.categoryId} className="modern-category-card">
-                <h2 className="category-title-red">- {category.categoryName} -</h2>
-                <div className="card-media-wrapper" onClick={() => setSelectedCategory(category.categoryId)}>
-                  {category.imageUrl ? (
-                    <img src={getImageUrl(category.imageUrl)} alt={category.categoryName} />
-                  ) : (
-                    <div className="h-100 d-flex align-items-center justify-content-center bg-light">
-                      <i className="fas fa-utensils fa-4x opacity-25"></i>
-                    </div>
-                  )}
-                  <div className="media-overlay">
-                    <button className="media-btn" onClick={(e) => { e.stopPropagation(); Swal.fire('Coming Soon', 'Photo gallery is being prepared!', 'info'); }}>Photo</button>
-                    <button className="media-btn" onClick={(e) => { e.stopPropagation(); Swal.fire('Coming Soon', 'Video gallery is being prepared!', 'info'); }}>Video</button>
-                  </div>
-                </div>
-                <button className="about-btn-dark" onClick={() => setSelectedCategory(category.categoryId)}>
-                  About
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    }
-
     return (
       <div className="items-view-container">
-        {/* Category Navigation - Horizontal Scroll */}
-        <div className="category-nav-container slide-in-top">
-          <button
-            className={`back-to-menus`}
-            onClick={() => {
-              setSelectedCategory(null);
-            }}
-          >
-            <i className="fas fa-chevron-left"></i>
-          </button>
-          <div className="horizontal-categories">
+        {/* Sticky Category Bar with Underline Animation */}
+        <div className="category-nav-sticky">
+          <div className="nav-header-row">
+            <button className="nav-back-btn" onClick={() => { setSelectedMenu(null); setSelectedCategory(null); }}>
+              <i className="fas fa-arrow-left"></i>
+            </button>
+            <div className="nav-title-modern">
+              {menus.find(m => m.menuId === selectedMenu)?.menuName || 'Our Menu'}
+            </div>
+          </div>
+          
+          <div className="horizontal-category-scroller">
             <button
-              className={`category-nav-pill ${!selectedCategory ? 'active' : ''}`}
+              className={`category-nav-btn ${!selectedCategory ? 'active' : ''}`}
               onClick={() => setSelectedCategory(null)}
             >
-              All Items
+              <span>All</span>
+              {!selectedCategory && (
+                <motion.div layoutId="activeCategory" className="nav-underline" />
+              )}
             </button>
             {categories
               .filter(cat => cat.menuId === selectedMenu)
               .map(category => (
                 <button
                   key={category.categoryId}
-                  className={`category-nav-pill ${selectedCategory === category.categoryId ? 'active' : ''}`}
+                  className={`category-nav-btn ${selectedCategory === category.categoryId ? 'active' : ''}`}
                   onClick={() => setSelectedCategory(category.categoryId)}
                 >
-                  {category.categoryName}
+                  <span>{category.categoryName}</span>
+                  {selectedCategory === category.categoryId && (
+                    <motion.div layoutId="activeCategory" className="nav-underline" />
+                  )}
                 </button>
               ))}
           </div>
