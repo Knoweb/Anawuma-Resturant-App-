@@ -313,14 +313,23 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 2px 6px rgba(38, 102, 104, 0.2);
 }
 
-/* --- Yellow Modern Category Cards --- */
+/* --- Yellow Modern Category Cards (Now Horizontal Slider) --- */
 .menu-grid-yellow {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 40px;
-  padding: 20px;
+  display: flex; /* Flex instead of grid for horizontal */
+  gap: 30px;
+  padding: 40px 20px;
   background: #FFD100; /* Vibrant Yellow */
   min-height: 100vh;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Hide scrollbar Firefox */
+}
+
+/* Hide scrollbar for Chrome/Safari */
+.menu-grid-yellow::-webkit-scrollbar {
+  display: none;
 }
 
 .modern-category-card {
@@ -329,7 +338,10 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
+  width: 85vw; /* Width for the slider effect */
+  max-width: 400px;
+  flex-shrink: 0;
+  scroll-snap-align: center;
 }
 
 .category-title-red {
