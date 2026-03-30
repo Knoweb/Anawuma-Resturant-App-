@@ -672,10 +672,6 @@ const CustomerQROrder = ({ isManual = false }) => {
                       </button>
                     ))}
                   </div>
-
-                  <button className="about-btn-dark mt-3" onClick={() => setSelectedMenu(menu.menuId)}>
-                    View Categories
-                  </button>
                 </div>
               );
             })}
@@ -731,9 +727,6 @@ const CustomerQROrder = ({ isManual = false }) => {
                     <button className="media-btn" onClick={(e) => { e.stopPropagation(); Swal.fire('Coming Soon', 'Video gallery is being prepared!', 'info'); }}>Video</button>
                   </div>
                 </div>
-                <button className="about-btn-dark" onClick={() => setSelectedCategory(category.categoryId)}>
-                  About
-                </button>
               </div>
             ))}
           </div>
