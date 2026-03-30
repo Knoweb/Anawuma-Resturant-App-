@@ -637,31 +637,48 @@ const CustomerQROrder = ({ isManual = false }) => {
           </div>
           
           <div className="menu-grid-yellow">
-            {menus.map(menu => (
-              <div
-                key={menu.menuId}
-                className="modern-category-card"
-                onClick={() => setSelectedMenu(menu.menuId)}
-              >
-                <h2 className="category-title-red">- {menu.menuName} -</h2>
-                <div className="card-media-wrapper">
-                  {menu.imageUrl ? (
-                    <img src={getImageUrl(menu.imageUrl)} alt={menu.menuName} className="menu-thumb" />
-                  ) : (
-                    <div className="h-100 d-flex align-items-center justify-content-center bg-light opacity-50">
-                      <i className="fas fa-utensils fa-4x"></i>
+            {menus.map(menu => {
+              const menuCats = categories.filter(c => c.menuId === menu.menuId);
+              return (
+                <div key={menu.menuId} className="modern-category-card">
+                  <h2 className="category-title-red">- {menu.menuName} -</h2>
+                  <div className="card-media-wrapper" onClick={() => setSelectedMenu(menu.menuId)}>
+                    {menu.imageUrl ? (
+                      <img src={getImageUrl(menu.imageUrl)} alt={menu.menuName} className="menu-thumb" />
+                    ) : (
+                      <div className="h-100 d-flex align-items-center justify-content-center bg-light opacity-50">
+                        <i className="fas fa-utensils fa-4x"></i>
+                      </div>
+                    )}
+                    <div className="media-overlay">
+                      <button className="media-btn" onClick={(e) => { e.stopPropagation(); Swal.fire('Explore', 'View our full category catalog below.', 'info'); }}>Explore</button>
+                      <button className="media-btn" onClick={(e) => { e.stopPropagation(); setSelectedMenu(menu.menuId); }}>Select</button>
                     </div>
-                  )}
-                  <div className="media-overlay">
-                    <button className="media-btn" onClick={(e) => { e.stopPropagation(); Swal.fire('Coming Soon', 'Menu overview is being prepared!', 'info'); }}>Explore</button>
-                    <button className="media-btn" onClick={(e) => { e.stopPropagation(); setSelectedMenu(menu.menuId); }}>Select</button>
                   </div>
+                  
+                  {/* Category Buttons under Menu Card */}
+                  <div className="d-flex flex-wrap gap-2 justify-content-center mt-3 px-2">
+                    {menuCats.map(cat => (
+                      <button 
+                        key={cat.categoryId} 
+                        className="quick-nav-btn py-1 px-3" 
+                        style={{ fontSize: '0.75rem' }}
+                        onClick={() => {
+                          setSelectedMenu(menu.menuId);
+                          setSelectedCategory(cat.categoryId);
+                        }}
+                      >
+                        {cat.categoryName}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button className="about-btn-dark mt-3" onClick={() => setSelectedMenu(menu.menuId)}>
+                    View Categories
+                  </button>
                 </div>
-                <button className="about-btn-dark" onClick={() => setSelectedMenu(menu.menuId)}>
-                  About
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       );
@@ -670,17 +687,36 @@ const CustomerQROrder = ({ isManual = false }) => {
     if (selectedMenu && !selectedCategory) {
       const menuCategories = categories.filter(cat => cat.menuId === selectedMenu);
       
+      const scrollToCategory = (id) => {
+        const element = document.getElementById(`cat-card-${id}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+      };
+
       return (
         <div className="slider-container-yellow fade-in">
-          <div className="w-100 d-flex justify-content-start mb-4 px-4" style={{ maxWidth: '1200px' }}>
+          <div className="w-100 d-flex justify-content-start mb-2 px-4" style={{ maxWidth: '1200px' }}>
             <button className="back-to-menus" onClick={() => setSelectedMenu(null)}>
               <i className="fas fa-chevron-left"></i>
             </button>
           </div>
 
+          <div className="category-quick-nav">
+            {menuCategories.map(category => (
+              <button 
+                key={`nav-${category.categoryId}`} 
+                className="quick-nav-btn"
+                onClick={() => scrollToCategory(category.categoryId)}
+              >
+                {category.categoryName}
+              </button>
+            ))}
+          </div>
+
           <div className="menu-grid-yellow">
             {menuCategories.map(category => (
-              <div key={category.categoryId} className="modern-category-card">
+              <div key={category.categoryId} id={`cat-card-${category.categoryId}`} className="modern-category-card">
                 <h2 className="category-title-red">- {category.categoryName} -</h2>
                 <div className="card-media-wrapper" onClick={() => setSelectedCategory(category.categoryId)}>
                   {category.imageUrl ? (

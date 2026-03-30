@@ -316,16 +316,50 @@ h1, h2, h3, h4, h5, h6 {
 .slider-container-yellow {
   background: #FFD100;
   min-height: 100vh;
-  padding: 40px 0;
+  padding: 20px 0 40px 0;
   display: flex;
   flex-direction: column;
+}
+
+.category-quick-nav {
+  display: flex;
+  gap: 10px;
+  padding: 10px 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: rgba(255, 255, 255, 0.1);
+  margin-bottom: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(5px);
+}
+
+.category-quick-nav::-webkit-scrollbar { display: none; }
+
+.quick-nav-btn {
+  white-space: nowrap;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1.5px solid #FF0000;
+  background: #fff;
+  color: #FF0000;
+  font-weight: 800;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quick-nav-btn:hover {
+  background: #FF0000;
+  color: #fff;
 }
 
 /* --- Yellow Modern Category Cards (Now Horizontal Slider) --- */
 .menu-grid-yellow {
   display: flex; 
   gap: 20px;
-  padding: 20px 20px;
+  padding: 0 20px 20px 20px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
