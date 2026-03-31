@@ -726,14 +726,12 @@ const CustomerQROrder = ({ isManual = false }) => {
       );
     }
     if (isManual) {
-      // Group items by menu for manual order
-      const groupedItems = menus.map(menu => {
-        const menuItems = foodItems.filter(item => {
-          const cat = categories.find(c => c.categoryId === item.categoryId);
-          return cat && cat.menuId === menu.menuId;
-        });
-        return { ...menu, items: menuItems };
-      }).filter(m => m.items.length > 0);
+      // Group items by category for manual order
+      const groupedItems = categories.map(cat => {
+        const catItems = foodItems.filter(item => item.categoryId === cat.categoryId);
+        const menuOfCat = menus.find(m => m.menuId === cat.menuId);
+        return { ...cat, items: catItems, menuName: menuOfCat?.menuName };
+      }).filter(c => c.items.length > 0);
 
       return (
         <div className="manual-grouped-view fade-in">
@@ -744,9 +742,11 @@ const CustomerQROrder = ({ isManual = false }) => {
 
           <div className="manual-sections-container">
             {groupedItems.map(group => (
-              <div key={group.menuId} className="menu-group-section mb-5">
+              <div key={group.categoryId} className="menu-group-section mb-5">
                 <div className="menu-group-header px-4 mb-3">
-                  <h3 className="menu-group-title text-capitalize">{group.menuName}</h3>
+                  <h3 className="menu-group-title text-capitalize">
+                    {group.categoryName} <span className="text-muted fs-6 fw-normal">({group.menuName})</span>
+                  </h3>
                   <div className="title-underline"></div>
                 </div>
                 
