@@ -21,7 +21,6 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
   });
 
   const [categories, setCategories] = useState([]);
-  const [subcategories, setSubcategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState({
     image1: null,
@@ -45,7 +44,6 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
         price: foodItem.price || '',
         currencyId: foodItem.currencyId || 1,
         categoryId: foodItem.categoryId || '',
-        subcategoryId: foodItem.subcategoryId || '',
         imageUrl1: foodItem.imageUrl1 || '',
         imageUrl2: foodItem.imageUrl2 || '',
         imageUrl3: foodItem.imageUrl3 || '',
@@ -64,29 +62,12 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
     }
   }, [show, foodItem]);
 
-  useEffect(() => {
-    if (formData.categoryId) {
-      fetchSubcategories(formData.categoryId);
-    } else {
-      setSubcategories([]);
-    }
-  }, [formData.categoryId]);
-
   const fetchCategories = async () => {
     try {
       const response = await apiClient.get('/categories');
       setCategories(response.data);
     } catch (error) {
       console.error('Error fetching categories:', error);
-    }
-  };
-
-  const fetchSubcategories = async (categoryId) => {
-    try {
-      const response = await apiClient.get(`/subcategories?categoryId=${categoryId}`);
-      setSubcategories(response.data);
-    } catch (error) {
-      console.error('Error fetching subcategories:', error);
     }
   };
 
@@ -185,7 +166,6 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
         price: parseFloat(formData.price),
         currencyId: parseInt(formData.currencyId),
         categoryId: parseInt(formData.categoryId),
-        subcategoryId: formData.subcategoryId ? parseInt(formData.subcategoryId) : undefined,
         imageUrl1: imageUrls.imageUrl1 || undefined,
         imageUrl2: imageUrls.imageUrl2 || undefined,
         imageUrl3: imageUrls.imageUrl3 || undefined,
@@ -282,25 +262,6 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
                   {categories.map((category) => (
                     <option key={category.categoryId} value={category.categoryId}>
                       {category.categoryName}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-            </div>
-
-            <div className="col-md-6 mb-3">
-              <Form.Group>
-                <Form.Label>Subcategory (Optional)</Form.Label>
-                <Form.Select
-                  name="subcategoryId"
-                  value={formData.subcategoryId}
-                  onChange={handleChange}
-                  disabled={!formData.categoryId}
-                >
-                  <option value="">Select Subcategory</option>
-                  {subcategories.map((subcategory) => (
-                    <option key={subcategory.subcategoryId} value={subcategory.subcategoryId}>
-                      {subcategory.subcategoryName}
                     </option>
                   ))}
                 </Form.Select>

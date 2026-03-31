@@ -163,11 +163,6 @@ function Sidebar() {
                     Add Category
                   </Link>
                 </li>
-                <li className={isQueryActive('/menus/subcategories', '?add=true')}>
-                  <Link to="/menus/subcategories?add=true">
-                    Add Subcategories
-                  </Link>
-                </li>
                 <li className={isQueryActive('/menus/food-items', '?add=true')}>
                   <Link to="/menus/food-items?add=true">
                     Add Food Items

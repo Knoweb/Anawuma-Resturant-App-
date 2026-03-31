@@ -14,7 +14,6 @@ function FoodItems() {
   const [foodItems, setFoodItems] = useState([]);
   const [menus, setMenus] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [subcategories, setSubcategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
@@ -24,7 +23,6 @@ function FoodItems() {
   const [filters, setFilters] = useState({
     menuId: '',
     categoryId: '',
-    subcategoryId: '',
     search: ''
   });
 
@@ -36,31 +34,19 @@ function FoodItems() {
     const queryParams = new URLSearchParams(location.search);
     const qMenuId = queryParams.get('menuId');
     const qCategoryId = queryParams.get('categoryId');
-    const qSubcategoryId = queryParams.get('subcategoryId');
 
-    if (qMenuId || qCategoryId || qSubcategoryId) {
+    if (qMenuId || qCategoryId) {
       setFilters(prev => ({
         ...prev,
         menuId: qMenuId || prev.menuId,
-        categoryId: qCategoryId || prev.categoryId,
-        subcategoryId: qSubcategoryId || prev.subcategoryId
+        categoryId: qCategoryId || prev.categoryId
       }));
 
       if (qCategoryId) {
         fetchCategoryDetail(qCategoryId);
-        fetchSubcategories(qCategoryId);
       }
     }
   }, [location.search]);
-
-  // Fetch subcategories when category changes
-  useEffect(() => {
-    if (filters.categoryId) {
-      fetchSubcategories(filters.categoryId);
-    } else {
-      setSubcategories([]);
-    }
-  }, [filters.categoryId]);
 
   const fetchMenus = async () => {
     try {
@@ -80,15 +66,6 @@ function FoodItems() {
     }
   };
 
-  const fetchSubcategories = async (categoryId) => {
-    try {
-      const response = await apiClient.get(`/subcategories?categoryId=${categoryId}`);
-      setSubcategories(response.data);
-    } catch (error) {
-      console.error('Error fetching subcategories:', error);
-    }
-  };
-
   const fetchFoodItems = useCallback(async () => {
     try {
       setLoading(true);
@@ -96,7 +73,6 @@ function FoodItems() {
 
       if (filters.menuId) params.append('menuId', filters.menuId);
       if (filters.categoryId) params.append('categoryId', filters.categoryId);
-      if (filters.subcategoryId) params.append('subcategoryId', filters.subcategoryId);
       if (filters.search) params.append('search', filters.search);
 
       const queryString = params.toString();
@@ -112,14 +88,13 @@ function FoodItems() {
         title: 'Error',
         text: 'Failed to load food items'
       });
-      setLoading(false);
     }
-  }, [filters.menuId, filters.categoryId, filters.subcategoryId, filters.search]);
+  }, [filters.menuId, filters.categoryId, filters.search]);
 
   // Fetch food items whenever filters change (except search which is debounced)
   useEffect(() => {
     fetchFoodItems();
-  }, [filters.menuId, filters.categoryId, filters.subcategoryId, fetchFoodItems]);
+  }, [filters.menuId, filters.categoryId, fetchFoodItems]);
 
   // Debounced search effect
   useEffect(() => {
@@ -137,7 +112,6 @@ function FoodItems() {
     setFilters({
       menuId: '',
       categoryId: '',
-      subcategoryId: '',
       search: ''
     });
   };
@@ -257,11 +231,6 @@ function FoodItems() {
                         {categories.find(c => c.categoryId.toString() === filters.categoryId.toString())?.categoryName}
                       </li>
                     )}
-                    {filters.subcategoryId && (
-                      <li className="breadcrumb-item active">
-                        {subcategories.find(s => s.subcategoryId.toString() === filters.subcategoryId.toString())?.subcategoryName}
-                      </li>
-                    )}
                   </ol>
                 </nav>
               </div>
@@ -292,36 +261,13 @@ function FoodItems() {
                     <button
                       key={cat.categoryId}
                       className={`btn ${filters.categoryId === cat.categoryId.toString() ? 'btn-dark' : 'btn-outline-dark'} rounded-pill px-3`}
-                      onClick={() => setFilters(prev => ({ ...prev, categoryId: cat.categoryId.toString(), subcategoryId: '' }))}
+                      onClick={() => setFilters(prev => ({ ...prev, categoryId: cat.categoryId.toString() }))}
                     >
                       {cat.categoryName}
                     </button>
                   ))}
                 </div>
               </div>
-
-              {/* Subcategory Filter Bar (Visible when category is selected) */}
-              {filters.categoryId && subcategories.length > 0 && (
-                <div className="subcategory-filter-bar mt-2 slide-down">
-                  <div className="d-flex flex-wrap gap-2 justify-content-center">
-                    <button
-                      className={`btn btn-sm ${!filters.subcategoryId ? 'btn-primary' : 'btn-outline-primary'} rounded-pill px-3`}
-                      onClick={() => setFilters(prev => ({ ...prev, subcategoryId: '' }))}
-                    >
-                      All {categories.find(c => c.categoryId.toString() === filters.categoryId.toString())?.categoryName}
-                    </button>
-                    {subcategories.map(sub => (
-                      <button
-                        key={sub.subcategoryId}
-                        className={`btn btn-sm ${filters.subcategoryId === sub.subcategoryId.toString() ? 'btn-primary' : 'btn-outline-primary'} rounded-pill px-3`}
-                        onClick={() => setFilters(prev => ({ ...prev, subcategoryId: sub.subcategoryId.toString() }))}
-                      >
-                        {sub.subcategoryName}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Food Items Grid */}
@@ -360,11 +306,6 @@ function FoodItems() {
                             <span className="badge bg-light text-dark border me-1">
                               {foodItem.category?.categoryName || 'Unknown'}
                             </span>
-                            {foodItem.subcategory && (
-                              <span className="badge bg-primary-subtle text-primary">
-                                {foodItem.subcategory.subcategoryName}
-                              </span>
-                            )}
                           </div>
                           <h5 className="food-item-title mb-2">{foodItem.itemName}</h5>
                           <h6 className="food-item-price mb-3">LKR {formatPrice(foodItem.price)}</h6>

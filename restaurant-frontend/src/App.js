@@ -10,7 +10,6 @@ import Menus from './pages/Menus';
 import AddMenu from './pages/AddMenu';
 import Categories from './pages/Categories';
 import AddCategory from './pages/AddCategory';
-import Subcategories from './pages/Subcategories';
 import FoodItems from './pages/FoodItems';
 import AddFoodItem from './pages/AddFoodItem';
 import KitchenKDS from './pages/KitchenKDS';
@@ -228,17 +227,6 @@ function App() {
                 <PrivateRoute>
                   <RoleRoute allowedRoles={['admin', 'super_admin']}>
                     <AddCategory />
-                  </RoleRoute>
-                </PrivateRoute>
-              }
-            />
-
-            <Route
-              path="/menus/subcategories"
-              element={
-                <PrivateRoute>
-                  <RoleRoute allowedRoles={['admin', 'super_admin']}>
-                    <Subcategories />
                   </RoleRoute>
                 </PrivateRoute>
               }

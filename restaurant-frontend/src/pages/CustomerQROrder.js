@@ -36,7 +36,6 @@ const CustomerQROrder = ({ isManual = false }) => {
   const [foodItems, setFoodItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
   const [selectedMenu, setSelectedMenu] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState(null);
   const [cart, setCart] = useState([]);
   const [customerName, setCustomerName] = useState('');
   const [whatsappNumber, setWhatsappNumber] = useState('');
@@ -343,20 +342,15 @@ const CustomerQROrder = ({ isManual = false }) => {
     let filtered = foodItems;
 
     if (selectedMenu) {
-      // Filter by menu: categories belonging to this menu
-      const menuCategoryIds = categories
-        .filter(cat => cat.menuId === selectedMenu)
-        .map(cat => cat.categoryId);
-
-      filtered = filtered.filter(item => menuCategoryIds.includes(item.categoryId));
-
-      if (selectedCategory) {
-        filtered = filtered.filter(item => item.categoryId === selectedCategory);
-      }
+      filtered = filtered.filter(item => {
+        // Find if this item belongs to any category that is under this menu
+        const itemCategory = categories.find(c => c.categoryId === item.categoryId);
+        return itemCategory && itemCategory.menuId === selectedMenu;
+      });
     }
 
     setFilteredItems(filtered);
-  }, [selectedMenu, selectedCategory, foodItems, categories]);
+  }, [selectedMenu, foodItems, categories]);
 
   const addToCart = (item) => {
     const existingItem = cart.find(cartItem => cartItem.foodItemId === item.foodItemId);
@@ -499,7 +493,6 @@ const CustomerQROrder = ({ isManual = false }) => {
     setCustomerName('');
     setWhatsappNumber('');
     setSelectedMenu(null);
-    setSelectedCategory(null);
     setShownNotifications(new Set());
   };
 
@@ -684,58 +677,51 @@ const CustomerQROrder = ({ isManual = false }) => {
       );
     }
 
-    if (selectedMenu && !selectedCategory) {
-      const menuCategories = categories.filter(cat => cat.menuId === selectedMenu);
+    if (selectedMenu) {
+      const menuItems = filteredItems;
       
-      const scrollToCategory = (id) => {
-        const element = document.getElementById(`cat-card-${id}`);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-        }
-      };
-
       return (
         <div className="slider-container-yellow fade-in">
           <div className="w-100 d-flex justify-content-start mb-2 px-4" style={{ maxWidth: '1200px' }}>
             <button className="back-to-menus" onClick={() => setSelectedMenu(null)}>
               <i className="fas fa-chevron-left"></i>
             </button>
-          </div>
-
-          <div className="category-quick-nav">
-            {menuCategories.map(category => (
-              <button 
-                key={`nav-${category.categoryId}`} 
-                className="quick-nav-btn"
-                onClick={() => scrollToCategory(category.categoryId)}
-              >
-                {category.categoryName}
-              </button>
-            ))}
+            <div className="ms-3">
+              <h2 className="mb-0 fw-bold">{menus.find(m => m.menuId === selectedMenu)?.menuName}</h2>
+              <p className="text-muted small mb-0">{menuItems.length} items available</p>
+            </div>
           </div>
 
           <div className="menu-grid-yellow">
-            {menuCategories.map(category => (
-              <div key={category.categoryId} id={`cat-card-${category.categoryId}`} className="modern-category-card">
-                <h2 className="category-title-red">{category.categoryName}</h2>
-                <div className="card-media-wrapper" onClick={() => setSelectedCategory(category.categoryId)}>
-                  {category.imageUrl ? (
-                    <img src={getImageUrl(category.imageUrl)} alt={category.categoryName} />
-                  ) : (
-                    <div className="h-100 d-flex align-items-center justify-content-center bg-light">
-                      <i className="fas fa-utensils fa-4x opacity-25"></i>
+            {menuItems.map(item => {
+              const displayImage = item.imageUrl1 || item.imageUrl || item.imageUrl2;
+              
+              return (
+                <div key={item.foodItemId} className="modern-category-card">
+                  <h2 className="category-title-red">{item.itemName}</h2>
+                  <div className="card-media-wrapper">
+                    {displayImage ? (
+                      <img src={getImageUrl(displayImage)} alt={item.itemName} className="menu-thumb" />
+                    ) : (
+                      <div className="h-100 d-flex align-items-center justify-content-center bg-light opacity-50">
+                        <i className="fas fa-utensils fa-4x"></i>
+                      </div>
+                    )}
+                    
+                    <div className="media-overlay flex-column">
+                      <div className="mb-2 text-white fw-bold" style={{ fontSize: '1.2rem', textShadow: '1px 1px 4px rgba(0,0,0,0.8)' }}>
+                        Rs. {parseFloat(item.price).toFixed(0)}
+                      </div>
+                      <div className="d-flex w-100 mb-1">
+                        <button className="media-btn w-50" onClick={(e) => { e.stopPropagation(); Swal.fire(item.itemName, item.description || 'No description available', 'info'); }}>Info</button>
+                        <button className="media-btn w-50" onClick={(e) => { e.stopPropagation(); addToCart(item); }}>Add</button>
+                      </div>
+                      <button className="media-btn w-100 bg-primary-yellow text-dark fw-bold" onClick={(e) => { e.stopPropagation(); addToCart(item); }}>Select</button>
                     </div>
-                  )}
-                  <div className="media-overlay flex-column">
-                    <div className="d-flex w-100 mb-1">
-                      <button className="media-btn w-50" onClick={(e) => { e.stopPropagation(); Swal.fire('Coming Soon', 'Photo gallery is being prepared!', 'info'); }}>Photo</button>
-                      <button className="media-btn w-50" onClick={(e) => { e.stopPropagation(); Swal.fire('Coming Soon', 'Video gallery is being prepared!', 'info'); }}>Video</button>
-                    </div>
-                    <button className="media-btn w-100" onClick={(e) => { e.stopPropagation(); setSelectedCategory(category.categoryId); }}>Select</button>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       );
@@ -743,61 +729,13 @@ const CustomerQROrder = ({ isManual = false }) => {
 
     return (
       <div className="items-view-container">
-        {/* Category Navigation - Horizontal Scroll */}
-        <div className="category-nav-container slide-in-top">
-          <button
-            className={`back-to-menus`}
-            onClick={() => {
-              setSelectedCategory(null);
-            }}
-          >
-            <i className="fas fa-chevron-left"></i>
-          </button>
-          <div className="horizontal-categories">
-            <button
-              className={`category-pill ${!selectedCategory ? 'active' : ''}`}
-              onClick={() => setSelectedCategory(null)}
-            >
-              All
-            </button>
-            {categories
-              .filter(cat => cat.menuId === selectedMenu)
-              .map(category => (
-                <button
-                  key={category.categoryId}
-                  className={`category-pill ${selectedCategory === category.categoryId ? 'active' : ''}`}
-                  onClick={() => setSelectedCategory(category.categoryId)}
-                >
-                  {category.categoryName}
-                </button>
-              ))}
-          </div>
+        {/* Basic fallback if somehow reached here without menu */}
+        <div className="text-center py-5">
+          <p>Please select a menu to start ordering.</p>
+          <button className="btn btn-primary" onClick={() => setSelectedMenu(null)}>Back to Menus</button>
         </div>
-
-        {/* Food Items Grid */}
-        <div className="food-items-section-modern fade-in">
-          <div className="items-header">
-            <h3>{categories.find(c => c.categoryId === selectedCategory)?.categoryName || 'All Items'}</h3>
-            <span className="items-count">{filteredItems.length} items available</span>
-          </div>
-
-          <div className="food-grid-modern">
-            {filteredItems.map(item => {
-              // Try multiple image fields from backend (imageUrl1 is primary)
-              const displayImage = item.imageUrl1 || item.imageUrl || item.imageUrl2;
-              
-              return (
-                <div key={item.foodItemId} className="modern-food-card">
-                  <div className="card-image-wrapper">
-                    {displayImage ? (
-                      <img src={getImageUrl(displayImage)} alt={item.itemName} />
-                    ) : (
-                      <div className="h-100 d-flex align-items-center justify-content-center text-muted card-image-placeholder">
-                        <i className="fas fa-utensils fa-3x opacity-25"></i>
-                      </div>
-                    )}
-                    <div className="price-tag">Rs. {parseFloat(item.price).toFixed(0)}</div>
-                  </div>
+      </div>
+    );
                   <div className="card-content">
                     <h4>{item.itemName}</h4>
                     <p>{item.description}</p>
