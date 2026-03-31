@@ -212,28 +212,11 @@ function FoodItems() {
             <div className="d-flex justify-content-between align-items-center mb-4">
               <button
                 className="btn btn-secondary"
-                onClick={() => navigate('/menus/all')}
+                onClick={() => navigate('/menus/categories')}
               >
                 <i className="fas fa-arrow-left me-2"></i>
-                Back
+                Back to Categories
               </button>
-
-              <div className="text-center flex-grow-1 mx-3">
-                <nav aria-label="breadcrumb">
-                  <ol className="breadcrumb mb-0 justify-content-center">
-                    {filters.menuId && (
-                      <li className="breadcrumb-item">
-                        {menus.find(m => m.menuId.toString() === filters.menuId.toString())?.menuName}
-                      </li>
-                    )}
-                    {filters.categoryId && (
-                      <li className="breadcrumb-item">
-                        {categories.find(c => c.categoryId.toString() === filters.categoryId.toString())?.categoryName}
-                      </li>
-                    )}
-                  </ol>
-                </nav>
-              </div>
 
               <div className="d-flex gap-2">
                 <button className="btn btn-outline-primary" onClick={() => setShowAddCategoryModal(true)}>
@@ -244,29 +227,6 @@ function FoodItems() {
                   <i className="fas fa-plus me-2"></i>
                   New Item
                 </button>
-              </div>
-            </div>
-
-            {/* Top Level Category Filter Bar */}
-            <div className="filter-section mb-4">
-              <div className="category-filter-bar mb-3">
-                <div className="d-flex flex-wrap gap-2 justify-content-center">
-                  <button
-                    className={`btn ${!filters.categoryId ? 'btn-dark' : 'btn-outline-dark'} rounded-pill px-4`}
-                    onClick={handleClearFilters}
-                  >
-                    All Categories
-                  </button>
-                  {categories.map(cat => (
-                    <button
-                      key={cat.categoryId}
-                      className={`btn ${filters.categoryId === cat.categoryId.toString() ? 'btn-dark' : 'btn-outline-dark'} rounded-pill px-3`}
-                      onClick={() => setFilters(prev => ({ ...prev, categoryId: cat.categoryId.toString() }))}
-                    >
-                      {cat.categoryName}
-                    </button>
-                  ))}
-                </div>
               </div>
             </div>
 
