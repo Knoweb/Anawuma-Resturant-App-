@@ -1066,17 +1066,17 @@ const CustomerQROrder = ({ isManual = false }) => {
             </div>
 
             <div className="cart-total">
-               <div className="d-flex justify-content-between mb-1 text-muted small">
+               <div className="total-row text-muted small mb-1">
                  <span>Subtotal:</span>
                  <span>Rs. {calculateSubtotal().toFixed(0)}</span>
                </div>
-               <div className="d-flex justify-content-between mb-2 text-muted small">
+               <div className="total-row text-muted small mb-2">
                  <span>Service Charge (10%):</span>
                  <span>Rs. {calculateServiceCharge().toFixed(0)}</span>
                </div>
-               <div className="d-flex justify-content-between fw-bold h5 mb-0">
-                 <span>Total:</span>
-                 <span>Rs. {parseFloat(calculateTotal()).toFixed(0)}</span>
+               <div className="total-row main">
+                 <span className="total-label-main">Total:</span>
+                 <span className="total-amount-main">Rs. {parseFloat(calculateTotal()).toFixed(0)}</span>
                </div>
             </div>
 
