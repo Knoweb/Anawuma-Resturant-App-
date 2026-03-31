@@ -1037,4 +1037,57 @@ h1, h2, h3, h4, h5, h6 {
   .timeline-step i { width: 32px; height: 32px; font-size: 0.9rem; border-width: 2px; }
   .timeline-step span { font-size: 0.65rem; }
   .order-number { font-size: 1.25rem; }
+
+  /* Fully Responsive Cart Drawer */
+  .cart-drawer {
+    width: 100vw;
+    max-width: none;
+    right: -101vw; /* Ensure it's hidden */
+  }
+  .cart-drawer.open {
+    right: 0;
+  }
+
+  /* Improved form factors for mobile */
+  .cart-header {
+    padding: 15px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+
+  .cart-body {
+    padding: 15px 20px;
+  }
+
+  .cart-footer {
+    padding: 20px;
+    border-top: 1px solid #E5E7EB;
+    background: #fdfdfd;
+  }
+
+  .order-inputs .form-label {
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  .manual-table-select .btn-sm {
+    padding: 12px 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border-radius: 10px;
+  }
+
+  .cart-total {
+    margin-bottom: 20px;
+    background: #f3f4f6;
+    padding: 15px;
+    border-radius: 12px;
+    border: none;
+  }
+
+  .cart-total h5 {
+    font-size: 1.1rem;
+  }
 }
