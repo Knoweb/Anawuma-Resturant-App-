@@ -804,7 +804,7 @@ const CustomerQROrder = ({ isManual = false }) => {
                   <h2 className="sketch-header-text">{group.menuName}</h2>
                 </div>
                 
-                <div className="sketch-grid-container px-4">
+                <div className="sketch-grid-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '20px' }}>
                   {group.cats.map(cat => {
                     const catItems = foodItems.filter(item => item.categoryId === cat.categoryId);
                     const catImage = cat.imageUrl || (catItems.length > 0 ? (catItems[0].imageUrl1 || catItems[0].imageUrl) : null);
@@ -813,37 +813,23 @@ const CustomerQROrder = ({ isManual = false }) => {
                       <div 
                         key={cat.categoryId} 
                         className="sketch-category-box"
-                        onClick={() => {
-                          if (catItems.length === 1) {
-                            addToCart(catItems[0]);
-                          } else {
-                            setSelectedMenu(group.menuId);
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (catItems.length > 0) {
+                            setActiveItemDetail(catItems[0]);
+                            setModalQty(1);
                           }
                         }}
                       >
                         <div className="sketch-box-label">
                           <span>{cat.categoryName}</span>
                         </div>
-                        <div className="sketch-box-media">
-                          {catImage ? (
-                            <img src={getImageUrl(catImage)} alt={cat.categoryName} />
+                        <div className="sketch-box-media" style={{ width: '100%', height: '150px', background: '#fafafa' }}>
+                          {catItems.length > 0 && (catItems[0].imageUrl1 || catItems[0].imageUrl) ? (
+                            <img src={getImageUrl(catItems[0].imageUrl1 || catItems[0].imageUrl)} alt={cat.categoryName} />
                           ) : (
                             <div className="sketch-placeholder"><i className="fas fa-utensils"></i></div>
                           )}
-                        </div>
-                        <div className="sketch-add-btn-container">
-                           <button 
-                             className="sketch-add-btn"
-                             onClick={(e) => {
-                               e.stopPropagation();
-                               if (catItems.length > 0) {
-                                 setActiveItemDetail(catItems[0]); // For now, taking first item as primary category item
-                                 setModalQty(1);
-                               }
-                             }}
-                           >
-                             <i className="fas fa-plus-circle me-2"></i>Select & Add
-                           </button>
                         </div>
                         {catItems.length > 1 && (
                           <div className="sketch-badge">{catItems.length} items</div>
