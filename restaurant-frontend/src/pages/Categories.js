@@ -153,7 +153,7 @@ function Categories() {
             <div className="mb-4">
               <button
                 className="btn btn-secondary mb-3"
-                onClick={() => navigate(-1)}
+                onClick={() => navigate('/menus/all')}
               >
                 <i className="fas fa-arrow-left me-2"></i>
                 Back

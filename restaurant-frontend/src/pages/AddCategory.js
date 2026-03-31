@@ -170,6 +170,10 @@ function AddCategory() {
         <Navbar />
         <div className="dashboard-content">
           <div className="container-fluid py-4">
+            <button className="btn btn-secondary btn-sm mb-3" onClick={handleCancel}>
+              <i className="fas fa-arrow-left me-2"></i>
+              Back
+            </button>
             <div className="add-menu-container">
               <h1 className="add-menu-title">Add New Category</h1>
 

@@ -144,7 +144,10 @@ function AddFoodItem() {
         <Navbar />
         <div className="dashboard-content">
           <div className="container-fluid py-4">
-            <button className="btn btn-secondary btn-sm mb-3" onClick={() => navigate('/menus/food-items')}>Back</button>
+            <button className="btn btn-secondary btn-sm mb-3" onClick={() => navigate('/menus/food-items')}>
+              <i className="fas fa-arrow-left me-2"></i>
+              Back
+            </button>
             <div className="add-food-container bg-white p-4 rounded shadow-sm">
               <h1 className="add-menu-title mb-4">Add Food Item</h1>
 
