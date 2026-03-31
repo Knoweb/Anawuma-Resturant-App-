@@ -922,8 +922,8 @@ const CustomerQROrder = ({ isManual = false }) => {
                       type="text" 
                       className="form-control sketch-input" 
                       placeholder={modalOrderType === 'table' ? "Enter Table Number" : "Enter Room Number"}
-                      value={tableNumber}
-                      onChange={(e) => setTableNumber(e.target.value)}
+                      value={manualTableNo}
+                      onChange={(e) => setManualTableNo(e.target.value)}
                     />
                   </div>
 
