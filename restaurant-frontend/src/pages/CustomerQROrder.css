@@ -1031,152 +1031,118 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 6px 20px rgba(38, 102, 104, 0.4);
 }
 
-/* Manual Grouped Order View Styling (Special Grid) */
-.manual-grouped-view {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 100px 0 150px; /* Offset for floating header */
-}
-
-.menu-group-section {
-  width: 100%;
-}
-
-.menu-group-header {
-  border-bottom: 1.5px solid rgba(0,0,0,0.05);
-  display: inline-block;
-  min-width: 150px;
-}
-
-.menu-group-title {
-  color: var(--primary-color);
-  font-size: 1.75rem;
+/* Manual Grouped Order View - Sketch Inspired Design */
+.manual-main-title {
+  font-size: 2.2rem;
   font-weight: 800;
-  margin-bottom: 4px;
+  color: #1a1a1a;
+  margin-bottom: 12px;
 }
 
-.title-underline {
-  height: 4px;
-  width: 40px;
+.title-divider {
+  width: 60px;
+  height: 5px;
   background: var(--primary-color);
-  border-radius: 2px;
+  border-radius: 10px;
 }
 
-.manual-grid-compact {
+.sketch-header-text {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 5px;
+}
+
+.sketch-grid-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 15px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 25px;
 }
 
-.manual-item-box {
-  background: #fff;
-  border-radius: 12px;
-  border: 1.5px solid rgba(0,0,0,0.05);
+.sketch-category-box {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px; /* More squared as per sketch */
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
+  transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
-.manual-item-box:hover {
-  transform: translateY(-4px);
+.sketch-category-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
   border-color: var(--primary-color);
-  box-shadow: 0 8px 25px rgba(38, 102, 104, 0.15);
 }
 
-.item-box-media {
+.sketch-box-media {
   width: 100%;
-  height: 100px;
-  background: #f8f9fa;
-  overflow: hidden;
+  height: 160px;
+  background: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.item-box-media img {
+.sketch-box-media img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.9;
-  transition: all 0.5s;
 }
 
-.manual-item-box:hover img {
-  opacity: 1;
-  transform: scale(1.1);
-}
-
-.box-placeholder {
+.sketch-placeholder {
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ccc;
-  font-size: 1.5rem;
+  color: #ddd;
+  font-size: 2.5rem;
 }
 
-.item-box-info {
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
+.sketch-box-label {
+  padding: 12px;
+  background: #fff;
+  text-align: center;
+  border-top: 1px solid #eee; /* The bottom strip division */
 }
 
-.item-name {
-  font-size: 0.95rem;
+.sketch-box-label span {
   font-weight: 700;
-  color: #1a1a1a;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 2px;
+  font-size: 1.1rem;
+  color: #333;
+  text-transform: capitalize;
 }
 
-.item-price {
-  font-size: 0.85rem;
-  color: var(--primary-color);
+.sketch-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(38, 102, 104, 0.9);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.7rem;
   font-weight: 600;
 }
 
-.add-vibe {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: var(--primary-color);
-  color: white;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
-  opacity: 0;
-  transform: scale(0.5);
-  transition: all 0.2s;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+/* Tablet/Mobile Adjustments */
+@media (max-width: 768px) {
+  .sketch-grid-container {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 15px;
+  }
+  .sketch-box-media { height: 130px; }
+  .sketch-header-text { font-size: 1.6rem; }
 }
 
-.manual-item-box:hover .add-vibe {
-  opacity: 1;
-  transform: scale(1);
-}
-
-/* Mobile Adjustments for Timeline */
 @media (max-width: 480px) {
-  .status-timeline::before { top: 35px; }
-  .timeline-step i { width: 32px; height: 32px; font-size: 0.9rem; border-width: 2px; }
-  .timeline-step span { font-size: 0.65rem; }
-  .order-number { font-size: 1.25rem; }
-  
-  .manual-grid-compact {
+  .sketch-grid-container {
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
   }
-  
-  .item-box-media {
-    height: 80px;
-  }
+  .sketch-box-media { height: 110px; }
+  .manual-main-title { font-size: 1.6rem; }
 }

@@ -726,53 +726,61 @@ const CustomerQROrder = ({ isManual = false }) => {
       );
     }
     if (isManual) {
-      // Group items by category for manual order
-      const groupedItems = categories.map(cat => {
-        const catItems = foodItems.filter(item => item.categoryId === cat.categoryId);
-        const menuOfCat = menus.find(m => m.menuId === cat.menuId);
-        return { ...cat, items: catItems, menuName: menuOfCat?.menuName };
-      }).filter(c => c.items.length > 0);
+      // Group categories by menu for manual order as per user sketch
+      const groupedData = menus.map(menu => {
+        const menuCats = categories.filter(cat => cat.menuId === menu.menuId);
+        return { ...menu, cats: menuCats };
+      }).filter(m => m.cats.length > 0);
 
       return (
         <div className="manual-grouped-view fade-in">
-          <div className="w-100 mb-4 px-4">
-            <h2 className="fw-bold"><i className="fas fa-plus-circle me-2"></i>Create Manual Order</h2>
-            <p className="text-muted">Select items from the categories below to add to the bill.</p>
+          <div className="w-100 mb-5 px-4 text-center">
+            <h1 className="manual-main-title">Create Manual Order</h1>
+            <div className="title-divider mx-auto"></div>
           </div>
 
           <div className="manual-sections-container">
-            {groupedItems.map(group => (
-              <div key={group.categoryId} className="menu-group-section mb-5">
-                <div className="menu-group-header px-4 mb-3">
-                  <h3 className="menu-group-title text-capitalize">
-                    {group.categoryName} <span className="text-muted fs-6 fw-normal">({group.menuName})</span>
-                  </h3>
-                  <div className="title-underline"></div>
+            {groupedData.map(group => (
+              <div key={group.menuId} className="menu-group-section mb-5">
+                <div className="sketch-header px-4 mb-4">
+                  <h2 className="sketch-header-text">{group.menuName}</h2>
                 </div>
                 
-                <div className="manual-grid-compact px-4">
-                  {group.items.map(item => {
-                    const displayImage = item.imageUrl1 || item.imageUrl || item.imageUrl2;
+                <div className="sketch-grid-container px-4">
+                  {group.cats.map(cat => {
+                    const catItems = foodItems.filter(item => item.categoryId === cat.categoryId);
+                    const catImage = cat.imageUrl || (catItems.length > 0 ? (catItems[0].imageUrl1 || catItems[0].imageUrl) : null);
+                    
                     return (
                       <div 
-                        key={item.foodItemId} 
-                        className="manual-item-box"
-                        onClick={() => addToCart(item)}
+                        key={cat.categoryId} 
+                        className="sketch-category-box"
+                        onClick={() => {
+                          // If there's only one item in this category, add it immediately
+                          // Otherwise, maybe filter/show items? For now, we'll try to add first if items exist
+                          if (catItems.length === 1) {
+                            addToCart(catItems[0]);
+                          } else {
+                            // Select category to show items in the flattened view if implemented, 
+                            // or for now just select menu and let the existing logic handle it
+                            setSelectedMenu(group.menuId);
+                            // We might need an additional state for manual category filtering if desired
+                          }
+                        }}
                       >
-                        <div className="item-box-media">
-                          {displayImage ? (
-                            <img src={getImageUrl(displayImage)} alt={item.itemName} />
+                        <div className="sketch-box-media">
+                          {catImage ? (
+                            <img src={getImageUrl(catImage)} alt={cat.categoryName} />
                           ) : (
-                            <div className="box-placeholder"><i className="fas fa-utensils"></i></div>
+                            <div className="sketch-placeholder"><i className="fas fa-utensils"></i></div>
                           )}
                         </div>
-                        <div className="item-box-info">
-                          <span className="item-name">{item.itemName}</span>
-                          <span className="item-price">Rs. {parseFloat(item.price).toFixed(0)}</span>
+                        <div className="sketch-box-label">
+                          <span>{cat.categoryName}</span>
                         </div>
-                        <div className="add-vibe">
-                           <i className="fas fa-plus"></i>
-                        </div>
+                        {catItems.length > 1 && (
+                          <div className="sketch-badge">{catItems.length} items</div>
+                        )}
                       </div>
                     );
                   })}
