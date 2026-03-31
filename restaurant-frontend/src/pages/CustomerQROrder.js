@@ -491,6 +491,59 @@ const CustomerQROrder = ({ isManual = false }) => {
     }
   };
 
+  const placeQuickManualOrder = async () => {
+    if (orderLocation === 'inside' && !manualTableNo.trim()) {
+      Swal.fire('Validation Error', `Please enter a ${modalOrderType === 'room' ? 'Room' : 'Table'} number`, 'warning');
+      return;
+    }
+    
+    if (!customerName.trim()) {
+      Swal.fire('Validation Error', 'Please enter your name', 'warning');
+      return;
+    }
+
+    try {
+      const orderPayload = {
+        customerName: customerName.trim(),
+        whatsappNumber: null,
+        notes: modalOrderNotes.trim() || null,
+        items: [{
+          foodItemId: activeItemDetail.foodItemId,
+          qty: modalQty,
+          notes: modalOrderNotes.trim() || null
+        }],
+        orderType: 'MANUAL_CASHIER'
+      };
+
+      if (orderLocation === 'inside') {
+        if (modalOrderType === 'room') {
+          orderPayload.roomNo = manualTableNo;
+        } else {
+          orderPayload.tableNo = manualTableNo;
+        }
+      }
+
+      const response = await apiClient.post('/orders/manual', orderPayload);
+
+      // Success
+      const orderData = {
+        ...response.data,
+        customerName: customerName.trim()
+      };
+      
+      setOrderSuccess(orderData);
+      setShowStatusScreen(true);
+      setCart([]);
+      setActiveItemDetail(null);
+      setModalOrderNotes('');
+
+    } catch (error) {
+      console.error('Quick Order error:', error);
+      const errorMsg = error.response?.data?.message || 'Failed to place order. Please try again.';
+      Swal.fire('Order Failed', errorMsg, 'error');
+    }
+  };
+
   const startNewOrder = () => {
     localStorage.removeItem(`active_order_${tableKey || roomKey}`);
     setOrderSuccess(null);
@@ -976,13 +1029,7 @@ const CustomerQROrder = ({ isManual = false }) => {
                 <div className="sticky-bottom-btn p-3 bg-white border-top">
                   <button 
                     className="order-now-btn"
-                    onClick={() => {
-                        // finalize logic...
-                        for(let i=0; i<modalQty; i++) {
-                            addToCart(activeItemDetail);
-                        }
-                        setActiveItemDetail(null);
-                    }}
+                    onClick={placeQuickManualOrder}
                   >
                     ORDER NOW
                   </button>

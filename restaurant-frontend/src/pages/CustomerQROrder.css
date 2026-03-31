@@ -1110,7 +1110,7 @@ h1, h2, h3, h4, h5, h6 {
 .sketch-add-btn {
   width: 100%;
   padding: 10px;
-  background: #2c3e50;
+  background: #266668; /* Updated to brand color */
   color: white;
   border: none;
   border-radius: 4px;
@@ -1121,7 +1121,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .sketch-category-box:hover .sketch-add-btn {
-  background: var(--primary-color);
+  background: #1e5254; /* Slightly darker for hover */
 }
 
 .sketch-badge {
@@ -1307,19 +1307,35 @@ h1, h2, h3, h4, h5, h6 {
 
 .order-now-btn {
   width: 100%;
-  padding: 18px;
-  background: #27ae60;
+  padding: 16px;
+  background-color: #266668;
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 800;
-  letter-spacing: 1px;
+  text-transform: uppercase;
   transition: all 0.3s;
+  letter-spacing: 0.5px;
 }
 
 .order-now-btn:hover {
-  background: #219150;
+  background-color: #1e5254;
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+  box-shadow: 0 5px 15px rgba(38, 102, 104, 0.4);
+}
+
+.sketch-modal-extra-fields .btn-primary {
+  background-color: #266668 !important;
+  border-color: #266668 !important;
+}
+
+.sketch-modal-extra-fields .btn-outline-primary {
+  color: #266668 !important;
+  border-color: #266668 !important;
+}
+
+.sketch-modal-extra-fields .btn-outline-primary:hover {
+  background-color: #266668 !important;
+  color: white !important;
 }
