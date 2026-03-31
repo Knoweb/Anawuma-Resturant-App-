@@ -925,166 +925,201 @@ const CustomerQROrder = ({ isManual = false }) => {
       </nav>
 
       {/* Main Content Area */}
-      {/* Main Content Area */}
       <main className="customer-main-content">
         {renderMainContent()}
       </main>
 
-      {/* Cart Drawer */}
-      <div className={`cart-drawer ${showCart ? 'open' : ''}`}>
-        <div className="cart-header">
-          <h4><i className="fas fa-shopping-cart me-2" style={{marginRight: '8px'}}></i> Your Order</h4>
-          <button className="btn-close" onClick={() => setShowCart(false)} style={{fontSize: '1.5rem', opacity: 0.7}}>
-            <i className="fas fa-times"></i>
+      {/* Refactored Cart Drawer with Tailwind CSS */}
+      <div className={`fixed top-0 right-0 h-full w-full max-w-[420px] bg-white shadow-2xl z-[2000] flex flex-col transition-transform duration-300 transform ${showCart ? 'translate-x-0' : 'translate-x-full'}`}>
+        
+        {/* Header - Fixed & Non-shrinking */}
+        <div className="p-5 border-b flex items-center justify-between shrink-0 bg-white">
+          <h4 className="flex items-center text-xl font-bold text-gray-800">
+            <i className="fas fa-shopping-cart mr-3 text-primary-color"></i> 
+            Your Order
+          </h4>
+          <button 
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500 hover:text-gray-700" 
+            onClick={() => setShowCart(false)}
+          >
+            <i className="fas fa-times text-xl"></i>
           </button>
         </div>
-        <div className="cart-body">
+
+        {/* Body - Scrollable Section */}
+        <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">
           {cart.length === 0 ? (
-            <div className="empty-cart-modern">
-              <i className="fas fa-shopping-basket"></i>
-              <p>Your cart is empty</p>
+            <div className="flex flex-col items-center justify-center h-full text-gray-400 opacity-60">
+              <i className="fas fa-shopping-basket text-6xl mb-4"></i>
+              <p className="text-lg font-medium text-center">Your cart is empty</p>
             </div>
           ) : (
-            <div className="cart-items">
-              {cart.map(item => (
-                <div key={item.foodItemId} className="cart-item-modern">
-                  {/* Top Row: Name and Remove Button */}
-                  <div className="cart-item-header">
-                    <h5 className="mb-0">{item.name}</h5>
-                    <button
-                      className="remove-btn"
-                      onClick={() => removeFromCart(item.foodItemId)}
-                    >
-                      <i className="fas fa-trash"></i>
-                    </button>
-                  </div>
+            <div className="space-y-8">
+              {/* Cart Items Section */}
+              <div className="space-y-4">
+                <h6 className="text-[10px] font-black uppercase tracking-[0.1em] text-gray-400 mb-2 border-b pb-2">Order Items</h6>
+                <div className="divide-y border-gray-100">
+                  {cart.map(item => (
+                    <div key={item.foodItemId} className="py-4 flex flex-col space-y-3 slide-in-top">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h5 className="font-bold text-gray-800 mb-0.5 leading-tight">{item.name}</h5>
+                          <span className="text-emerald-600 font-bold text-sm">Rs. {parseFloat(item.price).toFixed(0)}</span>
+                        </div>
+                        <button
+                          className="text-red-400 p-2 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all"
+                          onClick={() => removeFromCart(item.foodItemId)}
+                        >
+                          <i className="fas fa-trash-alt"></i>
+                        </button>
+                      </div>
 
-                  {/* Middle Row: Price */}
-                  <div className="cart-item-price">
-                    <span>Rs. {parseFloat(item.price).toFixed(0)}</span>
-                  </div>
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1">
+                          <input
+                            type="text"
+                            className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-400"
+                            placeholder="Add special requests..."
+                            value={item.notes}
+                            onChange={(e) => updateCartItemNotes(item.foodItemId, e.target.value)}
+                          />
+                        </div>
+                        <div className="flex items-center bg-gray-50 border border-gray-100 p-1 rounded-full gap-2 shrink-0">
+                          <button 
+                            className="w-7 h-7 flex items-center justify-center bg-white border border-gray-100 rounded-full shadow-sm text-[10px] hover:bg-gray-100 active:scale-95 transition-all text-gray-600"
+                            onClick={() => updateCartItemQty(item.foodItemId, -1)}
+                          >
+                            <i className="fas fa-minus"></i>
+                          </button>
+                          <span className="w-5 text-center font-black text-gray-700 text-sm">{item.qty}</span>
+                          <button 
+                            className="w-7 h-7 flex items-center justify-center bg-white border border-gray-100 rounded-full shadow-sm text-[10px] hover:bg-gray-100 active:scale-95 transition-all text-gray-600"
+                            onClick={() => updateCartItemQty(item.foodItemId, 1)}
+                          >
+                            <i className="fas fa-plus"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-                  {/* Bottom Row: Instructions and Quantity Controls */}
-                  <div className="cart-item-footer">
-                    <div className="cart-item-notes-wrapper">
+              {/* Order Info Form Section */}
+              <div className="space-y-6 pt-4 animate-in fade-in duration-500">
+                <h6 className="text-[10px] font-black uppercase tracking-[0.1em] text-gray-400 mb-2 border-b pb-2">Delivery Details</h6>
+                
+                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                  {isManual ? (
+                    <div className="space-y-4">
+                      <label className="text-xs font-black text-gray-500 uppercase tracking-wider flex items-center gap-2">
+                         <i className="fas fa-map-pin text-emerald-500"></i> Place Order For
+                      </label>
+                      <div className="flex gap-2 p-1.5 bg-gray-200/50 rounded-xl">
+                        <button 
+                          className={`flex-1 py-2 rounded-lg font-bold text-xs transition-all ${manualOrderType === 'TABLE' ? 'bg-white text-gray-900 shadow-sm border border-gray-100' : 'text-gray-500 hover:text-gray-700'}`}
+                          onClick={() => setManualOrderType('TABLE')}
+                        >
+                          Table
+                        </button>
+                        <button 
+                          className={`flex-1 py-2 rounded-lg font-bold text-xs transition-all ${manualOrderType === 'ROOM' ? 'bg-white text-gray-900 shadow-sm border border-gray-100' : 'text-gray-500 hover:text-gray-700'}`}
+                          onClick={() => setManualOrderType('ROOM')}
+                        >
+                          Room
+                        </button>
+                      </div>
                       <input
                         type="text"
-                        className="cart-notes-input"
-                        placeholder="Special instructions..."
-                        value={item.notes}
-                        onChange={(e) => updateCartItemNotes(item.foodItemId, e.target.value)}
+                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500/30 outline-none transition-all font-black text-gray-800 placeholder:text-gray-300"
+                        placeholder={`Enter ${manualOrderType === 'ROOM' ? 'Room' : 'Table'} Number`}
+                        value={manualTableNo}
+                        onChange={(e) => setManualTableNo(e.target.value)}
                       />
                     </div>
-                    <div className="qty-controls-modern">
-                      <button onClick={() => updateCartItemQty(item.foodItemId, -1)}>
-                        <i className="fas fa-minus"></i>
-                      </button>
-                      <span>{item.qty}</span>
-                      <button onClick={() => updateCartItemQty(item.foodItemId, 1)}>
-                        <i className="fas fa-plus"></i>
-                      </button>
+                  ) : (
+                    <div className="flex items-center gap-4 text-gray-800">
+                      <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 border border-emerald-100/50">
+                        <i className={`fas ${tableInfo?.isRoom ? 'fa-hotel' : 'fa-pizza-slice'} text-lg`}></i>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">{tableInfo?.isRoom ? 'Room' : 'Table'}</p>
+                        <p className="font-black text-xl text-gray-900">{tableInfo?.tableNo || tableInfo?.roomNo}</p>
+                      </div>
                     </div>
+                  )}
+                </div>
+
+                <div className="space-y-5">
+                  <div>
+                    <label className="text-xs font-black text-gray-500 uppercase tracking-widest mb-2 block ml-1">Customer Name <span className="text-red-400">*</span></label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500/30 outline-none transition-all placeholder:text-gray-300 font-medium"
+                      placeholder="e.g. John Doe"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-black text-gray-500 uppercase tracking-widest mb-2 block ml-1">WhatsApp Verification <span className="text-red-400">*</span></label>
+                    <div className="phone-input-custom-tailwind">
+                      <PhoneInput
+                        country={'lk'}
+                        value={whatsappNumber}
+                        onChange={setWhatsappNumber}
+                        inputClass="!w-full !h-12 !rounded-xl !bg-gray-50 !border-gray-200 !text-sm !font-medium focus:!ring-4 focus:!ring-emerald-500/10 focus:!border-emerald-500/30 outline-none transition-all"
+                        containerClass="!w-full"
+                        placeholder="WhatsApp Number"
+                        enableSearch={true}
+                      />
+                    </div>
+                    <p className="text-[9px] text-gray-400 mt-2 px-1 flex items-center gap-1.5 font-medium italic">
+                      <i className="fas fa-shield-alt text-emerald-500"></i> We will send your digital receipt to this number.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-black text-gray-500 uppercase tracking-widest mb-2 block ml-1">Kitchen Instructions</label>
+                    <textarea
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500/30 outline-none transition-all resize-none placeholder:text-gray-300 text-sm font-medium"
+                      rows="3"
+                      placeholder="e.g. No onions, extra spicy, etc."
+                      value={orderNotes}
+                      onChange={(e) => setOrderNotes(e.target.value)}
+                    ></textarea>
                   </div>
                 </div>
-              ))}
+              </div>
             </div>
           )}
         </div>
 
+        {/* Updated Footer - Always Visible & Elegant */}
         {cart.length > 0 && (
-          <div className="cart-footer">
-            <div className="order-inputs">
-               <div className="table-info-display mb-3">
-                {isManual ? (
-                  <div className="manual-table-select">
-                    <label className="form-label">Order For <span className="text-danger">*</span></label>
-                    <div className="d-flex gap-2 mb-2">
-                      <button 
-                        className={`btn-order-type ${manualOrderType === 'TABLE' ? 'active' : ''}`}
-                        onClick={() => setManualOrderType('TABLE')}
-                      >
-                        Table
-                      </button>
-                      <button 
-                        className={`btn-order-type ${manualOrderType === 'ROOM' ? 'active' : ''}`}
-                        onClick={() => setManualOrderType('ROOM')}
-                      >
-                        Room
-                      </button>
-                    </div>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder={`Enter ${manualOrderType === 'ROOM' ? 'Room' : 'Table'} Number`}
-                      value={manualTableNo}
-                      onChange={(e) => setManualTableNo(e.target.value)}
-                    />
-                  </div>
-                ) : (
-                  <>
-                    <i className={`fas ${tableInfo?.isRoom ? 'fa-concierge-bell' : 'fa-chair'} me-2`}></i>
-                    <strong>{tableInfo?.isRoom ? 'Room' : 'Table'}:</strong> {tableInfo?.tableNo || tableInfo?.roomNo}
-                  </>
-                )}
+          <div className="p-6 border-t bg-white border-gray-100 shrink-0 shadow-[0_-20px_40px_rgba(0,0,0,0.02)] sm:rounded-t-[2.5rem]">
+            <div className="space-y-3 mb-6">
+              <div className="flex justify-between text-gray-400 text-xs font-bold px-1">
+                <span>Cart Subtotal</span>
+                <span className="text-gray-600">Rs. {calculateSubtotal().toFixed(0)}</span>
               </div>
-
-              <div className="mb-3">
-                <label className="form-label">Your Name <span className="text-danger">*</span></label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Enter your name"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                />
+              <div className="flex justify-between text-gray-400 text-xs font-bold px-1">
+                <span>Service Fee (10%)</span>
+                <span className="text-gray-600">Rs. {calculateServiceCharge().toFixed(0)}</span>
               </div>
-
-              <div className="mb-3">
-                <label className="form-label">WhatsApp Number <span className="text-danger">*</span></label>
-                <PhoneInput
-                  country={'lk'}
-                  value={whatsappNumber}
-                  onChange={setWhatsappNumber}
-                  inputStyle={{ width: '100%' }}
-                  containerClass="phone-input-container"
-                  placeholder="Enter WhatsApp Number"
-                  enableSearch={true}
-                />
-                <small className="text-muted">We'll send your bill to this WhatsApp number.</small>
+              <div className="flex justify-between items-center pt-3 border-t border-dashed border-gray-100 px-1 mt-2">
+                <span className="text-sm font-black text-gray-900 uppercase tracking-tighter">Grand Total</span>
+                <span className="text-2xl font-black text-emerald-600 tracking-tighter">Rs. {parseFloat(calculateTotal()).toFixed(0)}</span>
               </div>
-
-              <div className="mb-3">
-                <label className="form-label">Order Notes (Optional)</label>
-                <textarea
-                  className="form-control"
-                  rows="2"
-                  placeholder="Any special requests?"
-                  value={orderNotes}
-                  onChange={(e) => setOrderNotes(e.target.value)}
-                ></textarea>
-              </div>
-            </div>
-
-            <div className="cart-total">
-               <div className="total-row text-muted small mb-1">
-                 <span>Subtotal:</span>
-                 <span>Rs. {calculateSubtotal().toFixed(0)}</span>
-               </div>
-               <div className="total-row text-muted small mb-2">
-                 <span>Service Charge (10%):</span>
-                 <span>Rs. {calculateServiceCharge().toFixed(0)}</span>
-               </div>
-               <div className="total-row main">
-                 <span className="total-label-main">Total:</span>
-                 <span className="total-amount-main">Rs. {parseFloat(calculateTotal()).toFixed(0)}</span>
-               </div>
             </div>
 
             <button
-              className="cart-place-order-btn"
+              className="w-full py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-emerald-600/20 active:scale-[0.97] transition-all flex items-center justify-center gap-3"
               onClick={placeOrder}
             >
-              <i className="fas fa-check me-2"></i> Place Order
+              <i className="fas fa-paper-plane text-xs opacity-70"></i> 
+              Place Your Order
             </button>
           </div>
         )}
