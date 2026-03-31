@@ -726,9 +726,12 @@ const CustomerQROrder = ({ isManual = false }) => {
                       <i className="fas fa-utensils fa-4x opacity-25"></i>
                     </div>
                   )}
-                  <div className="media-overlay">
-                    <button className="media-btn" onClick={(e) => { e.stopPropagation(); Swal.fire('Coming Soon', 'Photo gallery is being prepared!', 'info'); }}>Photo</button>
-                    <button className="media-btn" onClick={(e) => { e.stopPropagation(); Swal.fire('Coming Soon', 'Video gallery is being prepared!', 'info'); }}>Video</button>
+                  <div className="media-overlay flex-column">
+                    <div className="d-flex w-100 mb-1">
+                      <button className="media-btn w-50" onClick={(e) => { e.stopPropagation(); Swal.fire('Coming Soon', 'Photo gallery is being prepared!', 'info'); }}>Photo</button>
+                      <button className="media-btn w-50" onClick={(e) => { e.stopPropagation(); Swal.fire('Coming Soon', 'Video gallery is being prepared!', 'info'); }}>Video</button>
+                    </div>
+                    <button className="media-btn w-100" onClick={(e) => { e.stopPropagation(); setSelectedCategory(category.categoryId); }}>Select</button>
                   </div>
                 </div>
               </div>
