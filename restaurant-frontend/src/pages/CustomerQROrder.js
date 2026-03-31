@@ -36,6 +36,8 @@ const CustomerQROrder = ({ isManual = false }) => {
   const [foodItems, setFoodItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
   const [selectedMenu, setSelectedMenu] = useState(null);
+  const [activeItemDetail, setActiveItemDetail] = useState(null);
+  const [modalQty, setModalQty] = useState(1);
   const [cart, setCart] = useState([]);
   const [customerName, setCustomerName] = useState('');
   const [whatsappNumber, setWhatsappNumber] = useState('');
@@ -774,7 +776,16 @@ const CustomerQROrder = ({ isManual = false }) => {
                           )}
                         </div>
                         <div className="sketch-add-btn-container">
-                           <button className="sketch-add-btn">
+                           <button 
+                             className="sketch-add-btn"
+                             onClick={(e) => {
+                               e.stopPropagation();
+                               if (catItems.length > 0) {
+                                 setActiveItemDetail(catItems[0]); // For now, taking first item as primary category item
+                                 setModalQty(1);
+                               }
+                             }}
+                           >
                              <i className="fas fa-plus-circle me-2"></i>Select & Add
                            </button>
                         </div>
@@ -840,6 +851,68 @@ const CustomerQROrder = ({ isManual = false }) => {
 
   return (
     <div className="customer-qr-order-container">
+        {/* Item Detail Modal as per Sketch */}
+        {activeItemDetail && (
+          <div className="sketch-modal-overlay" onClick={() => setActiveItemDetail(null)}>
+            <div className="sketch-modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="sketch-modal-header py-3">
+                <span className="fw-bold fs-5 text-uppercase">{activeItemDetail.category?.categoryName || 'Product Info'}</span>
+              </div>
+              
+              <div className="sketch-modal-body">
+                <div className="sketch-modal-image-area mb-4">
+                  <img src={getImageUrl(activeItemDetail.imageUrl1 || activeItemDetail.imageUrl)} alt={activeItemDetail.itemName} />
+                </div>
+
+                <div className="sketch-modal-info-rows">
+                  <div className="sketch-detail-row">
+                    <span className="label">Name :</span>
+                    <span className="value">{activeItemDetail.itemName}</span>
+                  </div>
+                  <div className="sketch-detail-row">
+                    <span className="label">Code :</span>
+                    <span className="value">{activeItemDetail.foodItemId}</span>
+                  </div>
+                  <div className="sketch-detail-row">
+                    <span className="label">Price :</span>
+                    <span className="value">Rs. {parseFloat(activeItemDetail.price).toFixed(0)}</span>
+                  </div>
+                  <div className="sketch-detail-row quantity-row">
+                    <span className="label">Quantity :</span>
+                    <div className="qty-controls">
+                      <button className="qty-btn" onClick={() => setModalQty(Math.max(1, modalQty - 1))}>-</button>
+                      <span className="qty-value">{modalQty}</span>
+                      <button className="qty-btn" onClick={() => setModalQty(modalQty + 1)}>+</button>
+                    </div>
+                  </div>
+                  <div className="sketch-detail-row">
+                    <span className="label">Service Charge :</span>
+                    <span className="value">Rs. 0</span>
+                  </div>
+                  <div className="sketch-detail-row total-row mt-3">
+                    <span className="label fw-bold">Total :</span>
+                    <span className="value fw-bold">Rs. {parseFloat(activeItemDetail.price * modalQty).toFixed(0)}</span>
+                  </div>
+                </div>
+
+                <div className="mt-5 p-3">
+                  <button 
+                    className="order-now-btn"
+                    onClick={() => {
+                      for(let i=0; i<modalQty; i++) {
+                        addToCart(activeItemDetail);
+                      }
+                      setActiveItemDetail(null);
+                    }}
+                  >
+                    ORDER NOW
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
       {/* Premium Elegant Header */}
       <header className={`customer-header-v2 ${selectedMenu ? 'header-scrolled' : ''}`}>
         <div className="header-container">
