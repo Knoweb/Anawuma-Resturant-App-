@@ -621,7 +621,7 @@ const CustomerQROrder = ({ isManual = false }) => {
       );
     }
 
-    if (!selectedMenu) {
+    if (!selectedMenu && !isManual) {
       return (
         <div className="slider-container-yellow fade-in">
           <div className="section-title w-100 text-center mb-4 px-4">
@@ -676,7 +676,7 @@ const CustomerQROrder = ({ isManual = false }) => {
       );
     }
 
-    if (selectedMenu) {
+    if (selectedMenu && !isManual) {
       const menuItems = filteredItems;
       
       return (
@@ -725,6 +725,65 @@ const CustomerQROrder = ({ isManual = false }) => {
         </div>
       );
     }
+    if (isManual) {
+      // Group items by menu for manual order
+      const groupedItems = menus.map(menu => {
+        const menuItems = foodItems.filter(item => {
+          const cat = categories.find(c => c.categoryId === item.categoryId);
+          return cat && cat.menuId === menu.menuId;
+        });
+        return { ...menu, items: menuItems };
+      }).filter(m => m.items.length > 0);
+
+      return (
+        <div className="manual-grouped-view fade-in">
+          <div className="w-100 mb-4 px-4">
+            <h2 className="fw-bold"><i className="fas fa-plus-circle me-2"></i>Create Manual Order</h2>
+            <p className="text-muted">Select items from the categories below to add to the bill.</p>
+          </div>
+
+          <div className="manual-sections-container">
+            {groupedItems.map(group => (
+              <div key={group.menuId} className="menu-group-section mb-5">
+                <div className="menu-group-header px-4 mb-3">
+                  <h3 className="menu-group-title text-capitalize">{group.menuName}</h3>
+                  <div className="title-underline"></div>
+                </div>
+                
+                <div className="manual-grid-compact px-4">
+                  {group.items.map(item => {
+                    const displayImage = item.imageUrl1 || item.imageUrl || item.imageUrl2;
+                    return (
+                      <div 
+                        key={item.foodItemId} 
+                        className="manual-item-box"
+                        onClick={() => addToCart(item)}
+                      >
+                        <div className="item-box-media">
+                          {displayImage ? (
+                            <img src={getImageUrl(displayImage)} alt={item.itemName} />
+                          ) : (
+                            <div className="box-placeholder"><i className="fas fa-utensils"></i></div>
+                          )}
+                        </div>
+                        <div className="item-box-info">
+                          <span className="item-name">{item.itemName}</span>
+                          <span className="item-price">Rs. {parseFloat(item.price).toFixed(0)}</span>
+                        </div>
+                        <div className="add-vibe">
+                           <i className="fas fa-plus"></i>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="items-view-container">
         {/* Basic fallback if somehow reached here without menu */}

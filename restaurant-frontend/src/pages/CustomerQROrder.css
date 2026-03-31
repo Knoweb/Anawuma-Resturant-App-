@@ -1031,10 +1031,152 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 6px 20px rgba(38, 102, 104, 0.4);
 }
 
+/* Manual Grouped Order View Styling (Special Grid) */
+.manual-grouped-view {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 100px 0 150px; /* Offset for floating header */
+}
+
+.menu-group-section {
+  width: 100%;
+}
+
+.menu-group-header {
+  border-bottom: 1.5px solid rgba(0,0,0,0.05);
+  display: inline-block;
+  min-width: 150px;
+}
+
+.menu-group-title {
+  color: var(--primary-color);
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.title-underline {
+  height: 4px;
+  width: 40px;
+  background: var(--primary-color);
+  border-radius: 2px;
+}
+
+.manual-grid-compact {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 15px;
+}
+
+.manual-item-box {
+  background: #fff;
+  border-radius: 12px;
+  border: 1.5px solid rgba(0,0,0,0.05);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.manual-item-box:hover {
+  transform: translateY(-4px);
+  border-color: var(--primary-color);
+  box-shadow: 0 8px 25px rgba(38, 102, 104, 0.15);
+}
+
+.item-box-media {
+  width: 100%;
+  height: 100px;
+  background: #f8f9fa;
+  overflow: hidden;
+}
+
+.item-box-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.9;
+  transition: all 0.5s;
+}
+
+.manual-item-box:hover img {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.box-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ccc;
+  font-size: 1.5rem;
+}
+
+.item-box-info {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.item-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.item-price {
+  font-size: 0.85rem;
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.add-vibe {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--primary-color);
+  color: white;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.2s;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.manual-item-box:hover .add-vibe {
+  opacity: 1;
+  transform: scale(1);
+}
+
 /* Mobile Adjustments for Timeline */
 @media (max-width: 480px) {
   .status-timeline::before { top: 35px; }
   .timeline-step i { width: 32px; height: 32px; font-size: 0.9rem; border-width: 2px; }
   .timeline-step span { font-size: 0.65rem; }
   .order-number { font-size: 1.25rem; }
+  
+  .manual-grid-compact {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  
+  .item-box-media {
+    height: 80px;
+  }
 }
