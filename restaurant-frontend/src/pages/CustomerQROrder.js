@@ -653,7 +653,6 @@ const CustomerQROrder = ({ isManual = false }) => {
                           style={{ fontSize: '0.75rem' }}
                           onClick={() => {
                             setSelectedMenu(menu.menuId);
-                            setSelectedCategory(cat.categoryId);
                           }}
                         >
                           {cat.categoryName}
