@@ -1173,20 +1173,51 @@ h1, h2, h3, h4, h5, h6 {
   background: white;
   width: 100%;
   max-width: 330px;
+  max-height: 85vh; /* Limit height */
   border-radius: 12px;
-  overflow: hidden;
+  overflow-y: auto; /* Enable scrolling */
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   animation: modalScale 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
 }
 
-@keyframes modalScale {
-  from { transform: scale(0.9); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+/* Scrollbar styling */
+.sketch-modal-content::-webkit-scrollbar {
+  width: 5px;
+}
+.sketch-modal-content::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
 }
 
 .sketch-modal-header {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 10;
   text-align: center;
   border-bottom: 2px solid #f0f0f0;
+}
+
+.sketch-input {
+  border: 1px solid #ddd;
+  padding: 10px;
+  font-size: 0.95rem;
+  border-radius: 6px;
+}
+
+.sketch-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(38, 102, 104, 0.1);
+}
+
+.sticky-bottom-btn {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  background: white;
+  border-top: 1px solid #eee;
 }
 
 .sketch-modal-image-area {

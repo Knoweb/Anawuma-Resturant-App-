@@ -38,6 +38,8 @@ const CustomerQROrder = ({ isManual = false }) => {
   const [selectedMenu, setSelectedMenu] = useState(null);
   const [activeItemDetail, setActiveItemDetail] = useState(null);
   const [modalQty, setModalQty] = useState(1);
+  const [modalOrderType, setModalOrderType] = useState('table');
+  const [modalOrderNotes, setModalOrderNotes] = useState('');
   const [cart, setCart] = useState([]);
   const [customerName, setCustomerName] = useState('');
   const [whatsappNumber, setWhatsappNumber] = useState('');
@@ -895,14 +897,68 @@ const CustomerQROrder = ({ isManual = false }) => {
                   </div>
                 </div>
 
-                <div className="mt-5 p-3">
+                {/* New Fields from Screenshot 1 */}
+                <div className="sketch-modal-extra-fields p-4 border-top">
+                  <div className="mb-4">
+                    <label className="d-block mb-2 fw-bold text-muted small">ORDER FOR *</label>
+                    <div className="d-flex gap-2">
+                       <button 
+                         className={`flex-grow-1 btn ${modalOrderType === 'table' ? 'btn-primary' : 'btn-outline-primary'}`}
+                         onClick={() => setModalOrderType('table')}
+                       >
+                         Table
+                       </button>
+                       <button 
+                         className={`flex-grow-1 btn ${modalOrderType === 'room' ? 'btn-primary' : 'btn-outline-primary'}`}
+                         onClick={() => setModalOrderType('room')}
+                       >
+                         Room
+                       </button>
+                    </div>
+                  </div>
+
+                  <div className="mb-3">
+                    <input 
+                      type="text" 
+                      className="form-control sketch-input" 
+                      placeholder={modalOrderType === 'table' ? "Enter Table Number" : "Enter Room Number"}
+                      value={tableNumber}
+                      onChange={(e) => setTableNumber(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="d-block mb-2 fw-bold text-muted small">YOUR NAME *</label>
+                    <input 
+                      type="text" 
+                      className="form-control sketch-input" 
+                      placeholder="Enter your name" 
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="d-block mb-2 fw-bold text-muted small">ORDER NOTES (OPTIONAL)</label>
+                    <textarea 
+                      className="form-control sketch-input" 
+                      placeholder="Any special requests?"
+                      rows="3"
+                      value={modalOrderNotes}
+                      onChange={(e) => setModalOrderNotes(e.target.value)}
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div className="sticky-bottom-btn p-3 bg-white border-top">
                   <button 
                     className="order-now-btn"
                     onClick={() => {
-                      for(let i=0; i<modalQty; i++) {
-                        addToCart(activeItemDetail);
-                      }
-                      setActiveItemDetail(null);
+                        // finalize logic...
+                        for(let i=0; i<modalQty; i++) {
+                            addToCart(activeItemDetail);
+                        }
+                        setActiveItemDetail(null);
                     }}
                   >
                     ORDER NOW
