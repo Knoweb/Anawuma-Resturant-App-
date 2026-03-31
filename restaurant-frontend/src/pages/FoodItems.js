@@ -238,7 +238,7 @@ function FoodItems() {
             <div className="d-flex justify-content-between align-items-center mb-4">
               <button
                 className="btn btn-secondary"
-                onClick={() => navigate(-1)}
+                onClick={() => navigate('/menus/all')}
               >
                 <i className="fas fa-arrow-left me-2"></i>
                 Back
