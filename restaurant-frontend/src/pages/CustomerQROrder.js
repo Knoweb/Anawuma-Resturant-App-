@@ -992,16 +992,14 @@ const CustomerQROrder = ({ isManual = false }) => {
                     <label className="form-label">Order For <span className="text-danger">*</span></label>
                     <div className="d-flex gap-2 mb-2">
                       <button 
-                        className={`btn btn-sm ${manualOrderType === 'TABLE' ? 'btn-primary' : 'btn-outline-primary'}`}
+                        className={`btn-order-type ${manualOrderType === 'TABLE' ? 'active' : ''}`}
                         onClick={() => setManualOrderType('TABLE')}
-                        style={{ flex: 1 }}
                       >
                         Table
                       </button>
                       <button 
-                        className={`btn btn-sm ${manualOrderType === 'ROOM' ? 'btn-primary' : 'btn-outline-primary'}`}
+                        className={`btn-order-type ${manualOrderType === 'ROOM' ? 'active' : ''}`}
                         onClick={() => setManualOrderType('ROOM')}
-                        style={{ flex: 1 }}
                       >
                         Room
                       </button>
@@ -1075,9 +1073,8 @@ const CustomerQROrder = ({ isManual = false }) => {
             </div>
 
             <button
-              className="btn btn-lg w-100 text-white"
+              className="cart-place-order-btn"
               onClick={placeOrder}
-              style={{ borderRadius: '8px', background: 'var(--primary-color)', border: 'none', fontWeight: '700', padding: '14px', fontSize: '1.05rem', boxShadow: '0 4px 12px rgba(38, 102, 104, 0.2)' }}
             >
               <i className="fas fa-check me-2"></i> Place Order
             </button>

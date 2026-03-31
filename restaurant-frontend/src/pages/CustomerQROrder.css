@@ -1091,3 +1091,71 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 1.1rem;
   }
 }
+
+/* Custom Cart Buttons & Forms Styling (Fix for User UI request) */
+.btn-order-type {
+  flex: 1;
+  padding: 12px;
+  border: 1.5px solid #2563EB;
+  background: white;
+  color: #2563EB;
+  font-weight: 700;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-align: center;
+}
+
+.btn-order-type.active {
+  background: #2563EB;
+  color: white;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+}
+
+.cart-place-order-btn {
+  width: 100%;
+  padding: 15px;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(38, 102, 104, 0.25);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 10px;
+}
+
+.cart-place-order-btn:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.cart-place-order-btn i {
+  font-size: 1.2rem;
+}
+
+/* Ensure form labels and inputs are modern */
+.cart-footer .form-label {
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.cart-footer .form-control {
+  border-radius: 8px;
+  padding: 10px 14px;
+  border: 1px solid #D1D5DB;
+  font-size: 0.95rem;
+}
+
+.cart-footer .form-control:focus {
+  border-color: #2563EB;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
