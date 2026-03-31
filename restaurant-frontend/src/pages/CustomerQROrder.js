@@ -929,71 +929,93 @@ const CustomerQROrder = ({ isManual = false }) => {
         {renderMainContent()}
       </main>
 
-      {/* Refactored Cart Drawer with Tailwind CSS */}
-      <div className={`fixed top-0 right-0 h-full w-full max-w-[420px] bg-white shadow-2xl z-[2000] flex flex-col transition-transform duration-300 transform ${showCart ? 'translate-x-0' : 'translate-x-full'}`}>
-        
-        {/* Header - Fixed & Non-shrinking */}
-        <div className="p-5 border-b flex items-center justify-between shrink-0 bg-white">
-          <h4 className="flex items-center text-xl font-bold text-gray-800">
-            <i className="fas fa-shopping-cart mr-3 text-primary-color"></i> 
-            Your Order
+      {/* FIXED POSITIONED DRAWER OVERLAY */}
+      {/* Dark Overlay Background Mask */}
+      <div 
+        className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-[2000] transition-opacity duration-300 pointer-events-none ${showCart ? 'opacity-100 pointer-events-auto' : 'opacity-0'}`}
+        onClick={() => setShowCart(false)}
+      />
+
+      {/* Sliding Drawer Panel */}
+      <div 
+        className={`fixed top-0 right-0 h-screen w-full sm:w-[420px] bg-white shadow-[-]30px_0_60px_rgba(0,0,0,0.15)] z-[2001] flex flex-col transition-transform duration-500 ease-in-out transform ${showCart ? 'translate-x-0' : 'translate-x-full'}`}
+      >
+        {/* Header - Non-shrinking top section */}
+        <div className="p-6 border-b flex items-center justify-between shrink-0 bg-white">
+          <h4 className="flex items-center text-xl font-black text-gray-900 tracking-tight">
+             <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 mr-3">
+               <i className="fas fa-shopping-bag"></i>
+             </div>
+            Checkout Order
           </h4>
           <button 
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500 hover:text-gray-700" 
+            className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-full transition-all text-gray-400 hover:text-gray-900" 
             onClick={() => setShowCart(false)}
           >
             <i className="fas fa-times text-xl"></i>
           </button>
         </div>
 
-        {/* Body - Scrollable Section */}
-        <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">
+        {/* Body - Main scrollable content including items and form */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
           {cart.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-gray-400 opacity-60">
-              <i className="fas fa-shopping-basket text-6xl mb-4"></i>
-              <p className="text-lg font-medium text-center">Your cart is empty</p>
+            <div className="flex flex-col items-center justify-center h-full text-gray-300 opacity-80">
+              <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6">
+                <i className="fas fa-shopping-basket text-4xl"></i>
+              </div>
+              <p className="text-lg font-black uppercase tracking-widest">Cart is empty</p>
+              <button 
+                className="mt-6 text-sm font-bold text-emerald-600 hover:underline"
+                onClick={() => setShowCart(false)}
+              >
+                Browse Our Menu
+              </button>
             </div>
           ) : (
-            <div className="space-y-8">
-              {/* Cart Items Section */}
+            <div className="space-y-10">
+              {/* Order Items Section */}
               <div className="space-y-4">
-                <h6 className="text-[10px] font-black uppercase tracking-[0.1em] text-gray-400 mb-2 border-b pb-2">Order Items</h6>
-                <div className="divide-y border-gray-100">
+                <h6 className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 mb-4 flex items-center gap-2">
+                  <span className="w-8 h-[2px] bg-emerald-600"></span>
+                  Selected Items
+                  <span className="bg-emerald-100 px-2 py-0.5 rounded-full text-[9px]">{cart.length}</span>
+                </h6>
+                <div className="space-y-4">
                   {cart.map(item => (
-                    <div key={item.foodItemId} className="py-4 flex flex-col space-y-3 slide-in-top">
-                      <div className="flex justify-between items-start">
+                    <div key={item.foodItemId} className="p-4 bg-white border border-gray-100 rounded-2xl shadow-sm hover:border-emerald-200 transition-all group">
+                      <div className="flex justify-between items-start mb-3">
                         <div className="flex-1">
-                          <h5 className="font-bold text-gray-800 mb-0.5 leading-tight">{item.name}</h5>
-                          <span className="text-emerald-600 font-bold text-sm">Rs. {parseFloat(item.price).toFixed(0)}</span>
+                          <h5 className="font-black text-gray-900 mb-1 leading-tight group-hover:text-emerald-700 transition-colors">{item.name}</h5>
+                          <span className="text-emerald-600 font-black text-sm tracking-tighter">Rs. {parseFloat(item.price).toFixed(0)}</span>
                         </div>
                         <button
-                          className="text-red-400 p-2 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all"
+                          className="text-gray-300 p-2 hover:bg-red-50 hover:text-red-500 rounded-xl transition-all"
                           onClick={() => removeFromCart(item.foodItemId)}
                         >
-                          <i className="fas fa-trash-alt"></i>
+                          <i className="fas fa-trash-alt text-sm"></i>
                         </button>
                       </div>
 
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-4 pt-3 border-t border-gray-50">
                         <div className="flex-1">
                           <input
                             type="text"
-                            className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-400"
-                            placeholder="Add special requests..."
+                            className="w-full px-4 py-2 bg-gray-50 border-none rounded-xl text-[11px] font-medium focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all placeholder:text-gray-300"
+                            placeholder="Add special instructions..."
                             value={item.notes}
                             onChange={(e) => updateCartItemNotes(item.foodItemId, e.target.value)}
                           />
                         </div>
-                        <div className="flex items-center bg-gray-50 border border-gray-100 p-1 rounded-full gap-2 shrink-0">
+                        <div className="flex items-center bg-gray-100/80 p-0.5 rounded-full gap-2 shrink-0">
                           <button 
-                            className="w-7 h-7 flex items-center justify-center bg-white border border-gray-100 rounded-full shadow-sm text-[10px] hover:bg-gray-100 active:scale-95 transition-all text-gray-600"
+                            className="w-7 h-7 flex items-center justify-center bg-white rounded-full shadow-sm text-[10px] hover:bg-gray-100 active:scale-95 transition-all text-gray-600"
                             onClick={() => updateCartItemQty(item.foodItemId, -1)}
                           >
                             <i className="fas fa-minus"></i>
                           </button>
-                          <span className="w-5 text-center font-black text-gray-700 text-sm">{item.qty}</span>
+                          <span className="w-5 text-center font-black text-gray-800 text-sm">{item.qty}</span>
                           <button 
-                            className="w-7 h-7 flex items-center justify-center bg-white border border-gray-100 rounded-full shadow-sm text-[10px] hover:bg-gray-100 active:scale-95 transition-all text-gray-600"
+                            className="w-7 h-7 flex items-center justify-center bg-white rounded-full shadow-sm text-[10px] hover:bg-gray-100 active:scale-95 transition-all text-gray-600"
                             onClick={() => updateCartItemQty(item.foodItemId, 1)}
                           >
                             <i className="fas fa-plus"></i>
@@ -1005,25 +1027,32 @@ const CustomerQROrder = ({ isManual = false }) => {
                 </div>
               </div>
 
-              {/* Order Info Form Section */}
-              <div className="space-y-6 pt-4 animate-in fade-in duration-500">
-                <h6 className="text-[10px] font-black uppercase tracking-[0.1em] text-gray-400 mb-2 border-b pb-2">Delivery Details</h6>
+              {/* Delivery Details Form Section */}
+              <div className="space-y-6 animate-in slide-in-from-bottom-5 duration-700">
+                <h6 className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 mb-4 flex items-center gap-2">
+                  <span className="w-8 h-[2px] bg-emerald-600"></span>
+                  Checkout Info
+                </h6>
                 
-                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                <div className="p-5 bg-gradient-to-br from-gray-50 to-emerald-50/30 rounded-3xl border border-gray-100 relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform duration-700">
+                    <i className="fas fa-utensils text-8xl text-emerald-900"></i>
+                  </div>
+                  
                   {isManual ? (
-                    <div className="space-y-4">
-                      <label className="text-xs font-black text-gray-500 uppercase tracking-wider flex items-center gap-2">
-                         <i className="fas fa-map-pin text-emerald-500"></i> Place Order For
+                    <div className="space-y-5 relative z-10">
+                      <label className="text-[10px] font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">
+                         <i className="fas fa-location-dot"></i> Order Location
                       </label>
-                      <div className="flex gap-2 p-1.5 bg-gray-200/50 rounded-xl">
+                      <div className="flex gap-2 p-1 bg-gray-200/40 rounded-2xl">
                         <button 
-                          className={`flex-1 py-2 rounded-lg font-bold text-xs transition-all ${manualOrderType === 'TABLE' ? 'bg-white text-gray-900 shadow-sm border border-gray-100' : 'text-gray-500 hover:text-gray-700'}`}
+                          className={`flex-1 py-3 rounded-xl font-black text-xs transition-all uppercase tracking-widest ${manualOrderType === 'TABLE' ? 'bg-white text-emerald-700 shadow-xl shadow-emerald-900/5' : 'text-gray-400 hover:text-gray-600'}`}
                           onClick={() => setManualOrderType('TABLE')}
                         >
                           Table
                         </button>
                         <button 
-                          className={`flex-1 py-2 rounded-lg font-bold text-xs transition-all ${manualOrderType === 'ROOM' ? 'bg-white text-gray-900 shadow-sm border border-gray-100' : 'text-gray-500 hover:text-gray-700'}`}
+                          className={`flex-1 py-3 rounded-xl font-black text-xs transition-all uppercase tracking-widest ${manualOrderType === 'ROOM' ? 'bg-white text-emerald-700 shadow-xl shadow-emerald-900/5' : 'text-gray-400 hover:text-gray-600'}`}
                           onClick={() => setManualOrderType('ROOM')}
                         >
                           Room
@@ -1031,61 +1060,64 @@ const CustomerQROrder = ({ isManual = false }) => {
                       </div>
                       <input
                         type="text"
-                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500/30 outline-none transition-all font-black text-gray-800 placeholder:text-gray-300"
-                        placeholder={`Enter ${manualOrderType === 'ROOM' ? 'Room' : 'Table'} Number`}
+                        className="w-full px-5 py-4 bg-white border-2 border-emerald-100 rounded-2xl focus:border-emerald-500 focus:ring-0 outline-none transition-all font-black text-xl text-emerald-900 placeholder:text-gray-200 text-center"
+                        placeholder={`NO.`}
                         value={manualTableNo}
                         onChange={(e) => setManualTableNo(e.target.value)}
                       />
                     </div>
                   ) : (
-                    <div className="flex items-center gap-4 text-gray-800">
-                      <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 border border-emerald-100/50">
-                        <i className={`fas ${tableInfo?.isRoom ? 'fa-hotel' : 'fa-pizza-slice'} text-lg`}></i>
+                    <div className="flex items-center gap-5 relative z-10">
+                      <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-emerald-600 border-2 border-emerald-100 shadow-lg shadow-emerald-900/5">
+                        <i className={`fas ${tableInfo?.isRoom ? 'fa-hotel' : 'fa-utensils'} text-2xl`}></i>
                       </div>
                       <div>
-                        <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">{tableInfo?.isRoom ? 'Room' : 'Table'}</p>
-                        <p className="font-black text-xl text-gray-900">{tableInfo?.tableNo || tableInfo?.roomNo}</p>
+                        <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.3em]">{tableInfo?.isRoom ? 'Room' : 'Table'}</p>
+                        <p className="font-black text-3xl text-emerald-900 tracking-tighter leading-none">{tableInfo?.tableNo || tableInfo?.roomNo}</p>
                       </div>
                     </div>
                   )}
                 </div>
 
-                <div className="space-y-5">
-                  <div>
-                    <label className="text-xs font-black text-gray-500 uppercase tracking-widest mb-2 block ml-1">Customer Name <span className="text-red-400">*</span></label>
-                    <input
-                      type="text"
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500/30 outline-none transition-all placeholder:text-gray-300 font-medium"
-                      placeholder="e.g. John Doe"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                    />
+                <div className="space-y-6">
+                  <div className="group">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 block ml-2 group-focus-within:text-emerald-500 transition-colors">Customer Name <span className="text-red-400">*</span></label>
+                    <div className="relative">
+                      <i className="fas fa-user absolute left-5 top-1/2 -translate-y-1/2 text-gray-300"></i>
+                      <input
+                        type="text"
+                        className="w-full pl-12 pr-5 py-4 bg-gray-50 border-2 border-transparent border-gray-50 rounded-2xl focus:bg-white focus:border-emerald-500/20 focus:ring-0 outline-none transition-all font-bold text-gray-800"
+                        placeholder="John Doe"
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                      />
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="text-xs font-black text-gray-500 uppercase tracking-widest mb-2 block ml-1">WhatsApp Verification <span className="text-red-400">*</span></label>
-                    <div className="phone-input-custom-tailwind">
+                  <div className="group">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 block ml-2 group-focus-within:text-emerald-500 transition-colors">WhatsApp Number <span className="text-red-400">*</span></label>
+                    <div className="phone-input-premium">
                       <PhoneInput
                         country={'lk'}
                         value={whatsappNumber}
                         onChange={setWhatsappNumber}
-                        inputClass="!w-full !h-12 !rounded-xl !bg-gray-50 !border-gray-200 !text-sm !font-medium focus:!ring-4 focus:!ring-emerald-500/10 focus:!border-emerald-500/30 outline-none transition-all"
-                        containerClass="!w-full"
-                        placeholder="WhatsApp Number"
+                        inputClass="!w-full !h-14 !rounded-2xl !bg-gray-50 !border-none !font-bold !text-gray-800 focus:!bg-white focus:!ring-2 focus:!ring-emerald-500/10 outline-none transition-all"
+                        containerClass="!w-full !border-none"
+                        buttonClass="!bg-transparent !border-none !rounded-2xl"
+                        placeholder="Mobile Number"
                         enableSearch={true}
                       />
                     </div>
-                    <p className="text-[9px] text-gray-400 mt-2 px-1 flex items-center gap-1.5 font-medium italic">
-                      <i className="fas fa-shield-alt text-emerald-500"></i> We will send your digital receipt to this number.
+                    <p className="text-[10px] text-gray-400 mt-3 px-2 flex items-center gap-2 font-medium italic opacity-70">
+                      <i className="fas fa-check-circle text-emerald-500"></i> Digital bill will be sent to this number.
                     </p>
                   </div>
 
                   <div>
-                    <label className="text-xs font-black text-gray-500 uppercase tracking-widest mb-2 block ml-1">Kitchen Instructions</label>
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 block ml-2">Kitchen Note</label>
                     <textarea
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500/30 outline-none transition-all resize-none placeholder:text-gray-300 text-sm font-medium"
-                      rows="3"
-                      placeholder="e.g. No onions, extra spicy, etc."
+                      className="w-full px-5 py-5 bg-gray-50 border-none rounded-2xl focus:bg-white focus:ring-2 focus:ring-emerald-500/10 outline-none transition-all resize-none shadow-sm min-h-[100px] text-sm font-medium"
+                      placeholder="Add any allergies or preferences..."
                       value={orderNotes}
                       onChange={(e) => setOrderNotes(e.target.value)}
                     ></textarea>
@@ -1096,37 +1128,38 @@ const CustomerQROrder = ({ isManual = false }) => {
           )}
         </div>
 
-        {/* Updated Footer - Always Visible & Elegant */}
+        {/* Footer - Solid fixed bottom section with high impact */}
         {cart.length > 0 && (
-          <div className="p-6 border-t bg-white border-gray-100 shrink-0 shadow-[0_-20px_40px_rgba(0,0,0,0.02)] sm:rounded-t-[2.5rem]">
-            <div className="space-y-3 mb-6">
-              <div className="flex justify-between text-gray-400 text-xs font-bold px-1">
-                <span>Cart Subtotal</span>
-                <span className="text-gray-600">Rs. {calculateSubtotal().toFixed(0)}</span>
+          <div className="p-8 border-t bg-white border-gray-100 shrink-0 shadow-[0_-30px_60px_rgba(0,0,0,0.03)] rounded-t-[3rem] animate-in slide-in-from-bottom duration-500">
+            <div className="space-y-4 mb-8">
+              <div className="flex justify-between text-gray-400 text-[10px] font-black uppercase tracking-widest px-2">
+                <span>Subtotal</span>
+                <span className="text-gray-900">Rs. {calculateSubtotal().toFixed(0)}</span>
               </div>
-              <div className="flex justify-between text-gray-400 text-xs font-bold px-1">
+              <div className="flex justify-between text-gray-400 text-[10px] font-black uppercase tracking-widest px-2">
                 <span>Service Fee (10%)</span>
-                <span className="text-gray-600">Rs. {calculateServiceCharge().toFixed(0)}</span>
+                <span className="text-gray-900">Rs. {calculateServiceCharge().toFixed(0)}</span>
               </div>
-              <div className="flex justify-between items-center pt-3 border-t border-dashed border-gray-100 px-1 mt-2">
-                <span className="text-sm font-black text-gray-900 uppercase tracking-tighter">Grand Total</span>
-                <span className="text-2xl font-black text-emerald-600 tracking-tighter">Rs. {parseFloat(calculateTotal()).toFixed(0)}</span>
+              <div className="flex justify-between items-center pt-5 border-t-2 border-dashed border-gray-100 px-2 mt-4">
+                <span className="text-sm font-black text-gray-900 uppercase tracking-tighter">Total Payable</span>
+                <div className="text-right">
+                  <span className="text-3xl font-black text-emerald-600 tracking-tighter block leading-none">Rs. {parseFloat(calculateTotal()).toFixed(0)}</span>
+                  <span className="text-[9px] text-gray-400 font-bold uppercase">Inclusive of VAT</span>
+                </div>
               </div>
             </div>
 
             <button
-              className="w-full py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-emerald-600/20 active:scale-[0.97] transition-all flex items-center justify-center gap-3"
+              className="w-full py-5 bg-emerald-600 text-white rounded-[2rem] font-black text-sm uppercase tracking-[0.3em] shadow-2xl shadow-emerald-600/30 active:scale-[0.96] transition-all flex items-center justify-center gap-4 relative overflow-hidden group"
               onClick={placeOrder}
             >
-              <i className="fas fa-paper-plane text-xs opacity-70"></i> 
-              Place Your Order
+              <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+              <i className="fas fa-bolt text-xs text-emerald-200"></i> 
+              PLACE YOUR ORDER
             </button>
           </div>
         )}
       </div>
-
-      {/* Cart Overlay */}
-      {showCart && <div className="cart-overlay" onClick={() => setShowCart(false)}></div>}
     </div>
   );
 };
