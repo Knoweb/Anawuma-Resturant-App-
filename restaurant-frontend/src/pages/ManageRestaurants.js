@@ -194,7 +194,7 @@ function ManageRestaurants() {
                     <div className="privileges-list">
                       <div className="privilege-item">QR Menu System</div>
                       {restaurant.enableHousekeeping && (
-                        <div className="privilege-item">QR Housekeeping System</div>
+                        <div className="privilege-item">Room Orders (QR)</div>
                       )}
                       {restaurant.enableKds && (
                         <div className="privilege-item">Kitchen Display System</div>
@@ -291,7 +291,7 @@ function ManageRestaurants() {
                           defaultChecked={editModal.restaurant.enableHousekeeping}
                         />
                         <label className="form-check-label" htmlFor="enable_housekeeping">
-                          QR Housekeeping System
+                          Room Orders (QR)
                         </label>
                       </div>
                       <div className="form-check">

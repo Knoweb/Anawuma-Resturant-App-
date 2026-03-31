@@ -244,7 +244,7 @@ function AdminHotelProfile() {
 
   const privileges = [
     'QR Menu System',
-    restaurant.enableHousekeeping && 'QR Housekeeping System',
+    restaurant.enableHousekeeping && 'Room Orders (QR)',
     restaurant.enableKds && 'Kitchen Display System',
     restaurant.enableReports && 'Reports & Analytics',
     restaurant.enableAccountant && 'Accountant Management',

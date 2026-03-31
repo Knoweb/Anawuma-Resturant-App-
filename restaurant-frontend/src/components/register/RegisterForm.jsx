@@ -255,7 +255,7 @@ const RegisterForm = () => {
                 checked={form.enable_housekeeping}
                 onChange={handleFeatureToggle}
               />
-              <span>QR Housekeeping System</span>
+              <span>Room Orders (QR)</span>
             </label>
 
             <label className="reg-feature-item" htmlFor="enable_kds">
