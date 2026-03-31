@@ -948,26 +948,34 @@ const CustomerQROrder = ({ isManual = false }) => {
             <div className="cart-items">
               {cart.map(item => (
                 <div key={item.foodItemId} className="cart-item-modern">
-                  <div className="cart-item-info" style={{ flex: 1, paddingRight: '10px' }}>
-                    <h5>{item.name}</h5>
-                    <p>Rs. {parseFloat(item.price).toFixed(0)}</p>
-                    <input
-                      type="text"
-                      className="form-control form-control-sm mt-2"
-                      placeholder="Special instructions..."
-                      value={item.notes}
-                      onChange={(e) => updateCartItemNotes(item.foodItemId, e.target.value)}
-                      style={{ borderRadius: '8px', fontSize: '0.85rem' }}
-                    />
-                  </div>
-                  <div className="cart-item-controls" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+                  {/* Top Row: Name and Remove Button */}
+                  <div className="cart-item-header">
+                    <h5 className="mb-0">{item.name}</h5>
                     <button
                       className="remove-btn"
                       onClick={() => removeFromCart(item.foodItemId)}
                     >
                       <i className="fas fa-trash"></i>
                     </button>
-                    <div className="qty-controls">
+                  </div>
+
+                  {/* Middle Row: Price */}
+                  <div className="cart-item-price">
+                    <span>Rs. {parseFloat(item.price).toFixed(0)}</span>
+                  </div>
+
+                  {/* Bottom Row: Instructions and Quantity Controls */}
+                  <div className="cart-item-footer">
+                    <div className="cart-item-notes-wrapper">
+                      <input
+                        type="text"
+                        className="cart-notes-input"
+                        placeholder="Special instructions..."
+                        value={item.notes}
+                        onChange={(e) => updateCartItemNotes(item.foodItemId, e.target.value)}
+                      />
+                    </div>
+                    <div className="qty-controls-modern">
                       <button onClick={() => updateCartItemQty(item.foodItemId, -1)}>
                         <i className="fas fa-minus"></i>
                       </button>
