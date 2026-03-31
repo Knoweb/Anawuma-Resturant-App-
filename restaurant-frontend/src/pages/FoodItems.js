@@ -5,7 +5,7 @@ import Sidebar from '../components/common/Sidebar';
 import EditFoodItemModal from '../components/food-items/EditFoodItemModal';
 import AddCategoryModal from '../components/categories/AddCategoryModal';
 import Swal from 'sweetalert2';
-import apiClient from '../api/apiClient';
+import apiClient, { sanitizeUrl } from '../api/apiClient';
 import './FoodItems.css';
 
 function FoodItems() {
@@ -343,8 +343,11 @@ function FoodItems() {
                     foodItem.imageUrl1,
                     foodItem.imageUrl2,
                     foodItem.imageUrl3,
-                    foodItem.imageUrl4
-                  ].filter(Boolean);
+                    foodItem.imageUrl4,
+                    foodItem.imageUrl,   // Support single image field
+                    foodItem.image,      // Support alternative name
+                    foodItem.itemImage   // Support another alternative name
+                  ].filter(Boolean).map(url => sanitizeUrl(url));
 
                   return (
                     <div className="col-lg-3 col-md-4 col-sm-6" key={foodItem.foodItemId}>
