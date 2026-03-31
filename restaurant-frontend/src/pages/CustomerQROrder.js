@@ -756,18 +756,16 @@ const CustomerQROrder = ({ isManual = false }) => {
                         key={cat.categoryId} 
                         className="sketch-category-box"
                         onClick={() => {
-                          // If there's only one item in this category, add it immediately
-                          // Otherwise, maybe filter/show items? For now, we'll try to add first if items exist
                           if (catItems.length === 1) {
                             addToCart(catItems[0]);
                           } else {
-                            // Select category to show items in the flattened view if implemented, 
-                            // or for now just select menu and let the existing logic handle it
                             setSelectedMenu(group.menuId);
-                            // We might need an additional state for manual category filtering if desired
                           }
                         }}
                       >
+                        <div className="sketch-box-label">
+                          <span>{cat.categoryName}</span>
+                        </div>
                         <div className="sketch-box-media">
                           {catImage ? (
                             <img src={getImageUrl(catImage)} alt={cat.categoryName} />
@@ -775,8 +773,10 @@ const CustomerQROrder = ({ isManual = false }) => {
                             <div className="sketch-placeholder"><i className="fas fa-utensils"></i></div>
                           )}
                         </div>
-                        <div className="sketch-box-label">
-                          <span>{cat.categoryName}</span>
+                        <div className="sketch-add-btn-container">
+                           <button className="sketch-add-btn">
+                             <i className="fas fa-plus-circle me-2"></i>Select & Add
+                           </button>
                         </div>
                         {catItems.length > 1 && (
                           <div className="sketch-badge">{catItems.length} items</div>
