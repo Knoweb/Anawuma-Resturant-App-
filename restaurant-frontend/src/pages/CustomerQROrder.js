@@ -726,30 +726,12 @@ const CustomerQROrder = ({ isManual = false }) => {
         </div>
       );
     }
-
     return (
       <div className="items-view-container">
         {/* Basic fallback if somehow reached here without menu */}
         <div className="text-center py-5">
           <p>Please select a menu to start ordering.</p>
           <button className="btn btn-primary" onClick={() => setSelectedMenu(null)}>Back to Menus</button>
-        </div>
-      </div>
-    );
-                  <div className="card-content">
-                    <h4>{item.itemName}</h4>
-                    <p>{item.description}</p>
-                    <button
-                      className="add-to-cart-modern"
-                      onClick={() => addToCart(item)}
-                    >
-                      <i className="fas fa-plus"></i> Add to Order
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
         </div>
       </div>
     );
