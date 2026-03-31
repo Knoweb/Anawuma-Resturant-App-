@@ -886,12 +886,12 @@ const CustomerQROrder = ({ isManual = false }) => {
                     </div>
                   </div>
                   <div className="sketch-detail-row">
-                    <span className="label">Service Charge :</span>
-                    <span className="value">Rs. 0</span>
+                    <span className="label">Service Charge (10%) :</span>
+                    <span className="value">Rs. {parseFloat(activeItemDetail.price * modalQty * 0.1).toFixed(0)}</span>
                   </div>
                   <div className="sketch-detail-row total-row mt-3">
                     <span className="label fw-bold">Total :</span>
-                    <span className="value fw-bold">Rs. {parseFloat(activeItemDetail.price * modalQty).toFixed(0)}</span>
+                    <span className="value fw-bold">Rs. {parseFloat(activeItemDetail.price * modalQty * 1.1).toFixed(0)}</span>
                   </div>
                 </div>
 
