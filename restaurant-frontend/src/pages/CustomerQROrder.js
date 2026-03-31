@@ -925,241 +925,168 @@ const CustomerQROrder = ({ isManual = false }) => {
       </nav>
 
       {/* Main Content Area */}
+      {/* Main Content Area */}
       <main className="customer-main-content">
         {renderMainContent()}
       </main>
 
-      {/* FIXED POSITIONED DRAWER OVERLAY */}
-      {/* Dark Overlay Background Mask */}
-      <div 
-        className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-[2000] transition-opacity duration-300 pointer-events-none ${showCart ? 'opacity-100 pointer-events-auto' : 'opacity-0'}`}
-        onClick={() => setShowCart(false)}
-      />
-
-      {/* Sliding Drawer Panel */}
-      <div 
-        className={`fixed top-0 right-0 h-screen w-full sm:w-[420px] bg-white shadow-[-]30px_0_60px_rgba(0,0,0,0.15)] z-[2001] flex flex-col transition-transform duration-500 ease-in-out transform ${showCart ? 'translate-x-0' : 'translate-x-full'}`}
-      >
-        {/* Header - Non-shrinking top section */}
-        <div className="p-6 border-b flex items-center justify-between shrink-0 bg-white">
-          <h4 className="flex items-center text-xl font-black text-gray-900 tracking-tight">
-             <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 mr-3">
-               <i className="fas fa-shopping-bag"></i>
-             </div>
-            Checkout Order
-          </h4>
-          <button 
-            className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-full transition-all text-gray-400 hover:text-gray-900" 
-            onClick={() => setShowCart(false)}
-          >
-            <i className="fas fa-times text-xl"></i>
+      {/* Cart Drawer */}
+      <div className={`cart-drawer ${showCart ? 'open' : ''}`}>
+        <div className="cart-header">
+          <h4><i className="fas fa-shopping-cart me-2" style={{marginRight: '8px'}}></i> Your Order</h4>
+          <button className="btn-close" onClick={() => setShowCart(false)} style={{fontSize: '1.5rem', opacity: 0.7}}>
+            <i className="fas fa-times"></i>
           </button>
         </div>
-
-        {/* Body - Main scrollable content including items and form */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+        <div className="cart-body">
           {cart.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-gray-300 opacity-80">
-              <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6">
-                <i className="fas fa-shopping-basket text-4xl"></i>
-              </div>
-              <p className="text-lg font-black uppercase tracking-widest">Cart is empty</p>
-              <button 
-                className="mt-6 text-sm font-bold text-emerald-600 hover:underline"
-                onClick={() => setShowCart(false)}
-              >
-                Browse Our Menu
-              </button>
+            <div className="empty-cart-modern">
+              <i className="fas fa-shopping-basket"></i>
+              <p>Your cart is empty</p>
             </div>
           ) : (
-            <div className="space-y-10">
-              {/* Order Items Section */}
-              <div className="space-y-4">
-                <h6 className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 mb-4 flex items-center gap-2">
-                  <span className="w-8 h-[2px] bg-emerald-600"></span>
-                  Selected Items
-                  <span className="bg-emerald-100 px-2 py-0.5 rounded-full text-[9px]">{cart.length}</span>
-                </h6>
-                <div className="space-y-4">
-                  {cart.map(item => (
-                    <div key={item.foodItemId} className="p-4 bg-white border border-gray-100 rounded-2xl shadow-sm hover:border-emerald-200 transition-all group">
-                      <div className="flex justify-between items-start mb-3">
-                        <div className="flex-1">
-                          <h5 className="font-black text-gray-900 mb-1 leading-tight group-hover:text-emerald-700 transition-colors">{item.name}</h5>
-                          <span className="text-emerald-600 font-black text-sm tracking-tighter">Rs. {parseFloat(item.price).toFixed(0)}</span>
-                        </div>
-                        <button
-                          className="text-gray-300 p-2 hover:bg-red-50 hover:text-red-500 rounded-xl transition-all"
-                          onClick={() => removeFromCart(item.foodItemId)}
-                        >
-                          <i className="fas fa-trash-alt text-sm"></i>
-                        </button>
-                      </div>
-
-                      <div className="flex items-center gap-4 pt-3 border-t border-gray-50">
-                        <div className="flex-1">
-                          <input
-                            type="text"
-                            className="w-full px-4 py-2 bg-gray-50 border-none rounded-xl text-[11px] font-medium focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all placeholder:text-gray-300"
-                            placeholder="Add special instructions..."
-                            value={item.notes}
-                            onChange={(e) => updateCartItemNotes(item.foodItemId, e.target.value)}
-                          />
-                        </div>
-                        <div className="flex items-center bg-gray-100/80 p-0.5 rounded-full gap-2 shrink-0">
-                          <button 
-                            className="w-7 h-7 flex items-center justify-center bg-white rounded-full shadow-sm text-[10px] hover:bg-gray-100 active:scale-95 transition-all text-gray-600"
-                            onClick={() => updateCartItemQty(item.foodItemId, -1)}
-                          >
-                            <i className="fas fa-minus"></i>
-                          </button>
-                          <span className="w-5 text-center font-black text-gray-800 text-sm">{item.qty}</span>
-                          <button 
-                            className="w-7 h-7 flex items-center justify-center bg-white rounded-full shadow-sm text-[10px] hover:bg-gray-100 active:scale-95 transition-all text-gray-600"
-                            onClick={() => updateCartItemQty(item.foodItemId, 1)}
-                          >
-                            <i className="fas fa-plus"></i>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Delivery Details Form Section */}
-              <div className="space-y-6 animate-in slide-in-from-bottom-5 duration-700">
-                <h6 className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 mb-4 flex items-center gap-2">
-                  <span className="w-8 h-[2px] bg-emerald-600"></span>
-                  Checkout Info
-                </h6>
-                
-                <div className="p-5 bg-gradient-to-br from-gray-50 to-emerald-50/30 rounded-3xl border border-gray-100 relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform duration-700">
-                    <i className="fas fa-utensils text-8xl text-emerald-900"></i>
+            <div className="cart-items">
+              {cart.map(item => (
+                <div key={item.foodItemId} className="cart-item-modern">
+                  <div className="cart-item-info" style={{ flex: 1, paddingRight: '10px' }}>
+                    <h5>{item.name}</h5>
+                    <p>Rs. {parseFloat(item.price).toFixed(0)}</p>
+                    <input
+                      type="text"
+                      className="form-control form-control-sm mt-2"
+                      placeholder="Special instructions..."
+                      value={item.notes}
+                      onChange={(e) => updateCartItemNotes(item.foodItemId, e.target.value)}
+                      style={{ borderRadius: '8px', fontSize: '0.85rem' }}
+                    />
                   </div>
-                  
-                  {isManual ? (
-                    <div className="space-y-5 relative z-10">
-                      <label className="text-[10px] font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">
-                         <i className="fas fa-location-dot"></i> Order Location
-                      </label>
-                      <div className="flex gap-2 p-1 bg-gray-200/40 rounded-2xl">
-                        <button 
-                          className={`flex-1 py-3 rounded-xl font-black text-xs transition-all uppercase tracking-widest ${manualOrderType === 'TABLE' ? 'bg-white text-emerald-700 shadow-xl shadow-emerald-900/5' : 'text-gray-400 hover:text-gray-600'}`}
-                          onClick={() => setManualOrderType('TABLE')}
-                        >
-                          Table
-                        </button>
-                        <button 
-                          className={`flex-1 py-3 rounded-xl font-black text-xs transition-all uppercase tracking-widest ${manualOrderType === 'ROOM' ? 'bg-white text-emerald-700 shadow-xl shadow-emerald-900/5' : 'text-gray-400 hover:text-gray-600'}`}
-                          onClick={() => setManualOrderType('ROOM')}
-                        >
-                          Room
-                        </button>
-                      </div>
-                      <input
-                        type="text"
-                        className="w-full px-5 py-4 bg-white border-2 border-emerald-100 rounded-2xl focus:border-emerald-500 focus:ring-0 outline-none transition-all font-black text-xl text-emerald-900 placeholder:text-gray-200 text-center"
-                        placeholder={`NO.`}
-                        value={manualTableNo}
-                        onChange={(e) => setManualTableNo(e.target.value)}
-                      />
+                  <div className="cart-item-controls" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+                    <button
+                      className="remove-btn"
+                      onClick={() => removeFromCart(item.foodItemId)}
+                    >
+                      <i className="fas fa-trash"></i>
+                    </button>
+                    <div className="qty-controls">
+                      <button onClick={() => updateCartItemQty(item.foodItemId, -1)}>
+                        <i className="fas fa-minus"></i>
+                      </button>
+                      <span>{item.qty}</span>
+                      <button onClick={() => updateCartItemQty(item.foodItemId, 1)}>
+                        <i className="fas fa-plus"></i>
+                      </button>
                     </div>
-                  ) : (
-                    <div className="flex items-center gap-5 relative z-10">
-                      <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-emerald-600 border-2 border-emerald-100 shadow-lg shadow-emerald-900/5">
-                        <i className={`fas ${tableInfo?.isRoom ? 'fa-hotel' : 'fa-utensils'} text-2xl`}></i>
-                      </div>
-                      <div>
-                        <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.3em]">{tableInfo?.isRoom ? 'Room' : 'Table'}</p>
-                        <p className="font-black text-3xl text-emerald-900 tracking-tighter leading-none">{tableInfo?.tableNo || tableInfo?.roomNo}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-6">
-                  <div className="group">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 block ml-2 group-focus-within:text-emerald-500 transition-colors">Customer Name <span className="text-red-400">*</span></label>
-                    <div className="relative">
-                      <i className="fas fa-user absolute left-5 top-1/2 -translate-y-1/2 text-gray-300"></i>
-                      <input
-                        type="text"
-                        className="w-full pl-12 pr-5 py-4 bg-gray-50 border-2 border-transparent border-gray-50 rounded-2xl focus:bg-white focus:border-emerald-500/20 focus:ring-0 outline-none transition-all font-bold text-gray-800"
-                        placeholder="John Doe"
-                        value={customerName}
-                        onChange={(e) => setCustomerName(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="group">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 block ml-2 group-focus-within:text-emerald-500 transition-colors">WhatsApp Number <span className="text-red-400">*</span></label>
-                    <div className="phone-input-premium">
-                      <PhoneInput
-                        country={'lk'}
-                        value={whatsappNumber}
-                        onChange={setWhatsappNumber}
-                        inputClass="!w-full !h-14 !rounded-2xl !bg-gray-50 !border-none !font-bold !text-gray-800 focus:!bg-white focus:!ring-2 focus:!ring-emerald-500/10 outline-none transition-all"
-                        containerClass="!w-full !border-none"
-                        buttonClass="!bg-transparent !border-none !rounded-2xl"
-                        placeholder="Mobile Number"
-                        enableSearch={true}
-                      />
-                    </div>
-                    <p className="text-[10px] text-gray-400 mt-3 px-2 flex items-center gap-2 font-medium italic opacity-70">
-                      <i className="fas fa-check-circle text-emerald-500"></i> Digital bill will be sent to this number.
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 block ml-2">Kitchen Note</label>
-                    <textarea
-                      className="w-full px-5 py-5 bg-gray-50 border-none rounded-2xl focus:bg-white focus:ring-2 focus:ring-emerald-500/10 outline-none transition-all resize-none shadow-sm min-h-[100px] text-sm font-medium"
-                      placeholder="Add any allergies or preferences..."
-                      value={orderNotes}
-                      onChange={(e) => setOrderNotes(e.target.value)}
-                    ></textarea>
                   </div>
                 </div>
-              </div>
+              ))}
             </div>
           )}
         </div>
 
-        {/* Footer - Solid fixed bottom section with high impact */}
         {cart.length > 0 && (
-          <div className="p-8 border-t bg-white border-gray-100 shrink-0 shadow-[0_-30px_60px_rgba(0,0,0,0.03)] rounded-t-[3rem] animate-in slide-in-from-bottom duration-500">
-            <div className="space-y-4 mb-8">
-              <div className="flex justify-between text-gray-400 text-[10px] font-black uppercase tracking-widest px-2">
-                <span>Subtotal</span>
-                <span className="text-gray-900">Rs. {calculateSubtotal().toFixed(0)}</span>
+          <div className="cart-footer">
+            <div className="order-inputs">
+               <div className="table-info-display mb-3">
+                {isManual ? (
+                  <div className="manual-table-select">
+                    <label className="form-label">Order For <span className="text-danger">*</span></label>
+                    <div className="d-flex gap-2 mb-2">
+                      <button 
+                        className={`btn btn-sm ${manualOrderType === 'TABLE' ? 'btn-primary' : 'btn-outline-primary'}`}
+                        onClick={() => setManualOrderType('TABLE')}
+                        style={{ flex: 1 }}
+                      >
+                        Table
+                      </button>
+                      <button 
+                        className={`btn btn-sm ${manualOrderType === 'ROOM' ? 'btn-primary' : 'btn-outline-primary'}`}
+                        onClick={() => setManualOrderType('ROOM')}
+                        style={{ flex: 1 }}
+                      >
+                        Room
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder={`Enter ${manualOrderType === 'ROOM' ? 'Room' : 'Table'} Number`}
+                      value={manualTableNo}
+                      onChange={(e) => setManualTableNo(e.target.value)}
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <i className={`fas ${tableInfo?.isRoom ? 'fa-concierge-bell' : 'fa-chair'} me-2`}></i>
+                    <strong>{tableInfo?.isRoom ? 'Room' : 'Table'}:</strong> {tableInfo?.tableNo || tableInfo?.roomNo}
+                  </>
+                )}
               </div>
-              <div className="flex justify-between text-gray-400 text-[10px] font-black uppercase tracking-widest px-2">
-                <span>Service Fee (10%)</span>
-                <span className="text-gray-900">Rs. {calculateServiceCharge().toFixed(0)}</span>
+
+              <div className="mb-3">
+                <label className="form-label">Your Name <span className="text-danger">*</span></label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Enter your name"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                />
               </div>
-              <div className="flex justify-between items-center pt-5 border-t-2 border-dashed border-gray-100 px-2 mt-4">
-                <span className="text-sm font-black text-gray-900 uppercase tracking-tighter">Total Payable</span>
-                <div className="text-right">
-                  <span className="text-3xl font-black text-emerald-600 tracking-tighter block leading-none">Rs. {parseFloat(calculateTotal()).toFixed(0)}</span>
-                  <span className="text-[9px] text-gray-400 font-bold uppercase">Inclusive of VAT</span>
-                </div>
+
+              <div className="mb-3">
+                <label className="form-label">WhatsApp Number <span className="text-danger">*</span></label>
+                <PhoneInput
+                  country={'lk'}
+                  value={whatsappNumber}
+                  onChange={setWhatsappNumber}
+                  inputStyle={{ width: '100%' }}
+                  containerClass="phone-input-container"
+                  placeholder="Enter WhatsApp Number"
+                  enableSearch={true}
+                />
+                <small className="text-muted">We'll send your bill to this WhatsApp number.</small>
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label">Order Notes (Optional)</label>
+                <textarea
+                  className="form-control"
+                  rows="2"
+                  placeholder="Any special requests?"
+                  value={orderNotes}
+                  onChange={(e) => setOrderNotes(e.target.value)}
+                ></textarea>
               </div>
             </div>
 
+            <div className="cart-total">
+               <div className="d-flex justify-content-between mb-1 text-muted small">
+                 <span>Subtotal:</span>
+                 <span>Rs. {calculateSubtotal().toFixed(0)}</span>
+               </div>
+               <div className="d-flex justify-content-between mb-2 text-muted small">
+                 <span>Service Charge (10%):</span>
+                 <span>Rs. {calculateServiceCharge().toFixed(0)}</span>
+               </div>
+               <div className="d-flex justify-content-between fw-bold h5 mb-0">
+                 <span>Total:</span>
+                 <span>Rs. {parseFloat(calculateTotal()).toFixed(0)}</span>
+               </div>
+            </div>
+
             <button
-              className="w-full py-5 bg-emerald-600 text-white rounded-[2rem] font-black text-sm uppercase tracking-[0.3em] shadow-2xl shadow-emerald-600/30 active:scale-[0.96] transition-all flex items-center justify-center gap-4 relative overflow-hidden group"
+              className="btn btn-lg w-100 text-white"
               onClick={placeOrder}
+              style={{ borderRadius: '8px', background: 'var(--primary-color)', border: 'none', fontWeight: '700', padding: '14px', fontSize: '1.05rem', boxShadow: '0 4px 12px rgba(38, 102, 104, 0.2)' }}
             >
-              <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-              <i className="fas fa-bolt text-xs text-emerald-200"></i> 
-              PLACE YOUR ORDER
+              <i className="fas fa-check me-2"></i> Place Order
             </button>
           </div>
         )}
       </div>
+
+      {/* Cart Overlay */}
+      {showCart && <div className="cart-overlay" onClick={() => setShowCart(false)}></div>}
     </div>
   );
 };
