@@ -39,6 +39,7 @@ const CustomerQROrder = ({ isManual = false }) => {
   const [activeItemDetail, setActiveItemDetail] = useState(null);
   const [modalQty, setModalQty] = useState(1);
   const [modalOrderType, setModalOrderType] = useState('table');
+  const [orderLocation, setOrderLocation] = useState('inside');
   const [modalOrderNotes, setModalOrderNotes] = useState('');
   const [cart, setCart] = useState([]);
   const [customerName, setCustomerName] = useState('');
@@ -900,32 +901,54 @@ const CustomerQROrder = ({ isManual = false }) => {
                 {/* New Fields from Screenshot 1 */}
                 <div className="sketch-modal-extra-fields p-4 border-top">
                   <div className="mb-4">
-                    <label className="d-block mb-2 fw-bold text-muted small">ORDER FOR *</label>
+                    <label className="d-block mb-2 fw-bold text-muted small">ORDER LOCATION *</label>
                     <div className="d-flex gap-2">
                        <button 
-                         className={`flex-grow-1 btn ${modalOrderType === 'table' ? 'btn-primary' : 'btn-outline-primary'}`}
-                         onClick={() => setModalOrderType('table')}
+                         className={`flex-grow-1 btn ${orderLocation === 'inside' ? 'btn-primary' : 'btn-outline-primary'}`}
+                         onClick={() => setOrderLocation('inside')}
                        >
-                         Table
+                         IN SIDE
                        </button>
                        <button 
-                         className={`flex-grow-1 btn ${modalOrderType === 'room' ? 'btn-primary' : 'btn-outline-primary'}`}
-                         onClick={() => setModalOrderType('room')}
+                         className={`flex-grow-1 btn ${orderLocation === 'outside' ? 'btn-primary' : 'btn-outline-primary'}`}
+                         onClick={() => setOrderLocation('outside')}
                        >
-                         Room
+                         OUTSIDE
                        </button>
                     </div>
                   </div>
 
-                  <div className="mb-3">
-                    <input 
-                      type="text" 
-                      className="form-control sketch-input" 
-                      placeholder={modalOrderType === 'table' ? "Enter Table Number" : "Enter Room Number"}
-                      value={manualTableNo}
-                      onChange={(e) => setManualTableNo(e.target.value)}
-                    />
-                  </div>
+                  {orderLocation === 'inside' && (
+                    <>
+                      <div className="mb-4">
+                        <label className="d-block mb-2 fw-bold text-muted small">ORDER FOR *</label>
+                        <div className="d-flex gap-2">
+                          <button 
+                            className={`flex-grow-1 btn ${modalOrderType === 'table' ? 'btn-primary' : 'btn-outline-primary'}`}
+                            onClick={() => setModalOrderType('table')}
+                          >
+                            Table
+                          </button>
+                          <button 
+                            className={`flex-grow-1 btn ${modalOrderType === 'room' ? 'btn-primary' : 'btn-outline-primary'}`}
+                            onClick={() => setModalOrderType('room')}
+                          >
+                            Room
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="mb-3">
+                        <input 
+                          type="text" 
+                          className="form-control sketch-input" 
+                          placeholder={modalOrderType === 'table' ? "Enter Table Number" : "Enter Room Number"}
+                          value={manualTableNo}
+                          onChange={(e) => setManualTableNo(e.target.value)}
+                        />
+                      </div>
+                    </>
+                  )}
 
                   <div className="mb-3">
                     <label className="d-block mb-2 fw-bold text-muted small">YOUR NAME *</label>
