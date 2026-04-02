@@ -45,13 +45,24 @@ const ManualTableOrders = () => {
               `).join('')}
             </div>
             <div class="order-group-footer">
-              Subtotal: Rs. ${parseFloat(order.subtotal).toFixed(0)}
+              <div class="d-flex justify-content-between small text-muted">
+                <span>Subtotal:</span>
+                <span>Rs. ${parseFloat(order.subtotal).toFixed(0)}</span>
+              </div>
+              <div class="d-flex justify-content-between small text-muted">
+                <span>Service Charge (10%):</span>
+                <span>Rs. ${parseFloat(order.serviceCharge).toFixed(0)}</span>
+              </div>
+              <div class="d-flex justify-content-between font-weight-bold mt-1" style="border-top: 1px dashed #ccc; padding-top: 5px; color: #4e73df">
+                <span>Order Total:</span>
+                <span>Rs. ${parseFloat(order.totalAmount).toFixed(0)}</span>
+              </div>
             </div>
           </div>
         `).join('')}
         
         <div class="bill-summary">
-          <div class="bill-total-label">ACCUMULATED GRAND TOTAL (inc. SC)</div>
+          <div class="bill-total-label">ACCUMULATED GRAND TOTAL (Inc. 10% SC)</div>
           <div class="bill-total-value">Rs. ${account.totalAmount.toFixed(0)}</div>
         </div>
       </div>
