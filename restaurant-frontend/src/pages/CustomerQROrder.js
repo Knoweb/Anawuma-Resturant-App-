@@ -1008,243 +1008,241 @@ const CustomerQROrder = ({ isManual = false }) => {
             </div>
           </div>
         </div>
-          </div>
-  )
-}
-
-{/* Premium Elegant Header */ }
-<header className={`customer-header-v2 ${selectedMenu ? 'header-scrolled' : ''}`}>
-  <div className="header-container">
-    <div className="restaurant-brand-v2">
-      {tableInfo?.logo ? (
-        <img src={tableInfo.logo} alt={tableInfo.restaurantName} className="brand-logo-v2" />
-      ) : (
-        <div className="brand-placeholder-v2">
-          <i className="fas fa-utensils"></i>
-        </div>
       )}
-      <div className="brand-text-v2">
-        <h1 className="hotel-name-v2">{tableInfo.restaurantName}</h1>
-        <div className="room-badge-v2">
-          <i className={`fas ${tableInfo?.isRoom || manualOrderType === 'ROOM' ? 'fa-concierge-bell' : 'fa-chair'}`}></i>
-          <span>
-            {isManual ? (
-              `${manualOrderType === 'ROOM' ? 'Room' : 'Table'} ${manualTableNo || '?'}`
+
+      {/* Premium Elegant Header */}
+      <header className={`customer-header-v2 ${selectedMenu ? 'header-scrolled' : ''}`}>
+        <div className="header-container">
+          <div className="restaurant-brand-v2">
+            {tableInfo?.logo ? (
+              <img src={tableInfo.logo} alt={tableInfo.restaurantName} className="brand-logo-v2" />
             ) : (
-              `${tableInfo?.isRoom ? 'Room' : 'Table'} ${tableInfo?.tableNo || tableInfo?.roomNo}`
+              <div className="brand-placeholder-v2">
+                <i className="fas fa-utensils"></i>
+              </div>
             )}
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <div className="cart-trigger-v2" onClick={() => setShowCart(true)}>
-      <div className={`cart-btn-v2 ${cart.length > 0 ? 'pulse' : ''}`}>
-        <i className="fas fa-shopping-bag"></i>
-        {cart.length > 0 && <span className="cart-badge-v2">{cart.length}</span>}
-      </div>
-    </div>
-  </div>
-</header>
-
-{/* Modern Bottom Navigation */ }
-<nav className="mobile-bottom-nav">
-  <button
-    className={`nav-item ${!showStatusScreen ? 'active' : ''}`}
-    onClick={() => setShowStatusScreen(false)}
-  >
-    <i className="fas fa-utensils"></i>
-    <span>Menu</span>
-  </button>
-  <button
-    className={`nav-item ${showStatusScreen ? 'active' : ''} ${orderSuccess ? 'has-active-order' : ''}`}
-    onClick={() => {
-      if (orderSuccess) {
-        setShowStatusScreen(true);
-      } else {
-        Swal.fire({
-          title: 'No Active Order',
-          text: 'You haven\'t placed an order yet.',
-          icon: 'info',
-          toast: true,
-          position: 'bottom',
-          timer: 3000,
-          showConfirmButton: false
-        });
-      }
-    }}
-  >
-    <div className="track-icon-wrapper">
-      <i className="fas fa-receipt"></i>
-      {orderSuccess && <span className="notification-dot"></span>}
-    </div>
-    <span>Track Order</span>
-  </button>
-</nav>
-
-{/* Main Content Area */ }
-{/* Main Content Area */ }
-<main className="customer-main-content">
-  {renderMainContent()}
-</main>
-
-{/* Cart Drawer */ }
-<div className={`cart-drawer ${showCart ? 'open' : ''}`}>
-  <div className="cart-header">
-    <h4><i className="fas fa-shopping-cart me-2" style={{ marginRight: '8px' }}></i> Your Order</h4>
-    <button className="btn-close" onClick={() => setShowCart(false)} style={{ fontSize: '1.5rem', opacity: 0.7 }}>
-      <i className="fas fa-times"></i>
-    </button>
-  </div>
-  <div className="cart-body">
-    {cart.length === 0 ? (
-      <div className="empty-cart-modern">
-        <i className="fas fa-shopping-basket"></i>
-        <p>Your cart is empty</p>
-      </div>
-    ) : (
-      <div className="cart-items">
-        {cart.map(item => (
-          <div key={item.foodItemId} className="cart-item-modern">
-            <div className="cart-item-info" style={{ flex: 1, paddingRight: '10px' }}>
-              <h5>{item.name}</h5>
-              <p>Rs. {parseFloat(item.price).toFixed(0)}</p>
-              <input
-                type="text"
-                className="form-control form-control-sm mt-2"
-                placeholder="Special instructions..."
-                value={item.notes}
-                onChange={(e) => updateCartItemNotes(item.foodItemId, e.target.value)}
-                style={{ borderRadius: '8px', fontSize: '0.85rem' }}
-              />
-            </div>
-            <div className="cart-item-controls" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-              <button
-                className="remove-btn"
-                onClick={() => removeFromCart(item.foodItemId)}
-              >
-                <i className="fas fa-trash"></i>
-              </button>
-              <div className="qty-controls">
-                <button onClick={() => updateCartItemQty(item.foodItemId, -1)}>
-                  <i className="fas fa-minus"></i>
-                </button>
-                <span>{item.qty}</span>
-                <button onClick={() => updateCartItemQty(item.foodItemId, 1)}>
-                  <i className="fas fa-plus"></i>
-                </button>
+            <div className="brand-text-v2">
+              <h1 className="hotel-name-v2">{tableInfo.restaurantName}</h1>
+              <div className="room-badge-v2">
+                <i className={`fas ${tableInfo?.isRoom || manualOrderType === 'ROOM' ? 'fa-concierge-bell' : 'fa-chair'}`}></i>
+                <span>
+                  {isManual ? (
+                    `${manualOrderType === 'ROOM' ? 'Room' : 'Table'} ${manualTableNo || '?'}`
+                  ) : (
+                    `${tableInfo?.isRoom ? 'Room' : 'Table'} ${tableInfo?.tableNo || tableInfo?.roomNo}`
+                  )}
+                </span>
               </div>
             </div>
           </div>
-        ))}
-      </div>
-    )}
-  </div>
 
-  {cart.length > 0 && (
-    <div className="cart-footer">
-      <div className="order-inputs">
-        <div className="table-info-display mb-3">
-          {isManual ? (
-            <div className="manual-table-select">
-              <label className="form-label">Order For <span className="text-danger">*</span></label>
-              <div className="d-flex gap-2 mb-2">
-                <button
-                  className={`btn btn-sm ${manualOrderType === 'TABLE' ? 'btn-primary' : 'btn-outline-primary'}`}
-                  onClick={() => setManualOrderType('TABLE')}
-                  style={{ flex: 1 }}
-                >
-                  Table
-                </button>
-                <button
-                  className={`btn btn-sm ${manualOrderType === 'ROOM' ? 'btn-primary' : 'btn-outline-primary'}`}
-                  onClick={() => setManualOrderType('ROOM')}
-                  style={{ flex: 1 }}
-                >
-                  Room
-                </button>
-              </div>
-              <input
-                type="text"
-                className="form-control"
-                placeholder={`Enter ${manualOrderType === 'ROOM' ? 'Room' : 'Table'} Number`}
-                value={manualTableNo}
-                onChange={(e) => setManualTableNo(e.target.value)}
-              />
+          <div className="cart-trigger-v2" onClick={() => setShowCart(true)}>
+            <div className={`cart-btn-v2 ${cart.length > 0 ? 'pulse' : ''}`}>
+              <i className="fas fa-shopping-bag"></i>
+              {cart.length > 0 && <span className="cart-badge-v2">{cart.length}</span>}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Modern Bottom Navigation */}
+      <nav className="mobile-bottom-nav">
+        <button
+          className={`nav-item ${!showStatusScreen ? 'active' : ''}`}
+          onClick={() => setShowStatusScreen(false)}
+        >
+          <i className="fas fa-utensils"></i>
+          <span>Menu</span>
+        </button>
+        <button
+          className={`nav-item ${showStatusScreen ? 'active' : ''} ${orderSuccess ? 'has-active-order' : ''}`}
+          onClick={() => {
+            if (orderSuccess) {
+              setShowStatusScreen(true);
+            } else {
+              Swal.fire({
+                title: 'No Active Order',
+                text: 'You haven\'t placed an order yet.',
+                icon: 'info',
+                toast: true,
+                position: 'bottom',
+                timer: 3000,
+                showConfirmButton: false
+              });
+            }
+          }}
+        >
+          <div className="track-icon-wrapper">
+            <i className="fas fa-receipt"></i>
+            {orderSuccess && <span className="notification-dot"></span>}
+          </div>
+          <span>Track Order</span>
+        </button>
+      </nav>
+
+      {/* Main Content Area */}
+      {/* Main Content Area */}
+      <main className="customer-main-content">
+        {renderMainContent()}
+      </main>
+
+      {/* Cart Drawer */}
+      <div className={`cart-drawer ${showCart ? 'open' : ''}`}>
+        <div className="cart-header">
+          <h4><i className="fas fa-shopping-cart me-2" style={{ marginRight: '8px' }}></i> Your Order</h4>
+          <button className="btn-close" onClick={() => setShowCart(false)} style={{ fontSize: '1.5rem', opacity: 0.7 }}>
+            <i className="fas fa-times"></i>
+          </button>
+        </div>
+        <div className="cart-body">
+          {cart.length === 0 ? (
+            <div className="empty-cart-modern">
+              <i className="fas fa-shopping-basket"></i>
+              <p>Your cart is empty</p>
             </div>
           ) : (
-            <>
-              <i className={`fas ${tableInfo?.isRoom ? 'fa-concierge-bell' : 'fa-chair'} me-2`}></i>
-              <strong>{tableInfo?.isRoom ? 'Room' : 'Table'}:</strong> {tableInfo?.tableNo || tableInfo?.roomNo}
-            </>
+            <div className="cart-items">
+              {cart.map(item => (
+                <div key={item.foodItemId} className="cart-item-modern">
+                  <div className="cart-item-info" style={{ flex: 1, paddingRight: '10px' }}>
+                    <h5>{item.name}</h5>
+                    <p>Rs. {parseFloat(item.price).toFixed(0)}</p>
+                    <input
+                      type="text"
+                      className="form-control form-control-sm mt-2"
+                      placeholder="Special instructions..."
+                      value={item.notes}
+                      onChange={(e) => updateCartItemNotes(item.foodItemId, e.target.value)}
+                      style={{ borderRadius: '8px', fontSize: '0.85rem' }}
+                    />
+                  </div>
+                  <div className="cart-item-controls" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+                    <button
+                      className="remove-btn"
+                      onClick={() => removeFromCart(item.foodItemId)}
+                    >
+                      <i className="fas fa-trash"></i>
+                    </button>
+                    <div className="qty-controls">
+                      <button onClick={() => updateCartItemQty(item.foodItemId, -1)}>
+                        <i className="fas fa-minus"></i>
+                      </button>
+                      <span>{item.qty}</span>
+                      <button onClick={() => updateCartItemQty(item.foodItemId, 1)}>
+                        <i className="fas fa-plus"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
 
-        <div className="mb-3">
-          <label className="form-label">Your Name <span className="text-danger">*</span></label>
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Enter your name"
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
-          />
-        </div>
+        {cart.length > 0 && (
+          <div className="cart-footer">
+            <div className="order-inputs">
+              <div className="table-info-display mb-3">
+                {isManual ? (
+                  <div className="manual-table-select">
+                    <label className="form-label">Order For <span className="text-danger">*</span></label>
+                    <div className="d-flex gap-2 mb-2">
+                      <button
+                        className={`btn btn-sm ${manualOrderType === 'TABLE' ? 'btn-primary' : 'btn-outline-primary'}`}
+                        onClick={() => setManualOrderType('TABLE')}
+                        style={{ flex: 1 }}
+                      >
+                        Table
+                      </button>
+                      <button
+                        className={`btn btn-sm ${manualOrderType === 'ROOM' ? 'btn-primary' : 'btn-outline-primary'}`}
+                        onClick={() => setManualOrderType('ROOM')}
+                        style={{ flex: 1 }}
+                      >
+                        Room
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder={`Enter ${manualOrderType === 'ROOM' ? 'Room' : 'Table'} Number`}
+                      value={manualTableNo}
+                      onChange={(e) => setManualTableNo(e.target.value)}
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <i className={`fas ${tableInfo?.isRoom ? 'fa-concierge-bell' : 'fa-chair'} me-2`}></i>
+                    <strong>{tableInfo?.isRoom ? 'Room' : 'Table'}:</strong> {tableInfo?.tableNo || tableInfo?.roomNo}
+                  </>
+                )}
+              </div>
 
-        <div className="mb-3">
-          <label className="form-label">WhatsApp Number <span className="text-danger">*</span></label>
-          <PhoneInput
-            country={'lk'}
-            value={whatsappNumber}
-            onChange={setWhatsappNumber}
-            inputStyle={{ width: '100%' }}
-            containerClass="phone-input-container"
-            placeholder="Enter WhatsApp Number"
-            enableSearch={true}
-          />
-          <small className="text-muted">We'll send your bill to this WhatsApp number.</small>
-        </div>
+              <div className="mb-3">
+                <label className="form-label">Your Name <span className="text-danger">*</span></label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Enter your name"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                />
+              </div>
 
-        <div className="mb-3">
-          <label className="form-label">Order Notes (Optional)</label>
-          <textarea
-            className="form-control"
-            rows="2"
-            placeholder="Any special requests?"
-            value={orderNotes}
-            onChange={(e) => setOrderNotes(e.target.value)}
-          ></textarea>
-        </div>
+              <div className="mb-3">
+                <label className="form-label">WhatsApp Number <span className="text-danger">*</span></label>
+                <PhoneInput
+                  country={'lk'}
+                  value={whatsappNumber}
+                  onChange={setWhatsappNumber}
+                  inputStyle={{ width: '100%' }}
+                  containerClass="phone-input-container"
+                  placeholder="Enter WhatsApp Number"
+                  enableSearch={true}
+                />
+                <small className="text-muted">We'll send your bill to this WhatsApp number.</small>
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label">Order Notes (Optional)</label>
+                <textarea
+                  className="form-control"
+                  rows="2"
+                  placeholder="Any special requests?"
+                  value={orderNotes}
+                  onChange={(e) => setOrderNotes(e.target.value)}
+                ></textarea>
+              </div>
+            </div>
+
+            <div className="cart-total">
+              <div className="d-flex justify-content-between mb-1 text-muted small">
+                <span>Subtotal:</span>
+                <span>Rs. {calculateSubtotal().toFixed(0)}</span>
+              </div>
+              <div className="d-flex justify-content-between mb-2 text-muted small">
+                <span>Service Charge (10%):</span>
+                <span>Rs. {calculateServiceCharge().toFixed(0)}</span>
+              </div>
+              <div className="d-flex justify-content-between fw-bold h5 mb-0">
+                <span>Total:</span>
+                <span>Rs. {parseFloat(calculateTotal()).toFixed(0)}</span>
+              </div>
+            </div>
+
+            <button
+              className="btn btn-lg w-100 text-white"
+              onClick={placeOrder}
+              style={{ borderRadius: '8px', background: 'var(--primary-color)', border: 'none', fontWeight: '700', padding: '14px', fontSize: '1.05rem', boxShadow: '0 4px 12px rgba(38, 102, 104, 0.2)' }}
+            >
+              <i className="fas fa-check me-2"></i> Place Order
+            </button>
+          </div>
+        )}
       </div>
 
-      <div className="cart-total">
-        <div className="d-flex justify-content-between mb-1 text-muted small">
-          <span>Subtotal:</span>
-          <span>Rs. {calculateSubtotal().toFixed(0)}</span>
-        </div>
-        <div className="d-flex justify-content-between mb-2 text-muted small">
-          <span>Service Charge (10%):</span>
-          <span>Rs. {calculateServiceCharge().toFixed(0)}</span>
-        </div>
-        <div className="d-flex justify-content-between fw-bold h5 mb-0">
-          <span>Total:</span>
-          <span>Rs. {parseFloat(calculateTotal()).toFixed(0)}</span>
-        </div>
-      </div>
-
-      <button
-        className="btn btn-lg w-100 text-white"
-        onClick={placeOrder}
-        style={{ borderRadius: '8px', background: 'var(--primary-color)', border: 'none', fontWeight: '700', padding: '14px', fontSize: '1.05rem', boxShadow: '0 4px 12px rgba(38, 102, 104, 0.2)' }}
-      >
-        <i className="fas fa-check me-2"></i> Place Order
-      </button>
-    </div>
-  )}
-</div>
-
-{/* Cart Overlay */ }
-{ showCart && <div className="cart-overlay" onClick={() => setShowCart(false)}></div> }
+      {/* Cart Overlay */}
+      {showCart && <div className="cart-overlay" onClick={() => setShowCart(false)}></div>}
     </div >
   );
 };
