@@ -607,12 +607,7 @@ const CustomerQROrder = ({ isManual = false }) => {
       const orderData = response.data;
 
       // 2. Automatically Generate Invoice (Bill)
-      const invoiceResponse = await apiClient.post('/billing/invoices', {
-        orderId: orderData.orderId,
-        taxAmount: 0,
-        serviceCharge: orderData.serviceCharge || (orderData.subtotal * 0.1),
-        discountAmount: 0
-      });
+      const invoiceResponse = await apiClient.post(`/billing/orders/${orderData.orderId}/create-invoice`);
 
       // 3. Trigger Printing (Popup)
       printOrder(orderData, identifier);
