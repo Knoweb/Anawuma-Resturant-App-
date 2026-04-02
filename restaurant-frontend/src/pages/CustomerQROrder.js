@@ -913,107 +913,113 @@ const CustomerQROrder = ({ isManual = false }) => {
             {activeItemDetail && (
               <div className="sketch-modal-overlay" onClick={() => setActiveItemDetail(null)}>
                 <div className="sketch-modal-content" onClick={(e) => e.stopPropagation()}>
-                  <div className="sketch-modal-header py-3">
-                    <span className="fw-bold fs-5 text-uppercase">{activeItemDetail.category?.categoryName || 'Product Info'}</span>
+                  <div className="text-center py-3 border-bottom">
+                    <h5 className="fw-bold mb-0 text-uppercase" style={{ letterSpacing: '1px' }}>
+                      {activeItemDetail.category?.categoryName || 'Item Info'}
+                    </h5>
                   </div>
 
                   <div className="sketch-modal-body d-flex flex-wrap p-0">
                     {/* Left Column: Product Info */}
-                    <div className="sketch-modal-left-col p-4 border-end">
-                      <div className="sketch-modal-image-area mb-4">
-                        <img src={getImageUrl(activeItemDetail.imageUrl1 || activeItemDetail.imageUrl)} alt={activeItemDetail.itemName} />
+                    <div className="sketch-modal-left-col p-4 border-end" style={{ flex: '1', minWidth: '300px' }}>
+                      <div className="sketch-modal-image-area mb-4 text-center">
+                        <img
+                          src={getImageUrl(activeItemDetail.imageUrl1 || activeItemDetail.imageUrl)}
+                          alt={activeItemDetail.itemName}
+                          style={{ maxWidth: '100%', borderRadius: '4px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+                        />
                       </div>
 
                       <div className="sketch-modal-info-rows">
-                        <div className="sketch-detail-row">
-                          <span className="label">Name :</span>
+                        <div className="sketch-detail-row py-2 border-bottom border-light d-flex justify-content-between">
+                          <span className="label text-muted">Name :</span>
                           <span className="value fw-bold">{activeItemDetail.itemName}</span>
                         </div>
-                        <div className="sketch-detail-row">
-                          <span className="label">Code :</span>
-                          <span className="value">{activeItemDetail.foodItemId}</span>
+                        <div className="sketch-detail-row py-2 border-bottom border-light d-flex justify-content-between">
+                          <span className="label text-muted">Code :</span>
+                          <span className="value fw-bold">{activeItemDetail.foodItemId}</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Right Column: Order Configuration */}
-                    <div className="sketch-modal-right-col p-4">
+                    <div className="sketch-modal-right-col p-4 bg-light" style={{ flex: '1', minWidth: '300px' }}>
                       <div className="mb-4">
                         <label className="d-block mb-3 fw-bold text-muted small">SELECT QUANTITY</label>
-                        <div className="qty-control-manual d-flex align-items-center justify-content-center gap-4">
-                          <button className="qty-btn-manual" onClick={() => setModalQty(Math.max(1, modalQty - 1))}>
+                        <div className="qty-control-manual d-flex align-items-center justify-content-start gap-4">
+                          <button className="btn btn-outline-dark" style={{ width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setModalQty(Math.max(1, modalQty - 1))}>
                             <i className="fas fa-minus"></i>
                           </button>
-                          <span className="qty-value-manual fw-bold fs-4">{modalQty}</span>
-                          <button className="qty-btn-manual" onClick={() => setModalQty(modalQty + 1)}>
+                          <span className="fw-bold fs-3 px-2" style={{ minWidth: '40px', textAlign: 'center' }}>{modalQty}</span>
+                          <button className="btn btn-outline-dark" style={{ width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setModalQty(modalQty + 1)}>
                             <i className="fas fa-plus"></i>
                           </button>
                         </div>
                       </div>
 
-                      {orderLocation === 'inside' && (
-                        <div className="fade-in">
-                          <div className="mb-4">
-                            <label className="d-block mb-2 fw-bold text-muted small">ORDER FOR *</label>
-                            <div className="d-flex gap-2">
-                              <button
-                                className={`flex-grow-1 btn ${modalOrderType === 'table' ? 'btn-primary' : 'btn-outline-primary'}`}
-                                style={modalOrderType === 'table' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }}
-                                onClick={() => setModalOrderType('table')}
-                              >
-                                Table
-                              </button>
-                              <button
-                                className={`flex-grow-1 btn ${modalOrderType === 'room' ? 'btn-primary' : 'btn-outline-primary'}`}
-                                style={modalOrderType === 'room' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }}
-                                onClick={() => setModalOrderType('room')}
-                              >
-                                Room
-                              </button>
-                            </div>
-                          </div>
-
-                          <div className="mb-4">
-                            {modalOrderType === 'room' ? (
-                              <select
-                                className="form-control sketch-input"
-                                value={manualTableNo}
-                                onChange={(e) => setManualTableNo(e.target.value)}
-                              >
-                                <option value="">Select Room Number</option>
-                                {Array.from({ length: 16 }, (_, i) => (i + 1).toString()).map(room => (
-                                  <option key={room} value={room}>Room {room}</option>
-                                ))}
-                              </select>
-                            ) : (
-                              <input
-                                type="text"
-                                className="form-control sketch-input"
-                                placeholder="Enter Table Number"
-                                value={manualTableNo}
-                                onChange={(e) => setManualTableNo(e.target.value)}
-                              />
-                            )}
-                          </div>
+                      <div className="mb-4">
+                        <label className="d-block mb-2 fw-bold text-muted small">ORDER FOR *</label>
+                        <div className="d-flex gap-2">
+                          <button
+                            className={`flex-grow-1 btn ${modalOrderType === 'table' ? 'btn-primary' : 'btn-outline-primary'}`}
+                            style={modalOrderType === 'table' ? { backgroundColor: '#266668', color: 'white', border: 'none' } : { color: '#266668', borderColor: '#266668' }}
+                            onClick={() => setModalOrderType('table')}
+                          >
+                            Table
+                          </button>
+                          <button
+                            className={`flex-grow-1 btn ${modalOrderType === 'room' ? 'btn-primary' : 'btn-outline-primary'}`}
+                            style={modalOrderType === 'room' ? { backgroundColor: '#266668', color: 'white', border: 'none' } : { color: '#266668', borderColor: '#266668' }}
+                            onClick={() => setModalOrderType('room')}
+                          >
+                            Room
+                          </button>
                         </div>
-                      )}
+                      </div>
+
+                      <div className="mb-4">
+                        {modalOrderType === 'room' ? (
+                          <select
+                            className="form-control"
+                            value={manualTableNo}
+                            onChange={(e) => setManualTableNo(e.target.value)}
+                            style={{ borderRadius: '4px', height: '45px' }}
+                          >
+                            <option value="">Select Room Number</option>
+                            {Array.from({ length: 16 }, (_, i) => (i + 1).toString()).map(room => (
+                              <option key={room} value={room}>Room {room}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Enter Table Number"
+                            value={manualTableNo}
+                            onChange={(e) => setManualTableNo(e.target.value)}
+                            style={{ borderRadius: '4px', height: '45px' }}
+                          />
+                        )}
+                      </div>
 
                       <div className="mb-0">
                         <label className="d-block mb-2 fw-bold text-muted small">ORDER NOTES (OPTIONAL)</label>
                         <textarea
-                          className="form-control sketch-input"
+                          className="form-control"
                           placeholder="Any special requests or instructions..."
                           rows="4"
                           value={modalOrderNotes}
                           onChange={(e) => setModalOrderNotes(e.target.value)}
+                          style={{ borderRadius: '4px' }}
                         ></textarea>
                       </div>
                     </div>
                   </div>
 
-                  <div className="sticky-bottom-btn p-3 bg-white border-top">
+                  <div className="p-0">
                     <button
-                      className="order-now-btn"
+                      className="btn w-100 py-3 fw-bold text-uppercase"
+                      style={{ backgroundColor: '#266668', color: 'white', borderRadius: '0 0 8px 8px', fontSize: '1.2rem', letterSpacing: '1px' }}
                       onClick={placeQuickManualOrder}
                     >
                       ORDER NOW
