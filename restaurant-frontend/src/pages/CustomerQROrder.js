@@ -7,6 +7,8 @@ import Swal from 'sweetalert2';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import './CustomerQROrder.css';
+import Navbar from '../components/common/Navbar';
+import Sidebar from '../components/common/Sidebar';
 
 const normalizeWhatsAppNumber = (phone) => {
   if (!phone) return '';
@@ -1146,9 +1148,48 @@ const CustomerQROrder = ({ isManual = false }) => {
       </nav>
 
       {/* Main Content Area */}
-      {/* Main Content Area */}
       <main className="customer-main-content">
-        {renderMainContent()}
+        {isManual ? (
+          <div className="wrapper">
+            <Navbar />
+            <Sidebar />
+            <div className="content-wrapper" style={{ padding: '0', backgroundColor: '#fcfcfc', minHeight: 'calc(100vh - 70px)', marginTop: '0' }}>
+              {/* Floating Quick Cart Cart Icon - Top Right of content */}
+              <button
+                className="manual-quick-cart-btn"
+                onClick={() => setShowCart(true)}
+                style={{
+                  position: 'absolute',
+                  top: '20px',
+                  right: '30px',
+                  zIndex: 100,
+                  width: '50px',
+                  height: '45px',
+                  backgroundColor: '#fff',
+                  border: '1px solid #ddd',
+                  borderRadius: '10px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.2rem',
+                  color: '#266668',
+                  transition: 'all 0.2s',
+                  cursor: 'pointer'
+                }}
+              >
+                <i className="fas fa-shopping-basket"></i>
+                {cart.length > 0 && (
+                  <span className="cart-badge-v2" style={{ top: '-10px', right: '-10px' }}>{cart.length}</span>
+                )}
+              </button>
+
+              {renderMainContent()}
+            </div>
+          </div>
+        ) : (
+          renderMainContent()
+        )}
       </main>
 
       {/* Cart Drawer */}
