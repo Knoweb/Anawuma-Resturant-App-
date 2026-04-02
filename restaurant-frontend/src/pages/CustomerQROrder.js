@@ -786,55 +786,75 @@ const CustomerQROrder = ({ isManual = false }) => {
       }).filter(m => m.cats.length > 0);
 
       return (
-        <div className="manual-grouped-view fade-in">
-          <div className="w-100 mb-5 px-4 text-center">
-            <h1 className="manual-main-title">Create Manual Order</h1>
-            <div className="title-divider mx-auto"></div>
-          </div>
+        <div className="manual-dashboard-layout d-flex" style={{ minHeight: 'calc(100vh - 80px)', backgroundColor: '#fcfcfc' }}>
+          {/* Dashboard Sidebar */}
+          <aside className="manual-dashboard-sidebar bg-white border-end shadow-sm" style={{ width: '220px', position: 'sticky', top: '80px', height: 'calc(100vh - 80px)', overflowY: 'auto', zIndex: 10 }}>
+            <div className="p-3 border-bottom bg-light">
+              <h6 className="mb-0 fw-bold text-uppercase small text-muted"><i className="fas fa-th-large me-2"></i> Categories</h6>
+            </div>
+            <div className="list-group list-group-flush">
+              {groupedData.map(group => (
+                <button
+                  key={group.menuId}
+                  className="list-group-item list-group-item-action border-0 py-3 small fw-bold d-flex align-items-center"
+                  onClick={() => {
+                    const el = document.getElementById(`menu-group-${group.menuId}`);
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  style={{ fontSize: '0.82rem', letterSpacing: '0.3px', transition: 'all 0.2s' }}
+                >
+                  <i className="fas fa-chevron-right me-2 opacity-50 small"></i> {group.menuName}
+                </button>
+              ))}
+            </div>
+          </aside>
 
-          <div className="manual-sections-container">
-            {groupedData.map(group => (
-              <div key={group.menuId} className="menu-group-section mb-5">
-                <div className="sketch-header px-4 mb-4">
-                  <h2 className="sketch-header-text">{group.menuName}</h2>
-                </div>
+          {/* Main Content Area */}
+          <div className="manual-content-main flex-grow-1 p-0">
+            <div className="w-100 mb-5 px-4 pt-5 text-center">
+              <h1 className="manual-main-title">Create Manual Order</h1>
+              <div className="title-divider mx-auto"></div>
+            </div>
 
-                <div className="sketch-grid-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '20px' }}>
-                  {group.cats.map(cat => {
-                    const catItems = foodItems.filter(item => item.categoryId === cat.categoryId);
-                    const catImage = cat.imageUrl || (catItems.length > 0 ? (catItems[0].imageUrl1 || catItems[0].imageUrl) : null);
+            <div className="manual-sections-container px-4">
+              {groupedData.map(group => (
+                <div key={group.menuId} id={`menu-group-${group.menuId}`} className="menu-group-section mb-5 pt-3">
+                  <div className="sketch-header mb-4">
+                    <h2 className="sketch-header-text">{group.menuName}</h2>
+                  </div>
 
-                    return (
-                      <div
-                        key={cat.categoryId}
-                        className="sketch-category-box"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (catItems.length > 0) {
-                            setActiveItemDetail(catItems[0]);
-                            setModalQty(1);
-                          }
-                        }}
-                      >
-                        <div className="sketch-box-label">
-                          <span>{cat.categoryName}</span>
+                  <div className="sketch-grid-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '20px' }}>
+                    {group.cats.map(cat => {
+                      const catItems = foodItems.filter(item => item.categoryId === cat.categoryId);
+                      return (
+                        <div
+                          key={cat.categoryId}
+                          className="sketch-category-box"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (catItems.length > 0) {
+                              setActiveItemDetail(catItems[0]);
+                              setModalQty(1);
+                            }
+                          }}
+                        >
+                          <div className="sketch-box-label">
+                            <span>{cat.categoryName}</span>
+                          </div>
+                          <div className="sketch-box-media" style={{ width: '100%', height: '150px', background: '#fafafa' }}>
+                            {catItems.length > 0 && (catItems[0].imageUrl1 || catItems[0].imageUrl) ? (
+                              <img src={getImageUrl(catItems[0].imageUrl1 || catItems[0].imageUrl)} alt={cat.categoryName} />
+                            ) : (
+                              <div className="sketch-placeholder"><i className="fas fa-utensils"></i></div>
+                            )}
+                          </div>
                         </div>
-                        <div className="sketch-box-media" style={{ width: '100%', height: '150px', background: '#fafafa' }}>
-                          {catItems.length > 0 && (catItems[0].imageUrl1 || catItems[0].imageUrl) ? (
-                            <img src={getImageUrl(catItems[0].imageUrl1 || catItems[0].imageUrl)} alt={cat.categoryName} />
-                          ) : (
-                            <div className="sketch-placeholder"><i className="fas fa-utensils"></i></div>
-                          )}
-                        </div>
-                        {catItems.length > 1 && (
-                          <div className="sketch-badge">{catItems.length} items</div>
-                        )}
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       );

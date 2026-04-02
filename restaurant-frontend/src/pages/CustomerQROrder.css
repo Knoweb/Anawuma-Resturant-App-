@@ -1495,3 +1495,54 @@ h6 {
   background-color: #266668 !important;
   color: white !important;
 }
+
+/* Manual Order Dashboard Layout */
+.manual-dashboard-layout {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.manual-dashboard-sidebar {
+  transition: all 0.3s ease;
+}
+
+.manual-dashboard-sidebar .list-group-item {
+  color: #555;
+  background-color: transparent !important;
+  border-left: 3px solid transparent !important;
+}
+
+.manual-dashboard-sidebar .list-group-item:hover {
+  color: #266668;
+  background-color: #f8fdfd !important;
+  border-left: 3px solid #266668 !important;
+  padding-left: 1.5rem !important;
+}
+
+.manual-dashboard-sidebar .list-group-item:active {
+  background-color: #e0f2f1 !important;
+}
+
+.manual-dashboard-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.manual-dashboard-sidebar::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 10px;
+}
+
+.manual-main-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 800;
+  font-size: 2.2rem;
+  color: #1a1a1a;
+  letter-spacing: -0.5px;
+}
+
+.title-divider {
+  width: 60px;
+  height: 4px;
+  background: #266668;
+  border-radius: 2px;
+  margin-top: 10px;
+}
