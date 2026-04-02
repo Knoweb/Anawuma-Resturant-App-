@@ -639,8 +639,11 @@ const CustomerQROrder = ({ isManual = false }) => {
 
     } catch (error) {
       console.error('Quick Order error:', error);
-      const errorMsg = error.response?.data?.message || 'Failed to place order. Please try again.';
-      Swal.fire('Order Failed', errorMsg, 'error');
+      let errorMsg = error.response?.data?.message || 'Failed to place order. Please try again.';
+      if (Array.isArray(errorMsg)) {
+        errorMsg = errorMsg.join(', ');
+      }
+      Swal.fire('Order Failed', String(errorMsg), 'error');
     }
   };
 

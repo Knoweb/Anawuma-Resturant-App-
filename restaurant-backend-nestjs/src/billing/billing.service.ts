@@ -298,9 +298,9 @@ export class BillingService {
       throw new NotFoundException('Order not found');
     }
 
-    if (order.status !== OrderStatus.READY) {
+    if (order.status !== OrderStatus.READY && order.status !== OrderStatus.SERVED) {
       throw new BadRequestException(
-        `Order must be in READY status to create an invoice. Current status: ${order.status}`,
+        `Order must be in READY or SERVED status to create an invoice. Current status: ${order.status}`,
       );
     }
 
