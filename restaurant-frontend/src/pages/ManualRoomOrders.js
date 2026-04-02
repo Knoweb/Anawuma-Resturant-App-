@@ -141,6 +141,37 @@ const ManualRoomOrders = () => {
         printWindow.document.close();
     };
 
+    const handleFinalizePaid = async (account, roomNo) => {
+        try {
+            const orderIds = account.orders.map(o => o.orderId);
+            const response = await apiClient.post('/billing/manual/finalize', {
+                orderIds,
+                identifier: roomNo,
+                isPaid: false // Set to false so it appears in the PENDING queue as requested "comes to cashier queue"
+            });
+
+            if (response.data) {
+                // 1. Show success message
+                Swal.fire({
+                    title: 'Payment Successful',
+                    text: `Bill for Room ${roomNo} has been sent to the Cashier Queue.`,
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
+                // 2. Trigger Print
+                printAccountBill(account, roomNo);
+
+                // 3. Refresh accounts
+                setTimeout(() => fetchAccounts(), 1000);
+            }
+        } catch (error) {
+            console.error('Error finalizing manual order:', error);
+            Swal.fire('Error', error.response?.data?.message || 'Failed to finalize payment', 'error');
+        }
+    };
+
     const handleRoomClick = (roomNo, account) => {
         if (!account) {
             Swal.fire({
@@ -203,12 +234,15 @@ const ManualRoomOrders = () => {
             html: itemsHtml,
             width: '600px',
             showCancelButton: true,
-            confirmButtonText: '<i class="fas fa-print me-1"></i> Print All & Proceed',
+            confirmButtonText: '<i class="fas fa-check-circle me-1"></i> Paid & Finalize',
             cancelButtonText: 'Close',
             confirmButtonColor: '#1cc88a',
             cancelButtonColor: '#858796',
+            footer: `<button class="btn btn-dark w-100 py-2" id="print-all-bill-btn"><i class="fas fa-print me-1"></i> Print Bill Snapshot</button>`,
             didOpen: () => {
                 const popup = Swal.getPopup();
+
+                // Single order print buttons
                 const printBtns = popup.querySelectorAll('.print-single-order');
                 printBtns.forEach(btn => {
                     btn.addEventListener('click', () => {
@@ -216,19 +250,19 @@ const ManualRoomOrders = () => {
                         printOrder(account.orders[idx], roomNo);
                     });
                 });
+
+                // Overall bill print button in footer
+                const printAllBtn = popup.querySelector('#print-all-bill-btn');
+                printAllBtn.addEventListener('click', () => {
+                    printAccountBill(account, roomNo);
+                });
             },
             customClass: {
                 popup: 'modal-radius'
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                printAccountBill(account, roomNo);
-                Swal.fire({
-                    title: 'Checkout Preview',
-                    text: 'Account bill printed. Final checkout integration coming soon.',
-                    icon: 'success',
-                    confirmButtonColor: '#4e73df'
-                });
+                handleFinalizePaid(account, roomNo);
             }
         });
     };

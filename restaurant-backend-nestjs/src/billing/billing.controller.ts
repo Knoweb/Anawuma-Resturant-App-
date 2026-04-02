@@ -62,7 +62,7 @@ const ACCOUNTANT_REVIEW_ROLES: UserRole[] = [
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('billing')
 export class BillingController {
-  constructor(private readonly billingService: BillingService) {}
+  constructor(private readonly billingService: BillingService) { }
 
   /**
    * GET /billing/ready-orders
@@ -85,6 +85,23 @@ export class BillingController {
     @Request() req: RequestWithUser,
   ) {
     return this.billingService.createInvoice(
+      dto,
+      req.user.restaurantId,
+      req.user.adminId ?? req.user.id,
+    );
+  }
+
+  /**
+   * POST /billing/manual/finalize
+   * Aggregates multiple manual orders into one invoice.
+   */
+  @Post('manual/finalize')
+  @Roles(...BILLING_ROLES)
+  createManualInvoice(
+    @Body() dto: any, // CreateManualInvoiceDto
+    @Request() req: RequestWithUser,
+  ) {
+    return this.billingService.createManualInvoice(
       dto,
       req.user.restaurantId,
       req.user.adminId ?? req.user.id,

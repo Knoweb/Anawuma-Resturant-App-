@@ -65,7 +65,7 @@ export const sanitizeUrl = (url) => {
 
   const currentHostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
   const currentProtocol = typeof window !== 'undefined' ? window.location.protocol : 'http:';
-  
+
   // Dynamically resolve base URL for this specific sanitize call
   const dynamicBaseUrl = (currentHostname === 'localhost' || currentHostname === '127.0.0.1')
     ? 'http://localhost:3000'
@@ -73,35 +73,35 @@ export const sanitizeUrl = (url) => {
 
   // If it's a relative path, resolve it based on the type of asset
   if (!url.startsWith('http')) {
-     const isBackendAsset = url.startsWith('/uploads') || url.startsWith('uploads/');
-     const isFrontendAsset = url.startsWith('/assets') || url.startsWith('assets/');
+    const isBackendAsset = url.startsWith('/uploads') || url.startsWith('uploads/');
+    const isFrontendAsset = url.startsWith('/assets') || url.startsWith('assets/');
 
-     if (isBackendAsset) {
-        return `${dynamicBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
-     }
-     
-     // For frontend assets, just return the path so it hits the current host/port (frontend server)
-     if (isFrontendAsset) {
-        return url;
-     }
+    if (isBackendAsset) {
+      return `${dynamicBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+    }
 
-     // Generic fallback for other potential assets
-     if (/\.(png|jpe?g|gif|webp|svg)$/i.test(url)) {
-        return `${dynamicBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
-     }
-     
-     return url;
+    // For frontend assets, just return the path so it hits the current host/port (frontend server)
+    if (isFrontendAsset) {
+      return url;
+    }
+
+    // Generic fallback for other potential assets
+    if (/\.(png|jpe?g|gif|webp|svg)$/i.test(url)) {
+      return `${dynamicBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+    }
+
+    return url;
   }
 
   try {
     const urlObj = new URL(url);
-    
+
     // If accessing via LAN IP/different host, ensure absolute URLs point to current backend host
     if (currentHostname && currentHostname !== 'localhost' && currentHostname !== '127.0.0.1') {
       if (urlObj.hostname !== currentHostname) {
         urlObj.hostname = currentHostname;
         // Keep the backend port (3000) unless it was something else explicitly
-        if (!urlObj.port) urlObj.port = '3000'; 
+        if (!urlObj.port) urlObj.port = '3000';
         return urlObj.toString();
       }
     }
@@ -114,7 +114,7 @@ export const sanitizeUrl = (url) => {
 /** Recursive helper to sanitize all URLs in an object/array. */
 const sanitizeData = (data, parentKey = '') => {
   if (!data) return data;
-  
+
   if (typeof data === 'string') {
     const lowerKey = parentKey.toLowerCase();
     const isUrlKey = lowerKey.includes('url') || lowerKey.includes('image') || lowerKey.includes('logo') || lowerKey === 'qrimage';
@@ -123,7 +123,7 @@ const sanitizeData = (data, parentKey = '') => {
     }
     return data;
   }
-  
+
   if (Array.isArray(data)) return data.map(item => sanitizeData(item, parentKey));
   if (typeof data === 'object') {
     const sanitized = {};
@@ -314,6 +314,10 @@ export const billingAPI = {
   /** Accountant rejects pending transfers (keeps data with cashier). */
   rejectTransactionsByAccountant: (data) =>
     apiClient.post('/billing/accountant/reject', data),
+
+  /** Finalize manual multi-order billing. */
+  finalizeManualInvoice: (data) =>
+    apiClient.post('/billing/manual/finalize', data),
 };
 
 export default apiClient;
