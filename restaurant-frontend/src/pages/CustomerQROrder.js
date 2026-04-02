@@ -452,10 +452,14 @@ const CustomerQROrder = ({ isManual = false }) => {
       if (isManual) {
         endpoint = '/orders/manual';
         orderPayload.orderType = 'MANUAL_CASHIER';
+
+        // Normalize: remove leading zeros if numeric (e.g., "03" -> "3")
+        const normalizedManualNo = manualTableNo.trim().replace(/^0+/, '') || manualTableNo.trim();
+
         if (manualOrderType === 'ROOM') {
-          orderPayload.roomNo = manualTableNo;
+          orderPayload.roomNo = normalizedManualNo;
         } else {
-          orderPayload.tableNo = manualTableNo;
+          orderPayload.tableNo = normalizedManualNo;
         }
       } else {
         if (tableKey) headers['x-table-key'] = tableKey;
@@ -520,10 +524,11 @@ const CustomerQROrder = ({ isManual = false }) => {
       };
 
       if (orderLocation === 'inside') {
+        const normalizedManualNo = manualTableNo.trim().replace(/^0+/, '') || manualTableNo.trim();
         if (modalOrderType === 'room') {
-          orderPayload.roomNo = manualTableNo;
+          orderPayload.roomNo = normalizedManualNo;
         } else {
-          orderPayload.tableNo = manualTableNo;
+          orderPayload.tableNo = normalizedManualNo;
         }
       }
 
