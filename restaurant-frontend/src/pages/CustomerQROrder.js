@@ -1158,21 +1158,23 @@ const CustomerQROrder = ({ isManual = false }) => {
               <button
                 className="manual-quick-cart-btn"
                 onClick={() => setShowCart(true)}
+                onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#f8f9fa'; e.currentTarget.style.transform = 'scale(1.05)'; }}
+                onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.transform = 'scale(1)'; }}
                 style={{
                   position: 'absolute',
                   top: '20px',
                   right: '30px',
                   zIndex: 100,
-                  width: '50px',
-                  height: '45px',
+                  width: '56px',
+                  height: '52px',
                   backgroundColor: '#fff',
                   border: '1px solid #ddd',
-                  borderRadius: '10px',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  borderRadius: '12px',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '1.2rem',
+                  fontSize: '1.4rem',
                   color: '#266668',
                   transition: 'all 0.2s',
                   cursor: 'pointer'
@@ -1180,7 +1182,7 @@ const CustomerQROrder = ({ isManual = false }) => {
               >
                 <i className="fas fa-shopping-basket"></i>
                 {cart.length > 0 && (
-                  <span className="cart-badge-v2" style={{ top: '-10px', right: '-10px' }}>{cart.length}</span>
+                  <span className="cart-badge-v2" style={{ top: '-10px', right: '-10px', width: '22px', height: '22px', fontSize: '0.75rem' }}>{cart.length}</span>
                 )}
               </button>
 
