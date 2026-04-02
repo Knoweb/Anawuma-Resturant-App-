@@ -506,6 +506,71 @@ const CustomerQROrder = ({ isManual = false }) => {
     }
   };
 
+  const printOrder = (order, identifier = null) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      Swal.fire('Print Blocked', 'Please allow popups to print the bill.', 'warning');
+      return;
+    }
+    const content = `
+        <html>
+            <head>
+                <title>Print Order - ${order.orderNo}</title>
+                <style>
+                    body { font-family: 'Courier New', Courier, monospace; padding: 20px; width: 300px; }
+                    .header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
+                    .item-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 5px; }
+                    .total-section { border-top: 1px dashed #000; margin-top: 10px; padding-top: 10px; }
+                    .total-row { display: flex; justify-content: space-between; font-weight: bold; }
+                    .footer { text-align: center; margin-top: 20px; font-size: 12px; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h2 style="margin:0">ANAWUMA</h2>
+                    <p style="margin:5px 0">Order Receipt</p>
+                    <p style="margin:2px 0">#${order.orderNo}</p>
+                    <p style="margin:2px 0">${new Date(order.createdAt).toLocaleString()}</p>
+                    ${identifier ? `<p style="margin:2px 0">${modalOrderType === 'room' ? 'Room' : 'Table'}: ${identifier}</p>` : ''}
+                </div>
+                <div class="items">
+                    ${order.orderItems.map(item => `
+                        <div class="item-row">
+                            <span>${item.itemName} x${item.qty}</span>
+                            <span>${parseFloat(item.lineTotal).toFixed(0)}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="total-section">
+                    <div class="item-row">
+                        <span>Subtotal:</span>
+                        <span>${parseFloat(order.subtotal).toFixed(0)}</span>
+                    </div>
+                    <div class="item-row">
+                        <span>Service Charge (10%):</span>
+                        <span>${parseFloat(order.serviceCharge).toFixed(0)}</span>
+                    </div>
+                    <div class="total-row" style="font-size:18px; margin-top:5px">
+                        <span>TOTAL:</span>
+                        <span>Rs. ${parseFloat(order.totalAmount).toFixed(0)}</span>
+                    </div>
+                </div>
+                <div class="footer">
+                    <p>Thank You!</p>
+                </div>
+                <script>
+                  window.onload = function() {
+                    window.print();
+                    setTimeout(function() { window.close(); }, 500);
+                  };
+                </script>
+            </body>
+        </html>
+    `;
+    printWindow.document.write(content);
+    printWindow.document.close();
+  };
+
   const placeQuickManualOrder = async () => {
     if (orderLocation === 'inside' && !manualTableNo.trim()) {
       Swal.fire('Validation Error', `Please enter a ${modalOrderType === 'room' ? 'Room' : 'Table'} number`, 'warning');
@@ -513,6 +578,7 @@ const CustomerQROrder = ({ isManual = false }) => {
     }
 
     try {
+      // 0. Prepare Payload
       const orderPayload = {
         customerName: customerName.trim() || 'Manual Order',
         whatsappNumber: null,
@@ -525,8 +591,10 @@ const CustomerQROrder = ({ isManual = false }) => {
         orderType: 'MANUAL_CASHIER'
       };
 
+      let identifier = '';
       if (orderLocation === 'inside') {
         const normalizedManualNo = manualTableNo.trim().replace(/^0+/, '') || manualTableNo.trim();
+        identifier = normalizedManualNo;
         if (modalOrderType === 'room') {
           orderPayload.roomNo = normalizedManualNo;
         } else {
@@ -534,13 +602,32 @@ const CustomerQROrder = ({ isManual = false }) => {
         }
       }
 
+      // 1. Place Order
       const response = await apiClient.post('/orders/manual', orderPayload);
+      const orderData = response.data;
 
-      // Success
-      const orderData = {
-        ...response.data,
-        customerName: customerName.trim()
-      };
+      // 2. Automatically Generate Invoice (Bill)
+      const invoiceResponse = await apiClient.post('/billing/invoices', {
+        orderId: orderData.orderId,
+        taxAmount: 0,
+        serviceCharge: orderData.serviceCharge || (orderData.subtotal * 0.1),
+        discountAmount: 0
+      });
+
+      // 3. Trigger Printing (Popup)
+      printOrder(orderData, identifier);
+
+      // 4. Mark as Printed (This technically "assigns" to room in our logic)
+      await apiClient.patch(`/billing/invoices/${invoiceResponse.data.invoiceId}/mark-printed`);
+
+      // Success UI
+      Swal.fire({
+        title: 'Order Completed',
+        text: 'Order placed, bill generated and assigned to room.',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+      });
 
       setOrderSuccess(orderData);
       setCart([]);
