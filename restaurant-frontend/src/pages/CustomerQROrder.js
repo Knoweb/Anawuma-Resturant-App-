@@ -1023,13 +1023,26 @@ const CustomerQROrder = ({ isManual = false }) => {
                     </div>
 
                     <div className="mb-4">
-                      <input
-                        type="text"
-                        className="form-control sketch-input"
-                        placeholder={modalOrderType === 'table' ? "Enter Table Number" : "Enter Room Number"}
-                        value={manualTableNo}
-                        onChange={(e) => setManualTableNo(e.target.value)}
-                      />
+                      {modalOrderType === 'room' ? (
+                        <select
+                          className="form-control sketch-input"
+                          value={manualTableNo}
+                          onChange={(e) => setManualTableNo(e.target.value)}
+                        >
+                          <option value="">Select Room Number</option>
+                          {Array.from({ length: 16 }, (_, i) => (i + 1).toString()).map(room => (
+                            <option key={room} value={room}>Room {room}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          type="text"
+                          className="form-control sketch-input"
+                          placeholder="Enter Table Number"
+                          value={manualTableNo}
+                          onChange={(e) => setManualTableNo(e.target.value)}
+                        />
+                      )}
                     </div>
                   </div>
                 )}
