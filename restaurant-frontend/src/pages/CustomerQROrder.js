@@ -6,8 +6,6 @@ import { useAuthStore } from '../store/authStore';
 import Swal from 'sweetalert2';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
-import Navbar from '../components/common/Navbar';
-import Sidebar from '../components/common/Sidebar';
 import './CustomerQROrder.css';
 
 const normalizeWhatsAppNumber = (phone) => {
@@ -804,10 +802,32 @@ const CustomerQROrder = ({ isManual = false }) => {
       }).filter(m => m.cats.length > 0);
 
       return (
-        <div className="manual-dashboard-layout" style={{ minHeight: 'calc(100vh - 80px)', backgroundColor: '#fcfcfc' }}>
+        <div className="manual-dashboard-layout d-flex" style={{ minHeight: 'calc(100vh - 80px)', backgroundColor: '#fcfcfc' }}>
+          {/* Dashboard Sidebar */}
+          <aside className="manual-dashboard-sidebar bg-white border-end shadow-sm" style={{ width: '220px', position: 'sticky', top: '80px', height: 'calc(100vh - 80px)', overflowY: 'auto', zIndex: 10 }}>
+            <div className="p-3 border-bottom bg-light">
+              <h6 className="mb-0 fw-bold text-uppercase small text-muted"><i className="fas fa-th-large me-2"></i> Categories</h6>
+            </div>
+            <div className="list-group list-group-flush">
+              {groupedData.map(group => (
+                <button
+                  key={group.menuId}
+                  className="list-group-item list-group-item-action border-0 py-3 small fw-bold d-flex align-items-center"
+                  onClick={() => {
+                    const el = document.getElementById(`menu-group-${group.menuId}`);
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  style={{ fontSize: '0.82rem', letterSpacing: '0.3px', transition: 'all 0.2s' }}
+                >
+                  <i className="fas fa-chevron-right me-2 opacity-50 small"></i> {group.menuName}
+                </button>
+              ))}
+            </div>
+          </aside>
+
           {/* Main Content Area */}
           <div className="manual-content-main flex-grow-1 p-0">
-            <div className="w-100 mb-5 px-4 pt-4 text-center">
+            <div className="w-100 mb-5 px-4 pt-5 text-center">
               <h1 className="manual-main-title">Create Manual Order</h1>
               <div className="title-divider mx-auto"></div>
             </div>
@@ -901,297 +921,6 @@ const CustomerQROrder = ({ isManual = false }) => {
     if (!url) return null;
     return url; // Now handled automatically by apiClient interceptor
   };
-
-  if (isManual) {
-    return (
-      <div className="wrapper">
-        <Navbar />
-        <Sidebar />
-        <div className="content-wrapper" style={{ minHeight: '100vh', background: '#f4f6f9' }}>
-          <div className="customer-qr-order-container manual-layout">
-            {/* Item Detail Modal as per Sketch */}
-            {activeItemDetail && (
-              <div className="sketch-modal-overlay" onClick={() => setActiveItemDetail(null)}>
-                <div className="sketch-modal-content" onClick={(e) => e.stopPropagation()}>
-                  <div className="text-center py-3 border-bottom">
-                    <h5 className="fw-bold mb-0 text-uppercase" style={{ letterSpacing: '1px' }}>
-                      {activeItemDetail.category?.categoryName || 'Item Info'}
-                    </h5>
-                  </div>
-
-                  <div className="sketch-modal-body d-flex flex-wrap p-0">
-                    {/* Left Column: Product Info */}
-                    <div className="sketch-modal-left-col p-4 border-end" style={{ flex: '1', minWidth: '300px' }}>
-                      <div className="sketch-modal-image-area mb-4 text-center">
-                        <img
-                          src={getImageUrl(activeItemDetail.imageUrl1 || activeItemDetail.imageUrl)}
-                          alt={activeItemDetail.itemName}
-                          style={{ maxWidth: '100%', borderRadius: '4px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
-                        />
-                      </div>
-
-                      <div className="sketch-modal-info-rows">
-                        <div className="sketch-detail-row py-2 border-bottom border-light d-flex justify-content-between">
-                          <span className="label text-muted">Name :</span>
-                          <span className="value fw-bold">{activeItemDetail.itemName}</span>
-                        </div>
-                        <div className="sketch-detail-row py-2 border-bottom border-light d-flex justify-content-between">
-                          <span className="label text-muted">Code :</span>
-                          <span className="value fw-bold">{activeItemDetail.foodItemId}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Right Column: Order Configuration */}
-                    <div className="sketch-modal-right-col p-4 bg-light" style={{ flex: '1', minWidth: '300px' }}>
-                      <div className="mb-4">
-                        <label className="d-block mb-3 fw-bold text-muted small">SELECT QUANTITY</label>
-                        <div className="qty-control-manual d-flex align-items-center justify-content-start gap-4">
-                          <button className="btn btn-outline-dark" style={{ width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setModalQty(Math.max(1, modalQty - 1))}>
-                            <i className="fas fa-minus"></i>
-                          </button>
-                          <span className="fw-bold fs-3 px-2" style={{ minWidth: '40px', textAlign: 'center' }}>{modalQty}</span>
-                          <button className="btn btn-outline-dark" style={{ width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setModalQty(modalQty + 1)}>
-                            <i className="fas fa-plus"></i>
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="mb-4">
-                        <label className="d-block mb-2 fw-bold text-muted small">ORDER FOR *</label>
-                        <div className="d-flex gap-2">
-                          <button
-                            className={`flex-grow-1 btn ${modalOrderType === 'table' ? 'btn-primary' : 'btn-outline-primary'}`}
-                            style={modalOrderType === 'table' ? { backgroundColor: '#266668', color: 'white', border: 'none' } : { color: '#266668', borderColor: '#266668' }}
-                            onClick={() => setModalOrderType('table')}
-                          >
-                            Table
-                          </button>
-                          <button
-                            className={`flex-grow-1 btn ${modalOrderType === 'room' ? 'btn-primary' : 'btn-outline-primary'}`}
-                            style={modalOrderType === 'room' ? { backgroundColor: '#266668', color: 'white', border: 'none' } : { color: '#266668', borderColor: '#266668' }}
-                            onClick={() => setModalOrderType('room')}
-                          >
-                            Room
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="mb-4">
-                        {modalOrderType === 'room' ? (
-                          <select
-                            className="form-control"
-                            value={manualTableNo}
-                            onChange={(e) => setManualTableNo(e.target.value)}
-                            style={{ borderRadius: '4px', height: '45px' }}
-                          >
-                            <option value="">Select Room Number</option>
-                            {Array.from({ length: 16 }, (_, i) => (i + 1).toString()).map(room => (
-                              <option key={room} value={room}>Room {room}</option>
-                            ))}
-                          </select>
-                        ) : (
-                          <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Enter Table Number"
-                            value={manualTableNo}
-                            onChange={(e) => setManualTableNo(e.target.value)}
-                            style={{ borderRadius: '4px', height: '45px' }}
-                          />
-                        )}
-                      </div>
-
-                      <div className="mb-0">
-                        <label className="d-block mb-2 fw-bold text-muted small">ORDER NOTES (OPTIONAL)</label>
-                        <textarea
-                          className="form-control"
-                          placeholder="Any special requests or instructions..."
-                          rows="4"
-                          value={modalOrderNotes}
-                          onChange={(e) => setModalOrderNotes(e.target.value)}
-                          style={{ borderRadius: '4px' }}
-                        ></textarea>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-0">
-                    <button
-                      className="btn w-100 py-3 fw-bold text-uppercase"
-                      style={{ backgroundColor: '#266668', color: 'white', borderRadius: '0 0 8px 8px', fontSize: '1.2rem', letterSpacing: '1px' }}
-                      onClick={placeQuickManualOrder}
-                    >
-                      ORDER NOW
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Premium Elegant Header */}
-            <header className={`customer-header-v2 ${selectedMenu ? 'header-scrolled' : ''}`}>
-              <div className="header-container">
-                <div className="restaurant-brand-v2">
-                  {tableInfo?.logo ? (
-                    <img src={tableInfo.logo} alt={tableInfo.restaurantName} className="brand-logo-v2" />
-                  ) : (
-                    <div className="brand-placeholder-v2">
-                      <i className="fas fa-utensils"></i>
-                    </div>
-                  )}
-                  <div className="brand-text-v2">
-                    <h1 className="hotel-name-v2">{tableInfo.restaurantName}</h1>
-                    <div className="room-badge-v2">
-                      <i className={`fas ${tableInfo?.isRoom || manualOrderType === 'ROOM' ? 'fa-concierge-bell' : 'fa-chair'}`}></i>
-                      <span>
-                        {isManual ? (
-                          `${manualOrderType === 'ROOM' ? 'Room' : 'Table'} ${manualTableNo || '?'}`
-                        ) : (
-                          `${tableInfo?.isRoom ? 'Room' : 'Table'} ${tableInfo?.tableNo || tableInfo?.roomNo}`
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="header-actions-v2">
-                  {!isManual && (
-                    <button
-                      className="nav-item-minimal me-3"
-                      onClick={() => setShowStatusScreen(true)}
-                      title="Track Orders"
-                    >
-                      <i className="fas fa-clipboard-list"></i>
-                    </button>
-                  )}
-
-                  <button
-                    className={`cart-btn-v2 ${cart.length > 0 ? 'pulse' : ''}`}
-                    onClick={() => setShowCart(true)}
-                  >
-                    <i className="fas fa-shopping-basket"></i>
-                    {cart.length > 0 && <span className="cart-badge-v2">{cart.length}</span>}
-                  </button>
-                </div>
-              </div>
-            </header>
-
-            {renderMainContent()}
-
-            {/* Cart Sidebar/Drawer */}
-            <div className={`cart-drawer ${showCart ? 'open' : ''}`}>
-              <div className="cart-header">
-                <h4>Your Order</h4>
-                <button className="btn-close" onClick={() => setShowCart(false)}>
-                  <i className="fas fa-times"></i>
-                </button>
-              </div>
-
-              <div className="cart-body">
-                {cart.length === 0 ? (
-                  <div className="empty-cart-modern">
-                    <i className="fas fa-shopping-basket"></i>
-                    <p>Your cart is empty</p>
-                    <button className="btn btn-outline-primary mt-3" onClick={() => setShowCart(false)}>Start Adding Items</button>
-                  </div>
-                ) : (
-                  <div className="cart-items-list">
-                    {cart.map((item) => (
-                      <div key={item.foodItemId} className="cart-item-card-v2">
-                        <div className="cart-item-info">
-                          <span className="cart-item-name">{item.itemName}</span>
-                          <div className="cart-item-meta">
-                            <span className="cart-item-price">Rs. {item.price.toFixed(0)}</span>
-                          </div>
-                        </div>
-                        <div className="cart-item-controls">
-                          <button className="qty-v2" onClick={() => updateCartItemQty(item.foodItemId, -1)}>-</button>
-                          <span className="qty-val">{item.qty}</span>
-                          <button className="qty-v2" onClick={() => updateCartItemQty(item.foodItemId, 1)}>+</button>
-                          <button className="remove-v2 ms-2" onClick={() => removeFromCart(item.foodItemId)}>
-                            <i className="fas fa-trash-alt"></i>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {cart.length > 0 && (
-                <div className="cart-footer p-3 border-top">
-                  <div className="order-options mb-3">
-                    <div className="mb-3">
-                      <label className="form-label">Customer Name</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Enter Name"
-                        value={customerName}
-                        onChange={(e) => setCustomerName(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="mb-3">
-                      <label className="form-label">WhatsApp Number <span className="text-danger">*</span></label>
-                      <PhoneInput
-                        country={'lk'}
-                        value={whatsappNumber}
-                        onChange={setWhatsappNumber}
-                        inputStyle={{ width: '100%' }}
-                        containerClass="phone-input-container"
-                        placeholder="Enter WhatsApp Number"
-                        enableSearch={true}
-                      />
-                      <small className="text-muted">We'll send your bill to this WhatsApp number.</small>
-                    </div>
-
-                    <div className="mb-3">
-                      <label className="form-label">Order Notes (Optional)</label>
-                      <textarea
-                        className="form-control"
-                        rows="2"
-                        placeholder="Any special requests?"
-                        value={orderNotes}
-                        onChange={(e) => setOrderNotes(e.target.value)}
-                      ></textarea>
-                    </div>
-                  </div>
-
-                  <div className="cart-total">
-                    <div className="d-flex justify-content-between mb-1 text-muted small">
-                      <span>Subtotal:</span>
-                      <span>Rs. {calculateSubtotal().toFixed(0)}</span>
-                    </div>
-                    <div className="d-flex justify-content-between mb-2 text-muted small">
-                      <span>Service Charge (10%):</span>
-                      <span>Rs. {calculateServiceCharge().toFixed(0)}</span>
-                    </div>
-                    <div className="d-flex justify-content-between fw-bold h5 mb-0">
-                      <span>Total:</span>
-                      <span>Rs. {parseFloat(calculateTotal()).toFixed(0)}</span>
-                    </div>
-                  </div>
-
-                  <button
-                    className="btn btn-lg w-100 text-white"
-                    onClick={placeOrder}
-                    style={{ borderRadius: '8px', background: 'var(--primary-color)', border: 'none', fontWeight: '700', padding: '14px', fontSize: '1.05rem', boxShadow: '0 4px 12px rgba(38, 102, 104, 0.2)' }}
-                  >
-                    <i className="fas fa-check me-2"></i> Place Order
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Cart Overlay */}
-            {showCart && <div className="cart-overlay" onClick={() => setShowCart(false)}></div>}
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="customer-qr-order-container">
