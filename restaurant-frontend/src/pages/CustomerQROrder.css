@@ -1298,18 +1298,39 @@ h6 {
 
 .sketch-modal-content {
   background: white;
-  width: 100%;
-  max-width: 480px;
-  /* Increased width as requested */
-  max-height: 85vh;
-  /* Limit height */
+  width: 95%;
+  max-width: 850px;
+  /* Increased for 2-column layout */
+  max-height: 90vh;
   border-radius: 12px;
-  overflow-y: auto;
-  /* Enable scrolling */
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-  animation: modalScale 0.3s ease-out;
+  overflow: hidden;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+  animation: modalScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   display: flex;
   flex-direction: column;
+}
+
+.sketch-modal-left-col {
+  flex: 1;
+  min-width: 320px;
+}
+
+.sketch-modal-right-col {
+  flex: 1.2;
+  min-width: 320px;
+}
+
+@media (max-width: 768px) {
+  .sketch-modal-content {
+    max-width: 450px;
+    max-height: 95vh;
+    overflow-y: auto;
+  }
+
+  .sketch-modal-left-col {
+    border-right: none !important;
+    border-bottom: 1px solid #eee;
+  }
 }
 
 /* Scrollbar styling */

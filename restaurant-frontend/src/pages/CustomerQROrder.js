@@ -896,55 +896,60 @@ const CustomerQROrder = ({ isManual = false }) => {
               <span className="fw-bold fs-5 text-uppercase">{activeItemDetail.category?.categoryName || 'Product Info'}</span>
             </div>
 
-            <div className="sketch-modal-body">
-              <div className="sketch-modal-image-area mb-4">
-                <img src={getImageUrl(activeItemDetail.imageUrl1 || activeItemDetail.imageUrl)} alt={activeItemDetail.itemName} />
-              </div>
+            <div className="sketch-modal-body d-flex flex-wrap p-0">
+              {/* Left Column: Product Info */}
+              <div className="sketch-modal-left-col p-4 border-end">
+                <div className="sketch-modal-image-area mb-4">
+                  <img src={getImageUrl(activeItemDetail.imageUrl1 || activeItemDetail.imageUrl)} alt={activeItemDetail.itemName} />
+                </div>
 
-              <div className="sketch-modal-info-rows">
-                <div className="sketch-detail-row">
-                  <span className="label">Name :</span>
-                  <span className="value">{activeItemDetail.itemName}</span>
-                </div>
-                <div className="sketch-detail-row">
-                  <span className="label">Code :</span>
-                  <span className="value">{activeItemDetail.foodItemId}</span>
-                </div>
-                <div className="sketch-detail-row">
-                  <span className="label">Price :</span>
-                  <span className="value">Rs. {parseFloat(activeItemDetail.price).toFixed(0)}</span>
-                </div>
-                <div className="sketch-detail-row quantity-row">
-                  <span className="label">Quantity :</span>
-                  <div className="qty-controls">
-                    <button className="qty-btn" onClick={() => setModalQty(Math.max(1, modalQty - 1))}>-</button>
-                    <span className="qty-value">{modalQty}</span>
-                    <button className="qty-btn" onClick={() => setModalQty(modalQty + 1)}>+</button>
+                <div className="sketch-modal-info-rows">
+                  <div className="sketch-detail-row">
+                    <span className="label">Name :</span>
+                    <span className="value fw-bold">{activeItemDetail.itemName}</span>
+                  </div>
+                  <div className="sketch-detail-row">
+                    <span className="label">Code :</span>
+                    <span className="value">{activeItemDetail.foodItemId}</span>
+                  </div>
+                  <div className="sketch-detail-row">
+                    <span className="label">Price :</span>
+                    <span className="value">Rs. {parseFloat(activeItemDetail.price).toFixed(0)}</span>
+                  </div>
+                  <div className="sketch-detail-row quantity-row my-3 py-2 border-top border-bottom">
+                    <span className="label">Quantity :</span>
+                    <div className="qty-controls">
+                      <button className="qty-btn" onClick={() => setModalQty(Math.max(1, modalQty - 1))}>-</button>
+                      <span className="qty-value">{modalQty}</span>
+                      <button className="qty-btn" onClick={() => setModalQty(modalQty + 1)}>+</button>
+                    </div>
+                  </div>
+                  <div className="sketch-detail-row">
+                    <span className="label small text-muted">Service Charge (10%) :</span>
+                    <span className="value small text-muted">Rs. {parseFloat(activeItemDetail.price * modalQty * 0.1).toFixed(0)}</span>
+                  </div>
+                  <div className="sketch-detail-row total-row mt-2 pr-2">
+                    <span className="label fw-bold h5 mb-0">Total :</span>
+                    <span className="value fw-bold h5 mb-0 text-primary">Rs. {parseFloat(activeItemDetail.price * modalQty * 1.1).toFixed(0)}</span>
                   </div>
                 </div>
-                <div className="sketch-detail-row">
-                  <span className="label">Service Charge (10%) :</span>
-                  <span className="value">Rs. {parseFloat(activeItemDetail.price * modalQty * 0.1).toFixed(0)}</span>
-                </div>
-                <div className="sketch-detail-row total-row mt-3">
-                  <span className="label fw-bold">Total :</span>
-                  <span className="value fw-bold">Rs. {parseFloat(activeItemDetail.price * modalQty * 1.1).toFixed(0)}</span>
-                </div>
               </div>
 
-              {/* New Fields from Screenshot 1 */}
-              <div className="sketch-modal-extra-fields p-4 border-top">
+              {/* Right Column: Order Fields */}
+              <div className="sketch-modal-right-col flex-grow-1 p-4 bg-light">
                 <div className="mb-4">
                   <label className="d-block mb-2 fw-bold text-muted small">ORDER LOCATION *</label>
                   <div className="d-flex gap-2">
                     <button
                       className={`flex-grow-1 btn ${orderLocation === 'inside' ? 'btn-primary' : 'btn-outline-primary'}`}
+                      style={orderLocation === 'inside' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }}
                       onClick={() => setOrderLocation('inside')}
                     >
                       IN SIDE
                     </button>
                     <button
                       className={`flex-grow-1 btn ${orderLocation === 'outside' ? 'btn-primary' : 'btn-outline-primary'}`}
+                      style={orderLocation === 'outside' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }}
                       onClick={() => setOrderLocation('outside')}
                     >
                       OUTSIDE
@@ -953,18 +958,20 @@ const CustomerQROrder = ({ isManual = false }) => {
                 </div>
 
                 {orderLocation === 'inside' && (
-                  <>
+                  <div className="fade-in">
                     <div className="mb-4">
                       <label className="d-block mb-2 fw-bold text-muted small">ORDER FOR *</label>
                       <div className="d-flex gap-2">
                         <button
                           className={`flex-grow-1 btn ${modalOrderType === 'table' ? 'btn-primary' : 'btn-outline-primary'}`}
+                          style={modalOrderType === 'table' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }}
                           onClick={() => setModalOrderType('table')}
                         >
                           Table
                         </button>
                         <button
                           className={`flex-grow-1 btn ${modalOrderType === 'room' ? 'btn-primary' : 'btn-outline-primary'}`}
+                          style={modalOrderType === 'room' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }}
                           onClick={() => setModalOrderType('room')}
                         >
                           Room
@@ -972,7 +979,7 @@ const CustomerQROrder = ({ isManual = false }) => {
                       </div>
                     </div>
 
-                    <div className="mb-3">
+                    <div className="mb-4">
                       <input
                         type="text"
                         className="form-control sketch-input"
@@ -981,20 +988,19 @@ const CustomerQROrder = ({ isManual = false }) => {
                         onChange={(e) => setManualTableNo(e.target.value)}
                       />
                     </div>
-                  </>
+                  </div>
                 )}
 
-              </div>
-
-              <div className="mb-3">
-                <label className="d-block mb-2 fw-bold text-muted small">ORDER NOTES (OPTIONAL)</label>
-                <textarea
-                  className="form-control sketch-input"
-                  placeholder="Any special requests?"
-                  rows="3"
-                  value={modalOrderNotes}
-                  onChange={(e) => setModalOrderNotes(e.target.value)}
-                ></textarea>
+                <div className="mb-0">
+                  <label className="d-block mb-2 fw-bold text-muted small">ORDER NOTES (OPTIONAL)</label>
+                  <textarea
+                    className="form-control sketch-input"
+                    placeholder="Any special requests or instructions..."
+                    rows="4"
+                    value={modalOrderNotes}
+                    onChange={(e) => setModalOrderNotes(e.target.value)}
+                  ></textarea>
+                </div>
               </div>
             </div>
 
