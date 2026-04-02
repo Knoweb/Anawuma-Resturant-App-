@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import apiClient from '../api/apiClient';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAuthStore } from '../store/authStore';
@@ -30,6 +30,7 @@ const normalizeWhatsAppNumber = (phone) => {
 
 const CustomerQROrder = ({ isManual = false }) => {
   const { tableKey, roomKey } = useParams();
+  const navigate = useNavigate();
   const [tableInfo, setTableInfo] = useState(null);
   const [menus, setMenus] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -479,10 +480,18 @@ const CustomerQROrder = ({ isManual = false }) => {
       setOrderSuccess(orderData);
       localStorage.setItem(`active_order_${tableKey || roomKey}`, JSON.stringify(orderData));
 
-      setShowStatusScreen(true);
-      setCart([]);
-      setOrderNotes('');
-      setShowCart(false);
+      if (isManual) {
+        setCart([]);
+        setOrderNotes('');
+        setShowCart(false);
+        const target = manualOrderType === 'ROOM' ? '/manual-orders/rooms' : '/manual-orders/tables';
+        navigate(target);
+      } else {
+        setShowStatusScreen(true);
+        setCart([]);
+        setOrderNotes('');
+        setShowCart(false);
+      }
 
     } catch (error) {
       console.error('Order error:', error);
@@ -527,10 +536,12 @@ const CustomerQROrder = ({ isManual = false }) => {
       };
 
       setOrderSuccess(orderData);
-      setShowStatusScreen(true);
       setCart([]);
       setActiveItemDetail(null);
       setModalOrderNotes('');
+
+      const target = modalOrderType === 'room' ? '/manual-orders/rooms' : '/manual-orders/tables';
+      navigate(target);
 
     } catch (error) {
       console.error('Quick Order error:', error);
