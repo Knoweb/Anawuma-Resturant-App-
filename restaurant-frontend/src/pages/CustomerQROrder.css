@@ -1310,6 +1310,11 @@ h6 {
   flex-direction: column;
 }
 
+.sketch-modal-body {
+  overflow-y: auto;
+  flex: 1;
+}
+
 .sketch-modal-left-col {
   flex: 1;
   min-width: 320px;
@@ -1324,7 +1329,6 @@ h6 {
   .sketch-modal-content {
     max-width: 450px;
     max-height: 95vh;
-    overflow-y: auto;
   }
 
   .sketch-modal-left-col {
