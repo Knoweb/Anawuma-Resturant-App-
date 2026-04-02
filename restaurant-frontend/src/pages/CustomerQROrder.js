@@ -803,27 +803,28 @@ const CustomerQROrder = ({ isManual = false }) => {
 
       return (
         <div className="manual-dashboard-layout d-flex" style={{ minHeight: 'calc(100vh - 80px)', backgroundColor: '#fcfcfc' }}>
-          {/* Dashboard Sidebar */}
-          <aside className="manual-dashboard-sidebar bg-white border-end shadow-sm" style={{ width: '220px', position: 'sticky', top: '80px', height: 'calc(100vh - 80px)', overflowY: 'auto', zIndex: 10 }}>
-            <div className="p-3 border-bottom bg-light">
-              <h6 className="mb-0 fw-bold text-uppercase small text-muted"><i className="fas fa-th-large me-2"></i> Categories</h6>
-            </div>
-            <div className="list-group list-group-flush">
-              {groupedData.map(group => (
-                <button
-                  key={group.menuId}
-                  className="list-group-item list-group-item-action border-0 py-3 small fw-bold d-flex align-items-center"
-                  onClick={() => {
-                    const el = document.getElementById(`menu-group-${group.menuId}`);
-                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }}
-                  style={{ fontSize: '0.82rem', letterSpacing: '0.3px', transition: 'all 0.2s' }}
-                >
-                  <i className="fas fa-chevron-right me-2 opacity-50 small"></i> {group.menuName}
-                </button>
-              ))}
-            </div>
-          </aside>
+          {!isManual && (
+            <aside className="manual-dashboard-sidebar bg-white border-end shadow-sm" style={{ width: '220px', position: 'sticky', top: '80px', height: 'calc(100vh - 80px)', overflowY: 'auto', zIndex: 10 }}>
+              <div className="p-3 border-bottom bg-light">
+                <h6 className="mb-0 fw-bold text-uppercase small text-muted"><i className="fas fa-th-large me-2"></i> Categories</h6>
+              </div>
+              <div className="list-group list-group-flush">
+                {groupedData.map(group => (
+                  <button
+                    key={group.menuId}
+                    className="list-group-item list-group-item-action border-0 py-3 small fw-bold d-flex align-items-center"
+                    onClick={() => {
+                      const el = document.getElementById(`menu-group-${group.menuId}`);
+                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
+                    style={{ fontSize: '0.82rem', letterSpacing: '0.3px', transition: 'all 0.2s' }}
+                  >
+                    <i className="fas fa-chevron-right me-2 opacity-50 small"></i> {group.menuName}
+                  </button>
+                ))}
+              </div>
+            </aside>
+          )}
 
           {/* Main Content Area */}
           <div className="manual-content-main flex-grow-1 p-0">
@@ -1073,39 +1074,41 @@ const CustomerQROrder = ({ isManual = false }) => {
       )}
 
       {/* Premium Elegant Header */}
-      <header className={`customer-header-v2 ${selectedMenu ? 'header-scrolled' : ''}`}>
-        <div className="header-container">
-          <div className="restaurant-brand-v2">
-            {tableInfo?.logo ? (
-              <img src={tableInfo.logo} alt={tableInfo.restaurantName} className="brand-logo-v2" />
-            ) : (
-              <div className="brand-placeholder-v2">
-                <i className="fas fa-utensils"></i>
-              </div>
-            )}
-            <div className="brand-text-v2">
-              <h1 className="hotel-name-v2">{tableInfo.restaurantName}</h1>
-              <div className="room-badge-v2">
-                <i className={`fas ${tableInfo?.isRoom || manualOrderType === 'ROOM' ? 'fa-concierge-bell' : 'fa-chair'}`}></i>
-                <span>
-                  {isManual ? (
-                    `${manualOrderType === 'ROOM' ? 'Room' : 'Table'} ${manualTableNo || '?'}`
-                  ) : (
-                    `${tableInfo?.isRoom ? 'Room' : 'Table'} ${tableInfo?.tableNo || tableInfo?.roomNo}`
-                  )}
-                </span>
+      {!isManual && (
+        <header className={`customer-header-v2 ${selectedMenu ? 'header-scrolled' : ''}`}>
+          <div className="header-container">
+            <div className="restaurant-brand-v2">
+              {tableInfo?.logo ? (
+                <img src={tableInfo.logo} alt={tableInfo.restaurantName} className="brand-logo-v2" />
+              ) : (
+                <div className="brand-placeholder-v2">
+                  <i className="fas fa-utensils"></i>
+                </div>
+              )}
+              <div className="brand-text-v2">
+                <h1 className="hotel-name-v2">{tableInfo.restaurantName}</h1>
+                <div className="room-badge-v2">
+                  <i className={`fas ${tableInfo?.isRoom || manualOrderType === 'ROOM' ? 'fa-concierge-bell' : 'fa-chair'}`}></i>
+                  <span>
+                    {isManual ? (
+                      `${manualOrderType === 'ROOM' ? 'Room' : 'Table'} ${manualTableNo || '?'}`
+                    ) : (
+                      `${tableInfo?.isRoom ? 'Room' : 'Table'} ${tableInfo?.tableNo || tableInfo?.roomNo}`
+                    )}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="cart-trigger-v2" onClick={() => setShowCart(true)}>
-            <div className={`cart-btn-v2 ${cart.length > 0 ? 'pulse' : ''}`}>
-              <i className="fas fa-shopping-bag"></i>
-              {cart.length > 0 && <span className="cart-badge-v2">{cart.length}</span>}
+            <div className="cart-trigger-v2" onClick={() => setShowCart(true)}>
+              <div className={`cart-btn-v2 ${cart.length > 0 ? 'pulse' : ''}`}>
+                <i className="fas fa-shopping-bag"></i>
+                {cart.length > 0 && <span className="cart-badge-v2">{cart.length}</span>}
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       {/* Modern Bottom Navigation */}
       <nav className="mobile-bottom-nav">
