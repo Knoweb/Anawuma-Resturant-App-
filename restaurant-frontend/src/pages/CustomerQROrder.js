@@ -1153,7 +1153,7 @@ const CustomerQROrder = ({ isManual = false }) => {
           <div className="wrapper">
             <Navbar />
             <Sidebar />
-            <div className="content-wrapper" style={{ padding: '0', backgroundColor: '#fcfcfc', minHeight: 'calc(100vh - 70px)', marginTop: '0' }}>
+            <div className="content-wrapper" style={{ padding: '0', backgroundColor: '#fcfcfc', minHeight: 'calc(100vh - 70px)', marginTop: '0', position: 'relative' }}>
               {/* Floating Quick Cart Cart Icon - Top Right of content */}
               <button
                 className="manual-quick-cart-btn"
@@ -1162,9 +1162,9 @@ const CustomerQROrder = ({ isManual = false }) => {
                 onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.transform = 'scale(1)'; }}
                 style={{
                   position: 'absolute',
-                  top: '20px',
-                  right: '30px',
-                  zIndex: 100,
+                  top: '15px',
+                  right: '20px',
+                  zIndex: 1100,
                   width: '56px',
                   height: '52px',
                   backgroundColor: '#fff',
