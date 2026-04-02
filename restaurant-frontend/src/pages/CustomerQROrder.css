@@ -1,5 +1,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700;800&display=swap');
 
+/* Manual Ordering Styles for Cashier Dashboard */
+.manual-layout {
+  padding-bottom: 20px !important;
+  max-width: none !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: #f4f6f9 !important;
+  min-height: calc(100vh - 100px) !important;
+}
+
+.manual-layout .mobile-bottom-nav {
+  display: none !important;
+}
+
+.manual-layout .customer-header-v2 {
+  position: sticky !important;
+  top: 0;
+  z-index: 1000;
+  border-bottom: 1px solid #ddd;
+}
+
 /* Box-type Premium UI (Inspired by previous layout but modernized) */
 :root {
   --primary-color: #266668;
