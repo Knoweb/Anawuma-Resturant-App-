@@ -25,8 +25,8 @@ export class Invoice {
   @Column({ name: 'invoice_number', type: 'varchar', length: 50, unique: true })
   invoiceNumber: string;
 
-  @Column({ name: 'order_id', type: 'int' })
-  orderId: number;
+  @Column({ name: 'order_id', type: 'int', nullable: true })
+  orderId: number | null;
 
   @Column({ name: 'restaurant_id', type: 'int' })
   restaurantId: number;

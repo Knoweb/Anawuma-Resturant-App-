@@ -136,35 +136,124 @@ const ManualTableOrders = () => {
         printWindow.document.close();
     };
 
-    const handleFinalizePaid = async (account, tableNo) => {
+    const finalizeCheckout = async (account, tableNo) => {
         try {
             const orderIds = account.orders.map(o => o.orderId);
             const response = await apiClient.post('/billing/manual/finalize', {
                 orderIds,
                 identifier: tableNo,
-                isPaid: false // Set to false so it appears in the PENDING queue as requested "comes to cashier queue"
+                type: 'TABLE'
             });
 
             if (response.data) {
-                // 1. Show success message
                 Swal.fire({
-                    title: 'Payment Successful',
-                    text: `Bill for Table ${tableNo} has been sent to the Cashier Queue.`,
+                    title: 'Payment Successful!',
+                    text: `Invoice #${response.data.invoiceNumber} has been marked as PAID and sent to Accountant.`,
                     icon: 'success',
-                    timer: 2000,
-                    showConfirmButton: false
+                    confirmButtonColor: '#1cc88a'
                 });
-
-                // 2. Trigger Print
-                printAccountBill(account, tableNo);
-
-                // 3. Refresh accounts
-                setTimeout(() => fetchAccounts(), 1000);
+                fetchAccounts(); // Refresh the list
             }
         } catch (error) {
-            console.error('Error finalizing manual order:', error);
-            Swal.fire('Error', error.response?.data?.message || 'Failed to finalize payment', 'error');
+            console.error('Checkout error:', error);
+            Swal.fire('Error', 'Failed to finalize checkout', 'error');
         }
+    };
+
+    const showInvoiceModal = (account, tableNo) => {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        // Generate a temporary invoice number for preview
+        const tempInv = `INV-MAN-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-TEMP`;
+
+        const invoiceHtml = `
+            <div class="invoice-container modern-invoice">
+                <div class="invoice-header text-center mb-4">
+                    <h2 class="mb-0">serene1</h2>
+                    <div class="border-top border-bottom my-2 py-1 font-weight-bold">TAX INVOICE</div>
+                    <div class="small d-flex justify-content-between px-2">
+                        <span>Invoice #: ${tempInv}</span>
+                    </div>
+                    <div class="small d-flex justify-content-between px-2">
+                        <span>Date: ${dateStr}, ${timeStr}</span>
+                    </div>
+                    <div class="small d-flex justify-content-between px-2">
+                        <span>Table: ${tableNo}</span>
+                        <span>Customer: Manual Order</span>
+                    </div>
+                </div>
+
+                <div class="invoice-body">
+                    <table class="table table-sm table-borderless">
+                        <thead>
+                            <tr class="border-bottom">
+                                <th class="text-start">Item</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-center">Unit</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${account.orders.flatMap(o => o.orderItems).map(item => `
+                                <tr>
+                                    <td class="text-start">${item.itemName}</td>
+                                    <td class="text-center">${item.qty}</td>
+                                    <td class="text-center">Rs. ${parseFloat(item.unitPrice).toFixed(2)}</td>
+                                    <td class="text-end">Rs. ${parseFloat(item.lineTotal).toFixed(2)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="invoice-footer border-top pt-2">
+                    <div class="d-flex justify-content-between px-2 mb-1">
+                        <span>Subtotal</span>
+                        <span>Rs. ${parseFloat(account.orders.reduce((sum, o) => sum + parseFloat(o.subtotal), 0)).toFixed(2)}</span>
+                    </div>
+                    <div class="d-flex justify-content-between px-2 mb-1">
+                        <span>Service Charge</span>
+                        <span>Rs. ${parseFloat(account.orders.reduce((sum, o) => sum + parseFloat(o.serviceCharge), 0)).toFixed(2)}</span>
+                    </div>
+                    <div class="d-flex justify-content-between px-2 font-weight-bold border-top pt-1 h5">
+                        <span>TOTAL</span>
+                        <span>Rs. ${parseFloat(account.totalAmount).toFixed(2)}</span>
+                    </div>
+                    <div class="text-center mt-3 small italic">
+                        <div class="border-top border-bottom py-1">Thank you for dining with us!</div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        Swal.fire({
+            title: `<div class="d-flex justify-content-between align-items-center w-100 pe-3">
+                        <span class="small text-muted">Invoice #${tempInv}</span>
+                        <span class="badge bg-success-soft text-success small" style="font-size:0.5em"><i class="fas fa-print"></i> DRAFT</span>
+                    </div>`,
+            html: invoiceHtml,
+            width: '500px',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-check-circle me-1"></i> Mark Paid',
+            cancelButtonText: 'Close',
+            denyButtonText: '<i class="fas fa-print me-1"></i> Print',
+            showDenyButton: true,
+            confirmButtonColor: '#1cc88a', // Green
+            denyButtonColor: '#2c3e50', // Dark
+            cancelButtonColor: '#858796',
+            customClass: {
+                popup: 'modal-radius'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                finalizeCheckout(account, tableNo);
+            } else if (result.isDenied) {
+                printAccountBill(account, tableNo);
+                // Reshow after print if they want
+                showInvoiceModal(account, tableNo);
+            }
+        });
     };
 
     const handleTableClick = (tableNo, account) => {
@@ -219,15 +308,12 @@ const ManualTableOrders = () => {
             html: itemsHtml,
             width: '600px',
             showCancelButton: true,
-            confirmButtonText: '<i class="fas fa-check-circle me-1"></i> Paid & Finalize',
+            confirmButtonText: '<i class="fas fa-check-circle me-1"></i> Print/Proceed',
             cancelButtonText: 'Close',
-            confirmButtonColor: '#1cc88a',
+            confirmButtonColor: '#4e73df', // Primary Blue
             cancelButtonColor: '#858796',
-            footer: `<button class="btn btn-dark w-100 py-2" id="print-all-bill-btn"><i class="fas fa-print me-1"></i> Print Bill Snapshot</button>`,
             didOpen: () => {
                 const popup = Swal.getPopup();
-
-                // Single order print buttons
                 const printBtns = popup.querySelectorAll('.print-single-order');
                 printBtns.forEach(btn => {
                     btn.addEventListener('click', () => {
@@ -235,19 +321,13 @@ const ManualTableOrders = () => {
                         printOrder(account.orders[idx], tableNo);
                     });
                 });
-
-                // Overall bill print button in footer
-                const printAllBtn = popup.querySelector('#print-all-bill-btn');
-                printAllBtn.addEventListener('click', () => {
-                    printAccountBill(account, tableNo);
-                });
             },
             customClass: {
                 popup: 'modal-radius'
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                handleFinalizePaid(account, tableNo);
+                showInvoiceModal(account, tableNo);
             }
         });
     };
@@ -324,12 +404,30 @@ const ManualTableOrders = () => {
         .bg-primary-soft {
           background-color: #f0f7ff;
         }
+        .bg-success-soft {
+          background-color: #e8fff3;
+        }
         .modal-radius {
           border-radius: 20px !important;
         }
         .border-dashed {
           border: 2px dashed #d1d3e2 !important;
         }
+        .modern-invoice {
+            font-family: 'Courier New', Courier, monospace;
+            background: #fff;
+            padding: 10px;
+            color: #333;
+        }
+        .modern-invoice table th {
+            text-transform: uppercase;
+            font-size: 0.8em;
+            color: #666;
+        }
+        .modern-invoice .h5 {
+            font-size: 1.25rem;
+        }
+        .italic { font-style: italic; }
       `}</style>
         </div>
     );

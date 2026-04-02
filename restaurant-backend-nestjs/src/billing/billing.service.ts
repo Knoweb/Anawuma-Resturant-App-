@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import {
   Invoice,
   InvoiceStatus,
@@ -131,10 +131,116 @@ export class BillingService {
     });
 
     invoices.forEach((invoice) => {
-      invoice.orderNo = orderNoById.get(invoice.orderId);
+      if (invoice.orderId) {
+        invoice.orderNo = orderNoById.get(invoice.orderId);
+      }
     });
 
     return invoices;
+  }
+
+  /**
+   * Finalizes multiple manual orders into a single PAID invoice
+   * and sends it to Accountant Transfer.
+   */
+  async finalizeManualCheckout(
+    restaurantId: number,
+    adminId: number,
+    payload: {
+      orderIds: number[];
+      identifier: string;
+      type: 'ROOM' | 'TABLE';
+    },
+  ): Promise<Invoice> {
+    // 1. Load orders with items
+    const orders = await this.ordersRepository.find({
+      where: {
+        orderId: In(payload.orderIds),
+        restaurantId,
+      },
+      relations: ['orderItems'],
+    });
+
+    if (orders.length === 0) {
+      throw new BadRequestException('No orders found to finalize');
+    }
+
+    // 2. Aggregate financials and items
+    let subtotal = 0;
+    let serviceCharge = 0;
+    let totalAmount = 0;
+    const aggregatedItems: any[] = [];
+
+    orders.forEach((order) => {
+      const orderSubtotal =
+        order.subtotal && parseFloat(order.subtotal.toString()) > 0
+          ? parseFloat(order.subtotal.toString())
+          : parseFloat(order.totalAmount.toString());
+
+      const orderSC = order.serviceCharge
+        ? parseFloat(order.serviceCharge.toString())
+        : 0;
+
+      subtotal += orderSubtotal;
+      serviceCharge += orderSC;
+      totalAmount += parseFloat(order.totalAmount.toString());
+
+      (order.orderItems || []).forEach((item) => {
+        aggregatedItems.push({
+          itemName: item.itemName,
+          qty: item.qty,
+          unitPrice: parseFloat(item.unitPrice.toString()),
+          lineTotal: parseFloat(item.lineTotal.toString()),
+          notes: item.notes || null,
+        });
+      });
+    });
+
+    const now = new Date();
+    const datePart = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(
+      2,
+      '0',
+    )}${String(now.getDate()).padStart(2, '0')}`;
+    const timePart = `${String(now.getHours()).padStart(2, '0')}${String(
+      now.getMinutes(),
+    ).padStart(2, '0')}`;
+    const randomPart = Math.floor(Math.random() * 900) + 100;
+    const invoiceNumber = `INV-MAN-${datePart}-${timePart}-${randomPart}`;
+
+    // 3. Create Aggregated Invoice
+    const invoice = this.invoicesRepository.create({
+      invoiceNumber,
+      orderId: orders[0].orderId, // Refer to the first order
+      restaurantId,
+      tableNo: payload.identifier,
+      customerName: `Manual Order (${payload.type} ${payload.identifier})`,
+      orderItemsJson: aggregatedItems,
+      subtotal,
+      taxAmount: 0,
+      serviceCharge,
+      discountAmount: 0,
+      totalAmount,
+      invoiceStatus: InvoiceStatus.PAID,
+      isPrinted: true,
+      accountantTransferStatus: AccountantTransferStatus.PENDING,
+      sentToAccountantAt: now,
+      sentToAccountantByAdminId: adminId,
+      createdByAdminId: adminId,
+    });
+
+    const savedInvoice = await this.invoicesRepository.save(invoice);
+    savedInvoice.orderNo = orders[0].orderNo || undefined;
+
+    // 4. Update all orders to BILLED status
+    for (const order of orders) {
+      order.status = OrderStatus.BILLED;
+      await this.ordersRepository.save(order);
+    }
+
+    // 5. Notify frontend
+    this.websocketGateway.server.emit('dashboard:refresh');
+
+    return savedInvoice;
   }
 
   private resolveDateBounds(date?: string): {
@@ -164,6 +270,10 @@ export class BillingService {
       .getMany();
   }
 
+  /**
+   * Creates an invoice for a READY order, marks the order as BILLED,
+   * and returns the saved invoice.
+   */
   async createInvoice(
     dto: CreateInvoiceDto,
     restaurantId: number,
@@ -242,125 +352,6 @@ export class BillingService {
       restaurantId: order.restaurantId,
     });
     this.websocketGateway.server.emit('dashboard:refresh');
-
-    return savedInvoice;
-  }
-
-  /**
-   * Creates a multi-order invoice for manual room/table orders.
-   * Merges items and totals from all provided order IDs.
-   */
-  async createManualInvoice(
-    dto: any, // CreateManualInvoiceDto
-    restaurantId: number,
-    adminId?: number,
-  ): Promise<Invoice> {
-    const { orderIds, identifier, taxAmount = 0, discountAmount = 0, isPaid = false } = dto;
-
-    if (!orderIds || orderIds.length === 0) {
-      throw new BadRequestException('No order IDs provided');
-    }
-
-    // Load all orders
-    const orders = await this.ordersRepository
-      .createQueryBuilder('order')
-      .leftJoinAndSelect('order.orderItems', 'orderItems')
-      .where('order.orderId IN (:...orderIds)', { orderIds })
-      .andWhere('order.restaurantId = :restaurantId', { restaurantId })
-      .getMany();
-
-    if (orders.length === 0) {
-      throw new NotFoundException('No orders found');
-    }
-
-    // Ensure all orders are NOT cancelled
-    orders.forEach(o => {
-      if (o.status === OrderStatus.CANCELLED) {
-        throw new BadRequestException(`Order #${o.orderNo} is cancelled and cannot be billed.`);
-      }
-    });
-
-    // Calculate aggregated totals
-    let combinedSubtotal = 0;
-    let combinedServiceCharge = 0;
-    const allItemsSnapshot: any[] = [];
-
-    orders.forEach(order => {
-      const orderSub = order.subtotal && parseFloat(order.subtotal.toString()) > 0
-        ? parseFloat(order.subtotal.toString())
-        : parseFloat(order.totalAmount.toString());
-
-      const orderSC = order.serviceCharge ? parseFloat(order.serviceCharge.toString()) : 0;
-
-      combinedSubtotal += orderSub;
-      combinedServiceCharge += orderSC;
-
-      (order.orderItems || []).forEach(item => {
-        allItemsSnapshot.push({
-          itemName: item.itemName,
-          qty: item.qty,
-          unitPrice: parseFloat(item.unitPrice.toString()),
-          lineTotal: parseFloat(item.lineTotal.toString()),
-          notes: item.notes || null,
-          orderNo: order.orderNo, // Track which order it came from
-        });
-      });
-    });
-
-    // Handle service charge override if provided in DTO
-    const serviceCharge = dto.serviceCharge !== undefined ? parseFloat(dto.serviceCharge.toString()) : combinedServiceCharge;
-    const tax = parseFloat(taxAmount.toString());
-    const discount = parseFloat(discountAmount.toString());
-    const finalTotal = combinedSubtotal + tax + serviceCharge - discount;
-
-    const today = new Date();
-    const datePart = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
-    // Using the first order ID for the invoice number generation stability
-    const invoiceNumber = `INV-MAN-${datePart}-${orders[0].orderId}-${Math.floor(Math.random() * 1000)}`;
-
-    const invoice = this.invoicesRepository.create({
-      invoiceNumber,
-      orderId: orders[0].orderId, // Primary reference
-      restaurantId,
-      customerName: orders[0].customerName || `Multi: ${identifier}`,
-      whatsappNumber: orders[0].whatsappNumber,
-      tableNo: identifier,
-      orderItemsJson: allItemsSnapshot,
-      subtotal: combinedSubtotal,
-      taxAmount: tax,
-      serviceCharge: serviceCharge,
-      discountAmount: discount,
-      totalAmount: finalTotal,
-      invoiceStatus: isPaid ? InvoiceStatus.PAID : InvoiceStatus.PENDING,
-      isPrinted: false,
-      isSentToCashier: true, // Manual checkout always sends to cashier queue
-      sentToCashierAt: new Date(),
-      isSentWhatsapp: false,
-      accountantTransferStatus: AccountantTransferStatus.NONE,
-      createdByAdminId: adminId ?? null,
-    });
-
-    const savedInvoice = await this.invoicesRepository.save(invoice);
-
-    // Transition ALL orders to BILLED
-    for (const order of orders) {
-      order.status = OrderStatus.BILLED;
-      await this.ordersRepository.save(order);
-
-      this.websocketGateway.emitOrderStatusUpdate({
-        orderId: order.orderId,
-        orderNo: order.orderNo,
-        tableNo: order.tableNo,
-        status: order.status,
-        restaurantId: order.restaurantId,
-      });
-    }
-
-    this.websocketGateway.server.emit('dashboard:refresh');
-    this.websocketGateway.emitToRole('cashier', 'cashier:queue-update', {
-      invoiceId: savedInvoice.invoiceId,
-      restaurantId: savedInvoice.restaurantId,
-    });
 
     return savedInvoice;
   }

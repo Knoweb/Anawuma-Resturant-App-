@@ -314,10 +314,6 @@ export const billingAPI = {
   /** Accountant rejects pending transfers (keeps data with cashier). */
   rejectTransactionsByAccountant: (data) =>
     apiClient.post('/billing/accountant/reject', data),
-
-  /** Finalize manual multi-order billing. */
-  finalizeManualInvoice: (data) =>
-    apiClient.post('/billing/manual/finalize', data),
 };
 
 export default apiClient;

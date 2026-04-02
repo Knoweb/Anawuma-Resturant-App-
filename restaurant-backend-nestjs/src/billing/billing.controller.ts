@@ -92,23 +92,6 @@ export class BillingController {
   }
 
   /**
-   * POST /billing/manual/finalize
-   * Aggregates multiple manual orders into one invoice.
-   */
-  @Post('manual/finalize')
-  @Roles(...BILLING_ROLES)
-  createManualInvoice(
-    @Body() dto: any, // CreateManualInvoiceDto
-    @Request() req: RequestWithUser,
-  ) {
-    return this.billingService.createManualInvoice(
-      dto,
-      req.user.restaurantId,
-      req.user.adminId ?? req.user.id,
-    );
-  }
-
-  /**
    * POST /billing/orders/:id/create-invoice
    * Creates or returns an invoice snapshot for handoff to cashier.
    */
@@ -309,6 +292,23 @@ export class BillingController {
     @Request() req: RequestWithUser,
   ) {
     return this.billingService.sendInvoiceToCashier(id, req.user.restaurantId);
+  }
+
+  /**
+   * POST /billing/manual/finalize
+   * Finalizes multiple manual orders into a single aggregated PAID invoice.
+   */
+  @Post('manual/finalize')
+  @Roles(...BILLING_ROLES)
+  finalizeManualCheckout(
+    @Body() payload: { orderIds: number[]; identifier: string; type: 'ROOM' | 'TABLE' },
+    @Request() req: RequestWithUser,
+  ) {
+    return this.billingService.finalizeManualCheckout(
+      req.user.restaurantId,
+      req.user.adminId ?? req.user.id,
+      payload,
+    );
   }
 
   /**
