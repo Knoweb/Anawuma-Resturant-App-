@@ -28,13 +28,13 @@ export class OrdersService {
     private websocketGateway: WebsocketGateway,
     private tableQrService: TableQrService,
     private roomQrService: RoomQrService,
-  ) {}
+  ) { }
 
   async create(createOrderDto: CreateOrderDto, restaurantId: number) {
     const { tableNo, roomNo, orderType, customerName, whatsappNumber, notes, items } = createOrderDto;
 
     // Normalize WhatsApp number if provided
-    const normalizedWhatsapp = whatsappNumber 
+    const normalizedWhatsapp = whatsappNumber
       ? normalizeWhatsAppNumber(whatsappNumber)
       : undefined;
 
@@ -364,5 +364,58 @@ export class OrdersService {
     }
 
     return await query.getOne();
+  }
+
+  async getManualActiveAccounts(restaurantId: number, type: 'ROOM' | 'TABLE') {
+    const activeStatuses: OrderStatus[] = [
+      OrderStatus.NEW,
+      OrderStatus.ACCEPTED,
+      OrderStatus.COOKING,
+      OrderStatus.READY,
+      OrderStatus.SERVED,
+    ];
+
+    const query = this.ordersRepository
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.orderItems', 'orderItems')
+      .where('order.restaurantId = :restaurantId', { restaurantId })
+      .andWhere('order.orderType = :orderType', { orderType: OrderType.MANUAL_CASHIER })
+      .andWhere('order.status IN (:...activeStatuses)', { activeStatuses });
+
+    if (type === 'ROOM') {
+      query.andWhere('order.roomNo IS NOT NULL');
+    } else {
+      query.andWhere('order.tableNo IS NOT NULL');
+    }
+
+    const orders = await query.getMany();
+
+    // Aggregate by roomNo or tableNo
+    const accounts: Record<string, any> = {};
+
+    orders.forEach(order => {
+      const key = type === 'ROOM' ? order.roomNo : order.tableNo;
+      if (!key) return;
+
+      if (!accounts[key]) {
+        accounts[key] = {
+          identifier: key,
+          orders: [],
+          totalAmount: 0,
+          itemCount: 0,
+          lastOrderAt: order.createdAt
+        };
+      }
+
+      accounts[key].orders.push(order);
+      accounts[key].totalAmount += parseFloat(order.totalAmount.toString());
+      accounts[key].itemCount += order.orderItems ? order.orderItems.length : 0;
+
+      if (new Date(order.createdAt) > new Date(accounts[key].lastOrderAt)) {
+        accounts[key].lastOrderAt = order.createdAt;
+      }
+    });
+
+    return Object.values(accounts);
   }
 }

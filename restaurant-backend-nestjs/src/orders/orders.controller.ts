@@ -31,7 +31,7 @@ import { TableKeyGuard } from '../common/guards/table-key.guard';
 
 @Controller('orders')
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(private readonly ordersService: OrdersService) { }
 
   @Post()
   @UseGuards(TableKeyGuard) // Secure public endpoint with QR key (Table or Room)
@@ -39,18 +39,18 @@ export class OrdersController {
   create(@Req() req, @Body() createOrderDto: CreateOrderDto) {
     // restaurantId, tableNo/roomNo, and orderType come from TableKeyGuard (attached to req)
     const { restaurantId, tableNo, roomNo, orderType } = req;
-    
+
     // Validate items array is not empty
     if (!createOrderDto.items || createOrderDto.items.length === 0) {
       throw new BadRequestException('Order must contain at least one item');
     }
 
     // Override tableNo/roomNo/orderType from the guard (more secure than client input)
-    const orderData = { 
-      ...createOrderDto, 
-      tableNo, 
-      roomNo, 
-      orderType 
+    const orderData = {
+      ...createOrderDto,
+      tableNo,
+      roomNo,
+      orderType
     };
 
     return this.ordersService.create(orderData, restaurantId);
@@ -61,7 +61,7 @@ export class OrdersController {
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.CASHIER)
   createManual(@Request() req, @Body() createOrderDto: CreateOrderDto) {
     const restaurantId = req.user.restaurantId;
-    
+
     if (!createOrderDto.items || createOrderDto.items.length === 0) {
       throw new BadRequestException('Order must contain at least one item');
     }
@@ -73,8 +73,8 @@ export class OrdersController {
 
     // For manual orders from cashier dashboard, we use a distinct orderType if provided, 
     // or default to MANUAL_CASHIER
-    const orderData = { 
-      ...createOrderDto, 
+    const orderData = {
+      ...createOrderDto,
       orderType: createOrderDto.orderType || 'MANUAL_CASHIER' as any
     };
 
@@ -117,24 +117,36 @@ export class OrdersController {
     return this.ordersService.getKitchenDashboardSummary(restaurantId, queryDto);
   }
 
+  @Get('manual-accounts/:type')
+  @SkipThrottle()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.CASHIER)
+  getManualActiveAccounts(
+    @Param('type') type: 'ROOM' | 'TABLE',
+    @Request() req
+  ) {
+    const restaurantId = req.user.restaurantId;
+    return this.ordersService.getManualActiveAccounts(restaurantId, type);
+  }
+
   // Public endpoint for customers to track their order
   @Get('track/:id')
   @SkipThrottle()
   async trackOrder(
-    @Param('id', ParseIntPipe) id: number, 
+    @Param('id', ParseIntPipe) id: number,
     @Headers('x-table-key') tableKey: string,
     @Headers('x-room-key') roomKey: string
   ) {
     if (!tableKey && !roomKey) {
       throw new HttpException('QR key is required', HttpStatus.UNAUTHORIZED);
     }
-    
+
     // Verify QR key and get order
     const order = await this.ordersService.trackOrderByQrKey(id, tableKey, roomKey);
     if (!order) {
       throw new HttpException('Order not found or unauthorized', HttpStatus.NOT_FOUND);
     }
-    
+
     return order;
   }
 

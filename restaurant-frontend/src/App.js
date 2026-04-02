@@ -49,6 +49,8 @@ import CheckoutPage from './pages/CheckoutPage';
 import BlogPage from './pages/BlogPage';
 import BlogPostPage from './pages/BlogPostPage';
 import AboutPage from './pages/AboutPage';
+import ManualRoomOrders from './pages/ManualRoomOrders';
+import ManualTableOrders from './pages/ManualTableOrders';
 
 import PrivateRoute from './components/auth/PrivateRoute';
 import RoleRoute from './components/auth/RoleRoute';
@@ -150,6 +152,26 @@ function App() {
                 <PrivateRoute>
                   <RoleRoute allowedRoles={['cashier', 'admin', 'super_admin']}>
                     <CustomerQROrder isManual={true} />
+                  </RoleRoute>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/manual-orders/tables"
+              element={
+                <PrivateRoute>
+                  <RoleRoute allowedRoles={['cashier', 'admin', 'super_admin']}>
+                    <ManualTableOrders />
+                  </RoleRoute>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/manual-orders/rooms"
+              element={
+                <PrivateRoute>
+                  <RoleRoute allowedRoles={['cashier', 'admin', 'super_admin']}>
+                    <ManualRoomOrders />
                   </RoleRoute>
                 </PrivateRoute>
               }

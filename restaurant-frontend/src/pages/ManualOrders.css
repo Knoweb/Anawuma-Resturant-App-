@@ -1,0 +1,199 @@
+/* Manual Orders Dashboard Styles */
+
+.manual-orders-container {
+    padding: 2rem;
+    background-color: #f8f9fc;
+    min-height: calc(100vh - 60px);
+}
+
+.page-title-section {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #e3e6f0;
+    padding-bottom: 1rem;
+}
+
+.page-title-section h1 {
+    color: #4e73df;
+    font-weight: 800;
+    font-size: 1.75rem;
+}
+
+/* Grid Layout */
+.accounts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Card Styles */
+.account-card {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    border: none;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    background: white;
+    position: relative;
+}
+
+.account-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 2rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.account-card.has-orders {
+    border-top: 5px solid #1cc88a;
+}
+
+.account-card.empty {
+    border-top: 5px solid #d1d3e2;
+    opacity: 0.8;
+}
+
+.account-card-body {
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.account-icon-wrapper {
+    width: 70px;
+    height: 70px;
+    background: #f8f9fc;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.account-card.has-orders .account-icon-wrapper {
+    background: #e8fff3;
+    color: #1cc88a;
+}
+
+.account-card.has-orders:hover .account-icon-wrapper {
+    background: #1cc88a;
+    color: white;
+}
+
+.account-id {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #2e59d9;
+    margin-bottom: 0.5rem;
+}
+
+.order-count-badge {
+    display: inline-block;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 10rem;
+    margin-bottom: 1rem;
+}
+
+.account-total-amount {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #3a3b45;
+    margin-bottom: 0.25rem;
+}
+
+.last-order-time {
+    font-size: 0.75rem;
+    color: #858796;
+}
+
+/* Modal styles overrides */
+.bill-detail-container {
+    text-align: left;
+    max-height: 450px;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+.order-group {
+    background: #f8f9fc;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #e3e6f0;
+}
+
+.order-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px dashed #d1d3e2;
+}
+
+.order-group-no {
+    font-weight: 800;
+    color: #4e73df;
+}
+
+.order-group-date {
+    font-size: 0.7rem;
+    color: #858796;
+}
+
+.item-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.item-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.item-name {
+    font-weight: 600;
+    color: #3a3b45;
+}
+
+.item-price {
+    color: #5a5c69;
+}
+
+.order-group-footer {
+    text-align: right;
+    margin-top: 0.75rem;
+    font-weight: 700;
+    color: #2e59d9;
+}
+
+.bill-summary {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background: #4e73df;
+    color: white;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bill-total-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    opacity: 0.9;
+}
+
+.bill-total-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .manual-orders-container {
+        padding: 1rem;
+    }
+}
