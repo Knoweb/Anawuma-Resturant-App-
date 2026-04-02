@@ -924,13 +924,20 @@ const CustomerQROrder = ({ isManual = false }) => {
                       <button className="qty-btn" onClick={() => setModalQty(modalQty + 1)}>+</button>
                     </div>
                   </div>
-                  <div className="sketch-detail-row">
-                    <span className="label small text-muted">Service Charge (10%) :</span>
-                    <span className="value small text-muted">Rs. {parseFloat(activeItemDetail.price * modalQty * 0.1).toFixed(0)}</span>
-                  </div>
-                  <div className="sketch-detail-row total-row mt-2 pr-2">
-                    <span className="label fw-bold h5 mb-0">Total :</span>
-                    <span className="value fw-bold h5 mb-0 text-primary">Rs. {parseFloat(activeItemDetail.price * modalQty * 1.1).toFixed(0)}</span>
+
+                  <div className="sketch-price-breakdown bg-light p-3 rounded">
+                    <div className="sketch-detail-row mb-1">
+                      <span className="label small text-muted">Food Subtotal :</span>
+                      <span className="value small">Rs. {parseFloat(activeItemDetail.price * modalQty).toFixed(0)}</span>
+                    </div>
+                    <div className="sketch-detail-row mb-2">
+                      <span className="label small text-muted">Service Charge (10%) :</span>
+                      <span className="value small">Rs. {parseFloat(activeItemDetail.price * modalQty * 0.1).toFixed(0)}</span>
+                    </div>
+                    <div className="sketch-detail-row total-row border-top pt-2">
+                      <span className="label fw-bold h5 mb-0">Total Amount :</span>
+                      <span className="value fw-bold h5 mb-0" style={{ color: '#266668' }}>Rs. {parseFloat(activeItemDetail.price * modalQty * 1.1).toFixed(0)}</span>
+                    </div>
                   </div>
                 </div>
               </div>
