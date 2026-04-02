@@ -394,8 +394,11 @@ export class OrdersService {
     const accounts: Record<string, any> = {};
 
     orders.forEach(order => {
-      const key = type === 'ROOM' ? order.roomNo : order.tableNo;
-      if (!key) return;
+      const rawKey = type === 'ROOM' ? order.roomNo : order.tableNo;
+      if (!rawKey) return;
+
+      // Normalize key by removing leading zeros (e.g., "03" -> "3")
+      const key = rawKey.trim().replace(/^0+/, '') || rawKey.trim();
 
       if (!accounts[key]) {
         accounts[key] = {
