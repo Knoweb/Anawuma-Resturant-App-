@@ -201,13 +201,21 @@ const ManualRoomOrders = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            ${account.orders.flatMap(o => o.orderItems).map(item => `
-                                <tr>
-                                    <td class="text-start">${item.itemName}</td>
-                                    <td class="text-center">${item.qty}</td>
-                                    <td class="text-center">Rs. ${parseFloat(item.unitPrice).toFixed(2)}</td>
-                                    <td class="text-end">Rs. ${parseFloat(item.lineTotal).toFixed(2)}</td>
+                            ${account.orders.map(order => `
+                                <tr class="bg-light shadow-none">
+                                    <td colspan="4" class="text-start py-1" style="font-size: 0.9em; background: #f8f9fa;">
+                                        <strong>Order #${order.orderNo}</strong> 
+                                        <small class="text-muted ms-2">${new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
+                                    </td>
                                 </tr>
+                                ${order.orderItems.map(item => `
+                                    <tr>
+                                        <td class="text-start ps-3 small">${item.itemName}</td>
+                                        <td class="text-center small">${item.qty}</td>
+                                        <td class="text-center small">Rs. ${parseFloat(item.unitPrice).toFixed(2)}</td>
+                                        <td class="text-end small">Rs. ${parseFloat(item.lineTotal).toFixed(2)}</td>
+                                    </tr>
+                                `).join('')}
                             `).join('')}
                         </tbody>
                     </table>

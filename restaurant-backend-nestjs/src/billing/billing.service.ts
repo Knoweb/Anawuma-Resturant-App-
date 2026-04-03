@@ -192,6 +192,8 @@ export class BillingService {
           unitPrice: parseFloat(item.unitPrice.toString()),
           lineTotal: parseFloat(item.lineTotal.toString()),
           notes: item.notes || null,
+          orderNo: order.orderNo,
+          orderedAt: order.createdAt,
         });
       });
     });
