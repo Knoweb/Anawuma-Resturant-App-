@@ -1,7 +1,7 @@
 /* Manual Orders Dashboard Styles */
 
 .manual-orders-container {
-    padding: 2rem;
+    padding: 80px 2rem 2rem;
     background-color: #f8f9fc;
     min-height: calc(100vh - 60px);
 }
