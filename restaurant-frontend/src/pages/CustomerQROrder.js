@@ -1246,7 +1246,7 @@ const CustomerQROrder = ({ isManual = false }) => {
                 onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#f8f9fa'; e.currentTarget.style.transform = 'scale(1.05)'; }}
                 onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.transform = 'scale(1)'; }}
                 style={{
-                  position: 'absolute',
+                  position: 'fixed',
                   top: '80px',
                   right: '25px',
                   zIndex: 1100,
