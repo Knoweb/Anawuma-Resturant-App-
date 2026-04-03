@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import apiClient from '../api/apiClient';
 import Sidebar from '../components/common/Sidebar';
 import Navbar from '../components/common/Navbar';
@@ -6,6 +7,7 @@ import Swal from 'sweetalert2';
 import './ManualOrders.css';
 
 const ManualTableOrders = () => {
+    const navigate = useNavigate();
     const [accounts, setAccounts] = useState([]);
     const [loading, setLoading] = useState(true);
 
