@@ -113,7 +113,7 @@ const ManualRoomOrders = () => {
                     
                     ${account.orders.map(order => `
                         <div class="order-block">
-                            <div style="font-weight:bold; font-size: 11px; margin-bottom: 5px;">#${order.orderNo} (${new Date(order.createdAt).toLocaleTimeString()})</div>
+                            <div style="font-weight:bold; font-size: 11px; margin-bottom: 5px;">#${order.orderNo} (Room: ${order.originalRoomNo || order.roomNo}) - ${new Date(order.createdAt).toLocaleTimeString()}</div>
                             ${order.orderItems.map(item => `
                                 <div class="item-row">
                                     <span>${item.itemName} x${item.qty}</span>
@@ -201,10 +201,11 @@ const ManualRoomOrders = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            ${account.orders.map(order => `
+                             ${account.orders.map(order => `
                                 <tr class="bg-light shadow-none">
                                     <td colspan="4" class="text-start py-1" style="font-size: 0.9em; background: #f8f9fa;">
                                         <strong>Order #${order.orderNo}</strong> 
+                                        <span class="badge bg-secondary-soft text-secondary ms-2" style="font-size:0.8em">Room: ${order.originalRoomNo || order.roomNo || roomNo}</span>
                                         <small class="text-muted ms-2">${new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
                                     </td>
                                 </tr>
@@ -289,6 +290,7 @@ const ManualRoomOrders = () => {
             <div class="order-group-header">
               <span class="order-group-no">
                 <i class="fas fa-receipt me-1"></i> ${order.orderNo}
+                <small class="badge bg-light text-dark ms-2 border">Room: ${order.originalRoomNo || order.roomNo}</small>
                 <button class="btn btn-sm btn-light ms-2 print-single-order" data-index="${idx}" title="Print this order">
                   <i class="fas fa-print"></i>
                 </button>

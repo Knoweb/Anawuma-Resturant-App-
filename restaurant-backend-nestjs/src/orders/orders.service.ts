@@ -99,6 +99,7 @@ export class OrdersService {
       orderNo,
       tableNo,
       roomNo,
+      originalRoomNo: roomNo,
       orderType: orderType || (roomNo ? OrderType.ROOM : OrderType.TABLE),
       customerName,
       whatsappNumber: normalizedWhatsapp,

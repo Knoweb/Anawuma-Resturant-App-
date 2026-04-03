@@ -51,6 +51,9 @@ export class Order {
   @Column({ name: 'room_no', type: 'varchar', length: 50, nullable: true })
   roomNo: string;
 
+  @Column({ name: 'original_room_no', type: 'varchar', length: 50, nullable: true })
+  originalRoomNo: string;
+
   @Column({
     type: 'enum',
     enum: OrderType,

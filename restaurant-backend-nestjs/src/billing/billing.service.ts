@@ -194,6 +194,7 @@ export class BillingService {
           notes: item.notes || null,
           orderNo: order.orderNo,
           orderedAt: order.createdAt,
+          originalRoomNo: order.originalRoomNo || order.roomNo,
         });
       });
     });

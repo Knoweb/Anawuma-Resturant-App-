@@ -108,7 +108,7 @@ const ManualTableOrders = () => {
                     
                     ${account.orders.map(order => `
                         <div class="order-block">
-                            <div style="font-weight:bold; font-size: 11px; margin-bottom: 5px;">#${order.orderNo} (${new Date(order.createdAt).toLocaleTimeString()})</div>
+                            <div style="font-weight:bold; font-size: 11px; margin-bottom: 5px;">#${order.orderNo} (${order.originalRoomNo ? `Room: ${order.originalRoomNo}` : (order.roomNo ? `Room: ${order.roomNo}` : `Table: ${order.tableNo}`)}) - ${new Date(order.createdAt).toLocaleTimeString()}</div>
                             ${order.orderItems.map(item => `
                                 <div class="item-row">
                                     <span>${item.itemName} x${item.qty}</span>
@@ -199,6 +199,7 @@ const ManualTableOrders = () => {
                                 <tr class="bg-light shadow-none">
                                     <td colspan="4" class="text-start py-1" style="font-size: 0.9em; background: #f8f9fa;">
                                         <strong>Order #${order.orderNo}</strong> 
+                                        <small class="badge bg-light text-dark ms-1 border" style="font-size:0.7em">${order.originalRoomNo ? `Room: ${order.originalRoomNo}` : (order.roomNo ? `Room: ${order.roomNo}` : `Table: ${order.tableNo}`)}</small>
                                         <small class="text-muted ms-2">${new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
                                     </td>
                                 </tr>
@@ -273,6 +274,7 @@ const ManualTableOrders = () => {
             <div class="order-group-header">
               <span class="order-group-no">
                 <i class="fas fa-receipt me-1"></i> ${order.orderNo}
+                <small class="badge bg-light text-dark ms-1 border" style="font-size:0.7em">${order.originalRoomNo ? `Room: ${order.originalRoomNo}` : (order.roomNo ? `Room: ${order.roomNo}` : `Table: ${order.tableNo}`)}</small>
                 <button class="btn btn-sm btn-light ms-2 print-single-order" data-index="${idx}" title="Print this order">
                   <i class="fas fa-print"></i>
                 </button>
