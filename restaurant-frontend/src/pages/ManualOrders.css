@@ -197,3 +197,14 @@
         padding: 1rem;
     }
 }
+/* SB Admin Layout Fixes for Sidebar Overlap */
+@media (min-width: 992px) {
+    #layoutSidenav_content {
+        padding-left: 250px;
+        transition: padding-left 0.15s ease-in-out;
+    }
+
+    body.sb-sidenav-toggled #layoutSidenav_content {
+        padding-left: 0;
+    }
+}
