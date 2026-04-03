@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import apiClient from '../api/apiClient';
 import Sidebar from '../components/common/Sidebar';
 import Navbar from '../components/common/Navbar';
@@ -7,7 +6,6 @@ import Swal from 'sweetalert2';
 import './ManualOrders.css';
 
 const ManualTableOrders = () => {
-    const navigate = useNavigate();
     const [accounts, setAccounts] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -378,9 +376,6 @@ const ManualTableOrders = () => {
                                                 <i className="fas fa-chair fa-4x text-muted opacity-25 mb-3"></i>
                                                 <h4 className="text-muted">No Active Manual Table Orders</h4>
                                                 <p className="text-muted small">Orders created manually via the cashier terminal will appear here.</p>
-                                                <button className="btn btn-primary mt-3 px-4 rounded-pill" onClick={() => navigate('/manual-orders/create')}>
-                                                    <i className="fas fa-plus me-2"></i> Create New Order
-                                                </button>
                                             </div>
                                         </div>
                                     ) : (
@@ -391,19 +386,18 @@ const ManualTableOrders = () => {
                                                 onClick={() => handleTableClick(account.identifier, account)}
                                             >
                                                 <div className="account-card-body">
-                                                    <div className="account-id-badge">TABLE</div>
-                                                    <div className="account-id">{account.identifier}</div>
+                                                    <div className="account-icon-wrapper">
+                                                        <i className="fas fa-chair fa-2x"></i>
+                                                    </div>
+                                                    <div className="account-id">TABLE {account.identifier}</div>
                                                     <div className="badge bg-primary-soft text-primary order-count-badge">
                                                         {account.orders.length} Active Orders
                                                     </div>
                                                     <div className="account-total-amount">
-                                                        Rs. {parseFloat(account.totalAmount).toLocaleString()}
+                                                        Rs. {account.totalAmount.toLocaleString()}
                                                     </div>
                                                     <div className="last-order-time">
-                                                        Last Order: {new Date(account.lastOrderAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                    </div>
-                                                    <div className="card-footer-action mt-3 pt-3 border-top">
-                                                        <span className="text-primary small fw-bold">VIEW DETAILS <i className="fas fa-chevron-right ms-1"></i></span>
+                                                        Updated: {new Date(account.lastOrderAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                     </div>
                                                 </div>
                                             </div>
