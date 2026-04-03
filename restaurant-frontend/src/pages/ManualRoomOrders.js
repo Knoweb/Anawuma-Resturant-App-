@@ -386,38 +386,43 @@ const ManualRoomOrders = () => {
                                 </div>
                             ) : (
                                 <div className="accounts-grid">
-                                    {rooms.map(roomNo => {
-                                        const account = getAccountForRoom(roomNo);
-                                        return (
+                                    {accounts.length === 0 ? (
+                                        <div className="col-12 mt-5">
+                                            <div className="text-center py-5 rounded-3 bg-white shadow-sm border border-dashed">
+                                                <i className="fas fa-hotel fa-4x text-muted opacity-25 mb-3"></i>
+                                                <h4 className="text-muted">No Active Manual Room Orders</h4>
+                                                <p className="text-muted small">Guest bills created manually will appear here.</p>
+                                                <button className="btn btn-primary mt-3 px-4 rounded-pill" onClick={() => navigate('/manual-orders/create')}>
+                                                    <i className="fas fa-plus me-2"></i> Create New Order
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        accounts.map(account => (
                                             <div
-                                                key={roomNo}
-                                                className={`account-card ${account ? 'has-orders' : 'empty'}`}
-                                                onClick={() => handleRoomClick(roomNo, account)}
+                                                key={account.identifier}
+                                                className="account-card has-orders"
+                                                onClick={() => handleRoomClick(account.identifier, account)}
                                             >
                                                 <div className="account-card-body">
-                                                    <div className="account-icon-wrapper">
-                                                        <i className="fas fa-hotel fa-2x"></i>
+                                                    <div className="account-id-badge">ROOM</div>
+                                                    <div className="account-id">{account.identifier}</div>
+                                                    <div className="badge bg-success-soft text-success order-count-badge">
+                                                        {account.orders.length} Active Orders
                                                     </div>
-                                                    <div className="account-id">ROOM {roomNo}</div>
-                                                    {account ? (
-                                                        <>
-                                                            <div className="badge bg-success-soft text-success order-count-badge">
-                                                                {account.orders.length} Active Orders
-                                                            </div>
-                                                            <div className="account-total-amount">
-                                                                Rs. {account.totalAmount.toLocaleString()}
-                                                            </div>
-                                                            <div className="last-order-time">
-                                                                Last: {new Date(account.lastOrderAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                            </div>
-                                                        </>
-                                                    ) : (
-                                                        <div className="text-muted small opacity-50 mt-4">NO ACTIVE BILLS</div>
-                                                    )}
+                                                    <div className="account-total-amount">
+                                                        Rs. {parseFloat(account.totalAmount).toLocaleString()}
+                                                    </div>
+                                                    <div className="last-order-time">
+                                                        Last Order: {new Date(account.lastOrderAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </div>
+                                                    <div className="card-footer-action mt-3 pt-3 border-top">
+                                                        <span className="text-primary small fw-bold">VIEW DETAILS <i className="fas fa-chevron-right ms-1"></i></span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        );
-                                    })}
+                                        ))
+                                    )}
                                 </div>
                             )}
                         </div>
