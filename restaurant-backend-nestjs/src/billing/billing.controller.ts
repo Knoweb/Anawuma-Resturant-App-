@@ -374,4 +374,20 @@ export class BillingController {
       req.user.restaurantId,
     );
   }
+  /**
+   * POST /billing/rooms/transfer
+   * Transfers all orders and invoices from one room to another.
+   */
+  @Post('rooms/transfer')
+  @Roles(...BILLING_ROLES)
+  transferRoomAccount(
+    @Body() payload: { oldRoomNo: string; newRoomNo: string },
+    @Request() req: RequestWithUser,
+  ) {
+    return this.billingService.transferRoomAccount(
+      req.user.restaurantId,
+      payload.oldRoomNo,
+      payload.newRoomNo,
+    );
+  }
 }

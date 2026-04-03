@@ -971,4 +971,46 @@ export class BillingService {
       allActions: billActions,
     };
   }
+  /**
+   * Transfers all orders and invoices from one room to another.
+   */
+  async transferRoomAccount(
+    restaurantId: number,
+    oldRoomNo: string,
+    newRoomNo: string,
+  ) {
+    const normalizedOld = oldRoomNo.trim().replace(/^0+/, '') || oldRoomNo.trim();
+    const normalizedNew = newRoomNo.trim().replace(/^0+/, '') || newRoomNo.trim();
+
+    if (normalizedOld === normalizedNew) {
+      throw new BadRequestException('Old and new room numbers must be different');
+    }
+
+    // 1. Update all Orders for this room
+    await this.ordersRepository
+      .createQueryBuilder()
+      .update(Order)
+      .set({ roomNo: normalizedNew })
+      .where('restaurantId = :restaurantId', { restaurantId })
+      .andWhere('roomNo = :oldRoomNo', { oldRoomNo: normalizedOld })
+      .andWhere('status != :cancelled', { cancelled: OrderStatus.CANCELLED })
+      .execute();
+
+    // 2. Update all Invoices for this room (tableNo stores the room identifier)
+    await this.invoicesRepository
+      .createQueryBuilder()
+      .update(Invoice)
+      .set({ tableNo: normalizedNew })
+      .where('restaurantId = :restaurantId', { restaurantId })
+      .andWhere('tableNo = :oldRoomNo', { oldRoomNo: normalizedOld })
+      .andWhere('invoiceStatus != :paid', { paid: InvoiceStatus.PAID })
+      .execute();
+
+    this.websocketGateway.server.emit('dashboard:refresh');
+
+    return {
+      success: true,
+      message: `Successfully transferred all bills from Room ${normalizedOld} to Room ${normalizedNew}`,
+    };
+  }
 }

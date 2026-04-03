@@ -51,6 +51,7 @@ import BlogPostPage from './pages/BlogPostPage';
 import AboutPage from './pages/AboutPage';
 import ManualRoomOrders from './pages/ManualRoomOrders';
 import ManualTableOrders from './pages/ManualTableOrders';
+import TransferRoom from './pages/TransferRoom';
 
 import PrivateRoute from './components/auth/PrivateRoute';
 import RoleRoute from './components/auth/RoleRoute';
@@ -172,6 +173,16 @@ function App() {
                 <PrivateRoute>
                   <RoleRoute allowedRoles={['cashier', 'admin', 'super_admin']}>
                     <ManualRoomOrders />
+                  </RoleRoute>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/manual-orders/transfer"
+              element={
+                <PrivateRoute>
+                  <RoleRoute allowedRoles={['cashier', 'admin', 'super_admin']}>
+                    <TransferRoom />
                   </RoleRoute>
                 </PrivateRoute>
               }

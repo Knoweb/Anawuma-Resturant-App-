@@ -232,6 +232,11 @@ function Sidebar() {
                     Room Orders
                   </Link>
                 </li>
+                <li className={isActive('/manual-orders/transfer')}>
+                  <Link to="/manual-orders/transfer">
+                    Transfer Room
+                  </Link>
+                </li>
               </ul>
             </li>
           )}
