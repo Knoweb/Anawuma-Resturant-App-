@@ -91,19 +91,17 @@ const TransferRoom = () => {
 
                     <div className="mb-4">
                       <label className="form-label fw-bold text-muted small">OLD ROOM NUMBER</label>
-                      <div className="input-group">
-                        <span className="input-group-text bg-light border-0">
-                          <i className="fas fa-door-open text-muted"></i>
-                        </span>
-                        <input
-                          type="text"
-                          className="form-control form-control-lg border-0 bg-light"
-                          placeholder="e.g. 101"
-                          style={{ borderRadius: '0 10px 10px 0' }}
-                          value={oldRoomNo}
-                          onChange={(e) => setOldRoomNo(e.target.value)}
-                        />
-                      </div>
+                      <select
+                        className="form-select form-select-lg border-0 bg-light"
+                        style={{ borderRadius: '10px' }}
+                        value={oldRoomNo}
+                        onChange={(e) => setOldRoomNo(e.target.value)}
+                      >
+                        <option value="">Select current guest room...</option>
+                        {Array.from({ length: 16 }, (_, i) => (i + 1).toString()).map(num => (
+                          <option key={num} value={num}>Room {num}</option>
+                        ))}
+                      </select>
                     </div>
 
                     <div className="text-center mb-4">
@@ -114,19 +112,17 @@ const TransferRoom = () => {
 
                     <div className="mb-5">
                       <label className="form-label fw-bold text-muted small">NEW ROOM NUMBER</label>
-                      <div className="input-group">
-                        <span className="input-group-text bg-light border-0">
-                          <i className="fas fa-door-closed text-muted"></i>
-                        </span>
-                        <input
-                          type="text"
-                          className="form-control form-control-lg border-0 bg-light"
-                          placeholder="e.g. 205"
-                          style={{ borderRadius: '0 10px 10px 0' }}
-                          value={newRoomNo}
-                          onChange={(e) => setNewRoomNo(e.target.value)}
-                        />
-                      </div>
+                      <select
+                        className="form-select form-select-lg border-0 bg-light"
+                        style={{ borderRadius: '10px' }}
+                        value={newRoomNo}
+                        onChange={(e) => setNewRoomNo(e.target.value)}
+                      >
+                        <option value="">Select destination room...</option>
+                        {Array.from({ length: 16 }, (_, i) => (i + 1).toString()).map(num => (
+                          <option key={num} value={num}>Room {num}</option>
+                        ))}
+                      </select>
                     </div>
 
                     <button
