@@ -184,6 +184,33 @@ function Sidebar() {
           )}
 
           {canAccessManualOrder && (
+            <li className={`has-submenu ${menuStates.manualDashboard ? 'open' : ''}`}>
+              <a href="#" onClick={(e) => { e.preventDefault(); toggleMenu('manualDashboard'); }}>
+                <i className="fas fa-file-invoice-dollar"></i>
+                <span>Manual Order Bills</span>
+                <i className={`fas fa-chevron-${menuStates.manualDashboard ? 'down' : 'right'} submenu-arrow`}></i>
+              </a>
+              <ul className="submenu" style={{ display: menuStates.manualDashboard ? 'block' : 'none' }}>
+                <li className={isActive('/manual-orders/tables')}>
+                  <Link to="/manual-orders/tables">
+                    Table Orders
+                  </Link>
+                </li>
+                <li className={isActive('/manual-orders/rooms')}>
+                  <Link to="/manual-orders/rooms">
+                    Room Orders
+                  </Link>
+                </li>
+                <li className={isActive('/manual-orders/transfer')}>
+                  <Link to="/manual-orders/transfer">
+                    Transfer Room
+                  </Link>
+                </li>
+              </ul>
+            </li>
+          )}
+
+          {canAccessManualOrder && (
             <li className={isActive('/cashier/manual-order')}>
               <Link to="/cashier/manual-order" onClick={closeSubmenus}>
                 <i className="fas fa-plus-circle"></i>
@@ -213,32 +240,6 @@ function Sidebar() {
                 </Link>
               </li>
             </>
-          )}
-          {canAccessManualOrder && (
-            <li className={`has-submenu ${menuStates.manualDashboard ? 'open' : ''}`}>
-              <a href="#" onClick={(e) => { e.preventDefault(); toggleMenu('manualDashboard'); }}>
-                <i className="fas fa-file-invoice-dollar"></i>
-                <span>Manual Order Bills</span>
-                <i className={`fas fa-chevron-${menuStates.manualDashboard ? 'down' : 'right'} submenu-arrow`}></i>
-              </a>
-              <ul className="submenu" style={{ display: menuStates.manualDashboard ? 'block' : 'none' }}>
-                <li className={isActive('/manual-orders/tables')}>
-                  <Link to="/manual-orders/tables">
-                    Table Orders
-                  </Link>
-                </li>
-                <li className={isActive('/manual-orders/rooms')}>
-                  <Link to="/manual-orders/rooms">
-                    Room Orders
-                  </Link>
-                </li>
-                <li className={isActive('/manual-orders/transfer')}>
-                  <Link to="/manual-orders/transfer">
-                    Transfer Room
-                  </Link>
-                </li>
-              </ul>
-            </li>
           )}
 
 
