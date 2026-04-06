@@ -1159,14 +1159,14 @@ const CustomerQROrder = ({ isManual = false }) => {
                         <button
                           className={`flex-grow-1 btn ${modalOrderType === 'table' ? 'btn-primary' : 'btn-outline-primary'}`}
                           style={modalOrderType === 'table' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }}
-                          onClick={() => setModalOrderType('table')}
+                          onClick={() => { setModalOrderType('table'); setManualOrderType('TABLE'); }}
                         >
                           Table
                         </button>
                         <button
                           className={`flex-grow-1 btn ${modalOrderType === 'room' ? 'btn-primary' : 'btn-outline-primary'}`}
                           style={modalOrderType === 'room' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }}
-                          onClick={() => setModalOrderType('room')}
+                          onClick={() => { setModalOrderType('room'); setManualOrderType('ROOM'); }}
                         >
                           Room
                         </button>
@@ -1418,14 +1418,14 @@ const CustomerQROrder = ({ isManual = false }) => {
                     <div className="d-flex gap-2 mb-2">
                       <button
                         className={`btn btn-sm ${manualOrderType === 'TABLE' ? 'btn-primary' : 'btn-outline-primary'}`}
-                        onClick={() => setManualOrderType('TABLE')}
+                        onClick={() => { setManualOrderType('TABLE'); setModalOrderType('table'); }}
                         style={{ flex: 1 }}
                       >
                         Table
                       </button>
                       <button
                         className={`btn btn-sm ${manualOrderType === 'ROOM' ? 'btn-primary' : 'btn-outline-primary'}`}
-                        onClick={() => setManualOrderType('ROOM')}
+                        onClick={() => { setManualOrderType('ROOM'); setModalOrderType('room'); }}
                         style={{ flex: 1 }}
                       >
                         Room
