@@ -264,13 +264,13 @@ const ManualRoomOrders = () => {
                     </div>`,
             html: invoiceHtml,
             width: '500px',
-            showCancelButton: true,
+            showConfirmButton: !!account.isPrinted, // Only show PAID after printing
             confirmButtonText: '<i class="fas fa-check-circle me-1"></i> Mark Paid',
             cancelButtonText: 'Close',
-            denyButtonText: '<i class="fas fa-print me-1"></i> Print',
+            denyButtonText: account.isPrinted ? '<i class="fas fa-print me-1"></i> Re-Print' : '<i class="fas fa-print me-1"></i> Print Bill',
             showDenyButton: true,
-            confirmButtonColor: '#1cc88a', // Green
-            denyButtonColor: '#2c3e50', // Dark
+            confirmButtonColor: '#1cc88a', 
+            denyButtonColor: account.isPrinted ? '#858796' : '#2c3e50', 
             cancelButtonColor: '#858796',
             customClass: {
                 popup: 'modal-radius'
@@ -298,6 +298,7 @@ const ManualRoomOrders = () => {
                 finalizeCheckout(account, roomNo, account.selectedPaymentMethod);
             } else if (result.isDenied) {
                 printAccountBill(account, roomNo);
+                account.isPrinted = true; // Mark as printed locally 
                 // Reshow after print if they want
                 showInvoiceModal(account, roomNo);
             }
