@@ -152,8 +152,9 @@ const ManualTableOrders = () => {
                     text: `Invoice #${response.data.invoiceNumber} has been marked as PAID and sent to Accountant.`,
                     icon: 'success',
                     confirmButtonColor: '#1cc88a'
+                }).then(() => {
+                    fetchAccounts(); // Refresh the list
                 });
-                fetchAccounts(); // Refresh the list
             }
         } catch (error) {
             console.error('Checkout error:', error);
