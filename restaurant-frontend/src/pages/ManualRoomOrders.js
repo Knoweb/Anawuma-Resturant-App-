@@ -240,10 +240,10 @@ const ManualRoomOrders = () => {
                     <div class="payment-method-selector mt-4 pt-3 border-top">
                         <div class="small fw-bold text-muted mb-2 text-start px-2">PAYMENT METHOD <span class="text-danger">*</span></div>
                         <div class="d-flex gap-2 px-2">
-                            <button id="modal-pay-cash-btn" class="btn flex-grow-1 payment-opt-btn active">
+                            <button id="modal-pay-cash-btn" class="btn flex-grow-1 payment-opt-btn ${account.selectedPaymentMethod !== 'CARD' ? 'active' : ''}">
                                 <i class="fas fa-money-bill-wave me-2"></i> CASH
                             </button>
-                            <button id="modal-pay-card-btn" class="btn flex-grow-1 payment-opt-btn">
+                            <button id="modal-pay-card-btn" class="btn flex-grow-1 payment-opt-btn ${account.selectedPaymentMethod === 'CARD' ? 'active' : ''}">
                                 <i class="fas fa-credit-card me-2"></i> CARD
                             </button>
                         </div>
@@ -276,7 +276,7 @@ const ManualRoomOrders = () => {
             },
             didOpen: () => {
                 const popup = Swal.getPopup();
-                account.selectedPaymentMethod = 'CASH'; // Reset default
+                if (!account.selectedPaymentMethod) account.selectedPaymentMethod = 'CASH'; 
                 const cashBtn = popup.querySelector('#modal-pay-cash-btn');
                 const cardBtn = popup.querySelector('#modal-pay-card-btn');
                 
