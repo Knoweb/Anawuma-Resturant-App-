@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/common/Navbar';
 import Sidebar from '../components/common/Sidebar';
-import { billingAPI } from '../api/apiClient';
+import { billingAPI, reportsAPI } from '../api/apiClient';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAuthStore } from '../store/authStore';
 import './ServiceBillingDashboard.css';
@@ -383,6 +383,10 @@ const ServiceBillingDashboard = ({
   const [filterFrom, setFilterFrom] = useState('');
   const [filterTo, setFilterTo] = useState('');
   const [filterTable, setFilterTable] = useState('');
+  
+  // Summary state
+  const [summaryData, setSummaryData] = useState(null);
+  const [loadingSummary, setLoadingSummary] = useState(false);
 
   // Modal state
   const [createModalOrder, setCreateModalOrder] = useState(null);
@@ -481,10 +485,24 @@ const ServiceBillingDashboard = ({
     }
   }, [filterFrom, filterTo, filterTable]);
 
+  const fetchSummary = useCallback(async () => {
+    if (!isCashierDashboard) return;
+    try {
+      setLoadingSummary(true);
+      const res = await reportsAPI.getSummary(getLocalDateString());
+      setSummaryData(res.data?.daily || null);
+    } catch (err) {
+      console.error('Failed to fetch summary:', err);
+    } finally {
+      setLoadingSummary(false);
+    }
+  }, [isCashierDashboard]);
+
   useEffect(() => {
     fetchCashierQueue();
     fetchReadyOrders();
-  }, [fetchCashierQueue, fetchReadyOrders]);
+    fetchSummary();
+  }, [fetchCashierQueue, fetchReadyOrders, fetchSummary]);
   useEffect(() => { fetchInvoices(); }, [fetchInvoices]);
   useEffect(() => {
     if (!isCashierDashboard) return;
@@ -802,6 +820,7 @@ const ServiceBillingDashboard = ({
                     if (isCashierDashboard) {
                       fetchCashierQueue();
                       fetchCashierTransactions(transferDate);
+                      fetchSummary();
                     } else {
                       fetchReadyOrders();
                     }
@@ -817,6 +836,48 @@ const ServiceBillingDashboard = ({
 
         <div className="content">
           <div className="container-fluid">
+            
+            {/* ── Summary Stats (Cashier Only) ── */}
+            {isCashierDashboard && summaryData && (
+              <div className="row g-3 mb-4 no-print">
+                <div className="col-md-3 col-sm-6">
+                  <div className="billing-summary-card cashier-total">
+                    <div className="bsc-icon"><i className="fas fa-chart-line"></i></div>
+                    <div className="bsc-info">
+                      <span className="bsc-label">Total Revenue</span>
+                      <span className="bsc-value">{formatCurrency(summaryData.totalRevenue)}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-3 col-sm-6">
+                  <div className="billing-summary-card cashier-cash">
+                    <div className="bsc-icon"><i className="fas fa-money-bill-wave"></i></div>
+                    <div className="bsc-info">
+                      <span className="bsc-label">Cash Revenue</span>
+                      <span className="bsc-value">{formatCurrency(summaryData.cashRevenue)}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-3 col-sm-6">
+                  <div className="billing-summary-card cashier-card">
+                    <div className="bsc-icon"><i className="fas fa-credit-card"></i></div>
+                    <div className="bsc-info">
+                      <span className="bsc-label">Card Revenue</span>
+                      <span className="bsc-value">{formatCurrency(summaryData.cardRevenue)}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-3 col-sm-6">
+                  <div className="billing-summary-card cashier-orders">
+                    <div className="bsc-icon"><i className="fas fa-shopping-basket"></i></div>
+                    <div className="bsc-info">
+                      <span className="bsc-label">Paid Orders</span>
+                      <span className="bsc-value">{summaryData.totalOrders}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {showCashierTransfersSection && (
               <section className="billing-section mb-4">

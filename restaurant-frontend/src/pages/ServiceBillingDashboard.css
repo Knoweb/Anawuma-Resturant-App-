@@ -448,3 +448,73 @@
     max-height: 95vh;
   }
 }
+/* ── Billing Summary Cards (Cashier) ── */
+.billing-summary-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  border: 1px solid #eee;
+  transition: transform 0.2s, box-shadow 0.2s;
+  height: 100%;
+}
+
+.billing-summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+}
+
+.bsc-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.bsc-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.bsc-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bsc-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #333;
+}
+
+/* Specific Card themes */
+.cashier-total { border-left: 4px solid #6366f1; }
+.cashier-total .bsc-icon { background: #eef2ff; color: #6366f1; }
+
+.cashier-cash { border-left: 4px solid #10b981; }
+.cashier-cash .bsc-icon { background: #ecfdf5; color: #10b981; }
+
+.cashier-card { border-left: 4px solid #0ea5e9; }
+.cashier-card .bsc-icon { background: #f0f9ff; color: #0ea5e9; }
+
+.cashier-orders { border-left: 4px solid #f59e0b; }
+.cashier-orders .bsc-icon { background: #fffbeb; color: #f59e0b; }
+
+@media (max-width: 576px) {
+  .billing-summary-card {
+    padding: 1rem;
+  }
+  .bsc-value {
+    font-size: 1.1rem;
+  }
+}
