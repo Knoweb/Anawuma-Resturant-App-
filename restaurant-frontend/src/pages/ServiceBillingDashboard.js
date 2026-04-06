@@ -340,7 +340,7 @@ const ServiceBillingDashboard = ({
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const { subscribe, connected } = useWebSocket();
-  const isCashierDashboard = user?.role === 'cashier';
+  const isCashierDashboard = user?.role?.toLowerCase() === 'cashier';
   const resolvedCashierTab = isCashierDashboard ? cashierTab : 'queue';
   const showCashierTransfersSection =
     isCashierDashboard && resolvedCashierTab === 'transfers';
