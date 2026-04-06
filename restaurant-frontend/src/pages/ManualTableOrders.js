@@ -142,7 +142,8 @@ const ManualTableOrders = () => {
             const response = await apiClient.post('/billing/manual/finalize', {
                 orderIds,
                 identifier: tableNo,
-                type: 'TABLE'
+                type: 'TABLE',
+                paymentMethod: account.selectedPaymentMethod || 'CASH'
             });
 
             if (response.data) {
@@ -310,6 +311,18 @@ const ManualTableOrders = () => {
           <div class="bill-total-label">ACCUMULATED GRAND TOTAL (Inc. 10% SC)</div>
           <div class="bill-total-value">Rs. ${parseFloat(account.totalAmount).toFixed(0)}</div>
         </div>
+
+        <div class="payment-method-selector mt-4">
+          <div class="bill-total-label mb-2">SELECT PAYMENT METHOD <span class="text-danger">*</span></div>
+          <div class="d-flex gap-2">
+            <button id="pay-cash-btn" class="btn flex-grow-1 payment-opt-btn active">
+              <i class="fas fa-money-bill-wave me-2"></i> CASH
+            </button>
+            <button id="pay-card-btn" class="btn flex-grow-1 payment-opt-btn">
+              <i class="fas fa-credit-card me-2"></i> CARD
+            </button>
+          </div>
+        </div>
       </div>
     `;
 
@@ -330,6 +343,23 @@ const ManualTableOrders = () => {
                         const idx = btn.getAttribute('data-index');
                         printOrder(account.orders[idx], tableNo);
                     });
+                });
+
+                // Payment Method Logic
+                account.selectedPaymentMethod = 'CASH'; // Reset default
+                const cashBtn = popup.querySelector('#pay-cash-btn');
+                const cardBtn = popup.querySelector('#pay-card-btn');
+                
+                cashBtn.addEventListener('click', () => {
+                    account.selectedPaymentMethod = 'CASH';
+                    cashBtn.classList.add('active');
+                    cardBtn.classList.remove('active');
+                });
+                
+                cardBtn.addEventListener('click', () => {
+                    account.selectedPaymentMethod = 'CARD';
+                    cardBtn.classList.add('active');
+                    cashBtn.classList.remove('active');
                 });
             },
             customClass: {
@@ -438,6 +468,26 @@ const ManualTableOrders = () => {
             font-size: 1.25rem;
         }
         .italic { font-style: italic; }
+
+        .payment-opt-btn {
+          border: 2px solid #eaecf4;
+          background: #fff;
+          color: #858796;
+          border-radius: 10px;
+          height: 45px;
+          transition: all 0.2s;
+        }
+        .payment-opt-btn:hover {
+          background: #f8f9fa;
+          color: #4e73df;
+          border-color: #4e73df;
+        }
+        .payment-opt-btn.active {
+          background: #4e73df;
+          color: #fff;
+          border-color: #4e73df;
+          box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3);
+        }
       `}</style>
         </div>
     );

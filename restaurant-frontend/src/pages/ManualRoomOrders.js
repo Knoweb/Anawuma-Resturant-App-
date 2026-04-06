@@ -448,6 +448,26 @@ const ManualRoomOrders = () => {
             font-size: 1.25rem;
         }
         .italic { font-style: italic; }
+        
+        .payment-opt-btn {
+          border: 2px solid #eaecf4;
+          background: #fff;
+          color: #858796;
+          border-radius: 10px;
+          height: 45px;
+          transition: all 0.2s;
+        }
+        .payment-opt-btn:hover {
+          background: #f8f9fa;
+          color: #4e73df;
+          border-color: #4e73df;
+        }
+        .payment-opt-btn.active {
+          background: #4e73df;
+          color: #fff;
+          border-color: #4e73df;
+          box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3);
+        }
       `}</style>
         </div>
     );

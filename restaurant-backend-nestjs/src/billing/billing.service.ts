@@ -154,6 +154,7 @@ export class BillingService {
       orderIds: number[];
       identifier: string;
       type: 'ROOM' | 'TABLE';
+      paymentMethod?: PaymentMethod;
     },
   ): Promise<Invoice> {
     // 1. Load orders with items
@@ -233,6 +234,7 @@ export class BillingService {
       sentToAccountantAt: now,
       sentToAccountantByAdminId: adminId,
       createdByAdminId: adminId,
+      paymentMethod: payload.paymentMethod || PaymentMethod.CASH,
     });
 
     const savedInvoice = await this.invoicesRepository.save(invoice);
