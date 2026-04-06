@@ -24,6 +24,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../auth/enums/role.enum';
+import { PaymentMethod } from './entities/invoice.entity';
 
 interface RequestWithUser {
   user: {
@@ -301,7 +302,7 @@ export class BillingController {
   @Post('manual/finalize')
   @Roles(...BILLING_ROLES)
   finalizeManualCheckout(
-    @Body() payload: { orderIds: number[]; identifier: string; type: 'ROOM' | 'TABLE' },
+    @Body() payload: { orderIds: number[]; identifier: string; type: 'ROOM' | 'TABLE'; paymentMethod?: PaymentMethod },
     @Request() req: RequestWithUser,
   ) {
     return this.billingService.finalizeManualCheckout(
@@ -319,9 +320,10 @@ export class BillingController {
   @Roles(...BILLING_ROLES)
   markInvoicePaid(
     @Param('id', ParseIntPipe) id: number,
+    @Body() payload: { paymentMethod: PaymentMethod },
     @Request() req: RequestWithUser,
   ) {
-    return this.billingService.markInvoicePaid(id, req.user.restaurantId);
+    return this.billingService.markInvoicePaid(id, req.user.restaurantId, payload.paymentMethod);
   }
 
   /**

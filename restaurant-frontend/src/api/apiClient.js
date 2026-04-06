@@ -288,8 +288,8 @@ export const billingAPI = {
     apiClient.patch(`/billing/invoices/${invoiceId}/send-to-cashier`),
 
   /** Mark an invoice as PAID. */
-  markInvoicePaid: (invoiceId) =>
-    apiClient.patch(`/billing/invoices/${invoiceId}/mark-paid`),
+  markInvoicePaid: (invoiceId, data) =>
+    apiClient.patch(`/billing/invoices/${invoiceId}/mark-paid`, data),
 
   /** Cashier day transactions for transfer review. */
   getCashierDayTransactions: (params) =>

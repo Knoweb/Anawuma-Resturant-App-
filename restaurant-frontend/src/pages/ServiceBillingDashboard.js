@@ -128,6 +128,7 @@ function InvoiceModal({ invoice, restaurantName, onClose, onMarkServed, onMarkPa
   // Use local state to track actions in current session if backend hasn't updated yet
   const [isPrinted, setIsPrinted] = useState(!!invoice.isPrinted);
   const [isSentWhatsapp, setIsSentWhatsapp] = useState(!!invoice.isSentWhatsapp);
+  const [paymentMethod, setPaymentMethod] = useState(invoice.paymentMethod || 'CASH');
 
   const handlePrint = async () => {
     setPrinting(true);
@@ -209,14 +210,33 @@ function InvoiceModal({ invoice, restaurantName, onClose, onMarkServed, onMarkPa
           </button>
 
           {invoice.invoiceStatus === 'PENDING' && (
-            <button 
-              className="btn btn-success btn-sm" 
-              onClick={onMarkPaid}
-              disabled={!canMarkPaid}
-              title={!canMarkPaid ? "Please complete Print and WhatsApp steps first" : ""}
-            >
-              <i className="fas fa-check-circle me-1"></i>Mark Paid
-            </button>
+            <div className="d-flex align-items-center gap-2">
+              <div className="btn-group btn-group-sm">
+                <button 
+                  type="button" 
+                  className={`btn ${paymentMethod === 'CASH' ? 'btn-primary' : 'btn-outline-primary'}`}
+                  onClick={() => setPaymentMethod('CASH')}
+                >
+                  <i className="fas fa-money-bill-wave me-1"></i>Cash
+                </button>
+                <button 
+                  type="button" 
+                  className={`btn ${paymentMethod === 'CARD' ? 'btn-primary' : 'btn-outline-primary'}`}
+                  onClick={() => setPaymentMethod('CARD')}
+                >
+                  <i className="fas fa-credit-card me-1"></i>Card
+                </button>
+              </div>
+
+              <button 
+                className="btn btn-success btn-sm" 
+                onClick={() => onMarkPaid(invoice.invoiceId, paymentMethod)}
+                disabled={!canMarkPaid}
+                title={!canMarkPaid ? "Please complete Print and WhatsApp steps first" : ""}
+              >
+                <i className="fas fa-check-circle me-1"></i>Mark Paid
+              </button>
+            </div>
           )}
 
           {isCashierDashboard && invoice.whatsappNumber && (
@@ -765,13 +785,14 @@ const ServiceBillingDashboard = ({
   };
 
   // Mark paid
-  const handleMarkPaid = async (invoiceId) => {
+  const handleMarkPaid = async (invoiceId, paymentMethod = 'CASH') => {
     try {
-      const res = await billingAPI.markInvoicePaid(invoiceId);
+      const res = await billingAPI.markInvoicePaid(invoiceId, { paymentMethod });
       setViewInvoice(res.data);
       fetchCashierQueue();
       fetchInvoices();
-      showToast('Invoice marked as paid!');
+      fetchSummary(); // Refresh stats too!
+      showToast(`Invoice marked as paid via ${paymentMethod}!`);
     } catch (err) {
       showToast(err?.response?.data?.message || 'Failed.', 'error');
     }

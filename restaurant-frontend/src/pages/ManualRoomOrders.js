@@ -142,13 +142,14 @@ const ManualRoomOrders = () => {
     };
 
 
-    const finalizeCheckout = async (account, roomNo) => {
+    const finalizeCheckout = async (account, roomNo, paymentMethod = 'CASH') => {
         try {
             const orderIds = account.orders.map(o => o.orderId);
             const response = await apiClient.post('/billing/manual/finalize', {
                 orderIds,
                 identifier: roomNo,
-                type: 'ROOM'
+                type: 'ROOM',
+                paymentMethod
             });
 
             if (response.data) {
