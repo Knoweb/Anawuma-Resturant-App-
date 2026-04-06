@@ -17,6 +17,12 @@ export enum AccountantTransferStatus {
   ACCEPTED = 'ACCEPTED',
 }
 
+export enum PaymentMethod {
+  CASH = 'CASH',
+  CARD = 'CARD',
+  NONE = 'NONE',
+}
+
 @Entity('invoices')
 export class Invoice {
   @PrimaryGeneratedColumn({ name: 'invoice_id' })
@@ -105,6 +111,14 @@ export class Invoice {
     default: InvoiceStatus.PENDING,
   })
   invoiceStatus: InvoiceStatus;
+  
+  @Column({
+    name: 'payment_method',
+    type: 'enum',
+    enum: PaymentMethod,
+    default: PaymentMethod.NONE,
+  })
+  paymentMethod: PaymentMethod;
 
   @Column({ name: 'is_printed', type: 'tinyint', default: 0 })
   isPrinted: boolean;

@@ -1,4 +1,5 @@
-import { IsNumber, IsOptional, Min } from 'class-validator';
+import { IsNumber, IsOptional, Min, IsEnum } from 'class-validator';
+import { PaymentMethod } from '../entities/invoice.entity';
 
 export class CreateInvoiceDto {
   @IsNumber()
@@ -18,4 +19,8 @@ export class CreateInvoiceDto {
   @IsNumber()
   @Min(0)
   discountAmount?: number;
+
+  @IsOptional()
+  @IsEnum(PaymentMethod)
+  paymentMethod?: PaymentMethod;
 }

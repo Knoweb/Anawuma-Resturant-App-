@@ -9,6 +9,7 @@ import {
   Invoice,
   InvoiceStatus,
   AccountantTransferStatus,
+  PaymentMethod,
 } from './entities/invoice.entity';
 import { BillAction, BillActionType } from './entities/bill-action.entity';
 import { Order, OrderStatus } from '../orders/entities/order.entity';
@@ -290,6 +291,7 @@ export class BillingService {
       taxAmount = 0,
       serviceCharge = 0,
       discountAmount = 0,
+      paymentMethod,
     } = dto;
 
     // Load the order
@@ -334,12 +336,18 @@ export class BillingService {
     const discount = parseFloat(discountAmount.toString());
     const total = subtotal + tax + charge - discount;
 
+    const invoiceStatus = paymentMethod && paymentMethod !== PaymentMethod.NONE 
+      ? InvoiceStatus.PAID 
+      : InvoiceStatus.PENDING;
+
     const invoice = this.buildInvoiceSnapshot(order, adminId, {
       subtotal,
       taxAmount: tax,
       serviceCharge: charge,
       discountAmount: discount,
       totalAmount: total,
+      invoiceStatus,
+      paymentMethod: paymentMethod || PaymentMethod.NONE,
     });
 
     const savedInvoice = await this.invoicesRepository.save(invoice);

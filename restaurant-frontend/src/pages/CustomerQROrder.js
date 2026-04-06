@@ -52,6 +52,7 @@ const CustomerQROrder = ({ isManual = false }) => {
   const [showCart, setShowCart] = useState(false);
   const [manualTableNo, setManualTableNo] = useState('');
   const [manualOrderType, setManualOrderType] = useState('TABLE');
+  const [paymentMethod, setPaymentMethod] = useState('CASH');
   const [orderSuccess, setOrderSuccess] = useState(null);
   const [showStatusScreen, setShowStatusScreen] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
@@ -532,7 +533,9 @@ const CustomerQROrder = ({ isManual = false }) => {
       if (isManual) {
         // 2. Automatically Generate Invoice (Bill)
         const createdOrder = response.data;
-        const invoiceResponse = await apiClient.post(`/billing/orders/${createdOrder.orderId}/create-invoice`);
+        const invoiceResponse = await apiClient.post(`/billing/orders/${createdOrder.orderId}/create-invoice`, {
+          paymentMethod: paymentMethod
+        });
 
         // 3. Trigger Printing (Popup)
         const identifier = manualTableNo.trim().replace(/^0+/, '') || manualTableNo.trim();
@@ -1446,6 +1449,28 @@ const CustomerQROrder = ({ isManual = false }) => {
                   </>
                 )}
               </div>
+
+              {isManual && (
+                <div className="mb-4">
+                  <label className="form-label d-block mb-2 fw-bold text-muted small">PAYMENT METHOD <span className="text-danger">*</span></label>
+                  <div className="d-flex gap-2">
+                    <button
+                      className={`btn flex-grow-1 d-flex align-items-center justify-content-center py-2 ${paymentMethod === 'CASH' ? 'btn-primary' : 'btn-outline-primary'}`}
+                      onClick={() => setPaymentMethod('CASH')}
+                      style={paymentMethod === 'CASH' ? { backgroundColor: '#266668', color: 'white', border: 'none', borderRadius: '10px' } : { color: '#266668', borderColor: '#266668', borderRadius: '10px' }}
+                    >
+                      <i className="fas fa-money-bill-wave me-2"></i> CASH
+                    </button>
+                    <button
+                      className={`btn flex-grow-1 d-flex align-items-center justify-content-center py-2 ${paymentMethod === 'CARD' ? 'btn-primary' : 'btn-outline-primary'}`}
+                      onClick={() => setPaymentMethod('CARD')}
+                      style={paymentMethod === 'CARD' ? { backgroundColor: '#266668', color: 'white', border: 'none', borderRadius: '10px' } : { color: '#266668', borderColor: '#266668', borderRadius: '10px' }}
+                    >
+                      <i className="fas fa-credit-card me-2"></i> CARD
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {!isManual && (
                 <>
