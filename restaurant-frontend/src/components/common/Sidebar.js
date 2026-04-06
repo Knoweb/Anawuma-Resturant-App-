@@ -183,6 +183,29 @@ function Sidebar() {
             </li>
           )}
 
+          {canAccessCashierDashboard && (
+            <>
+              <li className={isCashierTabActive('queue')}>
+                <Link to="/cashier/dashboard/queue" onClick={closeSubmenus}>
+                  <i className="fas fa-cash-register"></i>
+                  <span>Cashier Queue</span>
+                </Link>
+              </li>
+              <li className={isCashierTabActive('transfers')}>
+                <Link to="/cashier/dashboard/transfers" onClick={closeSubmenus}>
+                  <i className="fas fa-share-square"></i>
+                  <span>Accountant Transfers</span>
+                </Link>
+              </li>
+              <li className={isCashierTabActive('history')}>
+                <Link to="/cashier/dashboard/history" onClick={closeSubmenus}>
+                  <i className="fas fa-history"></i>
+                  <span>Invoice History</span>
+                </Link>
+              </li>
+            </>
+          )}
+
           {canAccessManualOrder && (
             <li className={`has-submenu ${menuStates.manualDashboard ? 'open' : ''}`}>
               <a href="#" onClick={(e) => { e.preventDefault(); toggleMenu('manualDashboard'); }}>
@@ -219,28 +242,6 @@ function Sidebar() {
             </li>
           )}
 
-          {canAccessCashierDashboard && (
-            <>
-              <li className={isCashierTabActive('queue')}>
-                <Link to="/cashier/dashboard/queue" onClick={closeSubmenus}>
-                  <i className="fas fa-cash-register"></i>
-                  <span>Cashier Queue</span>
-                </Link>
-              </li>
-              <li className={isCashierTabActive('transfers')}>
-                <Link to="/cashier/dashboard/transfers" onClick={closeSubmenus}>
-                  <i className="fas fa-share-square"></i>
-                  <span>Accountant Transfers</span>
-                </Link>
-              </li>
-              <li className={isCashierTabActive('history')}>
-                <Link to="/cashier/dashboard/history" onClick={closeSubmenus}>
-                  <i className="fas fa-history"></i>
-                  <span>Invoice History</span>
-                </Link>
-              </li>
-            </>
-          )}
 
 
 
