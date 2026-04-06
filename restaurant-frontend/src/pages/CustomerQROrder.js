@@ -360,7 +360,7 @@ const CustomerQROrder = ({ isManual = false }) => {
     setFilteredItems(filtered);
   }, [selectedMenu, foodItems, categories]);
 
-  const addToCart = (item) => {
+  const addToCart = (item, openDrawer = true) => {
     const existingItem = cart.find(cartItem => cartItem.foodItemId === item.foodItemId);
     if (existingItem) {
       setCart(cart.map(cartItem =>
@@ -377,7 +377,9 @@ const CustomerQROrder = ({ isManual = false }) => {
         notes: ''
       }]);
     }
-    setShowCart(true);
+    if (openDrawer) {
+      setShowCart(true);
+    }
   };
 
   const updateCartItemQty = (foodItemId, delta) => {
@@ -410,7 +412,7 @@ const CustomerQROrder = ({ isManual = false }) => {
     return (calculateSubtotal() + calculateServiceCharge()).toFixed(2);
   };
 
-  const addToCartFromModal = () => {
+  const addToCartFromModal = (openDrawer = false) => {
     if (!activeItemDetail) return;
 
     const item = activeItemDetail;
@@ -435,7 +437,10 @@ const CustomerQROrder = ({ isManual = false }) => {
     setActiveItemDetail(null);
     setModalQty(1);
     setModalOrderNotes('');
-    setShowCart(true);
+    
+    if (openDrawer) {
+      setShowCart(true);
+    }
 
     Swal.fire({
       title: 'Added to Cart',
@@ -1209,7 +1214,7 @@ const CustomerQROrder = ({ isManual = false }) => {
             <div className="sticky-bottom-btn p-3 bg-white border-top d-flex gap-2">
               <button
                 className="btn btn-outline-primary flex-grow-1"
-                onClick={addToCartFromModal}
+                onClick={() => addToCartFromModal(false)}
                 style={{
                   padding: '14px',
                   borderRadius: '12px',
@@ -1222,7 +1227,7 @@ const CustomerQROrder = ({ isManual = false }) => {
               </button>
               <button
                 className="order-now-btn flex-grow-1"
-                onClick={placeQuickManualOrder}
+                onClick={() => addToCartFromModal(true)}
               >
                 ORDER NOW
               </button>
