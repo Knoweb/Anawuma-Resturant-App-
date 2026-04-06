@@ -235,6 +235,19 @@ const ManualRoomOrders = () => {
                         <span>TOTAL</span>
                         <span>Rs. ${parseFloat(account.totalAmount).toFixed(2)}</span>
                     </div>
+
+                    <div class="payment-method-selector mt-4 pt-3 border-top">
+                        <div class="small fw-bold text-muted mb-2 text-start px-2">PAYMENT METHOD <span class="text-danger">*</span></div>
+                        <div class="d-flex gap-2 px-2">
+                            <button id="modal-pay-cash-btn" class="btn flex-grow-1 payment-opt-btn active">
+                                <i class="fas fa-money-bill-wave me-2"></i> CASH
+                            </button>
+                            <button id="modal-pay-card-btn" class="btn flex-grow-1 payment-opt-btn">
+                                <i class="fas fa-credit-card me-2"></i> CARD
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="text-center mt-3 small italic">
                         <div class="border-top border-bottom py-1">Thank you for dining with us!</div>
                     </div>
@@ -259,10 +272,28 @@ const ManualRoomOrders = () => {
             cancelButtonColor: '#858796',
             customClass: {
                 popup: 'modal-radius'
+            },
+            didOpen: () => {
+                const popup = Swal.getPopup();
+                account.selectedPaymentMethod = 'CASH'; // Reset default
+                const cashBtn = popup.querySelector('#modal-pay-cash-btn');
+                const cardBtn = popup.querySelector('#modal-pay-card-btn');
+                
+                cashBtn.addEventListener('click', () => {
+                    account.selectedPaymentMethod = 'CASH';
+                    cashBtn.classList.add('active');
+                    cardBtn.classList.remove('active');
+                });
+                
+                cardBtn.addEventListener('click', () => {
+                    account.selectedPaymentMethod = 'CARD';
+                    cardBtn.classList.add('active');
+                    cashBtn.classList.remove('active');
+                });
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                finalizeCheckout(account, roomNo);
+                finalizeCheckout(account, roomNo, account.selectedPaymentMethod);
             } else if (result.isDenied) {
                 printAccountBill(account, roomNo);
                 // Reshow after print if they want

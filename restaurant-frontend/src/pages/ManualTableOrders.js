@@ -226,11 +226,24 @@ const ManualTableOrders = () => {
                         <span>Service Charge</span>
                         <span>Rs. ${parseFloat(account.orders.reduce((sum, o) => sum + parseFloat(o.serviceCharge), 0)).toFixed(2)}</span>
                     </div>
-                    <div class="d-flex justify-content-between px-2 font-weight-bold border-top pt-1 h5">
+                    <div className="d-flex justify-content-between px-2 font-weight-bold border-top pt-1 h5">
                         <span>TOTAL</span>
                         <span>Rs. ${parseFloat(account.totalAmount).toFixed(2)}</span>
                     </div>
-                    <div class="text-center mt-3 small italic">
+
+                    <div className="payment-method-selector mt-4 pt-3 border-top">
+                        <div className="small fw-bold text-muted mb-2 text-start px-2">PAYMENT METHOD <span className="text-danger">*</span></div>
+                        <div className="d-flex gap-2 px-2">
+                            <button id="modal-pay-cash-btn" class="btn flex-grow-1 payment-opt-btn active">
+                                <i class="fas fa-money-bill-wave me-2"></i> CASH
+                            </button>
+                            <button id="modal-pay-card-btn" class="btn flex-grow-1 payment-opt-btn">
+                                <i class="fas fa-credit-card me-2"></i> CARD
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="text-center mt-3 small italic">
                         <div class="border-top border-bottom py-1">Thank you for dining with us!</div>
                     </div>
                 </div>
@@ -254,6 +267,24 @@ const ManualTableOrders = () => {
             cancelButtonColor: '#858796',
             customClass: {
                 popup: 'modal-radius'
+            },
+            didOpen: () => {
+                const popup = Swal.getPopup();
+                account.selectedPaymentMethod = 'CASH'; // Reset default
+                const cashBtn = popup.querySelector('#modal-pay-cash-btn');
+                const cardBtn = popup.querySelector('#modal-pay-card-btn');
+                
+                cashBtn.addEventListener('click', () => {
+                    account.selectedPaymentMethod = 'CASH';
+                    cashBtn.classList.add('active');
+                    cardBtn.classList.remove('active');
+                });
+                
+                cardBtn.addEventListener('click', () => {
+                    account.selectedPaymentMethod = 'CARD';
+                    cardBtn.classList.add('active');
+                    cashBtn.classList.remove('active');
+                });
             }
         }).then((result) => {
             if (result.isConfirmed) {
@@ -311,18 +342,6 @@ const ManualTableOrders = () => {
           <div class="bill-total-label">ACCUMULATED GRAND TOTAL (Inc. 10% SC)</div>
           <div class="bill-total-value">Rs. ${parseFloat(account.totalAmount).toFixed(0)}</div>
         </div>
-
-        <div class="payment-method-selector mt-4">
-          <div class="bill-total-label mb-2">SELECT PAYMENT METHOD <span class="text-danger">*</span></div>
-          <div class="d-flex gap-2">
-            <button id="pay-cash-btn" class="btn flex-grow-1 payment-opt-btn active">
-              <i class="fas fa-money-bill-wave me-2"></i> CASH
-            </button>
-            <button id="pay-card-btn" class="btn flex-grow-1 payment-opt-btn">
-              <i class="fas fa-credit-card me-2"></i> CARD
-            </button>
-          </div>
-        </div>
       </div>
     `;
 
@@ -343,23 +362,6 @@ const ManualTableOrders = () => {
                         const idx = btn.getAttribute('data-index');
                         printOrder(account.orders[idx], tableNo);
                     });
-                });
-
-                // Payment Method Logic
-                account.selectedPaymentMethod = 'CASH'; // Reset default
-                const cashBtn = popup.querySelector('#pay-cash-btn');
-                const cardBtn = popup.querySelector('#pay-card-btn');
-                
-                cashBtn.addEventListener('click', () => {
-                    account.selectedPaymentMethod = 'CASH';
-                    cashBtn.classList.add('active');
-                    cardBtn.classList.remove('active');
-                });
-                
-                cardBtn.addEventListener('click', () => {
-                    account.selectedPaymentMethod = 'CARD';
-                    cardBtn.classList.add('active');
-                    cashBtn.classList.remove('active');
                 });
             },
             customClass: {
