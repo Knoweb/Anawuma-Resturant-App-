@@ -345,52 +345,79 @@ function AccountantDashboard() {
                   <div className="text-muted text-center py-3">No report data available for selected date.</div>
                 ) : (
                   <div className="row g-3">
-                    <div className="col-md-3 col-sm-6">
-                      <div className="border rounded p-3 h-100">
-                        <div className="text-muted small">Accepted Daily Revenue</div>
-                        <div className="h5 text-success mb-1">
+                    {/* Daily Stats */}
+                    <div className="col-md-2 col-sm-4">
+                      <div className="border rounded p-3 h-100 bg-white shadow-sm">
+                        <div className="text-muted small mb-1">
+                          <i className="fas fa-university me-1 text-primary"></i>
+                          Daily Accepted
+                        </div>
+                        <div className="h5 text-dark mb-0">
                           {formatCurrency(dailyAcceptedRevenue)}
                         </div>
-                        <div className="d-flex justify-content-between small text-muted">
-                           <span>Cash: {formatCurrency(dailySummary?.cashRevenue)}</span>
-                           <span>Card: {formatCurrency(dailySummary?.cardRevenue)}</span>
-                        </div>
-                        <div className="small text-muted mt-1">{dailySummary?.periodLabel || formatDateTime(selectedDate).split(',')[0]}</div>
+                        <div className="small text-muted mt-2">{dailySummary?.periodLabel || 'Today'}</div>
                       </div>
                     </div>
-                    <div className="col-md-3 col-sm-6">
-                      <div className="border rounded p-3 h-100">
-                        <div className="text-muted small">Accepted Daily Transfers</div>
-                        <div className="h5 text-primary mb-1">
-                          {dailyAcceptedCount}
+                    <div className="col-md-2 col-sm-4">
+                      <div className="border rounded p-3 h-100 bg-white shadow-sm border-start-success" style={{borderLeftWidth: '4px'}}>
+                        <div className="text-muted small mb-1">
+                          <i className="fas fa-money-bill-wave me-1 text-success"></i>
+                          Daily Cash
                         </div>
-                        <div className="small text-muted">{dailySummary?.periodLabel || formatDateTime(selectedDate).split(',')[0]}</div>
+                        <div className="h5 text-success mb-0">
+                          {formatCurrency(dailySummary?.cashRevenue || 0)}
+                        </div>
+                        <div className="small text-muted mt-2">Paid Cash</div>
                       </div>
                     </div>
-                    <div className="col-md-3 col-sm-6">
-                      <div className="border rounded p-3 h-100">
-                        <div className="text-muted small">Monthly Revenue</div>
-                        <div className="h5 text-success mb-1">
-                          {Number.isFinite(monthlySummary?.totalRevenue)
-                            ? formatCurrency(monthlySummary.totalRevenue)
-                            : '-'}
+                    <div className="col-md-2 col-sm-4">
+                      <div className="border rounded p-3 h-100 bg-white shadow-sm border-start-info" style={{borderLeftWidth: '4px'}}>
+                        <div className="text-muted small mb-1">
+                          <i className="fas fa-credit-card me-1 text-info"></i>
+                          Daily Card
                         </div>
-                        <div className="d-flex justify-content-between small text-muted">
-                           <span>Cash: {formatCurrency(monthlySummary?.cashRevenue)}</span>
-                           <span>Card: {formatCurrency(monthlySummary?.cardRevenue)}</span>
+                        <div className="h5 text-info mb-0">
+                          {formatCurrency(dailySummary?.cardRevenue || 0)}
                         </div>
-                        <div className="small text-muted mt-1">{monthlySummary?.periodLabel || '-'}</div>
+                        <div className="small text-muted mt-2">Paid Card</div>
                       </div>
                     </div>
-                    <div className="col-md-3 col-sm-6">
-                      <div className="border rounded p-3 h-100">
-                        <div className="text-muted small">Monthly Orders</div>
-                        <div className="h5 text-primary mb-1">
-                          {Number.isFinite(monthlySummary?.totalOrders)
-                            ? monthlySummary.totalOrders
-                            : '-'}
+
+                    {/* Monthly Stats */}
+                    <div className="col-md-2 col-sm-4">
+                      <div className="border rounded p-3 h-100 bg-white shadow-sm">
+                        <div className="text-muted small mb-1">
+                          <i className="fas fa-chart-line me-1 text-purple"></i>
+                          Monthly Total
                         </div>
-                        <div className="small text-muted">{monthlySummary?.periodLabel || '-'}</div>
+                        <div className="h5 text-dark mb-0">
+                          {formatCurrency(monthlySummary?.totalRevenue || 0)}
+                        </div>
+                        <div className="small text-muted mt-2">{monthlySummary?.periodLabel || '-'}</div>
+                      </div>
+                    </div>
+                    <div className="col-md-2 col-sm-4">
+                      <div className="border rounded p-3 h-100 bg-white shadow-sm border-start-success" style={{borderLeftWidth: '4px'}}>
+                        <div className="text-muted small mb-1">
+                          <i className="fas fa-coins me-1 text-success"></i>
+                          Monthly Cash
+                        </div>
+                        <div className="h5 text-success mb-0">
+                          {formatCurrency(monthlySummary?.cashRevenue || 0)}
+                        </div>
+                        <div className="small text-muted mt-2">Total Cash</div>
+                      </div>
+                    </div>
+                    <div className="col-md-2 col-sm-4">
+                      <div className="border rounded p-3 h-100 bg-white shadow-sm border-start-info" style={{borderLeftWidth: '4px'}}>
+                        <div className="text-muted small mb-1">
+                          <i className="fas fa-credit-card me-1 text-info"></i>
+                          Monthly Card
+                        </div>
+                        <div className="h5 text-info mb-0">
+                          {formatCurrency(monthlySummary?.cardRevenue || 0)}
+                        </div>
+                        <div className="small text-muted mt-2">Total Card</div>
                       </div>
                     </div>
                   </div>
