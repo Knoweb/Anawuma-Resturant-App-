@@ -525,9 +525,29 @@ const CustomerQROrder = ({ isManual = false }) => {
       localStorage.setItem(`active_order_${tableKey || roomKey}`, JSON.stringify(orderData));
 
       if (isManual) {
+        // 2. Automatically Generate Invoice (Bill)
+        const createdOrder = response.data;
+        const invoiceResponse = await apiClient.post(`/billing/orders/${createdOrder.orderId}/create-invoice`);
+
+        // 3. Trigger Printing (Popup)
+        const identifier = manualTableNo.trim().replace(/^0+/, '') || manualTableNo.trim();
+        printOrder(createdOrder, identifier);
+
+        // 4. Mark as Printed
+        await apiClient.patch(`/billing/invoices/${invoiceResponse.data.invoiceId}/mark-printed`);
+
+        Swal.fire({
+          title: 'Order Completed',
+          text: 'Order placed, bill generated and ready for print.',
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false
+        });
+
         setCart([]);
         setOrderNotes('');
         setShowCart(false);
+        setManualTableNo('');
         const target = manualOrderType === 'ROOM' ? '/manual-orders/rooms' : '/manual-orders/tables';
         navigate(target);
       } else {
