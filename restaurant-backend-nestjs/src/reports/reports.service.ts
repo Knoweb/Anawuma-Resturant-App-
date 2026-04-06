@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Raw } from 'typeorm';
 import { ReportsHistory } from './entities/reports-history.entity';
 import { Order } from '../orders/entities/order.entity';
 import { OrderItem } from '../orders/entities/order-item.entity';
+import { Invoice, PaymentMethod, InvoiceStatus } from '../billing/entities/invoice.entity';
 
 @Injectable()
 export class ReportsService {
@@ -14,6 +15,8 @@ export class ReportsService {
     private ordersRepository: Repository<Order>,
     @InjectRepository(OrderItem)
     private orderItemsRepository: Repository<OrderItem>,
+    @InjectRepository(Invoice)
+    private invoicesRepository: Repository<Invoice>,
   ) {}
 
   async getSummary(restaurantId: number, date: string) {
@@ -50,11 +53,15 @@ export class ReportsService {
         periodLabel: `${formattedDate} (${dayOfWeek})`,
         totalOrders: dailyTotals.totalOrders,
         totalRevenue: dailyTotals.totalRevenue,
+        cashRevenue: dailyTotals.cashRevenue,
+        cardRevenue: dailyTotals.cardRevenue,
       },
       monthly: {
         periodLabel: `${monthNames[month - 1]} ${year}`,
         totalOrders: monthlyTotals.totalOrders,
         totalRevenue: monthlyTotals.totalRevenue,
+        cashRevenue: monthlyTotals.cashRevenue,
+        cardRevenue: monthlyTotals.cardRevenue,
       },
     };
   }
@@ -64,22 +71,31 @@ export class ReportsService {
     fromDate: string,
     toDate: string,
   ) {
-    const result = await this.orderItemsRepository
-      .createQueryBuilder('item')
-      .innerJoin('item.order', 'order')
-      .where('order.restaurantId = :restaurantId', { restaurantId })
-      .andWhere('order.status = :status', { status: 'SERVED' })
-      .andWhere('DATE(order.createdAt) BETWEEN :fromDate AND :toDate', {
+    const result = await this.invoicesRepository
+      .createQueryBuilder('invoice')
+      .where('invoice.restaurantId = :restaurantId', { restaurantId })
+      .andWhere('invoice.invoiceStatus = :status', { status: 'PAID' })
+      .andWhere('DATE(invoice.createdAt) BETWEEN :fromDate AND :toDate', {
         fromDate,
         toDate,
       })
-      .select('COUNT(DISTINCT order.orderId)', 'totalOrders')
-      .addSelect('COALESCE(SUM(item.lineTotal), 0)', 'totalRevenue')
-      .getRawOne<{ totalOrders: string; totalRevenue: string }>();
+      .select('COUNT(invoice.invoiceId)', 'totalInvoices')
+      .addSelect('COALESCE(SUM(invoice.totalAmount), 0)', 'totalRevenue')
+      .addSelect(
+        `COALESCE(SUM(CASE WHEN invoice.payment_method = '${PaymentMethod.CASH}' THEN invoice.totalAmount ELSE 0 END), 0)`,
+        'cashRevenue',
+      )
+      .addSelect(
+        `COALESCE(SUM(CASE WHEN invoice.payment_method = '${PaymentMethod.CARD}' THEN invoice.totalAmount ELSE 0 END), 0)`,
+        'cardRevenue',
+      )
+      .getRawOne();
 
     return {
-      totalOrders: parseInt(result?.totalOrders || '0', 10),
+      totalOrders: parseInt(result?.totalInvoices || '0', 10),
       totalRevenue: parseFloat(result?.totalRevenue || '0'),
+      cashRevenue: parseFloat(result?.cashRevenue || '0'),
+      cardRevenue: parseFloat(result?.cardRevenue || '0'),
     };
   }
 
@@ -93,44 +109,54 @@ export class ReportsService {
     });
     const periodLabel = `${formattedDate} (${dayOfWeek})`;
 
-    // Query orders and items
-    const rows = await this.orderItemsRepository
-      .createQueryBuilder('item')
-      .innerJoin('item.order', 'order')
-      .where('order.restaurantId = :restaurantId', { restaurantId })
-      .andWhere('order.status = :status', { status: 'SERVED' })
-      .andWhere('DATE(order.createdAt) = :date', { date })
-      .select([
-        'order.orderNo as orderNo',
-        'order.tableNo as tableNo',
-        'order.createdAt as createdAt',
-        'item.itemName as itemName',
-        'item.qty as qty',
-        'item.unitPrice as unitPrice',
-        'item.lineTotal as lineTotal',
-      ])
-      .orderBy('order.createdAt', 'DESC')
-      .getRawMany();
+    // Query PAID invoices
+    const invoices = await this.invoicesRepository.find({
+      where: {
+        restaurantId,
+        invoiceStatus: InvoiceStatus.PAID,
+        createdAt: Raw((alias) => `DATE(${alias}) = :date`, { date }),
+      },
+      order: { createdAt: 'DESC' },
+    });
+    
+    const rows: any[] = [];
+    let totalRevenue = 0;
+    let cashRevenue = 0;
+    let cardRevenue = 0;
 
-    const totalOrders = new Set(rows.map((r) => r.orderNo)).size;
-    const totalRevenue = rows.reduce((sum, r) => sum + parseFloat(r.lineTotal || 0), 0);
+    invoices.forEach((inv) => {
+      const amount = parseFloat(inv.totalAmount.toString());
+      totalRevenue += amount;
+      if (inv.paymentMethod === PaymentMethod.CASH) cashRevenue += amount;
+      if (inv.paymentMethod === PaymentMethod.CARD) cardRevenue += amount;
 
-    // Save to history
+      const items = Array.isArray(inv.orderItemsJson) ? inv.orderItemsJson : [];
+      items.forEach((item: any) => {
+        rows.push({
+          orderNo: item.orderNo || inv.invoiceNumber,
+          tableNo: inv.tableNo,
+          createdAt: inv.createdAt,
+          itemName: item.itemName,
+          qty: item.qty,
+          unitPrice: item.unitPrice,
+          lineTotal: item.lineTotal,
+          paymentMethod: inv.paymentMethod,
+        });
+      });
+    });
+
+    const totalOrders = invoices.length;
+
+    // Save to history (optional status tracking)
     await this.saveToHistory(restaurantId, 'daily', date, date, totalOrders, totalRevenue);
 
     return {
       periodLabel,
       totalOrders,
       totalRevenue: parseFloat(totalRevenue.toFixed(2)),
-      rows: rows.map((r) => ({
-        orderNo: r.orderNo,
-        tableNo: r.tableNo,
-        createdAt: r.createdAt,
-        itemName: r.itemName,
-        qty: parseInt(r.qty),
-        unitPrice: parseFloat(r.unitPrice),
-        lineTotal: parseFloat(r.lineTotal),
-      })),
+      cashRevenue: parseFloat(cashRevenue.toFixed(2)),
+      cardRevenue: parseFloat(cardRevenue.toFixed(2)),
+      rows,
     };
   }
 
@@ -149,30 +175,46 @@ export class ReportsService {
     });
     const periodLabel = `${formattedFrom} - ${formattedTo}`;
 
-    // Query orders and items
-    const rows = await this.orderItemsRepository
-      .createQueryBuilder('item')
-      .innerJoin('item.order', 'order')
-      .where('order.restaurantId = :restaurantId', { restaurantId })
-      .andWhere('order.status = :status', { status: 'SERVED' })
-      .andWhere('DATE(order.createdAt) BETWEEN :fromDate AND :toDate', {
-        fromDate,
-        toDate,
-      })
-      .select([
-        'order.orderNo as orderNo',
-        'order.tableNo as tableNo',
-        'order.createdAt as createdAt',
-        'item.itemName as itemName',
-        'item.qty as qty',
-        'item.unitPrice as unitPrice',
-        'item.lineTotal as lineTotal',
-      ])
-      .orderBy('order.createdAt', 'DESC')
-      .getRawMany();
+    // Query PAID invoices
+    const invoices = await this.invoicesRepository.find({
+      where: {
+        restaurantId,
+        invoiceStatus: InvoiceStatus.PAID,
+        createdAt: Raw((alias) => `DATE(${alias}) BETWEEN :fromDate AND :toDate`, {
+          fromDate,
+          toDate,
+        }),
+      },
+      order: { createdAt: 'DESC' },
+    });
 
-    const totalOrders = new Set(rows.map((r) => r.orderNo)).size;
-    const totalRevenue = rows.reduce((sum, r) => sum + parseFloat(r.lineTotal || 0), 0);
+    const rows: any[] = [];
+    let totalRevenue = 0;
+    let cashRevenue = 0;
+    let cardRevenue = 0;
+
+    invoices.forEach((inv) => {
+      const amount = parseFloat(inv.totalAmount.toString());
+      totalRevenue += amount;
+      if (inv.paymentMethod === PaymentMethod.CASH) cashRevenue += amount;
+      if (inv.paymentMethod === PaymentMethod.CARD) cardRevenue += amount;
+
+      const items = Array.isArray(inv.orderItemsJson) ? inv.orderItemsJson : [];
+      items.forEach((item: any) => {
+        rows.push({
+          orderNo: item.orderNo || inv.invoiceNumber,
+          tableNo: inv.tableNo,
+          createdAt: inv.createdAt,
+          itemName: item.itemName,
+          qty: item.qty,
+          unitPrice: item.unitPrice,
+          lineTotal: item.lineTotal,
+          paymentMethod: inv.paymentMethod,
+        });
+      });
+    });
+
+    const totalOrders = invoices.length;
 
     // Save to history
     await this.saveToHistory(restaurantId, 'range', fromDate, toDate, totalOrders, totalRevenue);
@@ -181,15 +223,9 @@ export class ReportsService {
       periodLabel,
       totalOrders,
       totalRevenue: parseFloat(totalRevenue.toFixed(2)),
-      rows: rows.map((r) => ({
-        orderNo: r.orderNo,
-        tableNo: r.tableNo,
-        createdAt: r.createdAt,
-        itemName: r.itemName,
-        qty: parseInt(r.qty),
-        unitPrice: parseFloat(r.unitPrice),
-        lineTotal: parseFloat(r.lineTotal),
-      })),
+      cashRevenue: parseFloat(cashRevenue.toFixed(2)),
+      cardRevenue: parseFloat(cardRevenue.toFixed(2)),
+      rows,
     };
   }
 
@@ -205,30 +241,46 @@ export class ReportsService {
       'July', 'August', 'September', 'October', 'November', 'December'];
     const periodLabel = `${monthNames[month - 1]} ${year}`;
 
-    // Query orders and items
-    const rows = await this.orderItemsRepository
-      .createQueryBuilder('item')
-      .innerJoin('item.order', 'order')
-      .where('order.restaurantId = :restaurantId', { restaurantId })
-      .andWhere('order.status = :status', { status: 'SERVED' })
-      .andWhere('DATE(order.createdAt) BETWEEN :fromDate AND :toDate', {
-        fromDate,
-        toDate,
-      })
-      .select([
-        'order.orderNo as orderNo',
-        'order.tableNo as tableNo',
-        'order.createdAt as createdAt',
-        'item.itemName as itemName',
-        'item.qty as qty',
-        'item.unitPrice as unitPrice',
-        'item.lineTotal as lineTotal',
-      ])
-      .orderBy('order.createdAt', 'DESC')
-      .getRawMany();
+    // Query PAID invoices
+    const invoices = await this.invoicesRepository.find({
+      where: {
+        restaurantId,
+        invoiceStatus: InvoiceStatus.PAID,
+        createdAt: Raw((alias) => `DATE(${alias}) BETWEEN :fromDate AND :toDate`, {
+          fromDate,
+          toDate,
+        }),
+      },
+      order: { createdAt: 'DESC' },
+    });
 
-    const totalOrders = new Set(rows.map((r) => r.orderNo)).size;
-    const totalRevenue = rows.reduce((sum, r) => sum + parseFloat(r.lineTotal || 0), 0);
+    const rows: any[] = [];
+    let totalRevenue = 0;
+    let cashRevenue = 0;
+    let cardRevenue = 0;
+
+    invoices.forEach((inv) => {
+      const amount = parseFloat(inv.totalAmount.toString());
+      totalRevenue += amount;
+      if (inv.paymentMethod === PaymentMethod.CASH) cashRevenue += amount;
+      if (inv.paymentMethod === PaymentMethod.CARD) cardRevenue += amount;
+
+      const items = Array.isArray(inv.orderItemsJson) ? inv.orderItemsJson : [];
+      items.forEach((item: any) => {
+        rows.push({
+          orderNo: item.orderNo || inv.invoiceNumber,
+          tableNo: inv.tableNo,
+          createdAt: inv.createdAt,
+          itemName: item.itemName,
+          qty: item.qty,
+          unitPrice: item.unitPrice,
+          lineTotal: item.lineTotal,
+          paymentMethod: inv.paymentMethod,
+        });
+      });
+    });
+
+    const totalOrders = invoices.length;
 
     // Save to history
     await this.saveToHistory(restaurantId, 'monthly', fromDate, toDate, totalOrders, totalRevenue);
@@ -237,15 +289,9 @@ export class ReportsService {
       periodLabel,
       totalOrders,
       totalRevenue: parseFloat(totalRevenue.toFixed(2)),
-      rows: rows.map((r) => ({
-        orderNo: r.orderNo,
-        tableNo: r.tableNo,
-        createdAt: r.createdAt,
-        itemName: r.itemName,
-        qty: parseInt(r.qty),
-        unitPrice: parseFloat(r.unitPrice),
-        lineTotal: parseFloat(r.lineTotal),
-      })),
+      cashRevenue: parseFloat(cashRevenue.toFixed(2)),
+      cardRevenue: parseFloat(cardRevenue.toFixed(2)),
+      rows,
     };
   }
 
@@ -270,15 +316,17 @@ export class ReportsService {
   async generateDailyCsv(restaurantId: number, date: string): Promise<string> {
     const report = await this.getDailyReport(restaurantId, date);
 
-    let csv = 'Order No,Table No,Date/Time,Item Name,Qty,Unit Price,Line Total\n';
+    let csv = 'Order No,Table No,Date/Time,Item Name,Qty,Unit Price,Payment,Line Total\n';
     
     for (const row of report.rows) {
       const dateTime = new Date(row.createdAt).toLocaleString();
-      csv += `${row.orderNo},"${row.tableNo}","${dateTime}","${row.itemName}",${row.qty},${row.unitPrice},${row.lineTotal}\n`;
+      csv += `${row.orderNo},"${row.tableNo}","${dateTime}","${row.itemName}",${row.qty},${row.unitPrice},${row.paymentMethod},${row.lineTotal}\n`;
     }
 
-    csv += `\n,,,Total Orders:,${report.totalOrders},,\n`;
-    csv += `,,,Total Revenue:,,,${report.totalRevenue}\n`;
+    csv += `\n,,,,Total Orders:,${report.totalOrders},,\n`;
+    csv += `,,,,Total Revenue:,,,${report.totalRevenue}\n`;
+    csv += `,,,,Cash Revenue:,,,${report.cashRevenue || 0}\n`;
+    csv += `,,,,Card Revenue:,,,${report.cardRevenue || 0}\n`;
 
     return csv;
   }
@@ -286,15 +334,17 @@ export class ReportsService {
   async generateRangeCsv(restaurantId: number, fromDate: string, toDate: string): Promise<string> {
     const report = await this.getRangeReport(restaurantId, fromDate, toDate);
 
-    let csv = 'Order No,Table No,Date/Time,Item Name,Qty,Unit Price,Line Total\n';
+    let csv = 'Order No,Table No,Date/Time,Item Name,Qty,Unit Price,Payment,Line Total\n';
     
     for (const row of report.rows) {
       const dateTime = new Date(row.createdAt).toLocaleString();
-      csv += `${row.orderNo},"${row.tableNo}","${dateTime}","${row.itemName}",${row.qty},${row.unitPrice},${row.lineTotal}\n`;
+      csv += `${row.orderNo},"${row.tableNo}","${dateTime}","${row.itemName}",${row.qty},${row.unitPrice},${row.paymentMethod},${row.lineTotal}\n`;
     }
 
-    csv += `\n,,,Total Orders:,${report.totalOrders},,\n`;
-    csv += `,,,Total Revenue:,,,${report.totalRevenue}\n`;
+    csv += `\n,,,,Total Orders:,${report.totalOrders},,\n`;
+    csv += `,,,,Total Revenue:,,,${report.totalRevenue}\n`;
+    csv += `,,,,Cash Revenue:,,,${report.cashRevenue || 0}\n`;
+    csv += `,,,,Card Revenue:,,,${report.cardRevenue || 0}\n`;
 
     return csv;
   }
@@ -302,15 +352,17 @@ export class ReportsService {
   async generateMonthlyCsv(restaurantId: number, year: number, month: number): Promise<string> {
     const report = await this.getMonthlyReport(restaurantId, year, month);
 
-    let csv = 'Order No,Table No,Date/Time,Item Name,Qty,Unit Price,Line Total\n';
+    let csv = 'Order No,Table No,Date/Time,Item Name,Qty,Unit Price,Payment,Line Total\n';
     
     for (const row of report.rows) {
       const dateTime = new Date(row.createdAt).toLocaleString();
-      csv += `${row.orderNo},"${row.tableNo}","${dateTime}","${row.itemName}",${row.qty},${row.unitPrice},${row.lineTotal}\n`;
+      csv += `${row.orderNo},"${row.tableNo}","${dateTime}","${row.itemName}",${row.qty},${row.unitPrice},${row.paymentMethod},${row.lineTotal}\n`;
     }
 
-    csv += `\n,,,Total Orders:,${report.totalOrders},,\n`;
-    csv += `,,,Total Revenue:,,,${report.totalRevenue}\n`;
+    csv += `\n,,,,Total Orders:,${report.totalOrders},,\n`;
+    csv += `,,,,Total Revenue:,,,${report.totalRevenue}\n`;
+    csv += `,,,,Cash Revenue:,,,${report.cashRevenue || 0}\n`;
+    csv += `,,,,Card Revenue:,,,${report.cardRevenue || 0}\n`;
 
     return csv;
   }

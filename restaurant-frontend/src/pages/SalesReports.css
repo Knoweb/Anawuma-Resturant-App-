@@ -117,7 +117,18 @@
   background: linear-gradient(135deg, #266668 0%, #1a4648 100%);
   border-radius: 10px;
   color: white;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 15px rgba(38, 102, 104, 0.4);
+  height: 100%;
+}
+
+.summary-card.cash {
+  background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
+  box-shadow: 0 4px 15px rgba(0, 176, 155, 0.4);
+}
+
+.summary-card.card-type {
+  background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
+  box-shadow: 0 4px 15px rgba(33, 147, 176, 0.4);
 }
 
 .summary-card .summary-icon {

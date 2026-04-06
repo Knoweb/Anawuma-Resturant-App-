@@ -5,10 +5,11 @@ import { ReportsService } from './reports.service';
 import { ReportsHistory } from './entities/reports-history.entity';
 import { Order } from '../orders/entities/order.entity';
 import { OrderItem } from '../orders/entities/order-item.entity';
+import { Invoice } from '../billing/entities/invoice.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ReportsHistory, Order, OrderItem]),
+    TypeOrmModule.forFeature([ReportsHistory, Order, OrderItem, Invoice]),
   ],
   controllers: [ReportsController],
   providers: [ReportsService],

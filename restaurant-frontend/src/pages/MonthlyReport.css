@@ -133,6 +133,16 @@
   color: white;
 }
 
+.cash-card .card-icon {
+  background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
+  color: white;
+}
+
+.card-card .card-icon {
+  background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
+  color: white;
+}
+
 .summary-card .card-content h3 {
   margin: 0;
   font-size: 1.75rem;

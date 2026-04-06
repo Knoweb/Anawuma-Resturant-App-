@@ -94,6 +94,8 @@ function AccountantDashboard() {
             typeof daily.totalRevenue === 'number'
               ? daily.totalRevenue
               : Number(daily.totalRevenue),
+          cashRevenue: Number(daily.cashRevenue || 0),
+          cardRevenue: Number(daily.cardRevenue || 0),
         });
       } else {
         setDailySummary(null);
@@ -110,6 +112,8 @@ function AccountantDashboard() {
             typeof monthly.totalRevenue === 'number'
               ? monthly.totalRevenue
               : Number(monthly.totalRevenue),
+          cashRevenue: Number(monthly.cashRevenue || 0),
+          cardRevenue: Number(monthly.cardRevenue || 0),
         });
       } else {
         setMonthlySummary(null);
@@ -347,7 +351,11 @@ function AccountantDashboard() {
                         <div className="h5 text-success mb-1">
                           {formatCurrency(dailyAcceptedRevenue)}
                         </div>
-                        <div className="small text-muted">{dailySummary?.periodLabel || formatDateTime(selectedDate).split(',')[0]}</div>
+                        <div className="d-flex justify-content-between small text-muted">
+                           <span>Cash: {formatCurrency(dailySummary?.cashRevenue)}</span>
+                           <span>Card: {formatCurrency(dailySummary?.cardRevenue)}</span>
+                        </div>
+                        <div className="small text-muted mt-1">{dailySummary?.periodLabel || formatDateTime(selectedDate).split(',')[0]}</div>
                       </div>
                     </div>
                     <div className="col-md-3 col-sm-6">
@@ -367,7 +375,11 @@ function AccountantDashboard() {
                             ? formatCurrency(monthlySummary.totalRevenue)
                             : '-'}
                         </div>
-                        <div className="small text-muted">{monthlySummary?.periodLabel || '-'}</div>
+                        <div className="d-flex justify-content-between small text-muted">
+                           <span>Cash: {formatCurrency(monthlySummary?.cashRevenue)}</span>
+                           <span>Card: {formatCurrency(monthlySummary?.cardRevenue)}</span>
+                        </div>
+                        <div className="small text-muted mt-1">{monthlySummary?.periodLabel || '-'}</div>
                       </div>
                     </div>
                     <div className="col-md-3 col-sm-6">
@@ -429,6 +441,7 @@ function AccountantDashboard() {
                           <th>Table</th>
                           <th>Customer</th>
                           <th>Total</th>
+                          <th>Payment</th>
                           <th>Sent At</th>
                         </tr>
                       </thead>
@@ -447,6 +460,11 @@ function AccountantDashboard() {
                             <td>{invoice.tableNo || '-'}</td>
                             <td>{invoice.customerName || '-'}</td>
                             <td>{formatCurrency(invoice.totalAmount)}</td>
+                            <td>
+                              <span className={`badge ${invoice.paymentMethod === 'CARD' ? 'bg-info' : 'bg-secondary'}`}>
+                                {invoice.paymentMethod || 'CASH'}
+                              </span>
+                            </td>
                             <td>{formatDateTime(invoice.sentToAccountantAt)}</td>
                           </tr>
                         ))}
@@ -480,6 +498,7 @@ function AccountantDashboard() {
                           <th>Table</th>
                           <th>Customer</th>
                           <th>Total</th>
+                          <th>Payment</th>
                           <th>Accepted At</th>
                         </tr>
                       </thead>
@@ -491,6 +510,11 @@ function AccountantDashboard() {
                             <td>{invoice.tableNo || '-'}</td>
                             <td>{invoice.customerName || '-'}</td>
                             <td>{formatCurrency(invoice.totalAmount)}</td>
+                            <td>
+                              <span className={`badge ${invoice.paymentMethod === 'CARD' ? 'bg-info' : 'bg-secondary'}`}>
+                                {invoice.paymentMethod || 'CASH'}
+                              </span>
+                            </td>
                             <td>{formatDateTime(invoice.acceptedByAccountantAt)}</td>
                           </tr>
                         ))}

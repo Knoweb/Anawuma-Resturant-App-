@@ -163,7 +163,7 @@ const SalesReports = () => {
   };
 
   const formatCurrency = (amount) => {
-    return `$${parseFloat(amount).toFixed(2)}`;
+    return `Rs. ${parseFloat(amount).toFixed(2)}`;
   };
 
   const formatDateTime = (dateStr) => {
@@ -353,25 +353,47 @@ const SalesReports = () => {
 
                     {/* Summary Cards */}
                     <div className="row mb-4">
-                      <div className="col-md-6">
+                      <div className="col-md-3">
                         <div className="summary-card">
                           <div className="summary-icon">
-                            <i className="fas fa-shopping-cart"></i>
+                            <i className="fas fa-file-invoice-dollar"></i>
                           </div>
                           <div className="summary-content">
-                            <h6>Total Orders</h6>
+                            <h6>Paid Invoices</h6>
                             <h3>{reportData.totalOrders}</h3>
                           </div>
                         </div>
                       </div>
-                      <div className="col-md-6">
-                        <div className="summary-card">
-                          <div className="summary-icon revenue">
-                            <i className="fas fa-dollar-sign"></i>
+                      <div className="col-md-3">
+                        <div className="summary-card revenue">
+                          <div className="summary-icon">
+                            <i className="fas fa-chart-bar"></i>
                           </div>
                           <div className="summary-content">
                             <h6>Total Revenue</h6>
                             <h3>{formatCurrency(reportData.totalRevenue)}</h3>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="col-md-3">
+                        <div className="summary-card cash">
+                          <div className="summary-icon">
+                            <i className="fas fa-money-bill-wave"></i>
+                          </div>
+                          <div className="summary-content">
+                            <h6>Cash Revenue</h6>
+                            <h3>{formatCurrency(reportData.cashRevenue)}</h3>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="col-md-3">
+                        <div className="summary-card card-type">
+                          <div className="summary-icon">
+                            <i className="fas fa-credit-card"></i>
+                          </div>
+                          <div className="summary-content">
+                            <h6>Card Revenue</h6>
+                            <h3>{formatCurrency(reportData.cardRevenue)}</h3>
                           </div>
                         </div>
                       </div>
@@ -389,6 +411,7 @@ const SalesReports = () => {
                               <th>Item Name</th>
                               <th>Qty</th>
                               <th>Unit Price</th>
+                              <th>Payment</th>
                               <th>Line Total</th>
                             </tr>
                           </thead>
@@ -401,6 +424,11 @@ const SalesReports = () => {
                                 <td>{row.itemName}</td>
                                 <td>{row.qty}</td>
                                 <td>{formatCurrency(row.unitPrice)}</td>
+                                <td>
+                                  <span className={`badge ${row.paymentMethod === 'CARD' ? 'bg-info' : 'bg-secondary'}`}>
+                                    {row.paymentMethod || 'CASH'}
+                                  </span>
+                                </td>
                                 <td>{formatCurrency(row.lineTotal)}</td>
                               </tr>
                             ))}

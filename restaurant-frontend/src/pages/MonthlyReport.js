@@ -225,6 +225,24 @@ function MonthlyReport() {
                     <p>Total Revenue</p>
                   </div>
                 </div>
+                <div className="summary-card cash-card">
+                  <div className="card-icon text-success">
+                    <i className="fas fa-money-bill-wave"></i>
+                  </div>
+                  <div className="card-content">
+                    <h3>{formatCurrency(reportData.cashRevenue)}</h3>
+                    <p>Cash Revenue</p>
+                  </div>
+                </div>
+                <div className="summary-card card-card">
+                  <div className="card-icon text-info">
+                    <i className="fas fa-credit-card"></i>
+                  </div>
+                  <div className="card-content">
+                    <h3>{formatCurrency(reportData.cardRevenue)}</h3>
+                    <p>Card Revenue</p>
+                  </div>
+                </div>
               </div>
 
               {/* Report Table */}
@@ -242,6 +260,7 @@ function MonthlyReport() {
                         <th>Item Name</th>
                         <th>Qty</th>
                         <th>Unit Price</th>
+                        <th>Payment</th>
                         <th>Total</th>
                       </tr>
                     </thead>
@@ -255,12 +274,17 @@ function MonthlyReport() {
                             <td>{row.itemName}</td>
                             <td>{row.qty}</td>
                             <td>{formatCurrency(row.unitPrice)}</td>
+                            <td>
+                              <span className={`badge ${row.paymentMethod === 'CARD' ? 'bg-info' : 'bg-secondary'}`}>
+                                {row.paymentMethod || 'CASH'}
+                              </span>
+                            </td>
                             <td>{formatCurrency(row.lineTotal)}</td>
                           </tr>
                         ))
                       ) : (
                         <tr>
-                          <td colSpan="7" className="text-center text-muted py-4">
+                          <td colSpan="8" className="text-center text-muted py-4">
                             No orders found for this month
                           </td>
                         </tr>
@@ -269,7 +293,7 @@ function MonthlyReport() {
                     {reportData.rows.length > 0 && (
                       <tfoot>
                         <tr className="total-row">
-                          <td colSpan="6" className="text-end"><strong>Grand Total:</strong></td>
+                          <td colSpan="7" className="text-end"><strong>Grand Total:</strong></td>
                           <td><strong>{formatCurrency(reportData.totalRevenue)}</strong></td>
                         </tr>
                       </tfoot>
