@@ -410,6 +410,44 @@ const CustomerQROrder = ({ isManual = false }) => {
     return (calculateSubtotal() + calculateServiceCharge()).toFixed(2);
   };
 
+  const addToCartFromModal = () => {
+    if (!activeItemDetail) return;
+
+    const item = activeItemDetail;
+    const existingItem = cart.find(cartItem => cartItem.foodItemId === item.foodItemId);
+
+    if (existingItem) {
+      setCart(cart.map(cartItem =>
+        cartItem.foodItemId === item.foodItemId
+          ? { ...cartItem, qty: cartItem.qty + modalQty, notes: modalOrderNotes || cartItem.notes }
+          : cartItem
+      ));
+    } else {
+      setCart([...cart, {
+        foodItemId: item.foodItemId,
+        name: item.itemName,
+        price: parseFloat(item.price),
+        qty: modalQty,
+        notes: modalOrderNotes || ''
+      }]);
+    }
+
+    setActiveItemDetail(null);
+    setModalQty(1);
+    setModalOrderNotes('');
+    setShowCart(true);
+
+    Swal.fire({
+      title: 'Added to Cart',
+      text: `${item.itemName} has been added to your order.`,
+      icon: 'success',
+      timer: 1500,
+      showConfirmButton: false,
+      toast: true,
+      position: 'top-end'
+    });
+  };
+
   const placeOrder = async () => {
     if (cart.length === 0) {
       Swal.fire('Validation Error', 'Please add at least one item to your order', 'warning');
@@ -1148,9 +1186,22 @@ const CustomerQROrder = ({ isManual = false }) => {
               </div>
             </div>
 
-            <div className="sticky-bottom-btn p-3 bg-white border-top">
+            <div className="sticky-bottom-btn p-3 bg-white border-top d-flex gap-2">
               <button
-                className="order-now-btn"
+                className="btn btn-outline-primary flex-grow-1"
+                onClick={addToCartFromModal}
+                style={{
+                  padding: '14px',
+                  borderRadius: '12px',
+                  fontWeight: '700',
+                  borderColor: '#266668',
+                  color: '#266668'
+                }}
+              >
+                ADD TO CART
+              </button>
+              <button
+                className="order-now-btn flex-grow-1"
                 onClick={placeQuickManualOrder}
               >
                 ORDER NOW
@@ -1371,30 +1422,34 @@ const CustomerQROrder = ({ isManual = false }) => {
                 )}
               </div>
 
-              <div className="mb-3">
-                <label className="form-label">Your Name <span className="text-danger">*</span></label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Enter your name"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                />
-              </div>
+              {!isManual && (
+                <>
+                  <div className="mb-3">
+                    <label className="form-label">Your Name <span className="text-danger">*</span></label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Enter your name"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                    />
+                  </div>
 
-              <div className="mb-3">
-                <label className="form-label">WhatsApp Number <span className="text-danger">*</span></label>
-                <PhoneInput
-                  country={'lk'}
-                  value={whatsappNumber}
-                  onChange={setWhatsappNumber}
-                  inputStyle={{ width: '100%' }}
-                  containerClass="phone-input-container"
-                  placeholder="Enter WhatsApp Number"
-                  enableSearch={true}
-                />
-                <small className="text-muted">We'll send your bill to this WhatsApp number.</small>
-              </div>
+                  <div className="mb-3">
+                    <label className="form-label">WhatsApp Number <span className="text-danger">*</span></label>
+                    <PhoneInput
+                      country={'lk'}
+                      value={whatsappNumber}
+                      onChange={setWhatsappNumber}
+                      inputStyle={{ width: '100%' }}
+                      containerClass="phone-input-container"
+                      placeholder="Enter WhatsApp Number"
+                      enableSearch={true}
+                    />
+                    <small className="text-muted">We'll send your bill to this WhatsApp number.</small>
+                  </div>
+                </>
+              )}
 
               <div className="mb-3">
                 <label className="form-label">Order Notes (Optional)</label>
