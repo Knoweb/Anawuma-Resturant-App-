@@ -543,10 +543,10 @@ const CustomerQROrder = ({ isManual = false }) => {
 
         Swal.fire({
           title: 'Order Completed',
-          text: 'Order placed, bill generated and ready for print.',
+          text: `Order #${createdOrder.orderNo} placed, bill generated and ready for print.`,
           icon: 'success',
-          timer: 2000,
-          showConfirmButton: false
+          timer: 3000,
+          showConfirmButton: true
         });
 
         setCart([]);
@@ -681,10 +681,10 @@ const CustomerQROrder = ({ isManual = false }) => {
       // Success UI
       Swal.fire({
         title: 'Order Completed',
-        text: 'Order placed, bill generated and assigned to room.',
+        text: `Order #${orderData.orderNo} placed, bill generated and assigned to ${modalOrderType === 'room' ? 'room' : 'table'}.`,
         icon: 'success',
-        timer: 2000,
-        showConfirmButton: false
+        timer: 3000,
+        showConfirmButton: true
       });
 
       setOrderSuccess(orderData);
