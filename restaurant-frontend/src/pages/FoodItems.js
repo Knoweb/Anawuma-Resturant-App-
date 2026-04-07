@@ -315,10 +315,14 @@ function FoodItems() {
                     foodItem.imageUrl2,
                     foodItem.imageUrl3,
                     foodItem.imageUrl4,
-                    foodItem.imageUrl,   // Support single image field
-                    foodItem.image,      // Support alternative name
-                    foodItem.itemImage   // Support another alternative name
-                  ].filter(Boolean).map(url => sanitizeUrl(url));
+                    foodItem.imageUrl,
+                    foodItem.image,
+                    foodItem.itemImage
+                  ].filter(Boolean).map(url => {
+                    if (url.startsWith('http')) return sanitizeUrl(url);
+                    const baseUrl = (process.env.REACT_APP_API_URL || 'http://localhost:3000/api').replace('/api', '');
+                    return sanitizeUrl(`${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`);
+                  });
 
                   return (
                     <div className="col-lg-3 col-md-4 col-sm-6" key={foodItem.foodItemId}>

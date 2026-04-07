@@ -97,6 +97,17 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
     }
   }, [formData.menuId, categories]);
 
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith('data:')) return imagePath;
+    if (imagePath.startsWith('http')) {
+      return apiClient.sanitizeUrl ? apiClient.sanitizeUrl(imagePath) : imagePath;
+    }
+    const baseUrl = (process.env.REACT_APP_API_URL || 'http://localhost:3000/api').replace('/api', '');
+    const fullUrl = `${baseUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
+    return apiClient.sanitizeUrl ? apiClient.sanitizeUrl(fullUrl) : fullUrl;
+  };
+
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     
@@ -327,7 +338,7 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
                   {previews[`image${i}`] && (
                     <div className="mt-2 text-center">
                       <img
-                        src={previews[`image${i}`].startsWith('data:') ? previews[`image${i}`] : (previews[`image${i}`].startsWith('http') ? previews[`image${i}`] : `../${previews[`image${i}`]}`)}
+                        src={getImageUrl(previews[`image${i}`])}
                         alt={`Preview ${i}`}
                         style={{ height: '80px', objectFit: 'cover' }}
                         className="img-thumbnail"

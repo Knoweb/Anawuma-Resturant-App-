@@ -1146,10 +1146,19 @@ const CustomerQROrder = ({ isManual = false }) => {
     );
   }
 
-  // Helper to resolve image URL
-  const getImageUrl = (url) => {
-    if (!url) return null;
-    return url; // Now handled automatically by apiClient interceptor
+  // Helper to resolve image URL - robust version
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith('http')) {
+      // If it's an absolute URL but pointing to localhost/wrong host, let sanitizeUrl fix it
+      return apiClient.sanitizeUrl ? apiClient.sanitizeUrl(imagePath) : imagePath;
+    }
+
+    const baseUrl = (process.env.REACT_APP_API_URL || 'http://localhost:3000/api').replace('/api', '');
+    const fullUrl = `${baseUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
+    
+    // Final pass through sanitizeUrl to fix any IP/Host issues
+    return apiClient.sanitizeUrl ? apiClient.sanitizeUrl(fullUrl) : fullUrl;
   };
 
   return (
@@ -1300,7 +1309,7 @@ const CustomerQROrder = ({ isManual = false }) => {
           <div className="header-container">
             <div className="restaurant-brand-v2">
               {tableInfo?.logo ? (
-                <img src={tableInfo.logo} alt={tableInfo.restaurantName} className="brand-logo-v2" />
+                <img src={getImageUrl(tableInfo.logo)} alt={tableInfo.restaurantName} className="brand-logo-v2" />
               ) : (
                 <div className="brand-placeholder-v2">
                   <i className="fas fa-utensils"></i>
