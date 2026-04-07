@@ -79,7 +79,10 @@ function FoodItems() {
       const url = queryString ? `/food-items?${queryString}` : '/food-items';
 
       const response = await apiClient.get(url);
-      console.log('Food Items Data fetched:', response.data);
+      console.log('Food Items Data fetched:', response.data.length, response.data);
+      if (response.data.length > 0) {
+        console.log('Sample Food Item:', response.data[0]);
+      }
       setFoodItems(response.data);
       setLoading(false);
     } catch (error) {
