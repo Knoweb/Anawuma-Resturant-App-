@@ -1163,16 +1163,16 @@ const CustomerQROrder = ({ isManual = false }) => {
 
                 <div className="mb-4 fade-in">
                   <label className="d-block mb-2 fw-bold text-muted small">
-                    SELECT ${orderLocation === 'inside' ? 'ROOM' : 'TABLE'} *
+                    SELECT {orderLocation === 'inside' ? 'ROOM' : 'TABLE'} *
                   </label>
                   <select
                     className="form-control sketch-input"
                     value={manualTableNo}
                     onChange={(e) => setManualTableNo(e.target.value)}
                   >
-                    <option value="">Select ${orderLocation === 'inside' ? 'Room' : 'Table'} Number</option>
+                    <option value="">Select {orderLocation === 'inside' ? 'Room' : 'Table'} Number</option>
                     {Array.from({ length: 16 }, (_, i) => (i + 1).toString()).map(no => (
-                      <option key={no} value={no}>${orderLocation === 'inside' ? 'Room' : 'Table'} {no}</option>
+                      <option key={no} value={no}>{orderLocation === 'inside' ? 'Room' : 'Table'} {no}</option>
                     ))}
                   </select>
                 </div>

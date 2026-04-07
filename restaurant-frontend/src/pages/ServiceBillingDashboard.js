@@ -1013,7 +1013,7 @@ const ServiceBillingDashboard = ({
                           </th>
                           <th>Invoice #</th>
                           <th>Order #</th>
-                          <th>Table</th>
+                          <th>TABLE / ROOM</th>
                           <th>Total</th>
                           <th>Paid At</th>
                           <th>Transfer Status</th>
@@ -1034,7 +1034,7 @@ const ServiceBillingDashboard = ({
                               </td>
                               <td><code>{inv.invoiceNumber}</code></td>
                               <td>{inv.orderNo || inv.orderId}</td>
-                              <td>{inv.tableNo || '–'}</td>
+                              <td>{inv.roomNo ? `Room ${inv.roomNo}` : (inv.tableNo ? `Table ${inv.tableNo}` : '–')}</td>
                               <td>{formatCurrency(inv.totalAmount)}</td>
                               <td>{formatDateTime(inv.updatedAt)}</td>
                               <td>
@@ -1185,7 +1185,7 @@ const ServiceBillingDashboard = ({
                     <thead>
                       <tr>
                         <th>Invoice #</th>
-                        <th>Table</th>
+                        <th>TABLE / ROOM</th>
                         <th>Customer</th>
                         <th>Total</th>
                         <th>Status</th>
@@ -1197,7 +1197,7 @@ const ServiceBillingDashboard = ({
                       {invoices.map((inv) => (
                         <tr key={inv.invoiceId}>
                           <td><code>{inv.invoiceNumber}</code></td>
-                          <td>{inv.tableNo || '–'}</td>
+                          <td>{inv.roomNo ? `Room ${inv.roomNo}` : (inv.tableNo ? `Table ${inv.tableNo}` : '–')}</td>
                           <td>{inv.customerName || '–'}</td>
                           <td>{formatCurrency(inv.totalAmount)}</td>
                           <td>
@@ -1283,6 +1283,7 @@ function ReadyOrderCard({ order, onBill, onWhatsApp }) {
         <span className="badge bg-success ms-auto">READY</span>
       </div>
       <div className="roc-meta">
+        {order.roomNo && <span><i className="fas fa-concierge-bell me-1"></i>Room {order.roomNo}</span>}
         {order.tableNo && <span><i className="fas fa-chair me-1"></i>Table {order.tableNo}</span>}
         {order.customerName && <span><i className="fas fa-user me-1"></i>{order.customerName}</span>}
       </div>
@@ -1318,6 +1319,7 @@ function CashierQueueCard({ invoice, onOpen }) {
         <span className="badge bg-primary ms-auto">CASHIER</span>
       </div>
       <div className="roc-meta">
+        {invoice.roomNo && <span><i className="fas fa-concierge-bell me-1"></i>Room {invoice.roomNo}</span>}
         {invoice.tableNo && <span><i className="fas fa-chair me-1"></i>Table {invoice.tableNo}</span>}
         {invoice.customerName && <span><i className="fas fa-user me-1"></i>{invoice.customerName}</span>}
       </div>

@@ -136,11 +136,19 @@ const ManualRoomOrders = () => {
                     `).join('')}
 
                     <div class="total-section">
-                        <div class="grand-total">
+                        <div class="item-row" style="font-size: 14px; margin-bottom: 5px;">
+                            <span>Subtotal:</span>
+                            <span>Rs. ${parseFloat(account.orders.reduce((sum, o) => sum + parseFloat(o.subtotal), 0)).toFixed(0)}</span>
+                        </div>
+                        <div class="item-row" style="font-size: 14px; margin-bottom: 5px;">
+                            <span>Service Charge (10%):</span>
+                            <span>Rs. ${parseFloat(account.orders.reduce((sum, o) => sum + parseFloat(o.serviceCharge), 0)).toFixed(0)}</span>
+                        </div>
+                        <div class="grand-total" style="border-top: 1px solid #000; padding-top: 5px;">
                             <span>TOTAL DUE:</span>
                             <span>Rs. ${parseFloat(account.totalAmount).toFixed(0)}</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 14px; margin-top: 5px; font-weight: bold; border-top: 1px dashed #000; padding-top: 5px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 14px; margin-top: 8px; font-weight: bold; border-top: 1px dashed #000; padding-top: 5px;">
                             <span>PAYMENT METHOD:</span>
                             <span>${(account.selectedPaymentMethod || 'CASH').toUpperCase()}</span>
                         </div>
