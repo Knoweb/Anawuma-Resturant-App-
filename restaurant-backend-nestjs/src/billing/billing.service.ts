@@ -171,7 +171,7 @@ export class BillingService {
     }
 
     // Check if any order is already BILLED or COMPLETED
-    const alreadyBilled = orders.find(o => o.status === OrderStatus.BILLED || o.status === OrderStatus.SERVED);
+    const alreadyBilled = orders.find(o => o.status === OrderStatus.BILLED);
     if (alreadyBilled) {
       throw new BadRequestException(`Order #${alreadyBilled.orderNo || alreadyBilled.orderId} has already been finalized/billed.`);
     }
