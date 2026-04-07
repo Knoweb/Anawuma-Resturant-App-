@@ -160,6 +160,7 @@ function AddFoodItem() {
         currencyId: 1 // Default to LKR
       };
 
+      console.log('Final Food Item Payload:', payload);
       await apiClient.post('/food-items', payload);
       Swal.fire({ icon: 'success', title: 'Food item added!', timer: 2000, showConfirmButton: false });
       navigate('/menus/food-items');
