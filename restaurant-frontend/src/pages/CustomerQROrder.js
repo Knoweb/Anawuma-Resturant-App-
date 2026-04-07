@@ -1161,29 +1161,20 @@ const CustomerQROrder = ({ isManual = false }) => {
                   </div>
                 </div>
 
-                <div className="fade-in">
-                  <div className="mb-4">
-                    <label className="d-block mb-2 fw-bold text-muted small">
-                      {orderLocation === 'inside' ? 'SELECT ROOM *' : 'SELECT TABLE *'}
-                    </label>
-                    <div className="d-flex flex-wrap gap-2">
-                      {Array.from({ length: 16 }, (_, i) => (i + 1).toString()).map(no => (
-                        <button
-                          key={no}
-                          className={`btn btn-sm ${manualTableNo === no ? 'btn-primary' : 'btn-outline-secondary'}`}
-                          style={manualTableNo === no ? { backgroundColor: '#266668', color: 'white', minWidth: '45px' } : { minWidth: '45px' }}
-                          onClick={() => setManualTableNo(no)}
-                        >
-                          {no}
-                        </button>
-                      ))}
-                    </div>
-                    {manualTableNo && (
-                      <div className="mt-2 small text-success fw-bold">
-                         Selected: {orderLocation === 'inside' ? 'Room' : 'Table'} {manualTableNo}
-                      </div>
-                    )}
-                  </div>
+                <div className="mb-4 fade-in">
+                  <label className="d-block mb-2 fw-bold text-muted small">
+                    SELECT ${orderLocation === 'inside' ? 'ROOM' : 'TABLE'} *
+                  </label>
+                  <select
+                    className="form-control sketch-input"
+                    value={manualTableNo}
+                    onChange={(e) => setManualTableNo(e.target.value)}
+                  >
+                    <option value="">Select ${orderLocation === 'inside' ? 'Room' : 'Table'} Number</option>
+                    {Array.from({ length: 16 }, (_, i) => (i + 1).toString()).map(no => (
+                      <option key={no} value={no}>${orderLocation === 'inside' ? 'Room' : 'Table'} {no}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="mb-0">
@@ -1401,31 +1392,49 @@ const CustomerQROrder = ({ isManual = false }) => {
             <div className="order-inputs">
               <div className="table-info-display mb-3">
                 {isManual ? (
-                  <div className="manual-table-select">
-                    <label className="form-label">Order For <span className="text-danger">*</span></label>
-                    <div className="d-flex gap-2 mb-2">
+                  <div className="manual-table-select mb-3">
+                    <label className="form-label small fw-bold text-muted text-uppercase letter-spacing-1">Order Location <span className="text-danger">*</span></label>
+                    <div className="d-flex gap-2 mb-3">
                       <button
-                        className={`btn btn-sm ${manualOrderType === 'TABLE' ? 'btn-primary' : 'btn-outline-primary'}`}
-                        onClick={() => { setManualOrderType('TABLE'); setModalOrderType('table'); }}
-                        style={{ flex: 1 }}
+                        className={`btn btn-sm flex-grow-1 ${orderLocation === 'inside' ? 'btn-primary' : 'btn-outline-primary'}`}
+                        onClick={() => {
+                          setOrderLocation('inside');
+                          setManualOrderType('ROOM');
+                          setModalOrderType('room');
+                          setManualTableNo('');
+                        }}
+                        style={orderLocation === 'inside' ? { backgroundColor: '#266668', border: 'none' } : { color: '#266668', borderColor: '#266668' }}
                       >
-                        Table
+                        IN SIDE
                       </button>
                       <button
-                        className={`btn btn-sm ${manualOrderType === 'ROOM' ? 'btn-primary' : 'btn-outline-primary'}`}
-                        onClick={() => { setManualOrderType('ROOM'); setModalOrderType('room'); }}
-                        style={{ flex: 1 }}
+                        className={`btn btn-sm flex-grow-1 ${orderLocation === 'outside' ? 'btn-primary' : 'btn-outline-primary'}`}
+                        onClick={() => {
+                          setOrderLocation('outside');
+                          setManualOrderType('TABLE');
+                          setModalOrderType('table');
+                          setManualTableNo('');
+                        }}
+                        style={orderLocation === 'outside' ? { backgroundColor: '#266668', border: 'none' } : { color: '#266668', borderColor: '#266668' }}
                       >
-                        Room
+                        OUTSIDE
                       </button>
                     </div>
-                    <input
-                      type="text"
+
+                    <label className="form-label small fw-bold text-muted text-uppercase letter-spacing-1">
+                      Select {orderLocation === 'inside' ? 'Room' : 'Table'} <span className="text-danger">*</span>
+                    </label>
+                    <select
                       className="form-control"
-                      placeholder={`Enter ${manualOrderType === 'ROOM' ? 'Room' : 'Table'} Number`}
                       value={manualTableNo}
                       onChange={(e) => setManualTableNo(e.target.value)}
-                    />
+                      style={{ borderRadius: '8px', border: '1px solid #ddd' }}
+                    >
+                      <option value="">Select {orderLocation === 'inside' ? 'Room' : 'Table'} Number</option>
+                      {Array.from({ length: 16 }, (_, i) => (i + 1).toString()).map(no => (
+                        <option key={no} value={no}>{orderLocation === 'inside' ? 'Room' : 'Table'} {no}</option>
+                      ))}
+                    </select>
                   </div>
                 ) : (
                   <>
