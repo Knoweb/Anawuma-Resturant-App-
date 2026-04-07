@@ -131,10 +131,18 @@ function InvoiceModal({ invoice, restaurantName, onClose, onMarkServed, onMarkPa
   const [printing, setPrinting] = useState(false);
   const [sendingWhatsapp, setSendingWhatsapp] = useState(false);
 
-  // Use local state to track actions in current session if backend hasn't updated yet
   const [isPrinted, setIsPrinted] = useState(!!invoice.isPrinted);
   const [isSentWhatsapp, setIsSentWhatsapp] = useState(!!invoice.isSentWhatsapp);
   const [paymentMethod, setPaymentMethod] = useState(invoice.paymentMethod || 'CASH');
+  const [isPaying, setIsPaying] = useState(false);
+
+  useEffect(() => {
+    setIsPrinted(!!invoice.isPrinted);
+    setIsSentWhatsapp(!!invoice.isSentWhatsapp);
+    if (invoice.paymentMethod && invoice.paymentMethod !== 'NONE') {
+        setPaymentMethod(invoice.paymentMethod);
+    }
+  }, [invoice]);
 
   const handlePrint = async () => {
     setPrinting(true);
@@ -237,15 +245,24 @@ function InvoiceModal({ invoice, restaurantName, onClose, onMarkServed, onMarkPa
               <button 
                 className="btn btn-success btn-sm" 
                 onClick={async () => {
-                  const success = await onMarkPaid(invoice.invoiceId, paymentMethod);
-                  if (success) {
-                    handlePrint();
+                  setIsPaying(true);
+                  try {
+                      const success = await onMarkPaid(invoice.invoiceId, paymentMethod);
+                      if (success) {
+                        handlePrint();
+                      }
+                  } finally {
+                      setIsPaying(false);
                   }
                 }}
-                disabled={!canMarkPaid}
+                disabled={!canMarkPaid || isPaying}
                 title={!canMarkPaid ? "Please complete Print and WhatsApp steps first" : ""}
               >
-                <i className="fas fa-check-circle me-1"></i>Pay
+                {isPaying ? (
+                  <><span className="spinner-border spinner-border-sm me-1"></span>Paying…</>
+                ) : (
+                  <><i className="fas fa-check-circle me-1"></i>Pay</>
+                )}
               </button>
             </div>
           )}

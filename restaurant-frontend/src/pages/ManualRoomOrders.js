@@ -8,6 +8,7 @@ import './ManualOrders.css';
 const ManualRoomOrders = () => {
     const [accounts, setAccounts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isProcessingManual, setIsProcessingManual] = useState(false);
     const rooms = Array.from({ length: 16 }, (_, i) => (i + 1).toString());
 
     const fetchAccounts = async () => {
@@ -147,6 +148,8 @@ const ManualRoomOrders = () => {
 
 
     const finalizeCheckout = async (account, roomNo, paymentMethod = 'CASH', shouldPrint = false) => {
+        if (isProcessingManual) return;
+        setIsProcessingManual(true);
         try {
             const orderIds = account.orders.map(o => o.orderId);
             const response = await apiClient.post('/billing/manual/finalize', {
@@ -175,7 +178,9 @@ const ManualRoomOrders = () => {
             }
         } catch (error) {
             console.error('Checkout error:', error);
-            Swal.fire('Error', 'Failed to finalize checkout', 'error');
+            Swal.fire('Error', error?.response?.data?.message || 'Failed to finalize checkout', 'error');
+        } finally {
+            setIsProcessingManual(false);
         }
     };
 
