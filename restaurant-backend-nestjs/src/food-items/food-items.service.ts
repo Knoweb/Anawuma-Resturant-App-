@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -11,6 +12,7 @@ import { Subcategory } from '../subcategories/entities/subcategory.entity';
 import { Menu } from '../menus/entities/menu.entity';
 import { CreateFoodItemDto } from './dto/create-food-item.dto';
 import { UpdateFoodItemDto } from './dto/update-food-item.dto';
+import { OrderItem } from '../orders/entities/order-item.entity';
 
 @Injectable()
 export class FoodItemsService {
@@ -23,7 +25,9 @@ export class FoodItemsService {
     private subcategoriesRepository: Repository<Subcategory>,
     @InjectRepository(Menu)
     private menusRepository: Repository<Menu>,
-  ) { }
+    @InjectRepository(OrderItem)
+    private orderItemsRepository: Repository<OrderItem>,
+  ) {}
 
   async create(
     createFoodItemDto: CreateFoodItemDto,
@@ -253,7 +257,25 @@ export class FoodItemsService {
 
   async remove(id: number, restaurantId: number): Promise<void> {
     const foodItem = await this.findOne(id, restaurantId);
-    await this.foodItemsRepository.remove(foodItem);
+    
+    // Check if item is used in any orders
+    const orderItemsCount = await this.orderItemsRepository.count({
+      where: { foodItemId: id }
+    });
+
+    if (orderItemsCount > 0) {
+      throw new BadRequestException(
+        'Cannot delete food item because it is referenced in one or more orders. Please consider hiding it or removing it from all orders first.'
+      );
+    }
+
+    try {
+      await this.foodItemsRepository.remove(foodItem);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'An error occurred while trying to delete the food item. It might be referenced by other records.'
+      );
+    }
   }
 
   // Super admin can access all food items

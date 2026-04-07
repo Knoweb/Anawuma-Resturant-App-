@@ -6,9 +6,10 @@ import { FoodItem } from './entities/food-item.entity';
 import { Category } from '../categories/entities/category.entity';
 import { Subcategory } from '../subcategories/entities/subcategory.entity';
 import { Menu } from '../menus/entities/menu.entity';
+import { OrderItem } from '../orders/entities/order-item.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([FoodItem, Category, Subcategory, Menu])],
+  imports: [TypeOrmModule.forFeature([FoodItem, Category, Subcategory, Menu, OrderItem])],
   controllers: [FoodItemsController],
   providers: [FoodItemsService],
   exports: [FoodItemsService],
