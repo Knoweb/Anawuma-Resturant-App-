@@ -79,6 +79,7 @@ function FoodItems() {
       const url = queryString ? `/food-items?${queryString}` : '/food-items';
 
       const response = await apiClient.get(url);
+      console.log('Food Items Data fetched:', response.data);
       setFoodItems(response.data);
       setLoading(false);
     } catch (error) {
@@ -328,8 +329,13 @@ function FoodItems() {
                         <div className="card-body">
                           <div className="mb-2">
                             <span className="badge bg-light text-dark border me-1">
-                              {foodItem.category?.categoryName || 'Unknown'}
+                              {foodItem.menu?.menuName || 'No Menu'}
                             </span>
+                            {foodItem.category && (
+                              <span className="badge bg-info-subtle text-info border me-1">
+                                {foodItem.category.categoryName}
+                              </span>
+                            )}
                           </div>
                           <h5 className="food-item-title mb-2">{foodItem.itemName}</h5>
                           <h6 className="food-item-price mb-3">LKR {formatPrice(foodItem.price)}</h6>

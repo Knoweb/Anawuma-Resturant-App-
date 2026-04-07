@@ -269,6 +269,7 @@ const CustomerQROrder = ({ isManual = false }) => {
         item => item.restaurantId === restaurantId
       );
 
+      console.log('restaurantFoodItems fetched:', restaurantFoodItems);
       setMenus(restaurantMenus);
       setCategories(restaurantCategories);
       setFoodItems(restaurantFoodItems);
