@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import apiClient from '../api/apiClient';
+import apiClient, { sanitizeUrl } from '../api/apiClient';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAuthStore } from '../store/authStore';
 import Swal from 'sweetalert2';
@@ -350,7 +350,7 @@ const CustomerQROrder = ({ isManual = false }) => {
   const [expandedCategories, setExpandedCategories] = useState(new Set());
 
   const renderFoodCard = (item) => {
-    const displayImage = item.imageUrl1 || item.imageUrl || item.imageUrl2;
+    const displayImage = item.imageUrl1 || item.imageUrl2 || item.imageUrl3 || item.imageUrl4 || item.imageUrl || item.image || item.itemImage;
     return (
       <div key={item.foodItemId} className="modern-category-card">
         <h2 className="category-title-red">{item.itemName}</h2>
@@ -379,6 +379,8 @@ const CustomerQROrder = ({ isManual = false }) => {
   };
 
   const renderManualItemCard = (item) => {
+    const displayImage = item.imageUrl1 || item.imageUrl2 || item.imageUrl3 || item.imageUrl4 || item.imageUrl || item.image || item.itemImage;
+
     return (
       <div
         key={item.foodItemId}
@@ -394,8 +396,8 @@ const CustomerQROrder = ({ isManual = false }) => {
           <div className="small fw-bold" style={{ color: '#266668' }}>Rs. {parseFloat(item.price).toFixed(0)}</div>
         </div>
         <div className="sketch-box-media" style={{ width: '100%', height: '140px', background: '#fafafa' }}>
-          {item.imageUrl1 || item.imageUrl ? (
-            <img src={getImageUrl(item.imageUrl1 || item.imageUrl)} alt={item.itemName} />
+          {displayImage ? (
+            <img src={getImageUrl(displayImage)} alt={item.itemName} />
           ) : (
             <div className="sketch-placeholder"><i className="fas fa-utensils"></i></div>
           )}
@@ -412,6 +414,7 @@ const CustomerQROrder = ({ isManual = false }) => {
     }
 
     setFilteredItems(filtered);
+    console.log('CustomerQROrder: Items loaded/filtered:', filtered.length, filtered);
   }, [selectedMenu, foodItems]);
 
   const toggleCategoryExpand = (categoryId) => {

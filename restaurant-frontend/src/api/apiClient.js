@@ -311,9 +311,10 @@ export const billingAPI = {
   acceptTransactionsByAccountant: (data) =>
     apiClient.post('/billing/accountant/accept', data),
 
-  /** Accountant rejects pending transfers (keeps data with cashier). */
   rejectTransactionsByAccountant: (data) =>
     apiClient.post('/billing/accountant/reject', data),
 };
 
+apiClient.sanitizeUrl = sanitizeUrl;
 export default apiClient;
+export { sanitizeUrl };

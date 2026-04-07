@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import Swal from 'sweetalert2';
-import apiClient from '../../api/apiClient';
+import apiClient, { sanitizeUrl } from '../../api/apiClient';
 
 function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
   const [formData, setFormData] = useState({
