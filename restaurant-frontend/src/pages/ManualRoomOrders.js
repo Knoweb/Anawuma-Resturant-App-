@@ -3,6 +3,7 @@ import apiClient from '../api/apiClient';
 import Sidebar from '../components/common/Sidebar';
 import Navbar from '../components/common/Navbar';
 import Swal from 'sweetalert2';
+import { useWebSocket } from '../hooks/useWebSocket';
 import './ManualOrders.css';
 
 const ManualRoomOrders = () => {
@@ -24,9 +25,19 @@ const ManualRoomOrders = () => {
         }
     };
 
+    const { subscribe } = useWebSocket();
+
     useEffect(() => {
         fetchAccounts();
-    }, []);
+        
+        // Listen for real-time dashboard refreshes
+        const unsubscribe = subscribe('dashboard:refresh', () => {
+            console.log('🔄 Dashboard refresh received for manual accounts');
+            fetchAccounts();
+        });
+
+        return () => unsubscribe();
+    }, [subscribe]);
 
     const getAccountForRoom = (roomNo) => {
         return accounts.find(acc => acc.identifier === roomNo);
