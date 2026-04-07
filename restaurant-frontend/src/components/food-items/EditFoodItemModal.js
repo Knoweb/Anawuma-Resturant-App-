@@ -20,20 +20,34 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
     blogLink: ''
   });
 
+  const [menus, setMenus] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [filteredCategories, setFilteredCategories] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState({
-    image1: null,
-    image2: null,
-    image3: null,
-    image4: null
-  });
-  const [previews, setPreviews] = useState({
-    image1: null,
-    image2: null,
-    image3: null,
-    image4: null
-  });
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetchMenus();
+    fetchCategories();
+  }, []);
+
+  const fetchMenus = async () => {
+    try {
+      const response = await apiClient.get('/menus');
+      setMenus(response.data);
+    } catch (error) {
+      console.error('Error fetching menus:', error);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await apiClient.get('/categories');
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
 
   useEffect(() => {
     if (show && foodItem) {
@@ -43,6 +57,7 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
         moreDetails: foodItem.moreDetails || '',
         price: foodItem.price || '',
         currencyId: foodItem.currencyId || 1,
+        menuId: foodItem.menuId || '',
         categoryId: foodItem.categoryId || '',
         imageUrl1: foodItem.imageUrl1 || '',
         imageUrl2: foodItem.imageUrl2 || '',
@@ -58,18 +73,17 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
         image4: foodItem.imageUrl4 || null
       });
       setSelectedFiles({ image1: null, image2: null, image3: null, image4: null });
-      fetchCategories();
     }
   }, [show, foodItem]);
 
-  const fetchCategories = async () => {
-    try {
-      const response = await apiClient.get('/categories');
-      setCategories(response.data);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
+  useEffect(() => {
+    if (formData.menuId) {
+      const filtered = categories.filter(c => c.menuId === parseInt(formData.menuId));
+      setFilteredCategories(filtered);
+    } else {
+      setFilteredCategories([]);
     }
-  };
+  }, [formData.menuId, categories]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -97,9 +111,10 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
       return;
     }
 
-    setFormData({
-      ...formData,
-      [name]: value
+    setFormData(prev => {
+      const next = { ...prev, [name]: value };
+      if (name === 'menuId') next.categoryId = '';
+      return next;
     });
   };
 
@@ -108,33 +123,21 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
 
     // Validation
     if (!formData.itemName.trim()) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Validation Error',
-        text: 'Item name is required'
-      });
+      Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Item name is required' });
       return;
     }
 
     if (!formData.price || parseFloat(formData.price) <= 0) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Validation Error',
-        text: 'Price must be greater than 0'
-      });
+      Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Price must be greater than 0' });
       return;
     }
 
-    if (!formData.categoryId) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Validation Error',
-        text: 'Please select a category'
-      });
+    if (!formData.menuId) {
+      Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Please select a menu' });
       return;
     }
 
-    setLoading(true);
+    setSaving(true);
 
     try {
       const imageUrls = { ...formData };
@@ -145,56 +148,36 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
         if (file) {
           const uploadFormData = new FormData();
           uploadFormData.append('image', file);
-          
-          try {
-            const uploadRes = await apiClient.post('/food-items/upload-image', uploadFormData, {
-              headers: { 'Content-Type': 'multipart/form-data' }
-            });
-            if (uploadRes.data && uploadRes.data.imageUrl) {
-              imageUrls[`imageUrl${i}`] = uploadRes.data.imageUrl;
-            }
-          } catch (uploadError) {
-            console.error(`Error uploading image ${i}:`, uploadError);
-          }
+          const uploadRes = await apiClient.post('/food-items/upload-image', uploadFormData);
+          imageUrls[`imageUrl${i}`] = uploadRes.data.imageUrl;
         }
       }
 
       const submitData = {
         itemName: formData.itemName.trim(),
-        description: formData.description.trim() || undefined,
-        moreDetails: formData.moreDetails.trim() || undefined,
+        description: formData.description.trim(),
+        moreDetails: formData.moreDetails.trim(),
         price: parseFloat(formData.price),
         currencyId: parseInt(formData.currencyId),
-        categoryId: parseInt(formData.categoryId),
-        imageUrl1: imageUrls.imageUrl1 || undefined,
-        imageUrl2: imageUrls.imageUrl2 || undefined,
-        imageUrl3: imageUrls.imageUrl3 || undefined,
-        imageUrl4: imageUrls.imageUrl4 || undefined,
-        videoLink: formData.videoLink.trim() || undefined,
-        blogLink: formData.blogLink.trim() || undefined
+        menuId: parseInt(formData.menuId),
+        categoryId: formData.categoryId ? parseInt(formData.categoryId) : null,
+        imageUrl1: imageUrls.imageUrl1,
+        imageUrl2: imageUrls.imageUrl2,
+        imageUrl3: imageUrls.imageUrl3,
+        imageUrl4: imageUrls.imageUrl4,
+        videoLink: formData.videoLink.trim(),
+        blogLink: formData.blogLink.trim()
       };
 
       await apiClient.patch(`/food-items/${foodItem.foodItemId}`, submitData);
-
-      Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: 'Food item updated successfully',
-        timer: 2000,
-        showConfirmButton: false
-      });
-
+      Swal.fire({ icon: 'success', title: 'Success!', text: 'Food item updated successfully', timer: 2000, showConfirmButton: false });
       onSuccess();
       onHide();
     } catch (error) {
       console.error('Error updating food item:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: error.response?.data?.message || 'Failed to update food item'
-      });
+      Swal.fire({ icon: 'error', title: 'Error', text: error.response?.data?.message || 'Failed to update food item' });
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
@@ -250,16 +233,37 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
             <div className="col-md-6 mb-3">
               <Form.Group>
                 <Form.Label>
-                  Category <span className="text-danger">*</span>
+                  Menu <span className="text-danger">*</span>
+                </Form.Label>
+                <Form.Select
+                  name="menuId"
+                  value={formData.menuId}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Menu</option>
+                  {menus.map((menu) => (
+                    <option key={menu.menuId} value={menu.menuId}>
+                      {menu.menuName}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            </div>
+
+            <div className="col-md-6 mb-3">
+              <Form.Group>
+                <Form.Label>
+                  Category (Optional)
                 </Form.Label>
                 <Form.Select
                   name="categoryId"
                   value={formData.categoryId}
                   onChange={handleChange}
-                  required
+                  disabled={!formData.menuId}
                 >
                   <option value="">Select Category</option>
-                  {categories.map((category) => (
+                  {filteredCategories.map((category) => (
                     <option key={category.categoryId} value={category.categoryId}>
                       {category.categoryName}
                     </option>
@@ -365,11 +369,11 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
           </div>
 
           <div className="d-flex justify-content-end gap-2 mt-4">
-            <Button variant="secondary" onClick={onHide} disabled={loading}>
+            <Button variant="secondary" onClick={onHide} disabled={saving}>
               Cancel
             </Button>
-            <Button variant="primary" type="submit" disabled={loading}>
-              {loading ? (
+            <Button variant="primary" type="submit" disabled={saving}>
+              {saving ? (
                 <>
                   <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                   Updating...

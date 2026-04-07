@@ -346,19 +346,81 @@ const CustomerQROrder = ({ isManual = false }) => {
     }
   }, [tableKey, roomKey, isManual, fetchTableInfo, fetchMenuData]);
 
+  const [expandedCategories, setExpandedCategories] = useState(new Set());
+
+  const renderFoodCard = (item) => {
+    const displayImage = item.imageUrl1 || item.imageUrl || item.imageUrl2;
+    return (
+      <div key={item.foodItemId} className="modern-category-card">
+        <h2 className="category-title-red">{item.itemName}</h2>
+        <div className="card-media-wrapper">
+          {displayImage ? (
+            <img src={getImageUrl(displayImage)} alt={item.itemName} className="menu-thumb" />
+          ) : (
+            <div className="h-100 d-flex align-items-center justify-content-center bg-light opacity-50">
+              <i className="fas fa-utensils fa-4x"></i>
+            </div>
+          )}
+
+          <div className="media-overlay flex-column">
+            <div className="mb-2 text-white fw-bold" style={{ fontSize: '1.2rem', textShadow: '1px 1px 4px rgba(0,0,0,0.8)' }}>
+              Rs. {parseFloat(item.price).toFixed(0)}
+            </div>
+            <div className="d-flex w-100 mb-1">
+              <button className="media-btn w-50" onClick={(e) => { e.stopPropagation(); Swal.fire({ title: item.itemName, text: item.description || 'No description available', imageUrl: displayImage ? getImageUrl(displayImage) : null, imageWidth: 400, imageHeight: 300 }); }}>Info</button>
+              <button className="media-btn w-50" onClick={(e) => { e.stopPropagation(); addToCart(item); }}>Add</button>
+            </div>
+            <button className="media-btn w-100 bg-primary-yellow text-dark fw-bold" onClick={(e) => { e.stopPropagation(); addToCart(item); }}>Select</button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderManualItemCard = (item) => {
+    return (
+      <div
+        key={item.foodItemId}
+        className="sketch-category-box"
+        onClick={(e) => {
+          e.stopPropagation();
+          setActiveItemDetail(item);
+          setModalQty(1);
+        }}
+      >
+        <div className="sketch-box-label">
+          <span>{item.itemName}</span>
+          <div className="small fw-bold" style={{ color: '#266668' }}>Rs. {parseFloat(item.price).toFixed(0)}</div>
+        </div>
+        <div className="sketch-box-media" style={{ width: '100%', height: '140px', background: '#fafafa' }}>
+          {item.imageUrl1 || item.imageUrl ? (
+            <img src={getImageUrl(item.imageUrl1 || item.imageUrl)} alt={item.itemName} />
+          ) : (
+            <div className="sketch-placeholder"><i className="fas fa-utensils"></i></div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   useEffect(() => {
     let filtered = foodItems;
 
     if (selectedMenu) {
-      filtered = filtered.filter(item => {
-        // Find if this item belongs to any category that is under this menu
-        const itemCategory = categories.find(c => c.categoryId === item.categoryId);
-        return itemCategory && itemCategory.menuId === selectedMenu;
-      });
+      filtered = filtered.filter(item => item.menuId === selectedMenu);
     }
 
     setFilteredItems(filtered);
-  }, [selectedMenu, foodItems, categories]);
+  }, [selectedMenu, foodItems]);
+
+  const toggleCategoryExpand = (categoryId) => {
+    setExpandedCategories(prev => {
+      const next = new Set(prev);
+      if (next.has(categoryId)) next.delete(categoryId);
+      else next.add(categoryId);
+      return next;
+    });
+  };
 
   const addToCart = (item, openDrawer = true) => {
     const existingItem = cart.find(cartItem => cartItem.foodItemId === item.foodItemId);
@@ -897,6 +959,10 @@ const CustomerQROrder = ({ isManual = false }) => {
 
     if (selectedMenu && !isManual) {
       const menuItems = filteredItems;
+      const menuCategories = categories.filter(c => c.menuId === selectedMenu);
+      const categoryHasItems = (catId) => menuItems.some(item => item.categoryId === catId);
+      const activeCategories = menuCategories.filter(c => categoryHasItems(c.categoryId));
+      const flatItems = menuItems.filter(item => !item.categoryId);
 
       return (
         <div className="slider-container-yellow fade-in">
@@ -910,73 +976,76 @@ const CustomerQROrder = ({ isManual = false }) => {
             </div>
           </div>
 
-          <div className="menu-grid-yellow">
-            {menuItems.map(item => {
-              const displayImage = item.imageUrl1 || item.imageUrl || item.imageUrl2;
+          {/* If Menu has Categories, Show Grouped */}
+          {activeCategories.length > 0 ? (
+            <div className="menu-categories-wrapper w-100 px-4">
+              {activeCategories.map(cat => {
+                const catItems = menuItems.filter(item => item.categoryId === cat.categoryId);
+                const isExpanded = expandedCategories.has(cat.categoryId);
+                const itemsToShow = isExpanded ? catItems : catItems.slice(0, 4);
 
-              return (
-                <div key={item.foodItemId} className="modern-category-card">
-                  <h2 className="category-title-red">{item.itemName}</h2>
-                  <div className="card-media-wrapper">
-                    {displayImage ? (
-                      <img src={getImageUrl(displayImage)} alt={item.itemName} className="menu-thumb" />
-                    ) : (
-                      <div className="h-100 d-flex align-items-center justify-content-center bg-light opacity-50">
-                        <i className="fas fa-utensils fa-4x"></i>
-                      </div>
-                    )}
-
-                    <div className="media-overlay flex-column">
-                      <div className="mb-2 text-white fw-bold" style={{ fontSize: '1.2rem', textShadow: '1px 1px 4px rgba(0,0,0,0.8)' }}>
-                        Rs. {parseFloat(item.price).toFixed(0)}
-                      </div>
-                      <div className="d-flex w-100 mb-1">
-                        <button className="media-btn w-50" onClick={(e) => { e.stopPropagation(); Swal.fire(item.itemName, item.description || 'No description available', 'info'); }}>Info</button>
-                        <button className="media-btn w-50" onClick={(e) => { e.stopPropagation(); addToCart(item); }}>Add</button>
-                      </div>
-                      <button className="media-btn w-100 bg-primary-yellow text-dark fw-bold" onClick={(e) => { e.stopPropagation(); addToCart(item); }}>Select</button>
+                return (
+                  <div key={cat.categoryId} className="category-section mb-5">
+                    <div className="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                      <h3 className="fw-bold mb-0" style={{ color: '#266668', fontSize: '1.4rem' }}>{cat.categoryName}</h3>
+                      {catItems.length > 4 && (
+                        <button 
+                          className="btn btn-sm btn-link text-decoration-none fw-bold" 
+                          onClick={() => toggleCategoryExpand(cat.categoryId)}
+                          style={{ color: '#266668' }}
+                        >
+                          {isExpanded ? 'See Less' : `See More (${catItems.length - 4} more)`}
+                        </button>
+                      )}
+                    </div>
+                    <div className="menu-grid-yellow">
+                      {itemsToShow.map(item => renderFoodCard(item))}
                     </div>
                   </div>
+                );
+              })}
+
+              {/* Show items without categories at the end if any */}
+              {flatItems.length > 0 && (
+                <div className="category-section mb-5">
+                  <div className="sketch-header mb-4">
+                    <h2 className="sketch-header-text">Other Items</h2>
+                  </div>
+                  <div className="menu-grid-yellow">
+                    {flatItems.map(item => renderFoodCard(item))}
+                  </div>
                 </div>
-              );
-            })}
-          </div>
+              )}
+            </div>
+          ) : (
+            /* If no categories, show flat grid */
+            <div className="menu-grid-yellow">
+              {menuItems.map(item => renderFoodCard(item))}
+            </div>
+          )}
         </div>
       );
     }
+
     if (isManual) {
-      // Group categories by menu for manual order as per user sketch
-      const groupedData = menus.map(menu => {
+      // Manual Order View
+      const currentMenuData = selectedMenu ? [menus.find(m => m.menuId === selectedMenu)] : menus;
+      
+      const groupedData = currentMenuData.map(menu => {
+        const menuItems = foodItems.filter(fi => fi.menuId === menu.menuId);
         const menuCats = categories.filter(cat => cat.menuId === menu.menuId);
-        return { ...menu, cats: menuCats };
-      }).filter(m => m.cats.length > 0);
+        const catsWithItems = menuCats.map(cat => ({
+          ...cat,
+          items: menuItems.filter(fi => fi.categoryId === cat.categoryId)
+        })).filter(c => c.items.length > 0);
+        
+        const flatItems = menuItems.filter(fi => !fi.categoryId);
+        
+        return { ...menu, categories: catsWithItems, flatItems };
+      }).filter(m => m.categories.length > 0 || m.flatItems.length > 0);
 
       return (
         <div className="manual-dashboard-layout d-flex" style={{ minHeight: 'calc(100vh - 80px)', backgroundColor: '#fcfcfc' }}>
-          {!isManual && (
-            <aside className="manual-dashboard-sidebar bg-white border-end shadow-sm" style={{ width: '220px', position: 'sticky', top: '80px', height: 'calc(100vh - 80px)', overflowY: 'auto', zIndex: 10 }}>
-              <div className="p-3 border-bottom bg-light">
-                <h6 className="mb-0 fw-bold text-uppercase small text-muted"><i className="fas fa-th-large me-2"></i> Categories</h6>
-              </div>
-              <div className="list-group list-group-flush">
-                {groupedData.map(group => (
-                  <button
-                    key={group.menuId}
-                    className="list-group-item list-group-item-action border-0 py-3 small fw-bold d-flex align-items-center"
-                    onClick={() => {
-                      const el = document.getElementById(`menu-group-${group.menuId}`);
-                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }}
-                    style={{ fontSize: '0.82rem', letterSpacing: '0.3px', transition: 'all 0.2s' }}
-                  >
-                    <i className="fas fa-chevron-right me-2 opacity-50 small"></i> {group.menuName}
-                  </button>
-                ))}
-              </div>
-            </aside>
-          )}
-
-          {/* Main Content Area */}
           <div className="manual-content-main flex-grow-1 p-0">
             <div className="w-100 mb-5 px-4 pt-5 text-center">
               <h1 className="manual-main-title">Create Manual Order</h1>
@@ -986,39 +1055,48 @@ const CustomerQROrder = ({ isManual = false }) => {
             <div className="manual-sections-container px-4">
               {groupedData.map(group => (
                 <div key={group.menuId} id={`menu-group-${group.menuId}`} className="menu-group-section mb-5 pt-3">
-                  <div className="sketch-header mb-4">
+                  <div className="sketch-header mb-4 d-flex justify-content-between align-items-center">
                     <h2 className="sketch-header-text">{group.menuName}</h2>
                   </div>
 
-                  <div className="sketch-grid-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '20px' }}>
-                    {group.cats.map(cat => {
-                      const catItems = foodItems.filter(item => item.categoryId === cat.categoryId);
-                      return (
-                        <div
-                          key={cat.categoryId}
-                          className="sketch-category-box"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (catItems.length > 0) {
-                              setActiveItemDetail(catItems[0]);
-                              setModalQty(1);
-                            }
-                          }}
-                        >
-                          <div className="sketch-box-label">
-                            <span>{cat.categoryName}</span>
+                  {/* Categories if any */}
+                  {group.categories.length > 0 && (
+                    <div className="mb-4">
+                      {group.categories.map(cat => {
+                        const isExpanded = expandedCategories.has(`manual-${cat.categoryId}`);
+                        const itemsToShow = isExpanded ? cat.items : cat.items.slice(0, 6);
+                        
+                        return (
+                          <div key={cat.categoryId} className="cat-box-manual mb-4">
+                            <div className="d-flex justify-content-between align-items-center mb-2 px-2">
+                              <h5 className="fw-bold mb-0 text-muted small text-uppercase">{cat.categoryName}</h5>
+                              {cat.items.length > 6 && (
+                                <button 
+                                  className="btn btn-sm btn-link text-decoration-none p-0 fw-bold small" 
+                                  onClick={() => toggleCategoryExpand(`manual-${cat.categoryId}`)}
+                                  style={{ color: '#266668', fontSize: '0.7rem' }}
+                                >
+                                  {isExpanded ? 'SEE LESS' : 'SEE ALL'}
+                                </button>
+                              )}
+                            </div>
+                            <div className="sketch-grid-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '15px' }}>
+                              {itemsToShow.map(item => renderManualItemCard(item))}
+                            </div>
                           </div>
-                          <div className="sketch-box-media" style={{ width: '100%', height: '150px', background: '#fafafa' }}>
-                            {catItems.length > 0 && (catItems[0].imageUrl1 || catItems[0].imageUrl) ? (
-                              <img src={getImageUrl(catItems[0].imageUrl1 || catItems[0].imageUrl)} alt={cat.categoryName} />
-                            ) : (
-                              <div className="sketch-placeholder"><i className="fas fa-utensils"></i></div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Flat items if any */}
+                  {group.flatItems.length > 0 && (
+                   <div className="cat-box-manual mb-4">
+                      <div className="sketch-grid-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '15px' }}>
+                        {group.flatItems.map(item => renderManualItemCard(item))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

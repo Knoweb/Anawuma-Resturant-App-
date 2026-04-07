@@ -8,6 +8,7 @@ import {
 import { Category } from '../../categories/entities/category.entity';
 import { Subcategory } from '../../subcategories/entities/subcategory.entity';
 import { Restaurant } from '../../restaurants/entities/restaurant.entity';
+import { Menu } from '../../menus/entities/menu.entity';
 
 @Entity('food_items_tbl')
 export class FoodItem {
@@ -29,7 +30,10 @@ export class FoodItem {
   @Column({ name: 'currency_id', nullable: true })
   currencyId: number;
 
-  @Column({ name: 'category_id' })
+  @Column({ name: 'menu_id', nullable: true })
+  menuId: number;
+
+  @Column({ name: 'category_id', nullable: true })
   categoryId: number;
 
   @Column({ name: 'subcategory_id', nullable: true })
@@ -56,11 +60,15 @@ export class FoodItem {
   @Column({ name: 'restaurant_id' })
   restaurantId: number;
 
-  @ManyToOne(() => Category)
+  @ManyToOne(() => Menu, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'menu_id' })
+  menu: Menu;
+
+  @ManyToOne(() => Category, { onDelete: 'SET NULL', nullable: true })
   @JoinColumn({ name: 'category_id' })
   category: Category;
 
-  @ManyToOne(() => Subcategory)
+  @ManyToOne(() => Subcategory, { onDelete: 'SET NULL', nullable: true })
   @JoinColumn({ name: 'subcategory_id' })
   subcategory: Subcategory;
 

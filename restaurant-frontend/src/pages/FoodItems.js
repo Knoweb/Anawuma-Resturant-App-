@@ -211,21 +211,85 @@ function FoodItems() {
             {/* Header with Back and New Item */}
             <div className="d-flex justify-content-between align-items-center mb-4">
               <button
-                className="btn btn-secondary"
+                className="btn btn-secondary border-0 shadow-sm px-4"
                 onClick={() => navigate('/menus/categories')}
               >
                 <i className="fas fa-arrow-left me-2"></i>
-                Back to Categories
+                Back
               </button>
 
               <div className="d-flex gap-2">
-                <button className="btn btn-outline-primary" onClick={() => setShowAddCategoryModal(true)}>
+                <button className="btn btn-outline-primary shadow-sm px-4" onClick={() => setShowAddCategoryModal(true)}>
                   <i className="fas fa-folder-plus me-2"></i>
-                  Add Category
+                  New Category
                 </button>
-                <button className="btn btn-primary" onClick={() => navigate('/menus/food-items/add')}>
+                <button className="btn btn-primary shadow-sm px-4 ivory-btn text-dark" onClick={() => navigate('/menus/food-items/add')}>
                   <i className="fas fa-plus me-2"></i>
-                  New Item
+                  New Product
+                </button>
+              </div>
+            </div>
+
+            {/* Filters */}
+            <div className="row mb-4 g-3 align-items-end">
+              <div className="col-md-3">
+                <label className="form-label small fw-bold text-muted text-uppercase">Menu Filter</label>
+                <select
+                  className="form-select border-0 shadow-sm"
+                  value={filters.menuId}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setFilters(prev => ({ ...prev, menuId: val, categoryId: '' }));
+                    if (val) {
+                      navigate(`/menus/food-items?menuId=${val}`, { replace: true });
+                    } else {
+                      navigate(`/menus/food-items`, { replace: true });
+                    }
+                  }}
+                >
+                  <option value="">All Menus</option>
+                  {menus.map(menu => (
+                    <option key={menu.menuId} value={menu.menuId}>{menu.menuName}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="col-md-3">
+                <label className="form-label small fw-bold text-muted text-uppercase">Category Filter</label>
+                <select
+                  className="form-select border-0 shadow-sm"
+                  value={filters.categoryId}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setFilters(prev => ({ ...prev, categoryId: val }));
+                    const params = new URLSearchParams(location.search);
+                    if (val) params.set('categoryId', val);
+                    else params.delete('categoryId');
+                    navigate(`/menus/food-items?${params.toString()}`, { replace: true });
+                  }}
+                  disabled={!filters.menuId}
+                >
+                  <option value="">All Categories</option>
+                  {categories.filter(c => !filters.menuId || c.menuId === parseInt(filters.menuId)).map(cat => (
+                    <option key={cat.categoryId} value={cat.categoryId}>{cat.categoryName}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="col-md-4">
+                <label className="form-label small fw-bold text-muted text-uppercase">Search Items</label>
+                <div className="input-group shadow-sm">
+                  <span className="input-group-text bg-white border-0"><i className="fas fa-search text-muted"></i></span>
+                  <input
+                    type="text"
+                    className="form-control border-0"
+                    placeholder="Search by name..."
+                    value={filters.search}
+                    onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="col-md-2">
+                <button className="btn btn-light w-100 shadow-sm fw-bold ivory-btn" onClick={handleClearFilters}>
+                  Clear All
                 </button>
               </div>
             </div>

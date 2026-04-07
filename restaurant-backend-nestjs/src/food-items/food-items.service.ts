@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { FoodItem } from './entities/food-item.entity';
 import { Category } from '../categories/entities/category.entity';
 import { Subcategory } from '../subcategories/entities/subcategory.entity';
+import { Menu } from '../menus/entities/menu.entity';
 import { CreateFoodItemDto } from './dto/create-food-item.dto';
 import { UpdateFoodItemDto } from './dto/update-food-item.dto';
 
@@ -20,40 +21,59 @@ export class FoodItemsService {
     private categoriesRepository: Repository<Category>,
     @InjectRepository(Subcategory)
     private subcategoriesRepository: Repository<Subcategory>,
+    @InjectRepository(Menu)
+    private menusRepository: Repository<Menu>,
   ) { }
 
   async create(
     createFoodItemDto: CreateFoodItemDto,
     restaurantId: number,
   ): Promise<FoodItem> {
-    // Verify category exists
-    const category = await this.categoriesRepository.findOne({
+    // Verify menu exists
+    const menu = await this.menusRepository.findOne({
       where: {
-        categoryId: createFoodItemDto.categoryId,
+        menuId: createFoodItemDto.menuId,
         restaurantId,
       },
     });
 
-    if (!category) {
+    if (!menu) {
       throw new NotFoundException(
-        `Category with ID ${createFoodItemDto.categoryId} not found`,
+        `Menu with ID ${createFoodItemDto.menuId} not found`,
       );
     }
 
-    // If subcategoryId is provided, verify it exists and belongs to the same category
-    if (createFoodItemDto.subcategoryId) {
-      const subcategory = await this.subcategoriesRepository.findOne({
+    // Verify category exists if provided
+    if (createFoodItemDto.categoryId) {
+      const category = await this.categoriesRepository.findOne({
         where: {
-          subcategoryId: createFoodItemDto.subcategoryId,
           categoryId: createFoodItemDto.categoryId,
+          menuId: createFoodItemDto.menuId, // Ensure category belongs to the selected menu
           restaurantId,
         },
       });
 
-      if (!subcategory) {
-        throw new BadRequestException(
-          `Subcategory with ID ${createFoodItemDto.subcategoryId} not found or does not belong to category ${createFoodItemDto.categoryId}`,
+      if (!category) {
+        throw new NotFoundException(
+          `Category with ID ${createFoodItemDto.categoryId} not found or does not belong to the selected menu`,
         );
+      }
+
+      // If subcategoryId is provided, verify it exists and belongs to the same category
+      if (createFoodItemDto.subcategoryId) {
+        const subcategory = await this.subcategoriesRepository.findOne({
+          where: {
+            subcategoryId: createFoodItemDto.subcategoryId,
+            categoryId: createFoodItemDto.categoryId,
+            restaurantId,
+          },
+        });
+
+        if (!subcategory) {
+          throw new BadRequestException(
+            `Subcategory with ID ${createFoodItemDto.subcategoryId} not found or does not belong to category ${createFoodItemDto.categoryId}`,
+          );
+        }
       }
     }
 
@@ -79,16 +99,16 @@ export class FoodItemsService {
   ): Promise<FoodItem[]> {
     const query = this.foodItemsRepository
       .createQueryBuilder('foodItem')
+      .leftJoinAndSelect('foodItem.menu', 'menu')
       .leftJoinAndSelect('foodItem.category', 'category')
-      .leftJoinAndSelect('foodItem.subcategory', 'subcategory')
-      .leftJoinAndSelect('category.menu', 'menu');
+      .leftJoinAndSelect('foodItem.subcategory', 'subcategory');
 
     if (restaurantId) {
       query.andWhere('foodItem.restaurantId = :restaurantId', { restaurantId });
     }
 
     if (filters?.menuId) {
-      query.andWhere('category.menuId = :menuId', { menuId: filters.menuId });
+      query.andWhere('foodItem.menuId = :menuId', { menuId: filters.menuId });
     }
 
     if (filters?.categoryId) {
@@ -133,12 +153,12 @@ export class FoodItemsService {
       if (item.category.imageUrl && !item.category.imageUrl.startsWith('http')) {
         item.category.imageUrl = `${apiUrl}${item.category.imageUrl}`;
       }
+    }
 
-      // Resolve menu image if exists
-      if (item.category.menu) {
-        if (item.category.menu.imageUrl && !item.category.menu.imageUrl.startsWith('http')) {
-          item.category.menu.imageUrl = `${apiUrl}${item.category.menu.imageUrl}`;
-        }
+    // Resolve menu image if exists
+    if (item.menu) {
+      if (item.menu.imageUrl && !item.menu.imageUrl.startsWith('http')) {
+        item.menu.imageUrl = `${apiUrl}${item.menu.imageUrl}`;
       }
     }
 
@@ -148,7 +168,7 @@ export class FoodItemsService {
   async findOne(id: number, restaurantId: number): Promise<FoodItem> {
     const foodItem = await this.foodItemsRepository.findOne({
       where: { foodItemId: id, restaurantId },
-      relations: ['category', 'subcategory'],
+      relations: ['menu', 'category', 'subcategory'],
     });
 
     if (!foodItem) {
@@ -165,26 +185,49 @@ export class FoodItemsService {
   ): Promise<FoodItem> {
     const foodItem = await this.findOne(id, restaurantId);
 
-    // If categoryId is being updated, verify the new category exists
+    // If menuId is being updated, verify it exists
+    if (updateFoodItemDto.menuId) {
+      const menu = await this.menusRepository.findOne({
+        where: {
+          menuId: updateFoodItemDto.menuId,
+          restaurantId,
+        },
+      });
+
+      if (!menu) {
+        throw new NotFoundException(
+          `Menu with ID ${updateFoodItemDto.menuId} not found`,
+        );
+      }
+    }
+
+    // If categoryId is being updated, verify it exists and belongs to the current/new menu
     if (updateFoodItemDto.categoryId) {
+      const menuId = updateFoodItemDto.menuId || foodItem.menuId;
       const category = await this.categoriesRepository.findOne({
         where: {
           categoryId: updateFoodItemDto.categoryId,
+          menuId: menuId,
           restaurantId,
         },
       });
 
       if (!category) {
         throw new NotFoundException(
-          `Category with ID ${updateFoodItemDto.categoryId} not found`,
+          `Category with ID ${updateFoodItemDto.categoryId} not found or does not belong to the selected menu`,
         );
       }
     }
 
-    // If subcategoryId is being updated, verify it exists and belongs to the category
+    // If subcategoryId is being updated, verify it exists and belongs to the current/new category
     if (updateFoodItemDto.subcategoryId) {
-      const categoryId =
-        updateFoodItemDto.categoryId || foodItem.categoryId;
+      const categoryId = updateFoodItemDto.categoryId || foodItem.categoryId;
+
+      if (!categoryId) {
+        throw new BadRequestException(
+          `A category must be selected to use a subcategory`,
+        );
+      }
 
       const subcategory = await this.subcategoriesRepository.findOne({
         where: {
@@ -216,7 +259,7 @@ export class FoodItemsService {
   // Super admin can access all food items
   async findAllForSuperAdmin(): Promise<FoodItem[]> {
     const items = await this.foodItemsRepository.find({
-      relations: ['category', 'subcategory', 'restaurant'],
+      relations: ['menu', 'category', 'subcategory', 'restaurant'],
       order: { foodItemId: 'DESC' },
     });
 
