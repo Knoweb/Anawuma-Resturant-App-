@@ -68,6 +68,7 @@ export class BillingService {
       customerName: order.customerName,
       whatsappNumber: order.whatsappNumber,
       tableNo: order.tableNo,
+      roomNo: order.roomNo,
       orderItemsJson: orderItemsSnapshot,
       subtotal,
       taxAmount: 0,
@@ -222,11 +223,12 @@ export class BillingService {
     const invoiceNumber = `INV-MAN-${datePart}-${timePart}-${randomPart}`;
 
     // 3. Create Aggregated Invoice
-    const invoice = this.invoicesRepository.create({
+    const invoice = (this.invoicesRepository.create as any)({
       invoiceNumber,
       orderId: orders[0].orderId, // Refer to the first order
       restaurantId,
-      tableNo: payload.identifier,
+      tableNo: payload.type === 'TABLE' ? payload.identifier : null,
+      roomNo: payload.type === 'ROOM' ? payload.identifier : null,
       customerName: `Manual Order (${payload.type} ${payload.identifier})`,
       orderItemsJson: aggregatedItems,
       subtotal,

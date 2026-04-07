@@ -56,6 +56,9 @@ export class Invoice {
   @Column({ name: 'table_no', type: 'varchar', length: 50, nullable: true })
   tableNo: string;
 
+  @Column({ name: 'room_no', type: 'varchar', length: 50, nullable: true })
+  roomNo: string;
+
   @Column({ name: 'order_items_json', type: 'json' })
   orderItemsJson: object;
 
