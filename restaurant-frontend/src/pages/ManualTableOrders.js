@@ -270,7 +270,7 @@ const ManualTableOrders = () => {
             html: invoiceHtml,
             width: '500px',
             showConfirmButton: true, 
-            confirmButtonText: '<i class="fas fa-check-circle me-1"></i> Pay & Print',
+            confirmButtonText: '<i class="fas fa-check-circle me-1"></i> Pay',
             cancelButtonText: 'Close',
             denyButtonText: '<i class="fas fa-print me-1"></i> Print Draft',
             showDenyButton: true,
@@ -364,9 +364,9 @@ const ManualTableOrders = () => {
             html: itemsHtml,
             width: '600px',
             showCancelButton: true,
-            confirmButtonText: '<i class="fas fa-check-circle me-1"></i> Print/Proceed',
+            confirmButtonText: '<i class="fas fa-money-check-alt me-1"></i> Mark as Paid',
             cancelButtonText: 'Close',
-            confirmButtonColor: '#4e73df', // Primary Blue
+            confirmButtonColor: '#1cc88a', // Success Green
             cancelButtonColor: '#858796',
             didOpen: () => {
                 const popup = Swal.getPopup();

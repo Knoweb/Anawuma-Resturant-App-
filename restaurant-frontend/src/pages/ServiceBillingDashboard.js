@@ -245,7 +245,7 @@ function InvoiceModal({ invoice, restaurantName, onClose, onMarkServed, onMarkPa
                 disabled={!canMarkPaid}
                 title={!canMarkPaid ? "Please complete Print and WhatsApp steps first" : ""}
               >
-                <i className="fas fa-print me-1"></i>Pay & Print
+                <i className="fas fa-check-circle me-1"></i>Pay
               </button>
             </div>
           )}
@@ -262,8 +262,8 @@ function InvoiceModal({ invoice, restaurantName, onClose, onMarkServed, onMarkPa
           )}
 
           <button className="btn btn-dark btn-sm" onClick={handlePrint} disabled={printing}>
-            <i className="fas fa-print me-1"></i>
-            {printing ? 'Printing...' : 'Print'}
+            <i className={`fas ${invoice.invoiceStatus === 'PAID' ? 'fa-redo' : 'fa-print'} me-1`}></i>
+            {printing ? 'Printing...' : (invoice.invoiceStatus === 'PAID' ? 'Reprint Bill' : 'Print')}
           </button>
         </div>
       </div>
@@ -1193,8 +1193,9 @@ const ServiceBillingDashboard = ({
                             <button
                               className="btn btn-sm btn-outline-primary"
                               onClick={() => setViewInvoice(inv)}
+                              title={inv.invoiceStatus === 'PAID' ? 'View/Reprint' : 'View'}
                             >
-                              <i className="fas fa-eye"></i>
+                              <i className={`fas ${inv.invoiceStatus === 'PAID' ? 'fa-print' : 'fa-eye'}`}></i>
                             </button>
                           </td>
                         </tr>
@@ -1317,7 +1318,7 @@ function CashierQueueCard({ invoice, onOpen }) {
       </div>
       <div className="roc-actions">
         <button className="btn btn-primary btn-sm flex-grow-1" onClick={onOpen}>
-          <i className="fas fa-print me-1"></i>{invoice.isPrinted ? 'Reprint Bill' : 'Print Bill'}
+          <i className="fas fa-money-check-alt me-1"></i>Mark as Paid
         </button>
       </div>
     </div>
