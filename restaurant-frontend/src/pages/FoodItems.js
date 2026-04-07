@@ -263,8 +263,11 @@ function FoodItems() {
                         </div>
                         <div className="card-body">
                           <div className="mb-2">
+                            <span className="badge bg-primary text-white border me-1">
+                              {foodItem.menu?.menuName || 'No Menu'}
+                            </span>
                             <span className="badge bg-light text-dark border me-1">
-                              {foodItem.category?.categoryName || 'Unknown'}
+                              {foodItem.category?.categoryName || 'No Category'}
                             </span>
                           </div>
                           <h5 className="food-item-title mb-2">{foodItem.itemName}</h5>

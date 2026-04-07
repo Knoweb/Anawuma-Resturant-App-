@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { FoodItem } from './entities/food-item.entity';
 import { Category } from '../categories/entities/category.entity';
 import { Subcategory } from '../subcategories/entities/subcategory.entity';
+import { Menu } from '../menus/entities/menu.entity';
 import { CreateFoodItemDto } from './dto/create-food-item.dto';
 import { UpdateFoodItemDto } from './dto/update-food-item.dto';
 
@@ -20,24 +21,43 @@ export class FoodItemsService {
     private categoriesRepository: Repository<Category>,
     @InjectRepository(Subcategory)
     private subcategoriesRepository: Repository<Subcategory>,
+    @InjectRepository(Menu)
+    private menusRepository: Repository<Menu>,
   ) { }
 
   async create(
     createFoodItemDto: CreateFoodItemDto,
     restaurantId: number,
   ): Promise<FoodItem> {
-    // Verify category exists
-    const category = await this.categoriesRepository.findOne({
+    // Verify menu exists
+    const menu = await this.menusRepository.findOne({
       where: {
-        categoryId: createFoodItemDto.categoryId,
+        menuId: createFoodItemDto.menuId,
         restaurantId,
       },
     });
 
-    if (!category) {
+    if (!menu) {
       throw new NotFoundException(
-        `Category with ID ${createFoodItemDto.categoryId} not found`,
+        `Menu with ID ${createFoodItemDto.menuId} not found`,
       );
+    }
+
+    // Verify category exists if provided
+    if (createFoodItemDto.categoryId) {
+      const category = await this.categoriesRepository.findOne({
+        where: {
+          categoryId: createFoodItemDto.categoryId,
+          menuId: createFoodItemDto.menuId,
+          restaurantId,
+        },
+      });
+
+      if (!category) {
+        throw new NotFoundException(
+          `Category with ID ${createFoodItemDto.categoryId} not found in menu ${createFoodItemDto.menuId}`,
+        );
+      }
     }
 
     // If subcategoryId is provided, verify it exists and belongs to the same category
@@ -79,16 +99,16 @@ export class FoodItemsService {
   ): Promise<FoodItem[]> {
     const query = this.foodItemsRepository
       .createQueryBuilder('foodItem')
+      .leftJoinAndSelect('foodItem.menu', 'menu')
       .leftJoinAndSelect('foodItem.category', 'category')
-      .leftJoinAndSelect('foodItem.subcategory', 'subcategory')
-      .leftJoinAndSelect('category.menu', 'menu');
+      .leftJoinAndSelect('foodItem.subcategory', 'subcategory');
 
     if (restaurantId) {
       query.andWhere('foodItem.restaurantId = :restaurantId', { restaurantId });
     }
 
     if (filters?.menuId) {
-      query.andWhere('category.menuId = :menuId', { menuId: filters.menuId });
+      query.andWhere('foodItem.menuId = :menuId', { menuId: filters.menuId });
     }
 
     if (filters?.categoryId) {
@@ -142,13 +162,20 @@ export class FoodItemsService {
       }
     }
 
+    // Resolve direct menu image if exists (if category is null)
+    if (item.menu) {
+      if (item.menu.imageUrl && !item.menu.imageUrl.startsWith('http')) {
+        item.menu.imageUrl = `${apiUrl}${item.menu.imageUrl}`;
+      }
+    }
+
     return item;
   }
 
   async findOne(id: number, restaurantId: number): Promise<FoodItem> {
     const foodItem = await this.foodItemsRepository.findOne({
       where: { foodItemId: id, restaurantId },
-      relations: ['category', 'subcategory'],
+      relations: ['menu', 'category', 'subcategory'],
     });
 
     if (!foodItem) {
@@ -165,18 +192,37 @@ export class FoodItemsService {
   ): Promise<FoodItem> {
     const foodItem = await this.findOne(id, restaurantId);
 
-    // If categoryId is being updated, verify the new category exists
+    // If menuId is being updated, verify the new menu exists
+    if (updateFoodItemDto.menuId) {
+      const menu = await this.menusRepository.findOne({
+        where: {
+          menuId: updateFoodItemDto.menuId,
+          restaurantId,
+        },
+      });
+
+      if (!menu) {
+        throw new NotFoundException(
+          `Menu with ID ${updateFoodItemDto.menuId} not found`,
+        );
+      }
+    }
+
+    const menuId = updateFoodItemDto.menuId || foodItem.menuId;
+
+    // If categoryId is being updated, verify the new category exists in the menu
     if (updateFoodItemDto.categoryId) {
       const category = await this.categoriesRepository.findOne({
         where: {
           categoryId: updateFoodItemDto.categoryId,
+          menuId,
           restaurantId,
         },
       });
 
       if (!category) {
         throw new NotFoundException(
-          `Category with ID ${updateFoodItemDto.categoryId} not found`,
+          `Category with ID ${updateFoodItemDto.categoryId} not found in menu ${menuId}`,
         );
       }
     }

@@ -10,6 +10,7 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
     moreDetails: '',
     price: '',
     currencyId: 1,
+    menuId: '',
     categoryId: '',
     subcategoryId: '',
     imageUrl1: '',
@@ -20,7 +21,9 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
     blogLink: ''
   });
 
+  const [menus, setMenus] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [filteredCategories, setFilteredCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState({
     image1: null,
@@ -43,6 +46,7 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
         moreDetails: foodItem.moreDetails || '',
         price: foodItem.price || '',
         currencyId: foodItem.currencyId || 1,
+        menuId: foodItem.menuId || '',
         categoryId: foodItem.categoryId || '',
         imageUrl1: foodItem.imageUrl1 || '',
         imageUrl2: foodItem.imageUrl2 || '',
@@ -58,14 +62,29 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
         image4: foodItem.imageUrl4 || null
       });
       setSelectedFiles({ image1: null, image2: null, image3: null, image4: null });
-      fetchCategories();
+      fetchMenus();
+      fetchCategories(foodItem.menuId);
     }
   }, [show, foodItem]);
 
-  const fetchCategories = async () => {
+  const fetchMenus = async () => {
+    try {
+      const response = await apiClient.get('/menus');
+      setMenus(response.data);
+    } catch (error) {
+      console.error('Error fetching menus:', error);
+    }
+  };
+
+  const fetchCategories = async (mId = null) => {
     try {
       const response = await apiClient.get('/categories');
       setCategories(response.data);
+      if (mId) {
+        setFilteredCategories(response.data.filter(c => c.menuId === parseInt(mId)));
+      } else if (formData.menuId) {
+        setFilteredCategories(response.data.filter(c => c.menuId === parseInt(formData.menuId)));
+      }
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
@@ -101,6 +120,12 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
       ...formData,
       [name]: value
     });
+
+    if (name === 'menuId') {
+      const filtered = categories.filter(c => c.menuId === parseInt(value));
+      setFilteredCategories(filtered);
+      setFormData(prev => ({ ...prev, [name]: value, categoryId: '' }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -125,11 +150,11 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
       return;
     }
 
-    if (!formData.categoryId) {
+    if (!formData.menuId) {
       Swal.fire({
         icon: 'error',
         title: 'Validation Error',
-        text: 'Please select a category'
+        text: 'Please select a menu'
       });
       return;
     }
@@ -165,7 +190,8 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
         moreDetails: formData.moreDetails.trim() || undefined,
         price: parseFloat(formData.price),
         currencyId: parseInt(formData.currencyId),
-        categoryId: parseInt(formData.categoryId),
+        menuId: parseInt(formData.menuId),
+        categoryId: formData.categoryId ? parseInt(formData.categoryId) : null,
         imageUrl1: imageUrls.imageUrl1 || undefined,
         imageUrl2: imageUrls.imageUrl2 || undefined,
         imageUrl3: imageUrls.imageUrl3 || undefined,
@@ -250,16 +276,37 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
             <div className="col-md-6 mb-3">
               <Form.Group>
                 <Form.Label>
-                  Category <span className="text-danger">*</span>
+                  Menu <span className="text-danger">*</span>
+                </Form.Label>
+                <Form.Select
+                  name="menuId"
+                  value={formData.menuId}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Menu</option>
+                  {menus.map((menu) => (
+                    <option key={menu.menuId} value={menu.menuId}>
+                      {menu.menuName}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            </div>
+
+            <div className="col-md-6 mb-3">
+              <Form.Group>
+                <Form.Label>
+                  Category (Optional)
                 </Form.Label>
                 <Form.Select
                   name="categoryId"
                   value={formData.categoryId}
                   onChange={handleChange}
-                  required
+                  disabled={!formData.menuId}
                 >
-                  <option value="">Select Category</option>
-                  {categories.map((category) => (
+                  <option value="">No Category (Direct to Menu)</option>
+                  {filteredCategories.map((category) => (
                     <option key={category.categoryId} value={category.categoryId}>
                       {category.categoryName}
                     </option>
