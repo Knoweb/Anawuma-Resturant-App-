@@ -25,6 +25,18 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
   const [filteredCategories, setFilteredCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState({
+    image1: null,
+    image2: null,
+    image3: null,
+    image4: null
+  });
+  const [previews, setPreviews] = useState({
+    image1: null,
+    image2: null,
+    image3: null,
+    image4: null
+  });
 
   useEffect(() => {
     fetchMenus();

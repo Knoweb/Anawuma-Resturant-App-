@@ -26,6 +26,15 @@ function AddFoodItem() {
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
+  // File states
+  const [imageFiles, setImageFiles] = useState({
+    image1: null,
+    image2: null,
+    image3: null,
+    image4: null
+  });
+  const [videoFile, setVideoFile] = useState(null);
+
   useEffect(() => {
     fetchMenus();
     fetchCategories();
