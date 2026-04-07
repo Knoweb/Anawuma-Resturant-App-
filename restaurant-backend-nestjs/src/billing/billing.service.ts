@@ -170,6 +170,12 @@ export class BillingService {
       throw new BadRequestException('No orders found to finalize');
     }
 
+    // Check if any order is already BILLED or COMPLETED
+    const alreadyBilled = orders.find(o => o.status === OrderStatus.BILLED || o.status === OrderStatus.SERVED);
+    if (alreadyBilled) {
+      throw new BadRequestException(`Order #${alreadyBilled.orderNo || alreadyBilled.orderId} has already been finalized/billed.`);
+    }
+
     // 2. Aggregate financials and items
     let subtotal = 0;
     let serviceCharge = 0;
@@ -868,13 +874,16 @@ export class BillingService {
     return this.hydrateOrderNo(savedInvoice);
   }
 
-  /** Marks an invoice as PAID. */
-  async markInvoicePaid(
-    invoiceId: number,
-    restaurantId: number,
-    paymentMethod: PaymentMethod = PaymentMethod.CASH,
-  ): Promise<Invoice> {
-    const invoice = await this.findOneInvoice(invoiceId, restaurantId);
+    async markInvoicePaid(
+        invoiceId: number,
+        restaurantId: number,
+        paymentMethod: PaymentMethod = PaymentMethod.CASH,
+    ): Promise<Invoice> {
+        const invoice = await this.findOneInvoice(invoiceId, restaurantId);
+
+        if (invoice.invoiceStatus === InvoiceStatus.PAID) {
+            throw new BadRequestException('This invoice has already been paid.');
+        }
 
     // Final closing safety checks: Ensure bill was printed and sent to WhatsApp (if applicable)
     if (!invoice.isPrinted) {
