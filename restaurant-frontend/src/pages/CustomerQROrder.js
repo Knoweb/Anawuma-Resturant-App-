@@ -59,7 +59,6 @@ const CustomerQROrder = ({ isManual = false }) => {
   const [shownNotifications, setShownNotifications] = useState(new Set());
   const { subscribe, connected } = useWebSocket();
   const { user, isAuthenticated } = useAuthStore();
-  const [expandedCategories, setExpandedCategories] = useState(new Set());
 
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
@@ -352,8 +351,7 @@ const CustomerQROrder = ({ isManual = false }) => {
 
     if (selectedMenu) {
       filtered = filtered.filter(item => {
-        // Now using direct menuId or category's menuId as fallback
-        if (item.menuId === selectedMenu) return true;
+        // Find if this item belongs to any category that is under this menu
         const itemCategory = categories.find(c => c.categoryId === item.categoryId);
         return itemCategory && itemCategory.menuId === selectedMenu;
       });
@@ -361,15 +359,6 @@ const CustomerQROrder = ({ isManual = false }) => {
 
     setFilteredItems(filtered);
   }, [selectedMenu, foodItems, categories]);
-
-  const toggleCategory = (categoryId) => {
-    setExpandedCategories(prev => {
-      const next = new Set(prev);
-      if (next.has(categoryId)) next.delete(categoryId);
-      else next.add(categoryId);
-      return next;
-    });
-  };
 
   const addToCart = (item, openDrawer = true) => {
     const existingItem = cart.find(cartItem => cartItem.foodItemId === item.foodItemId);
@@ -908,272 +897,128 @@ const CustomerQROrder = ({ isManual = false }) => {
 
     if (selectedMenu && !isManual) {
       const menuItems = filteredItems;
-      const currentMenu = menus.find(m => m.menuId === selectedMenu);
-      
-      // Group items by category
-      const menuCategories = categories.filter(c => c.menuId === selectedMenu);
-      const itemsByCategory = menuCategories.map(cat => ({
-        ...cat,
-        items: menuItems.filter(item => item.categoryId === cat.categoryId)
-      })).filter(cat => cat.items.length > 0);
-
-      const standaloneItems = menuItems.filter(item => !item.categoryId);
 
       return (
-        <div className="serene-menu-container fade-in">
-          <div className="w-100 d-flex justify-content-start mb-4">
+        <div className="slider-container-yellow fade-in">
+          <div className="w-100 d-flex justify-content-start mb-2 px-4" style={{ maxWidth: '1200px' }}>
             <button className="back-to-menus" onClick={() => setSelectedMenu(null)}>
-              <i className="fas fa-arrow-left"></i>
+              <i className="fas fa-chevron-left"></i>
             </button>
-          </div>
-
-          <div className="text-center">
-            <div className="menu-header-badge">
-              <h1>{currentMenu?.menuName}</h1>
+            <div className="ms-3">
+              <h2 className="mb-0 fw-bold">{menus.find(m => m.menuId === selectedMenu)?.menuName}</h2>
+              <p className="text-muted small mb-0">{menuItems.length} items available</p>
             </div>
           </div>
 
-          {/* Render Categories if they exist */}
-          {itemsByCategory.length > 0 && (
-            <div className="categories-wrapper">
-              {itemsByCategory.map(cat => {
-                const isExpanded = expandedCategories.has(cat.categoryId);
-                const displayItems = isExpanded ? cat.items : cat.items.slice(0, 4);
+          <div className="menu-grid-yellow">
+            {menuItems.map(item => {
+              const displayImage = item.imageUrl1 || item.imageUrl || item.imageUrl2;
 
-                return (
-                  <section key={cat.categoryId} className="category-section">
-                    <div className="category-header-wrap">
-                      <div className="category-badge-title">{cat.categoryName}</div>
-                    </div>
-
-                    <div className="category-items-grid">
-                      {displayItems.map(item => (
-                        <div 
-                          key={item.foodItemId} 
-                          className="serene-food-item"
-                          onClick={() => {
-                            setActiveItemDetail(item);
-                            setModalQty(1);
-                          }}
-                        >
-                          <div className="item-main-info">
-                            <span className="item-name-styled">{item.itemName}</span>
-                            {item.description && <span className="item-desc-styled">{item.description}</span>}
-                          </div>
-                          <div className="item-price-styled">
-                            {parseFloat(item.price).toLocaleString()} LKR
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {cat.items.length > 4 && (
-                      <div className="see-more-container">
-                        <button 
-                          className="see-more-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleCategory(cat.categoryId);
-                          }}
-                        >
-                          {isExpanded ? 'SEE LESS' : 'SEE MORE'}
-                        </button>
+              return (
+                <div key={item.foodItemId} className="modern-category-card">
+                  <h2 className="category-title-red">{item.itemName}</h2>
+                  <div className="card-media-wrapper">
+                    {displayImage ? (
+                      <img src={getImageUrl(displayImage)} alt={item.itemName} className="menu-thumb" />
+                    ) : (
+                      <div className="h-100 d-flex align-items-center justify-content-center bg-light opacity-50">
+                        <i className="fas fa-utensils fa-4x"></i>
                       </div>
                     )}
-                  </section>
-                );
-              })}
-            </div>
-          )}
 
-          {/* Render Standalone Items (Menu Items without Categories) */}
-          {standaloneItems.length > 0 && (
-            <div className="standalone-items-wrapper">
-              {itemsByCategory.length > 0 && (
-                <div className="category-header-wrap">
-                  <div className="category-badge-title">MORE ITEMS</div>
-                </div>
-              )}
-              <div className="flat-items-grid">
-                {standaloneItems.map(item => (
-                  <div 
-                    key={item.foodItemId} 
-                    className="serene-food-item"
-                    onClick={() => {
-                      setActiveItemDetail(item);
-                      setModalQty(1);
-                    }}
-                  >
-                    <div className="item-main-info">
-                      <span className="item-name-styled">{item.itemName}</span>
-                      {item.description && <span className="item-desc-styled">{item.description}</span>}
-                    </div>
-                    <div className="item-price-styled">
-                      {parseFloat(item.price).toLocaleString()} LKR
+                    <div className="media-overlay flex-column">
+                      <div className="mb-2 text-white fw-bold" style={{ fontSize: '1.2rem', textShadow: '1px 1px 4px rgba(0,0,0,0.8)' }}>
+                        Rs. {parseFloat(item.price).toFixed(0)}
+                      </div>
+                      <div className="d-flex w-100 mb-1">
+                        <button className="media-btn w-50" onClick={(e) => { e.stopPropagation(); Swal.fire(item.itemName, item.description || 'No description available', 'info'); }}>Info</button>
+                        <button className="media-btn w-50" onClick={(e) => { e.stopPropagation(); addToCart(item); }}>Add</button>
+                      </div>
+                      <button className="media-btn w-100 bg-primary-yellow text-dark fw-bold" onClick={(e) => { e.stopPropagation(); addToCart(item); }}>Select</button>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       );
     }
     if (isManual) {
-      // Group categories and items by menu for manual order
+      // Group categories by menu for manual order as per user sketch
       const groupedData = menus.map(menu => {
         const menuCats = categories.filter(cat => cat.menuId === menu.menuId);
-        const menuItems = foodItems.filter(item => item.menuId === menu.menuId);
-        
-        const catsWithItems = menuCats.map(cat => ({
-          ...cat,
-          items: menuItems.filter(item => item.categoryId === cat.categoryId)
-        })).filter(cat => cat.items.length > 0);
-
-        const standaloneItems = menuItems.filter(item => !item.categoryId);
-
-        return { ...menu, cats: catsWithItems, standaloneItems };
-      }).filter(m => m.cats.length > 0 || m.standaloneItems.length > 0);
+        return { ...menu, cats: menuCats };
+      }).filter(m => m.cats.length > 0);
 
       return (
         <div className="manual-dashboard-layout d-flex" style={{ minHeight: 'calc(100vh - 80px)', backgroundColor: '#fcfcfc' }}>
-          {/* Sidebar Navigation */}
-          <aside className="manual-dashboard-sidebar bg-white border-end shadow-sm" style={{ width: '240px', position: 'sticky', top: '70px', height: 'calc(100vh - 70px)', overflowY: 'auto', zIndex: 10 }}>
-            <div className="p-3 border-bottom bg-light">
-              <h6 className="mb-0 fw-bold text-uppercase small text-muted"><i className="fas fa-th-large me-2"></i> Menus</h6>
-            </div>
-            <div className="list-group list-group-flush">
-              {groupedData.map(group => (
-                <button
-                  key={group.menuId}
-                  className="list-group-item list-group-item-action border-0 py-3 small fw-bold d-flex align-items-center"
-                  onClick={() => {
-                    const el = document.getElementById(`menu-group-${group.menuId}`);
-                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }}
-                  style={{ fontSize: '0.85rem', letterSpacing: '0.3px', transition: 'all 0.2s' }}
-                >
-                  <i className="fas fa-chevron-right me-2 opacity-50 small"></i> {group.menuName}
-                </button>
-              ))}
-            </div>
-          </aside>
-
-            <div className="manual-content-main flex-grow-1 p-0">
-              <div className="w-100 mb-2 px-4 pt-4">
-                <h1 className="manual-main-title text-start mb-0" style={{ fontSize: '1.8rem', color: '#333' }}>Quick Order</h1>
-                <p className="text-muted small">Select items to add to the bill</p>
+          {!isManual && (
+            <aside className="manual-dashboard-sidebar bg-white border-end shadow-sm" style={{ width: '220px', position: 'sticky', top: '80px', height: 'calc(100vh - 80px)', overflowY: 'auto', zIndex: 10 }}>
+              <div className="p-3 border-bottom bg-light">
+                <h6 className="mb-0 fw-bold text-uppercase small text-muted"><i className="fas fa-th-large me-2"></i> Categories</h6>
               </div>
-
-              {/* Requirement 4: Table/Room selection on the outside */}
-              <div className="manual-order-context-wrap px-4 mb-4">
-                <div className="bg-white rounded-3 shadow-sm border p-4">
-                  <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h5 className="fw-bold mb-0 text-dark">
-                      <i className="fas fa-map-marker-alt me-2 text-primary"></i>
-                      Select {manualOrderType === 'ROOM' ? 'Room' : 'Table'} <span className="text-danger">*</span>
-                    </h5>
-                    <div className="btn-group p-1 bg-light rounded-pill" style={{ border: '1px solid #eee' }}>
-                      <button 
-                        className={`btn btn-sm rounded-pill px-3 ${manualOrderType === 'ROOM' ? 'btn-primary' : 'btn-light'}`} 
-                        onClick={() => { setManualOrderType('ROOM'); setOrderLocation('inside'); }}
-                        style={manualOrderType === 'ROOM' ? { backgroundColor: '#266668', border: 'none', fontWeight: '600' } : { fontVariant: '0.85rem' }}
-                      >INSIDE (ROOMS)</button>
-                      <button 
-                        className={`btn btn-sm rounded-pill px-3 ${manualOrderType === 'TABLE' ? 'btn-primary' : 'btn-light'}`} 
-                        onClick={() => { setManualOrderType('TABLE'); setOrderLocation('outside'); }}
-                        style={manualOrderType === 'TABLE' ? { backgroundColor: '#266668', border: 'none', fontWeight: '600' } : { fontVariant: '0.85rem' }}
-                      >OUTSIDE (TABLES)</button>
-                    </div>
-                  </div>
-                  <div className="manual-grid-selector">
-                    {Array.from({ length: 16 }, (_, i) => (i + 1).toString()).map(no => (
-                      <div 
-                        key={no} 
-                        className={`manual-cell ${manualTableNo === no ? 'active' : ''}`}
-                        onClick={() => setManualTableNo(no)}
-                      >
-                        <div className="cell-no">{no}</div>
-                        <div className="cell-label">{manualOrderType === 'ROOM' ? 'Room' : 'Table'}</div>
-                      </div>
-                    ))}
-                  </div>
-                  {!manualTableNo && (
-                    <div className="mt-3 text-danger small bg-danger-subtle p-2 rounded">
-                      <i className="fas fa-info-circle me-1"></i> Please select a {manualOrderType === 'ROOM' ? 'room' : 'table'} before adding items.
-                    </div>
-                  )}
-                </div>
+              <div className="list-group list-group-flush">
+                {groupedData.map(group => (
+                  <button
+                    key={group.menuId}
+                    className="list-group-item list-group-item-action border-0 py-3 small fw-bold d-flex align-items-center"
+                    onClick={() => {
+                      const el = document.getElementById(`menu-group-${group.menuId}`);
+                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
+                    style={{ fontSize: '0.82rem', letterSpacing: '0.3px', transition: 'all 0.2s' }}
+                  >
+                    <i className="fas fa-chevron-right me-2 opacity-50 small"></i> {group.menuName}
+                  </button>
+                ))}
               </div>
+            </aside>
+          )}
 
-            <div className="manual-sections-container px-4 pb-5">
+          {/* Main Content Area */}
+          <div className="manual-content-main flex-grow-1 p-0">
+            <div className="w-100 mb-5 px-4 pt-5 text-center">
+              <h1 className="manual-main-title">Create Manual Order</h1>
+              <div className="title-divider mx-auto"></div>
+            </div>
+
+            <div className="manual-sections-container px-4">
               {groupedData.map(group => (
-                <div key={group.menuId} id={`menu-group-${group.menuId}`} className="menu-group-section mb-5">
-                  <div className="category-header-wrap mb-4">
-                    <div className="category-badge-title" style={{ background: '#fcfcfc', color: '#266668', fontSize: '1.4rem' }}>{group.menuName}</div>
+                <div key={group.menuId} id={`menu-group-${group.menuId}`} className="menu-group-section mb-5 pt-3">
+                  <div className="sketch-header mb-4">
+                    <h2 className="sketch-header-text">{group.menuName}</h2>
                   </div>
 
-                  {/* Render Categories */}
-                  {group.cats.length > 0 && (
-                    <div className="sketch-grid-container mb-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '15px' }}>
-                      {group.cats.map(cat => (
+                  <div className="sketch-grid-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '20px' }}>
+                    {group.cats.map(cat => {
+                      const catItems = foodItems.filter(item => item.categoryId === cat.categoryId);
+                      return (
                         <div
                           key={cat.categoryId}
                           className="sketch-category-box"
-                          style={{ border: '2px solid #eee', borderRadius: '15px', overflow: 'hidden' }}
                           onClick={(e) => {
                             e.stopPropagation();
-                            // If it has items, show the first one or open a sub-menu
-                            // For manual quick order, we'll open the detail modal for the category or first item
-                            if (cat.items.length > 0) {
-                              setActiveItemDetail(cat.items[0]);
+                            if (catItems.length > 0) {
+                              setActiveItemDetail(catItems[0]);
                               setModalQty(1);
                             }
                           }}
                         >
-                          <div className="sketch-box-media" style={{ width: '100%', height: '120px', background: '#fafafa' }}>
-                            {cat.imageUrl ? (
-                              <img src={getImageUrl(cat.imageUrl)} alt={cat.categoryName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            ) : cat.items.length > 0 && (cat.items[0].imageUrl1 || cat.items[0].imageUrl) ? (
-                              <img src={getImageUrl(cat.items[0].imageUrl1 || cat.items[0].imageUrl)} alt={cat.categoryName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          <div className="sketch-box-label">
+                            <span>{cat.categoryName}</span>
+                          </div>
+                          <div className="sketch-box-media" style={{ width: '100%', height: '150px', background: '#fafafa' }}>
+                            {catItems.length > 0 && (catItems[0].imageUrl1 || catItems[0].imageUrl) ? (
+                              <img src={getImageUrl(catItems[0].imageUrl1 || catItems[0].imageUrl)} alt={cat.categoryName} />
                             ) : (
-                              <div className="sketch-placeholder h-100 d-flex align-items-center justify-content-center text-muted opacity-30"><i className="fas fa-utensils fa-2x"></i></div>
+                              <div className="sketch-placeholder"><i className="fas fa-utensils"></i></div>
                             )}
                           </div>
-                          <div className="sketch-box-label p-2 text-center" style={{ background: '#fff', borderTop: '1px solid #eee' }}>
-                            <span className="fw-bold small">{cat.categoryName}</span>
-                          </div>
                         </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Render Standalone Items */}
-                  {group.standaloneItems.length > 0 && (
-                    <div className="standalone-manual-items mt-3">
-                      {group.cats.length > 0 && <h6 className="text-muted small text-uppercase mb-3 letter-spacing-1">General Items</h6>}
-                      <div className="manual-items-list border rounded bg-white overflow-hidden">
-                        {group.standaloneItems.map(item => (
-                          <div 
-                            key={item.foodItemId} 
-                            className="serene-food-item px-3"
-                            onClick={() => {
-                              setActiveItemDetail(item);
-                              setModalQty(1);
-                            }}
-                          >
-                            <div className="item-main-info">
-                              <span className="item-name-styled">{item.itemName}</span>
-                              {item.description && <span className="item-desc-styled">{item.description}</span>}
-                            </div>
-                            <div className="item-price-styled">
-                              {parseFloat(item.price).toLocaleString()} LKR
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                      );
+                    })}
+                  </div>
                 </div>
               ))}
             </div>
@@ -1286,63 +1131,51 @@ const CustomerQROrder = ({ isManual = false }) => {
 
               {/* Right Column: Order Fields */}
               <div className="sketch-modal-right-col flex-grow-1 p-4 bg-light">
-                {!isManual ? (
-                  <>
-                    <div className="mb-4">
-                      <label className="d-block mb-2 fw-bold text-muted small">ORDER LOCATION *</label>
-                      <div className="d-flex gap-2">
-                        <button
-                          className={`flex-grow-1 btn ${orderLocation === 'inside' ? 'btn-primary' : 'btn-outline-primary'}`}
-                          style={orderLocation === 'inside' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }}
-                          onClick={() => {
-                            setOrderLocation('inside');
-                            setModalOrderType('room');
-                            setManualOrderType('ROOM');
-                            setManualTableNo('');
-                          }}
-                        >
-                          IN SIDE
-                        </button>
-                        <button
-                          className={`flex-grow-1 btn ${orderLocation === 'outside' ? 'btn-primary' : 'btn-outline-primary'}`}
-                          style={orderLocation === 'outside' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }}
-                          onClick={() => {
-                            setOrderLocation('outside');
-                            setModalOrderType('table');
-                            setManualOrderType('TABLE');
-                            setManualTableNo('');
-                          }}
-                        >
-                          OUTSIDE
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="mb-4 fade-in">
-                      <label className="d-block mb-2 fw-bold text-muted small">
-                        SELECT {orderLocation === 'inside' ? 'ROOM' : 'TABLE'} *
-                      </label>
-                      <select
-                        className="form-control sketch-input"
-                        value={manualTableNo}
-                        onChange={(e) => setManualTableNo(e.target.value)}
-                      >
-                        <option value="">Select {orderLocation === 'inside' ? 'Room' : 'Table'} Number</option>
-                        {Array.from({ length: 16 }, (_, i) => (i + 1).toString()).map(no => (
-                          <option key={no} value={no}>{orderLocation === 'inside' ? 'Room' : 'Table'} {no}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </>
-                ) : (
-                  <div className="mb-4 p-3 bg-white rounded border border-success-subtle d-flex align-items-center">
-                    <div className="me-3 bg-success rounded-circle p-2 text-white"><i className="fas fa-check"></i></div>
-                    <div>
-                      <div className="fw-bold text-dark">Selected: {manualOrderType === 'ROOM' ? 'Room' : 'Table'} {manualTableNo}</div>
-                      <div className="small text-muted">Selection moved to main dashboard</div>
-                    </div>
+                <div className="mb-4">
+                  <label className="d-block mb-2 fw-bold text-muted small">ORDER LOCATION *</label>
+                  <div className="d-flex gap-2">
+                    <button
+                      className={`flex-grow-1 btn ${orderLocation === 'inside' ? 'btn-primary' : 'btn-outline-primary'}`}
+                      style={orderLocation === 'inside' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }}
+                      onClick={() => {
+                        setOrderLocation('inside');
+                        setModalOrderType('room');
+                        setManualOrderType('ROOM');
+                        setManualTableNo('');
+                      }}
+                    >
+                      IN SIDE
+                    </button>
+                    <button
+                      className={`flex-grow-1 btn ${orderLocation === 'outside' ? 'btn-primary' : 'btn-outline-primary'}`}
+                      style={orderLocation === 'outside' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }}
+                      onClick={() => {
+                        setOrderLocation('outside');
+                        setModalOrderType('table');
+                        setManualOrderType('TABLE');
+                        setManualTableNo('');
+                      }}
+                    >
+                      OUTSIDE
+                    </button>
                   </div>
-                )}
+                </div>
+
+                <div className="mb-4 fade-in">
+                  <label className="d-block mb-2 fw-bold text-muted small">
+                    SELECT {orderLocation === 'inside' ? 'ROOM' : 'TABLE'} *
+                  </label>
+                  <select
+                    className="form-control sketch-input"
+                    value={manualTableNo}
+                    onChange={(e) => setManualTableNo(e.target.value)}
+                  >
+                    <option value="">Select {orderLocation === 'inside' ? 'Room' : 'Table'} Number</option>
+                    {Array.from({ length: 16 }, (_, i) => (i + 1).toString()).map(no => (
+                      <option key={no} value={no}>{orderLocation === 'inside' ? 'Room' : 'Table'} {no}</option>
+                    ))}
+                  </select>
+                </div>
 
                 <div className="mb-0">
                   <label className="d-block mb-2 fw-bold text-muted small">ORDER NOTES (OPTIONAL)</label>

@@ -33,11 +33,7 @@ export class CreateFoodItemDto {
 
   @IsInt()
   @IsNotEmpty()
-  menuId: number;
-
-  @IsInt()
-  @IsOptional()
-  categoryId?: number;
+  categoryId: number;
 
   @IsInt()
   @IsOptional()

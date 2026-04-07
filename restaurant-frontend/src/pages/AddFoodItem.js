@@ -15,14 +15,11 @@ function AddFoodItem() {
     moreDetails: '',
     currency: 'LKR',
     price: '',
-    menuId: '',
     categoryId: '',
     blogLink: '',
   });
 
-  const [menus, setMenus] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [filteredCategories, setFilteredCategories] = useState([]);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
@@ -36,19 +33,8 @@ function AddFoodItem() {
   const [videoFile, setVideoFile] = useState(null);
 
   useEffect(() => {
-    fetchMenus();
     fetchCategories();
   }, []);
-
-  const fetchMenus = async () => {
-    try {
-      const response = await apiClient.get('/menus');
-      const data = response.data.data || response.data;
-      setMenus(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error('Error fetching menus:', error);
-    }
-  };
 
   const fetchCategories = async () => {
     try {
@@ -63,13 +49,6 @@ function AddFoodItem() {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
-
-    if (name === 'menuId') {
-      // Filter categories based on menuId
-      const filtered = categories.filter(c => c.menuId === parseInt(value));
-      setFilteredCategories(filtered);
-      setFormData(prev => ({ ...prev, categoryId: '' }));
-    }
   };
 
   const handleFileChange = (e, key) => {
@@ -97,7 +76,7 @@ function AddFoodItem() {
     const newErrors = {};
     if (!formData.itemName.trim()) newErrors.itemName = 'Item name is required';
     if (!formData.price) newErrors.price = 'Price is required';
-    if (!formData.menuId) newErrors.menuId = 'Please select a menu';
+    if (!formData.categoryId) newErrors.categoryId = 'Please select a category';
     if (formData.description.length > 350) newErrors.description = 'Limit exceeded';
     if (formData.moreDetails.length > 400) newErrors.moreDetails = 'Limit exceeded';
 
@@ -137,8 +116,7 @@ function AddFoodItem() {
         description: formData.description.trim(),
         moreDetails: formData.moreDetails.trim(),
         price: parseFloat(formData.price),
-        menuId: parseInt(formData.menuId),
-        categoryId: formData.categoryId ? parseInt(formData.categoryId) : null,
+        categoryId: parseInt(formData.categoryId),
         imageUrl1: imageUrls.image1,
         imageUrl2: imageUrls.image2,
         imageUrl3: imageUrls.image3,
@@ -234,34 +212,17 @@ function AddFoodItem() {
                   </div>
                 </div>
 
-                <div className="row mb-4">
-                  <div className="col-md-6">
-                    <label className="form-label">Menu <span className="text-danger">*</span></label>
-                    <select
-                      className={`form-select ${errors.menuId ? 'is-invalid' : ''}`}
-                      name="menuId"
-                      value={formData.menuId}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select Menu</option>
-                      {menus.map(m => <option key={m.menuId} value={m.menuId}>{m.menuName}</option>)}
-                    </select>
-                    {errors.menuId && <div className="invalid-feedback">{errors.menuId}</div>}
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label">Category (Optional)</label>
-                    <select
-                      className="form-select"
-                      name="categoryId"
-                      value={formData.categoryId}
-                      onChange={handleChange}
-                      disabled={!formData.menuId}
-                    >
-                      <option value="">No Category (Direct to Menu)</option>
-                      {filteredCategories.map(c => <option key={c.categoryId} value={c.categoryId}>{c.categoryName}</option>)}
-                    </select>
-                    <small className="text-muted">Only categories belonging to the selected menu are shown.</small>
-                  </div>
+                <div className="mb-4">
+                  <label className="form-label">Category</label>
+                  <select
+                    className={`form-select ${errors.categoryId ? 'is-invalid' : ''}`}
+                    name="categoryId"
+                    value={formData.categoryId}
+                    onChange={handleChange}
+                  >
+                    <option value="">Select Category</option>
+                    {categories.map(c => <option key={c.categoryId} value={c.categoryId}>{c.categoryName}</option>)}
+                  </select>
                 </div>
 
                 <div className="row g-3">

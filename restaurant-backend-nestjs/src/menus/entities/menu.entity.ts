@@ -1,7 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Restaurant } from '../../restaurants/entities/restaurant.entity';
-import { FoodItem } from '../../food-items/entities/food-item.entity';
-import { Category } from '../../categories/entities/category.entity';
 
 @Entity('menu_tbl')
 export class Menu {
@@ -23,10 +21,4 @@ export class Menu {
   @ManyToOne(() => Restaurant, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'restaurant_id' })
   restaurant: Restaurant;
-
-  @OneToMany(() => Category, (category) => category.menu)
-  categories: Category[];
-
-  @OneToMany(() => FoodItem, (foodItem) => foodItem.menu)
-  foodItems: FoodItem[];
 }

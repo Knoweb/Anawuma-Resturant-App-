@@ -102,12 +102,6 @@ export const WebSocketProvider = ({ children }) => {
         }
 
         const protocol = window.location.protocol || 'http:';
-        const isPublicIp = !isLocalFrontend && host.split('.').length === 4;
-
-        if (isPublicIp) {
-          return `${protocol}//${host}`;
-        }
-
         return `${protocol}//${host}:3000`;
       }
 
