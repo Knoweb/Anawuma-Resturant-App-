@@ -317,4 +317,3 @@ export const billingAPI = {
 
 apiClient.sanitizeUrl = sanitizeUrl;
 export default apiClient;
-export { sanitizeUrl };
