@@ -266,15 +266,19 @@ const ManualRoomOrders = () => {
                     </div>
 
                     <div class="payment-method-selector mt-4 pt-3 border-top">
-                        <div class="small fw-bold text-muted mb-2 text-start px-2">PAYMENT METHOD <span class="text-danger">*</span></div>
+                        <div class="small fw-bold text-muted mb-2 text-start px-2">
+                            PAYMENT METHOD <span class="text-danger">*</span>
+                            ${account.isPrinted ? ' <span class="badge bg-secondary-soft text-secondary ms-1"><i class="fas fa-lock me-1"></i> LOCKED</span>' : ''}
+                        </div>
                         <div class="d-flex gap-2 px-2">
-                            <button id="modal-pay-cash-btn" class="btn flex-grow-1 payment-opt-btn ${account.selectedPaymentMethod !== 'CARD' ? 'active' : ''}">
+                            <button id="modal-pay-cash-btn" class="btn flex-grow-1 payment-opt-btn ${account.selectedPaymentMethod !== 'CARD' ? 'active' : ''}" ${account.isPrinted ? 'disabled style="opacity: 0.7; pointer-events: none;"' : ''}>
                                 <i class="fas fa-money-bill-wave me-2"></i> CASH
                             </button>
-                            <button id="modal-pay-card-btn" class="btn flex-grow-1 payment-opt-btn ${account.selectedPaymentMethod === 'CARD' ? 'active' : ''}">
+                            <button id="modal-pay-card-btn" class="btn flex-grow-1 payment-opt-btn ${account.selectedPaymentMethod === 'CARD' ? 'active' : ''}" ${account.isPrinted ? 'disabled style="opacity: 0.7; pointer-events: none;"' : ''}>
                                 <i class="fas fa-credit-card me-2"></i> CARD
                             </button>
                         </div>
+                        ${account.isPrinted ? '<div class="small text-muted mt-2 text-center px-2 italic">Payment method is locked after reprinting.</div>' : ''}
                     </div>
 
                     <div class="text-center mt-3 small italic">
