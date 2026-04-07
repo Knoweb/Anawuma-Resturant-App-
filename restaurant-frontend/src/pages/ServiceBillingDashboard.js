@@ -109,6 +109,12 @@ function PrintableInvoice({ invoice, restaurantName }) {
           <div className="pi-total-row pi-discount"><span>Discount</span><span>– {formatCurrency(invoice.discountAmount)}</span></div>
         )}
         <div className="pi-total-row pi-grand-total"><span>TOTAL</span><span>{formatCurrency(invoice.totalAmount)}</span></div>
+        {invoice.paymentMethod && invoice.paymentMethod !== 'NONE' && (
+          <div className="pi-total-row pi-paymethod" style={{ borderTop: '1px dashed #ccc', marginTop: '5px', paddingTop: '5px' }}>
+            <span>PAYMENT</span>
+            <span>{(invoice.paymentMethod || 'CASH').toUpperCase()}</span>
+          </div>
+        )}
       </div>
 
       <div className="pi-footer">Thank you for dining with us!</div>
@@ -230,11 +236,16 @@ function InvoiceModal({ invoice, restaurantName, onClose, onMarkServed, onMarkPa
 
               <button 
                 className="btn btn-success btn-sm" 
-                onClick={() => onMarkPaid(invoice.invoiceId, paymentMethod)}
+                onClick={async () => {
+                  const success = await onMarkPaid(invoice.invoiceId, paymentMethod);
+                  if (success) {
+                    handlePrint();
+                  }
+                }}
                 disabled={!canMarkPaid}
                 title={!canMarkPaid ? "Please complete Print and WhatsApp steps first" : ""}
               >
-                <i className="fas fa-check-circle me-1"></i>Mark Paid
+                <i className="fas fa-print me-1"></i>Pay & Print
               </button>
             </div>
           )}
@@ -793,8 +804,10 @@ const ServiceBillingDashboard = ({
       fetchInvoices();
       fetchSummary(); // Refresh stats too!
       showToast(`Invoice marked as paid via ${paymentMethod}!`);
+      return true;
     } catch (err) {
       showToast(err?.response?.data?.message || 'Failed.', 'error');
+      return false;
     }
   };
 

@@ -123,6 +123,10 @@ const ManualTableOrders = () => {
                             <span>TOTAL DUE:</span>
                             <span>Rs. ${parseFloat(account.totalAmount).toFixed(0)}</span>
                         </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 14px; margin-top: 5px; font-weight: bold; border-top: 1px dashed #000; padding-top: 5px;">
+                            <span>PAYMENT METHOD:</span>
+                            <span>${(account.selectedPaymentMethod || 'CASH').toUpperCase()}</span>
+                        </div>
                     </div>
                     <div class="footer">
                         <p>Please present this at the cashier for settlement.</p>
@@ -136,24 +140,31 @@ const ManualTableOrders = () => {
         printWindow.document.close();
     };
 
-    const finalizeCheckout = async (account, tableNo) => {
+    const finalizeCheckout = async (account, tableNo, paymentMethod = 'CASH', shouldPrint = false) => {
         try {
             const orderIds = account.orders.map(o => o.orderId);
             const response = await apiClient.post('/billing/manual/finalize', {
                 orderIds,
                 identifier: tableNo,
                 type: 'TABLE',
-                paymentMethod: account.selectedPaymentMethod || 'CASH'
+                paymentMethod
             });
 
             if (response.data) {
+                // Set the final state to the account before printing
+                account.selectedPaymentMethod = paymentMethod;
+                
+                if (shouldPrint) {
+                    printAccountBill(account, tableNo);
+                }
+
                 Swal.fire({
                     title: 'Payment Successful!',
-                    text: `Invoice #${response.data.invoiceNumber} has been marked as PAID and sent to Accountant.`,
+                    text: `Invoice #${response.data.invoiceNumber} has been marked as PAID.`,
                     icon: 'success',
                     confirmButtonColor: '#1cc88a'
                 }).then(() => {
-                    fetchAccounts(); // Refresh the list
+                    fetchAccounts(); 
                 });
             }
         } catch (error) {
@@ -258,13 +269,13 @@ const ManualTableOrders = () => {
                     </div>`,
             html: invoiceHtml,
             width: '500px',
-            showConfirmButton: !!account.isPrinted, // Only show PAID after printing
-            confirmButtonText: '<i class="fas fa-check-circle me-1"></i> Mark Paid',
+            showConfirmButton: true, 
+            confirmButtonText: '<i class="fas fa-check-circle me-1"></i> Pay & Print',
             cancelButtonText: 'Close',
-            denyButtonText: account.isPrinted ? '<i class="fas fa-print me-1"></i> Re-Print' : '<i class="fas fa-print me-1"></i> Print Bill',
+            denyButtonText: '<i class="fas fa-print me-1"></i> Print Draft',
             showDenyButton: true,
             confirmButtonColor: '#1cc88a', 
-            denyButtonColor: account.isPrinted ? '#858796' : '#2c3e50', 
+            denyButtonColor: '#2c3e50', 
             cancelButtonColor: '#858796',
             customClass: {
                 popup: 'modal-radius'
@@ -289,11 +300,12 @@ const ManualTableOrders = () => {
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                finalizeCheckout(account, tableNo, account.selectedPaymentMethod);
+                // PAY & PRINT
+                finalizeCheckout(account, tableNo, account.selectedPaymentMethod || 'CASH', true);
             } else if (result.isDenied) {
+                // PRINT DRAFT
                 printAccountBill(account, tableNo);
-                account.isPrinted = true; // Mark as printed locally 
-                // Reshow after print if they want
+                account.isPrinted = true; 
                 showInvoiceModal(account, tableNo);
             }
         });
