@@ -278,7 +278,7 @@ const ManualRoomOrders = () => {
             showConfirmButton: true, 
             confirmButtonText: '<i class="fas fa-check-circle me-1"></i> Pay',
             cancelButtonText: 'Close',
-            denyButtonText: '<i class="fas fa-print me-1"></i> Print Draft',
+            denyButtonText: '<i class="fas fa-print me-1"></i> Reprint',
             showDenyButton: true,
             confirmButtonColor: '#1cc88a', 
             denyButtonColor: '#2c3e50', 
