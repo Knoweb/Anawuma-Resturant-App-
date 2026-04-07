@@ -180,7 +180,7 @@ const ManualRoomOrders = () => {
 
                 Swal.fire({
                     title: 'Payment Successful!',
-                    text: `Invoice #${response.data.invoiceNumber} has been marked as PAID.`,
+                    text: `Invoice #${response.data.invoiceNumber} has been marked as PAID. The transaction details have also been sent to the accountant.`,
                     icon: 'success',
                     confirmButtonColor: '#1cc88a'
                 }).then(() => {
