@@ -41,7 +41,7 @@ const CustomerQROrder = ({ isManual = false }) => {
   const [selectedMenu, setSelectedMenu] = useState(null);
   const [activeItemDetail, setActiveItemDetail] = useState(null);
   const [modalQty, setModalQty] = useState(1);
-  const [modalOrderType, setModalOrderType] = useState('table');
+  const [modalOrderType, setModalOrderType] = useState('room');
   const [orderLocation, setOrderLocation] = useState('inside');
   const [modalOrderNotes, setModalOrderNotes] = useState('');
   const [cart, setCart] = useState([]);
@@ -51,7 +51,7 @@ const CustomerQROrder = ({ isManual = false }) => {
   const [loading, setLoading] = useState(true);
   const [showCart, setShowCart] = useState(false);
   const [manualTableNo, setManualTableNo] = useState('');
-  const [manualOrderType, setManualOrderType] = useState('TABLE');
+  const [manualOrderType, setManualOrderType] = useState('ROOM');
   const [orderSuccess, setOrderSuccess] = useState(null);
   const [showStatusScreen, setShowStatusScreen] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
@@ -1137,66 +1137,54 @@ const CustomerQROrder = ({ isManual = false }) => {
                     <button
                       className={`flex-grow-1 btn ${orderLocation === 'inside' ? 'btn-primary' : 'btn-outline-primary'}`}
                       style={orderLocation === 'inside' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }}
-                      onClick={() => setOrderLocation('inside')}
+                      onClick={() => {
+                        setOrderLocation('inside');
+                        setModalOrderType('room');
+                        setManualOrderType('ROOM');
+                        setManualTableNo('');
+                      }}
                     >
                       IN SIDE
                     </button>
                     <button
                       className={`flex-grow-1 btn ${orderLocation === 'outside' ? 'btn-primary' : 'btn-outline-primary'}`}
                       style={orderLocation === 'outside' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }}
-                      onClick={() => setOrderLocation('outside')}
+                      onClick={() => {
+                        setOrderLocation('outside');
+                        setModalOrderType('table');
+                        setManualOrderType('TABLE');
+                        setManualTableNo('');
+                      }}
                     >
                       OUTSIDE
                     </button>
                   </div>
                 </div>
 
-                {orderLocation === 'inside' && (
-                  <div className="fade-in">
-                    <div className="mb-4">
-                      <label className="d-block mb-2 fw-bold text-muted small">ORDER FOR *</label>
-                      <div className="d-flex gap-2">
+                <div className="fade-in">
+                  <div className="mb-4">
+                    <label className="d-block mb-2 fw-bold text-muted small">
+                      {orderLocation === 'inside' ? 'SELECT ROOM *' : 'SELECT TABLE *'}
+                    </label>
+                    <div className="d-flex flex-wrap gap-2">
+                      {Array.from({ length: 16 }, (_, i) => (i + 1).toString()).map(no => (
                         <button
-                          className={`flex-grow-1 btn ${modalOrderType === 'table' ? 'btn-primary' : 'btn-outline-primary'}`}
-                          style={modalOrderType === 'table' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }}
-                          onClick={() => { setModalOrderType('table'); setManualOrderType('TABLE'); }}
+                          key={no}
+                          className={`btn btn-sm ${manualTableNo === no ? 'btn-primary' : 'btn-outline-secondary'}`}
+                          style={manualTableNo === no ? { backgroundColor: '#266668', color: 'white', minWidth: '45px' } : { minWidth: '45px' }}
+                          onClick={() => setManualTableNo(no)}
                         >
-                          Table
+                          {no}
                         </button>
-                        <button
-                          className={`flex-grow-1 btn ${modalOrderType === 'room' ? 'btn-primary' : 'btn-outline-primary'}`}
-                          style={modalOrderType === 'room' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }}
-                          onClick={() => { setModalOrderType('room'); setManualOrderType('ROOM'); }}
-                        >
-                          Room
-                        </button>
+                      ))}
+                    </div>
+                    {manualTableNo && (
+                      <div className="mt-2 small text-success fw-bold">
+                         Selected: {orderLocation === 'inside' ? 'Room' : 'Table'} {manualTableNo}
                       </div>
-                    </div>
-
-                    <div className="mb-4">
-                      {modalOrderType === 'room' ? (
-                        <select
-                          className="form-control sketch-input"
-                          value={manualTableNo}
-                          onChange={(e) => setManualTableNo(e.target.value)}
-                        >
-                          <option value="">Select Room Number</option>
-                          {Array.from({ length: 16 }, (_, i) => (i + 1).toString()).map(room => (
-                            <option key={room} value={room}>Room {room}</option>
-                          ))}
-                        </select>
-                      ) : (
-                        <input
-                          type="text"
-                          className="form-control sketch-input"
-                          placeholder="Enter Table Number"
-                          value={manualTableNo}
-                          onChange={(e) => setManualTableNo(e.target.value)}
-                        />
-                      )}
-                    </div>
+                    )}
                   </div>
-                )}
+                </div>
 
                 <div className="mb-0">
                   <label className="d-block mb-2 fw-bold text-muted small">ORDER NOTES (OPTIONAL)</label>
