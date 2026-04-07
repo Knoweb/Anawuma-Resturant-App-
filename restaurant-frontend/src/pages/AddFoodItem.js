@@ -130,9 +130,11 @@ function AddFoodItem() {
           const imgData = new FormData();
           imgData.append('file', file);
           const res = await apiClient.post('/food-items/upload-image', imgData);
+          console.log(`Upload result for ${key}:`, res.data);
           imageUrls[key] = res.data.imageUrl;
         }
       }
+      console.log('Collected Image URLs:', imageUrls);
 
       // 2. Upload Video
       let videoUrl = '';
