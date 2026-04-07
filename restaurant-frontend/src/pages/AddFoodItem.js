@@ -128,7 +128,7 @@ function AddFoodItem() {
       for (const [key, file] of Object.entries(imageFiles)) {
         if (file) {
           const imgData = new FormData();
-          imgData.append('image', file);
+          imgData.append('file', file);
           const res = await apiClient.post('/food-items/upload-image', imgData);
           imageUrls[key] = res.data.imageUrl;
         }
@@ -138,7 +138,7 @@ function AddFoodItem() {
       let videoUrl = '';
       if (videoFile) {
         const vidData = new FormData();
-        vidData.append('video', videoFile);
+        vidData.append('file', videoFile);
         const res = await apiClient.post('/food-items/upload-video', vidData);
         videoUrl = res.data.videoUrl;
       }
