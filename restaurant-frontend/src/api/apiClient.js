@@ -45,8 +45,19 @@ const resolveApiBaseUrl = () => {
       return envApiUrl;
     }
 
-    // When the frontend is opened via LAN IP, default API calls to the same host.
+    // Default to the same host using relative-like absolute URL.
+    // If there is a proxy (standard production setup), hit port 80/443.
+    // If not, fall back to 3000 but only as a retry hint if possible.
     const protocol = window.location.protocol || 'http:';
+    
+    // Check if current host is a public IP (roughly)
+    const isPublicIp = !isLocalFrontend && host.split('.').length === 4;
+    
+    if (isPublicIp) {
+      // In production/public IP setups, we often use a proxy on port 80/443
+      return `${protocol}//${host}/api`;
+    }
+
     return `${protocol}//${host}:3000/api`;
   }
 
