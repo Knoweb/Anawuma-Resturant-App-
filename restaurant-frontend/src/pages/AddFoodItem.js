@@ -33,6 +33,12 @@ function AddFoodItem() {
     image3: null,
     image4: null
   });
+  const [imagePreviews, setImagePreviews] = useState({
+    image1: null,
+    image2: null,
+    image3: null,
+    image4: null
+  });
   const [videoFile, setVideoFile] = useState(null);
 
   useEffect(() => {
@@ -87,6 +93,7 @@ function AddFoodItem() {
           return;
         }
         setImageFiles(prev => ({ ...prev, [key]: file }));
+        setImagePreviews(prev => ({ ...prev, [key]: URL.createObjectURL(file) }));
       } else if (key === 'video') {
         if (file.size > 50 * 1024 * 1024) {
           Swal.fire('Error', 'Video size must be less than 50MB', 'error');
@@ -275,6 +282,25 @@ function AddFoodItem() {
                       <label className="form-label">Image {num}</label>
                       <input type="file" className="form-control" onChange={(e) => handleFileChange(e, `image${num}`)} accept="image/*" />
                       <small className="text-muted" style={{ fontSize: '0.75rem' }}>Optional (JPG, JPEG, PNG, GIF - Max 5MB)</small>
+                      
+                      {imagePreviews[`image${num}`] && (
+                        <div className="mt-2 position-relative" style={{ width: '100px', height: '100px' }}>
+                          <img 
+                            src={imagePreviews[`image${num}`]} 
+                            alt={`Preview ${num}`} 
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px', border: '1px solid #ddd' }} 
+                          />
+                          <button 
+                            type="button"
+                            className="btn-close position-absolute top-0 end-0 bg-white shadow-sm"
+                            style={{ padding: '4px', fontSize: '0.6rem', transform: 'translate(40%, -40%)' }}
+                            onClick={() => {
+                              setImageFiles(prev => ({ ...prev, [`image${num}`]: null }));
+                              setImagePreviews(prev => ({ ...prev, [`image${num}`]: null }));
+                            }}
+                          ></button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
