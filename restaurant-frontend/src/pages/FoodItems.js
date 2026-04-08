@@ -385,7 +385,7 @@ function ImageCarousel({ images, itemName }) {
 
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 3000); // Change image every 3 seconds
+    }, 4000); // Change image every 4 seconds
 
     return () => clearInterval(interval);
   }, [images.length]);
@@ -400,13 +400,26 @@ function ImageCarousel({ images, itemName }) {
   }
 
   return (
-    <div className="carousel-container h-100">
-      <img
-        src={images[currentIndex]}
-        alt={itemName}
-        className="carousel-image"
-        key={currentIndex}
-      />
+    <div className="carousel-container h-100 position-relative overflow-hidden">
+      {images.map((img, index) => (
+        <img
+          key={index}
+          src={img}
+          alt={`${itemName} ${index + 1}`}
+          className={`carousel-image ${index === currentIndex ? 'active' : ''}`}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            opacity: index === currentIndex ? 1 : 0,
+            transition: 'opacity 1.5s ease-in-out',
+            zIndex: index === currentIndex ? 1 : 1
+          }}
+        />
+      ))}
       {images.length > 1 && (
         <div className="carousel-dots">
           {images.map((_, idx) => (

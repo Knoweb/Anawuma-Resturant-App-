@@ -33,6 +33,8 @@ export class FoodItemsService {
     createFoodItemDto: CreateFoodItemDto,
     restaurantId: number,
   ): Promise<FoodItem> {
+    console.log('DEBUG: Backend Received CreateFoodItemDto:', JSON.stringify(createFoodItemDto, null, 2));
+    
     // Verify menu exists
     const menu = await this.menusRepository.findOne({
       where: {

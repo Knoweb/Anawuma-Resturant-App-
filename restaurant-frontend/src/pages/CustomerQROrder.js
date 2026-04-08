@@ -30,6 +30,66 @@ const normalizeWhatsAppNumber = (phone) => {
   return cleaned;
 };
 
+const FoodItemImageCarousel = ({ item, getImageUrl, className = "menu-thumb" }) => {
+  const images = [item.imageUrl1, item.imageUrl2, item.imageUrl3, item.imageUrl4].filter(img => !!img);
+  // If no specific image URL fields, check the old generic ones
+  if (images.length === 0 && (item.imageUrl || item.image || item.itemImage)) {
+    images.push(item.imageUrl || item.image || item.itemImage);
+  }
+  
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (images.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % images.length);
+    }, 4000); // Change image every 4 seconds
+    return () => clearInterval(interval);
+  }, [images.length]);
+
+  if (images.length === 0) {
+    return (
+      <div className="h-100 d-flex align-items-center justify-content-center bg-light opacity-50">
+        <i className="fas fa-utensils fa-2x"></i>
+      </div>
+    );
+  }
+
+  return (
+    <div className="carousel-wrapper h-100 w-100 position-relative overflow-hidden">
+      {images.map((img, index) => (
+        <img
+          key={index}
+          src={getImageUrl(img)}
+          alt={`${item.itemName} ${index + 1}`}
+          className={`${className} carousel-fade-img ${index === currentIndex ? 'active' : ''}`}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            opacity: index === currentIndex ? 1 : 0,
+            transition: 'opacity 1.5s ease-in-out',
+            zIndex: index === currentIndex ? 1 : 0
+          }}
+        />
+      ))}
+      {images.length > 1 && (
+        <div className="carousel-dots-overlay">
+          {images.map((_, index) => (
+            <div 
+              key={index} 
+              className={`carousel-dot ${index === currentIndex ? 'active' : ''}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const CustomerQROrder = ({ isManual = false }) => {
   const { tableKey, roomKey } = useParams();
   const navigate = useNavigate();
@@ -349,38 +409,35 @@ const CustomerQROrder = ({ isManual = false }) => {
 
   const [expandedCategories, setExpandedCategories] = useState(new Set());
 
-  const renderFoodCard = (item) => {
-    const displayImage = item.imageUrl1 || item.imageUrl2 || item.imageUrl3 || item.imageUrl4 || item.imageUrl || item.image || item.itemImage;
-    return (
       <div key={item.foodItemId} className="modern-category-card">
         <h2 className="category-title-red">{item.itemName}</h2>
         <div className="card-media-wrapper">
-          {displayImage ? (
-            <img src={getImageUrl(displayImage)} alt={item.itemName} className="menu-thumb" />
-          ) : (
-            <div className="h-100 d-flex align-items-center justify-content-center bg-light opacity-50">
-              <i className="fas fa-utensils fa-4x"></i>
-            </div>
-          )}
+          <FoodItemImageCarousel item={item} getImageUrl={getImageUrl} className="menu-thumb" />
 
           <div className="media-overlay flex-column">
             <div className="mb-2 text-white fw-bold" style={{ fontSize: '1.2rem', textShadow: '1px 1px 4px rgba(0,0,0,0.8)' }}>
               Rs. {parseFloat(item.price).toFixed(0)}
             </div>
             <div className="d-flex w-100 mb-1">
-              <button className="media-btn w-50" onClick={(e) => { e.stopPropagation(); Swal.fire({ title: item.itemName, text: item.description || 'No description available', imageUrl: displayImage ? getImageUrl(displayImage) : null, imageWidth: 400, imageHeight: 300 }); }}>Info</button>
+              <button className="media-btn w-50" onClick={(e) => { 
+                e.stopPropagation(); 
+                const displayImage = item.imageUrl1 || item.imageUrl2 || item.imageUrl3 || item.imageUrl4 || item.imageUrl || item.image || item.itemImage;
+                Swal.fire({ 
+                  title: item.itemName, 
+                  text: item.description || 'No description available', 
+                  imageUrl: displayImage ? getImageUrl(displayImage) : null, 
+                  imageWidth: 400, 
+                  imageHeight: 300 
+                }); 
+              }}>Info</button>
               <button className="media-btn w-50" onClick={(e) => { e.stopPropagation(); addToCart(item); }}>Add</button>
             </div>
             <button className="media-btn w-100 bg-primary-yellow text-dark fw-bold" onClick={(e) => { e.stopPropagation(); addToCart(item); }}>Select</button>
           </div>
         </div>
       </div>
-    );
-  };
 
   const renderManualItemCard = (item) => {
-    const displayImage = item.imageUrl1 || item.imageUrl2 || item.imageUrl3 || item.imageUrl4 || item.imageUrl || item.image || item.itemImage;
-
     return (
       <div
         key={item.foodItemId}
@@ -395,12 +452,8 @@ const CustomerQROrder = ({ isManual = false }) => {
           <span>{item.itemName}</span>
           <div className="small fw-bold" style={{ color: '#266668' }}>Rs. {parseFloat(item.price).toFixed(0)}</div>
         </div>
-        <div className="sketch-box-media" style={{ width: '100%', height: '140px', background: '#fafafa' }}>
-          {displayImage ? (
-            <img src={getImageUrl(displayImage)} alt={item.itemName} />
-          ) : (
-            <div className="sketch-placeholder"><i className="fas fa-utensils"></i></div>
-          )}
+        <div className="sketch-box-media" style={{ width: '100%', height: '140px', background: '#fafafa', position: 'relative' }}>
+          <FoodItemImageCarousel item={item} getImageUrl={getImageUrl} className="" />
         </div>
       </div>
     );
@@ -1177,8 +1230,8 @@ const CustomerQROrder = ({ isManual = false }) => {
             <div className="sketch-modal-body d-flex flex-wrap p-0">
               {/* Left Column: Product Info */}
               <div className="sketch-modal-left-col p-4 border-end">
-                <div className="sketch-modal-image-area mb-4">
-                  <img src={getImageUrl(activeItemDetail.imageUrl1 || activeItemDetail.imageUrl)} alt={activeItemDetail.itemName} />
+                <div className="sketch-modal-image-area mb-4" style={{ height: '300px', position: 'relative', overflow: 'hidden', borderRadius: '12px' }}>
+                  <FoodItemImageCarousel item={activeItemDetail} getImageUrl={getImageUrl} className="" />
                 </div>
 
                 <div className="sketch-modal-info-rows">
