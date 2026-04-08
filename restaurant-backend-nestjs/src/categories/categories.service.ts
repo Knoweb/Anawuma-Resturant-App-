@@ -5,11 +5,19 @@ import { Category } from './entities/category.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
+import { FoodItem } from '../food-items/entities/food-item.entity';
+import { OrderItem } from '../orders/entities/order-item.entity';
+import { In } from 'typeorm';
+
 @Injectable()
 export class CategoriesService {
   constructor(
     @InjectRepository(Category)
     private categoriesRepository: Repository<Category>,
+    @InjectRepository(FoodItem)
+    private foodItemsRepository: Repository<FoodItem>,
+    @InjectRepository(OrderItem)
+    private orderItemsRepository: Repository<OrderItem>,
   ) { }
 
   async create(
@@ -90,32 +98,21 @@ export class CategoriesService {
       throw new NotFoundException(`Category with ID ${id} not found`);
     }
 
-    // Check if any food items have been used in orders
+    // Force delete related food items and their order references
     if (category.foodItems && category.foodItems.length > 0) {
       const foodItemIds = category.foodItems.map((item) => item.foodItemId);
-
-      // Check if any of these food items are in orders
-      const ordersCount: any = await this.categoriesRepository.query(
-        `SELECT COUNT(*) as count FROM kitchen_order_items_tbl WHERE food_item_id IN (?)`,
-        [foodItemIds],
-      );
-
-      if (ordersCount[0]?.count > 0) {
-        throw new BadRequestException(
-          'Cannot delete category because its food items have been used in orders. Please archive or hide this category instead.',
-        );
-      }
+      // Delete all related order items
+      await this.orderItemsRepository.delete({ foodItemId: In(foodItemIds) });
+      // Delete all related food items
+      await this.foodItemsRepository.delete({ foodItemId: In(foodItemIds) });
     }
 
     try {
       await this.categoriesRepository.remove(category);
     } catch (error: any) {
-      if (error.code === 'ER_ROW_IS_REFERENCED_2') {
-        throw new BadRequestException(
-          'Cannot delete category because it is being referenced in orders or other records.',
-        );
-      }
-      throw error;
+      throw new BadRequestException(
+        'An error occurred while trying to delete the category. It might be referenced by other records.'
+      );
     }
   }
 

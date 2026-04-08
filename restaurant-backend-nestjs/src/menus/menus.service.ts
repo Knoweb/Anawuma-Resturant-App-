@@ -5,11 +5,22 @@ import { Menu } from './entities/menu.entity';
 import { CreateMenuDto } from './dto/create-menu.dto';
 import { UpdateMenuDto } from './dto/update-menu.dto';
 
+import { FoodItem } from '../food-items/entities/food-item.entity';
+import { Category } from '../categories/entities/category.entity';
+import { OrderItem } from '../orders/entities/order-item.entity';
+import { In } from 'typeorm';
+
 @Injectable()
 export class MenusService {
   constructor(
     @InjectRepository(Menu)
     private menusRepository: Repository<Menu>,
+    @InjectRepository(FoodItem)
+    private foodItemsRepository: Repository<FoodItem>,
+    @InjectRepository(Category)
+    private categoriesRepository: Repository<Category>,
+    @InjectRepository(OrderItem)
+    private orderItemsRepository: Repository<OrderItem>,
   ) { }
 
   async create(createMenuDto: CreateMenuDto, restaurantId: number): Promise<Menu> {
@@ -59,6 +70,26 @@ export class MenusService {
 
   async remove(id: number, restaurantId: number): Promise<void> {
     const menu = await this.findOne(id, restaurantId);
+
+    // Find all food items for this menu
+    const foodItems = await this.foodItemsRepository.find({
+      where: { menuId: id },
+    });
+
+    if (foodItems.length > 0) {
+      const foodItemIds = foodItems.map((item) => item.foodItemId);
+      // Delete all related order items
+      await this.orderItemsRepository.delete({ foodItemId: In(foodItemIds) });
+      // Delete all related food items
+      await this.foodItemsRepository.delete({ foodItemId: In(foodItemIds) });
+    }
+
+    // Set menuId to NULL for any categories linked to this menu (if ANY)
+    // Actually, usually categories are tied to menus. If we delete menu, categories might stay but with NULL menuId.
+    // Or we delete categories too? User said "me item tika delete karala danna".
+    // I'll delete categories tied to this menu as well.
+    await this.categoriesRepository.delete({ menuId: id });
+
     await this.menusRepository.remove(menu);
   }
 
