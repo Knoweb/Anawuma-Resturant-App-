@@ -1323,9 +1323,20 @@ const CustomerQROrder = ({ isManual = false }) => {
                     onChange={(e) => setManualTableNo(e.target.value)}
                   >
                     <option value="">Select {orderLocation === 'inside' ? 'Room' : 'Table'} Number</option>
-                    {Array.from({ length: 16 }, (_, i) => (i + 1).toString()).map(no => (
-                      <option key={no} value={no}>{orderLocation === 'inside' ? 'Room' : 'Table'} {no}</option>
-                    ))}
+                    {orderLocation === 'inside' ? (
+                      // Rooms: SV - 201 to SV - 216 and HB - 01 to HB - 08
+                      [
+                        ...Array.from({ length: 16 }, (_, i) => `SV - ${201 + i}`),
+                        ...Array.from({ length: 8 }, (_, i) => `HB - ${String(i + 1).padStart(2, '0')}`)
+                      ].map(no => (
+                        <option key={no} value={no}>{no}</option>
+                      ))
+                    ) : (
+                      // Tables (sticking to 1-25 or similar for tables for now)
+                      Array.from({ length: 25 }, (_, i) => (i + 1).toString()).map(no => (
+                        <option key={no} value={no}>Table {no}</option>
+                      ))
+                    )}
                   </select>
                 </div>
 
@@ -1385,9 +1396,9 @@ const CustomerQROrder = ({ isManual = false }) => {
                   <i className={`fas ${tableInfo?.isRoom || manualOrderType === 'ROOM' ? 'fa-concierge-bell' : 'fa-chair'}`}></i>
                   <span>
                     {isManual ? (
-                      `${manualOrderType === 'ROOM' ? 'Room' : 'Table'} ${manualTableNo || '?'}`
+                      manualTableNo ? manualTableNo : `${manualOrderType === 'ROOM' ? 'Select Room' : 'Select Table'}`
                     ) : (
-                      `${tableInfo?.isRoom ? 'Room' : 'Table'} ${tableInfo?.tableNo || tableInfo?.roomNo}`
+                      `${tableInfo?.isRoom ? '' : 'Table '}${tableInfo?.tableNo || tableInfo?.roomNo}`
                     )}
                   </span>
                 </div>

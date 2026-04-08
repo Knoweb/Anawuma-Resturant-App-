@@ -10,7 +10,10 @@ const ManualRoomOrders = () => {
     const [accounts, setAccounts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isProcessingManual, setIsProcessingManual] = useState(false);
-    const rooms = Array.from({ length: 16 }, (_, i) => (i + 1).toString());
+    const rooms = [
+        ...Array.from({ length: 16 }, (_, i) => `SV - ${201 + i}`),
+        ...Array.from({ length: 8 }, (_, i) => `HB - ${String(i + 1).padStart(2, '0')}`)
+    ];
 
     const fetchAccounts = async () => {
         try {
@@ -64,7 +67,7 @@ const ManualRoomOrders = () => {
                         <p style="margin:5px 0">Order Receipt</p>
                         <p style="margin:2px 0">#${order.orderNo}</p>
                         <p style="margin:2px 0">${new Date(order.createdAt).toLocaleString()}</p>
-                        ${roomNo ? `<p style="margin:2px 0">Room: ${roomNo}</p>` : ''}
+                        ${roomNo ? `<p style="margin:2px 0">${roomNo}</p>` : ''}
                     </div>
                     <div class="items">
                         ${order.orderItems.map(item => `
@@ -104,7 +107,7 @@ const ManualRoomOrders = () => {
         const content = `
             <html>
                 <head>
-                    <title>Print Bill - Room ${id}</title>
+                    <title>Bill - ${id}</title>
                     <style>
                         body { font-family: 'Courier New', Courier, monospace; padding: 20px; width: 350px; }
                         .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
@@ -119,7 +122,7 @@ const ManualRoomOrders = () => {
                     <div class="header">
                         <h1 style="margin:0">ANAWUMA</h1>
                         <h3>ACCUMULATED ROOM BILL</h3>
-                        <p>Room Number: ${id}</p>
+                        <p>${id}</p>
                         <p>Printed: ${new Date().toLocaleString()}</p>
                     </div>
                     
@@ -222,7 +225,7 @@ const ManualRoomOrders = () => {
                         <span>Date: ${dateStr}, ${timeStr}</span>
                     </div>
                     <div class="small d-flex justify-content-between px-2">
-                        <span>Room: ${roomNo}</span>
+                        <span>ID: ${roomNo}</span>
                         <span>Customer: Manual Order</span>
                     </div>
                 </div>
@@ -242,7 +245,7 @@ const ManualRoomOrders = () => {
                                 <tr class="bg-light shadow-none">
                                     <td colspan="4" class="text-start py-1" style="font-size: 0.9em; background: #f8f9fa;">
                                         <strong>Order #${order.orderNo}</strong> 
-                                        <span class="badge bg-secondary-soft text-secondary ms-2" style="font-size:0.8em">Room: ${order.originalRoomNo || order.roomNo || roomNo}</span>
+                                        <span class="badge bg-secondary-soft text-secondary ms-2" style="font-size:0.8em">ID: ${order.originalRoomNo || order.roomNo || roomNo}</span>
                                         <small class="text-muted ms-2">${new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
                                     </td>
                                 </tr>
@@ -349,7 +352,7 @@ const ManualRoomOrders = () => {
         if (!account) {
             Swal.fire({
                 title: 'Empty Room',
-                text: `Room ${roomNo} has no active manual orders.`,
+                text: `${roomNo} has no active manual orders.`,
                 icon: 'info',
                 confirmButtonColor: '#4e73df'
             });
@@ -364,7 +367,7 @@ const ManualRoomOrders = () => {
             <div class="order-group-header">
               <span class="order-group-no">
                 <i class="fas fa-receipt me-1"></i> ${order.orderNo}
-                <small class="badge bg-light text-dark ms-2 border">Room: ${order.originalRoomNo || order.roomNo}</small>
+                <small class="badge bg-light text-dark ms-2 border">ID: ${order.originalRoomNo || order.roomNo}</small>
                 <button class="btn btn-sm btn-light ms-2 print-single-order" data-index="${idx}" title="Print this order">
                   <i class="fas fa-print"></i>
                 </button>
@@ -404,7 +407,7 @@ const ManualRoomOrders = () => {
     `;
 
         Swal.fire({
-            title: `<h3 style="margin-bottom:0; color:#4e73df">Room ${roomNo} Bill</h3>`,
+            title: `<h3 style="margin-bottom:0; color:#4e73df">${roomNo} Bill</h3>`,
             html: itemsHtml,
             width: '600px',
             showCancelButton: true,
@@ -472,7 +475,7 @@ const ManualRoomOrders = () => {
                                                     <div className="account-icon-wrapper">
                                                         <i className="fas fa-hotel fa-2x"></i>
                                                     </div>
-                                                    <div className="account-id">ROOM {roomNo}</div>
+                                                    <div className="account-id">{roomNo}</div>
                                                     {account ? (
                                                         <>
                                                             <div className="badge bg-success-soft text-success order-count-badge">
