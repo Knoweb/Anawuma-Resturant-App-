@@ -98,11 +98,11 @@ export class CategoriesService {
       throw new NotFoundException(`Category with ID ${id} not found`);
     }
 
-    // Force delete related food items and their order references
+    // Force delete related food items and their order references (nullify references to keep history)
     if (category.foodItems && category.foodItems.length > 0) {
       const foodItemIds = category.foodItems.map((item) => item.foodItemId);
-      // Delete all related order items
-      await this.orderItemsRepository.delete({ foodItemId: In(foodItemIds) });
+      // Nullify all related order items to preserve history
+      await this.orderItemsRepository.update({ foodItemId: In(foodItemIds) }, { foodItemId: null });
       // Delete all related food items
       await this.foodItemsRepository.delete({ foodItemId: In(foodItemIds) });
     }

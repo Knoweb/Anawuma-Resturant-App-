@@ -16,8 +16,8 @@ export class OrderItem {
   @Column({ name: 'order_id', type: 'int' })
   orderId: number;
 
-  @Column({ name: 'food_item_id', type: 'int' })
-  foodItemId: number;
+  @Column({ name: 'food_item_id', type: 'int', nullable: true })
+  foodItemId: number | null;
 
   @Column({ name: 'item_name', type: 'varchar', length: 100 })
   itemName: string;
@@ -38,7 +38,7 @@ export class OrderItem {
   @JoinColumn({ name: 'order_id' })
   order: Order;
 
-  @ManyToOne(() => FoodItem, { nullable: true })
+  @ManyToOne(() => FoodItem, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'food_item_id' })
   foodItem: FoodItem;
 }

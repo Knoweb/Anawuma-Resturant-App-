@@ -260,9 +260,9 @@ export class FoodItemsService {
   async remove(id: number, restaurantId: number): Promise<void> {
     const foodItem = await this.findOne(id, restaurantId);
     
-    // Per user request: delete references in orders first
+    // Per user request: keep history by setting foodItemId to NULL
     try {
-      await this.orderItemsRepository.delete({ foodItemId: id });
+      await this.orderItemsRepository.update({ foodItemId: id }, { foodItemId: null });
     } catch (error) {
       console.error('Error deleting related order items:', error);
       throw new InternalServerErrorException('Failed to clear order references before deleting food item');
