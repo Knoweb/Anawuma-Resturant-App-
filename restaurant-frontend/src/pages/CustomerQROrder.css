@@ -1549,6 +1549,7 @@ h6 {
 /* --- Side-Pop Description for Manual Order Cards --- */
 .sketch-category-box {
   position: relative;
+  overflow: visible !important;
   /* Ensure container doesn't clip the tooltip */
 }
 
