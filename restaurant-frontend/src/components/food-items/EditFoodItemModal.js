@@ -171,10 +171,12 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
         if (file) {
           const uploadFormData = new FormData();
           uploadFormData.append('image', file);
-          const uploadRes = await apiClient.post('/food-items/upload-image', uploadFormData);
+          const uploadRes = await apiClient.post('/food-items/upload-image', uploadFormData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+          });
           
-          if (!uploadRes.data.success) {
-            throw new Error(`Failed to upload image ${i}: ${uploadRes.data.message}`);
+          if (!uploadRes.data.success || !uploadRes.data.imageUrl) {
+            throw new Error(`Failed to upload image ${i}: ${uploadRes.data.message || 'No URL returned'}`);
           }
           
           imageUrls[`imageUrl${i}`] = uploadRes.data.imageUrl;

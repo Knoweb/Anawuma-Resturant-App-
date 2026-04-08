@@ -129,26 +129,30 @@ function AddFoodItem() {
         if (file) {
           const imgData = new FormData();
           imgData.append('image', file); // Should be 'image' per backend controller
-          const res = await apiClient.post('/food-items/upload-image', imgData);
-          console.log(`Upload result for ${key}:`, res.data);
+          const res = await apiClient.post('/food-items/upload-image', imgData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+          });
+          console.log(`DEBUG: Upload result for ${key}:`, res.data);
           
-          if (!res.data.success) {
-            throw new Error(`Failed to upload ${key}: ${res.data.message}`);
+          if (!res.data.success || !res.data.imageUrl) {
+            throw new Error(`Failed to upload ${key}: ${res.data.message || 'No URL returned'}`);
           }
           
           imageUrls[key] = res.data.imageUrl;
         }
       }
-      console.log('Collected Image URLs:', imageUrls);
+      console.log('DEBUG: imageUrls after upload loop:', JSON.stringify(imageUrls, null, 2));
 
       // 2. Upload Video
       let videoUrl = '';
       if (videoFile) {
         const vidData = new FormData();
         vidData.append('video', videoFile); // Should be 'video' per backend controller
-        const res = await apiClient.post('/food-items/upload-video', vidData);
-        if (!res.data.success) {
-          throw new Error(`Failed to upload video: ${res.data.message}`);
+        const res = await apiClient.post('/food-items/upload-video', vidData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        if (!res.data.success || !res.data.videoUrl) {
+          throw new Error(`Failed to upload video: ${res.data.message || 'No URL returned'}`);
         }
         videoUrl = res.data.videoUrl;
       }
@@ -170,8 +174,10 @@ function AddFoodItem() {
         currencyId: 1 // Default to LKR
       };
 
-      console.log('Final Food Item Payload:', payload);
-      await apiClient.post('/food-items', payload);
+      console.log('DEBUG: Final Food Item Payload ready to send:', JSON.stringify(payload, null, 2));
+      
+      const createResponse = await apiClient.post('/food-items', payload);
+      console.log('DEBUG: Create Food Item Response:', createResponse.data);
       Swal.fire({ icon: 'success', title: 'Food item added!', timer: 2000, showConfirmButton: false });
       navigate('/menus/food-items');
     } catch (error) {
