@@ -159,10 +159,11 @@ function FoodItems() {
           fetchFoodItems();
         } catch (error) {
           console.error('Error deleting food item:', error);
+          const serverError = error.response?.data?.message || 'Failed to delete food item';
           Swal.fire({
             icon: 'error',
-            title: 'Error',
-            text: 'Failed to delete food item'
+            title: 'Delete Failed',
+            text: serverError
           });
         }
       }
