@@ -409,6 +409,8 @@ const CustomerQROrder = ({ isManual = false }) => {
 
   const [expandedCategories, setExpandedCategories] = useState(new Set());
 
+  const renderFoodCard = (item) => {
+    return (
       <div key={item.foodItemId} className="modern-category-card">
         <h2 className="category-title-red">{item.itemName}</h2>
         <div className="card-media-wrapper">
@@ -436,6 +438,8 @@ const CustomerQROrder = ({ isManual = false }) => {
           </div>
         </div>
       </div>
+    );
+  };
 
   const renderManualItemCard = (item) => {
     return (
