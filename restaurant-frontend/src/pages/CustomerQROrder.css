@@ -1546,3 +1546,35 @@ h6 {
   border-radius: 2px;
   margin-top: 10px;
 }
+/* --- Hover Description for Manual Order Cards --- */
+.sketch-category-box {
+  position: relative;
+}
+
+.sketch-hover-description {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(38, 102, 104, 0.95); /* Deep Teal brand color */
+  color: white;
+  padding: 15px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  backdrop-filter: blur(4px);
+  transform: translateY(10px);
+}
+
+.sketch-category-box:hover .sketch-hover-description {
+  opacity: 1;
+  transform: translateY(0);
+}

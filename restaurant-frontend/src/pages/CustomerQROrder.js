@@ -451,7 +451,11 @@ const CustomerQROrder = ({ isManual = false }) => {
           setActiveItemDetail(item);
           setModalQty(1);
         }}
+        style={{ position: 'relative', overflow: 'hidden' }}
       >
+        <div className="sketch-hover-description">
+          {item.description || 'No description available'}
+        </div>
         <div className="sketch-box-label">
           <span>{item.itemName}</span>
           <div className="small fw-bold" style={{ color: '#266668' }}>Rs. {parseFloat(item.price).toFixed(0)}</div>
