@@ -128,9 +128,14 @@ function AddFoodItem() {
       for (const [key, file] of Object.entries(imageFiles)) {
         if (file) {
           const imgData = new FormData();
-          imgData.append('file', file);
+          imgData.append('image', file); // Should be 'image' per backend controller
           const res = await apiClient.post('/food-items/upload-image', imgData);
           console.log(`Upload result for ${key}:`, res.data);
+          
+          if (!res.data.success) {
+            throw new Error(`Failed to upload ${key}: ${res.data.message}`);
+          }
+          
           imageUrls[key] = res.data.imageUrl;
         }
       }
@@ -140,8 +145,11 @@ function AddFoodItem() {
       let videoUrl = '';
       if (videoFile) {
         const vidData = new FormData();
-        vidData.append('file', videoFile);
+        vidData.append('video', videoFile); // Should be 'video' per backend controller
         const res = await apiClient.post('/food-items/upload-video', vidData);
+        if (!res.data.success) {
+          throw new Error(`Failed to upload video: ${res.data.message}`);
+        }
         videoUrl = res.data.videoUrl;
       }
 
