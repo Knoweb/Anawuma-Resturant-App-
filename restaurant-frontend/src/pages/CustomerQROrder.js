@@ -451,7 +451,7 @@ const CustomerQROrder = ({ isManual = false }) => {
           setActiveItemDetail(item);
           setModalQty(1);
         }}
-        style={{ position: 'relative', overflow: 'hidden' }}
+        style={{ position: 'relative' }}
       >
         <div className="sketch-hover-description">
           {item.description || 'No description available'}
