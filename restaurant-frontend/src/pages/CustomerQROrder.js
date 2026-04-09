@@ -1593,10 +1593,20 @@ const CustomerQROrder = ({ isManual = false }) => {
                       onChange={(e) => setManualTableNo(e.target.value)}
                       style={{ borderRadius: '8px', border: '1px solid #ddd' }}
                     >
-                      <option value="">Select {orderLocation === 'inside' ? 'Room' : 'Table'} Number</option>
-                      {Array.from({ length: 16 }, (_, i) => (i + 1).toString()).map(no => (
-                        <option key={no} value={no}>{orderLocation === 'inside' ? 'Room' : 'Table'} {no}</option>
-                      ))}
+                      {orderLocation === 'inside' ? (
+                        // Rooms: SV - 201 to SV - 216 and HB - 01 to HB - 08
+                        [
+                          ...Array.from({ length: 16 }, (_, i) => `SV - ${201 + i}`),
+                          ...Array.from({ length: 8 }, (_, i) => `HB - ${String(i + 1).padStart(2, '0')}`)
+                        ].map(no => (
+                          <option key={no} value={no}>{no}</option>
+                        ))
+                      ) : (
+                        // Tables
+                        Array.from({ length: 25 }, (_, i) => (i + 1).toString()).map(no => (
+                          <option key={no} value={no}>Table {no}</option>
+                        ))
+                      )}
                     </select>
                   </div>
                 ) : (
