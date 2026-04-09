@@ -10,7 +10,6 @@ import './KitchenKDS.css';
 const KitchenKDS = () => {
   const [orders, setOrders] = useState({
     NEW: [],
-    ACCEPTED: [],
     COOKING: [],
     READY: [],
   });
@@ -98,9 +97,8 @@ const KitchenKDS = () => {
       setLoading(true);
       
       // Fetch orders for each status
-      const [newOrders, acceptedOrders, cookingOrders, readyOrders] = await Promise.all([
+      const [newOrders, cookingOrders, readyOrders] = await Promise.all([
         apiClient.get('/orders', { params: { status: 'NEW' } }),
-        apiClient.get('/orders', { params: { status: 'ACCEPTED' } }),
         apiClient.get('/orders', { params: { status: 'COOKING' } }),
         apiClient.get('/orders', { params: { status: 'READY' } }),
       ]);
@@ -113,7 +111,6 @@ const KitchenKDS = () => {
       };
 
       const newOrdersList = extractOrders(newOrders.data);
-      const acceptedOrdersList = extractOrders(acceptedOrders.data);
       const cookingOrdersList = extractOrders(cookingOrders.data);
       const readyOrdersList = extractOrders(readyOrders.data);
 
@@ -159,7 +156,6 @@ const KitchenKDS = () => {
 
       setOrders({
         NEW: newOrdersList,
-        ACCEPTED: acceptedOrdersList,
         COOKING: cookingOrdersList,
         READY: readyOrdersList,
       });
@@ -259,12 +255,8 @@ const KitchenKDS = () => {
 
     switch (currentStatus) {
       case 'NEW':
-        nextStatus = 'ACCEPTED';
-        actionText = 'Accept Order';
-        break;
-      case 'ACCEPTED':
         nextStatus = 'COOKING';
-        actionText = 'Start Cooking';
+        actionText = 'Accept & Start Cooking';
         break;
       case 'COOKING':
         nextStatus = 'READY';
@@ -301,7 +293,7 @@ const KitchenKDS = () => {
              });
 
              // Auto-open print bill window for immediate hard copy (Requirement: Print when accepting)
-             printOrderBill({ ...order, status: 'ACCEPTED' });
+             printOrderBill({ ...order, status: 'COOKING' });
           }
 
           if (currentStatus === 'READY') {
@@ -814,15 +806,9 @@ const KitchenKDS = () => {
       switch (status) {
         case 'NEW':
           return {
-            text: 'Accept Order',
+            text: 'Accept & Cook',
             icon: 'fa-check',
             color: 'success',
-          };
-        case 'ACCEPTED':
-          return {
-            text: 'Start Cooking',
-            icon: 'fa-fire',
-            color: 'warning',
           };
         case 'COOKING':
           return {
@@ -934,7 +920,7 @@ const KitchenKDS = () => {
             </button>
           )}
 
-          {status === 'ACCEPTED' && (
+          {(status === 'NEW' || status === 'COOKING') && (
             <button
               className="btn btn-outline-primary btn-sm kds-action-btn"
               onClick={(e) => {
@@ -965,7 +951,6 @@ const KitchenKDS = () => {
   const getStatusIcon = (status) => {
     switch (status) {
       case 'NEW': return 'fa-plus-circle';
-      case 'ACCEPTED': return 'fa-check-circle';
       case 'COOKING': return 'fa-fire';
       case 'READY': return 'fa-bell';
       default: return 'fa-circle';
@@ -976,7 +961,7 @@ const KitchenKDS = () => {
     const safeOrders = Array.isArray(orders) ? orders : [];
 
     return (
-      <div className="col-md-3">
+      <div className="col-md-4">
         <div className={`status-column ${bgClass}`}>
           <h5 className="status-header">
             <i className={`fas ${getStatusIcon(status)} me-2`}></i>
@@ -1007,9 +992,7 @@ const KitchenKDS = () => {
     const getNextStatusButton = () => {
       switch (selectedOrder.currentStatus) {
         case 'NEW':
-          return { text: 'Accept Order', icon: 'fa-check', color: 'success', nextStatus: 'ACCEPTED' };
-        case 'ACCEPTED':
-          return { text: 'Start Cooking', icon: 'fa-fire', color: 'warning', nextStatus: 'COOKING' };
+          return { text: 'Accept & Cook', icon: 'fa-check', color: 'success', nextStatus: 'COOKING' };
         case 'COOKING':
           return { text: 'Mark Ready', icon: 'fa-bell', color: 'info', nextStatus: 'READY' };
         case 'READY':
@@ -1221,7 +1204,6 @@ const KitchenKDS = () => {
   const getStatusBadgeColor = (status) => {
     switch (status) {
       case 'NEW': return 'primary';
-      case 'ACCEPTED': return 'warning';
       case 'COOKING': return 'danger';
       case 'READY': return 'success';
       case 'SERVED': return 'secondary';
@@ -1281,12 +1263,6 @@ const KitchenKDS = () => {
                   status="NEW"
                   orders={orders.NEW}
                   bgClass="bg-new"
-                />
-                <StatusColumn
-                  title="Accepted"
-                  status="ACCEPTED"
-                  orders={orders.ACCEPTED}
-                  bgClass="bg-accepted"
                 />
                 <StatusColumn
                   title="Cooking"

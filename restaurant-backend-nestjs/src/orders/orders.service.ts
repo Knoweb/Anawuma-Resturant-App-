@@ -228,7 +228,6 @@ export class OrdersService {
 
     const activeStatuses: OrderStatus[] = [
       OrderStatus.NEW,
-      OrderStatus.ACCEPTED,
       OrderStatus.COOKING,
       OrderStatus.READY,
     ];
@@ -244,7 +243,6 @@ export class OrdersService {
 
     const statusCounts = {
       NEW: 0,
-      ACCEPTED: 0,
       COOKING: 0,
       READY: 0,
     };
@@ -264,7 +262,7 @@ export class OrdersService {
       .createQueryBuilder('order')
       .where('order.restaurantId = :restaurantId', { restaurantId })
       .andWhere('order.status IN (:...urgentStatuses)', {
-        urgentStatuses: [OrderStatus.NEW, OrderStatus.ACCEPTED],
+        urgentStatuses: [OrderStatus.NEW],
       })
       .andWhere('order.createdAt <= :urgentBefore', { urgentBefore })
       .getCount();
@@ -281,12 +279,10 @@ export class OrdersService {
     return {
       summary: {
         newCount: statusCounts.NEW,
-        acceptedCount: statusCounts.ACCEPTED,
         cookingCount: statusCounts.COOKING,
         readyCount: statusCounts.READY,
         totalOpen:
           statusCounts.NEW +
-          statusCounts.ACCEPTED +
           statusCounts.COOKING +
           statusCounts.READY,
         urgentCount,

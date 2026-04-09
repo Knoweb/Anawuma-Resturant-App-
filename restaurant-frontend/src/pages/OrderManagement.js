@@ -19,7 +19,7 @@ const OrderManagement = () => {
     orderNo: ''
   });
 
-  const orderStatuses = ['NEW', 'ACCEPTED', 'COOKING', 'READY', 'SERVED', 'CANCELLED'];
+  const orderStatuses = ['NEW', 'COOKING', 'READY', 'SERVED', 'CANCELLED'];
 
   useEffect(() => {
     fetchOrders();
@@ -148,7 +148,6 @@ const OrderManagement = () => {
   const getStatusBadgeClass = (status) => {
     const statusClasses = {
       NEW: 'badge-primary',
-      ACCEPTED: 'badge-warning',
       COOKING: 'badge-info',
       READY: 'badge-primary',
       SERVED: 'badge-success',

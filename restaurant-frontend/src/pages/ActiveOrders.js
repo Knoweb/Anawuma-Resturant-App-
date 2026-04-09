@@ -22,7 +22,7 @@ const ActiveOrders = () => {
     orderNo: ''
   });
 
-  const activeStatuses = ['NEW', 'ACCEPTED', 'COOKING', 'READY'];
+  const activeStatuses = ['NEW', 'COOKING', 'READY'];
 
   useEffect(() => {
     fetchOrders();
@@ -203,7 +203,6 @@ const ActiveOrders = () => {
   const getStatusBadgeClass = (status) => {
     const statusClasses = {
       NEW: 'badge-primary',
-      ACCEPTED: 'badge-warning',
       COOKING: 'badge-info',
       READY: 'badge-success'
     };

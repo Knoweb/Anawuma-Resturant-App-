@@ -20,7 +20,7 @@ import './OrderDetailsModal.css';
  */
 
 const OrderDetailsModal = ({ order, onClose, onStatusUpdate, readOnly = false }) => {
-  const orderStatuses = ['NEW', 'ACCEPTED', 'COOKING', 'READY', 'SERVED'];
+  const orderStatuses = ['NEW', 'COOKING', 'READY', 'SERVED'];
   const canSendBill = order.status === 'READY' || order.status === 'SERVED';
   
   // Get restaurant name (can be configured via env variable or fetched from backend)
@@ -45,7 +45,6 @@ const OrderDetailsModal = ({ order, onClose, onStatusUpdate, readOnly = false })
   const getStatusBadgeClass = (status) => {
     const statusClasses = {
       NEW: 'badge-primary',
-      ACCEPTED: 'badge-warning',
       COOKING: 'badge-info',
       READY: 'badge-primary',
       SERVED: 'badge-success',
@@ -383,7 +382,6 @@ const OrderDetailsModal = ({ order, onClose, onStatusUpdate, readOnly = false })
                       key={status}
                       className={`btn btn-sm btn-outline-${
                         status === 'NEW' ? 'primary' :
-                        status === 'ACCEPTED' ? 'warning' :
                         status === 'COOKING' ? 'info' :
                         status === 'READY' ? 'primary' :
                         'success'

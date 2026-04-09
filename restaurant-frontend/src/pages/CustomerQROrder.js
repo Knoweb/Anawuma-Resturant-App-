@@ -875,7 +875,6 @@ const CustomerQROrder = ({ isManual = false }) => {
   const getStatusDisplay = (status) => {
     const displays = {
       'NEW': { color: 'primary', icon: 'fa-clock', text: 'Order Received' },
-      'ACCEPTED': { color: 'info', icon: 'fa-check-circle', text: 'Kitchen Accepted' },
       'COOKING': { color: 'warning', icon: 'fa-fire', text: 'Being Prepared' },
       'READY': { color: 'success', icon: 'fa-check-double', text: 'Ready to Serve' },
       'SERVED': { color: 'success', icon: 'fa-utensils', text: 'Served' },
@@ -910,13 +909,9 @@ const CustomerQROrder = ({ isManual = false }) => {
 
               {/* Status Progress */}
               <div className="status-timeline mt-3">
-                <div className={`timeline-step ${['NEW', 'ACCEPTED', 'COOKING', 'READY', 'SERVED'].indexOf(currentOrderStatus || orderSuccess.status) >= 0 ? 'completed' : ''}`}>
+                <div className={`timeline-step ${['NEW', 'COOKING', 'READY', 'SERVED'].indexOf(currentOrderStatus || orderSuccess.status) >= 0 ? 'completed' : ''}`}>
                   <i className="fas fa-check-circle"></i>
                   <span>Received</span>
-                </div>
-                <div className={`timeline-step ${['ACCEPTED', 'COOKING', 'READY', 'SERVED'].indexOf(currentOrderStatus || orderSuccess.status) >= 0 ? 'completed' : ''}`}>
-                  <i className="fas fa-thumbs-up"></i>
-                  <span>Accepted</span>
                 </div>
                 <div className={`timeline-step ${['COOKING', 'READY', 'SERVED'].indexOf(currentOrderStatus || orderSuccess.status) >= 0 ? 'completed' : ''}`}>
                   <i className="fas fa-fire"></i>

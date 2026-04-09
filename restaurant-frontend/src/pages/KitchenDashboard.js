@@ -16,7 +16,6 @@ const KitchenDashboard = () => {
 
   const [ordersByStatus, setOrdersByStatus] = useState({
     NEW: [],
-    ACCEPTED: [],
     COOKING: [],
     READY: [],
   });
@@ -29,16 +28,14 @@ const KitchenDashboard = () => {
       setRefreshing(true);
       setError('');
 
-      const [newOrders, acceptedOrders, cookingOrders, readyOrders] = await Promise.all([
+      const [newOrders, cookingOrders, readyOrders] = await Promise.all([
         apiClient.get('/orders', { params: { status: 'NEW' } }),
-        apiClient.get('/orders', { params: { status: 'ACCEPTED' } }),
         apiClient.get('/orders', { params: { status: 'COOKING' } }),
         apiClient.get('/orders', { params: { status: 'READY' } }),
       ]);
 
       setOrdersByStatus({
         NEW: Array.isArray(newOrders.data) ? newOrders.data : [],
-        ACCEPTED: Array.isArray(acceptedOrders.data) ? acceptedOrders.data : [],
         COOKING: Array.isArray(cookingOrders.data) ? cookingOrders.data : [],
         READY: Array.isArray(readyOrders.data) ? readyOrders.data : [],
       });
@@ -89,20 +86,18 @@ const KitchenDashboard = () => {
 
   const summary = useMemo(() => {
     const newCount = ordersByStatus.NEW.length;
-    const acceptedCount = ordersByStatus.ACCEPTED.length;
     const cookingCount = ordersByStatus.COOKING.length;
     const readyCount = ordersByStatus.READY.length;
 
-    const urgentOrders = [...ordersByStatus.NEW, ...ordersByStatus.ACCEPTED].filter(
+    const urgentOrders = [...ordersByStatus.NEW].filter(
       (order) => getOrderAgeMinutes(order.createdAt) >= URGENT_THRESHOLD_MINUTES,
     );
 
     return {
       newCount,
-      acceptedCount,
       cookingCount,
       readyCount,
-      totalOpen: newCount + acceptedCount + cookingCount + readyCount,
+      totalOpen: newCount + cookingCount + readyCount,
       urgentCount: urgentOrders.length,
     };
   }, [ordersByStatus]);
@@ -110,7 +105,6 @@ const KitchenDashboard = () => {
   const queueOrders = useMemo(() => {
     const rows = [
       ...ordersByStatus.NEW,
-      ...ordersByStatus.ACCEPTED,
       ...ordersByStatus.COOKING,
       ...ordersByStatus.READY,
     ];
@@ -132,8 +126,6 @@ const KitchenDashboard = () => {
     switch (status) {
       case 'NEW':
         return 'kd-status-new';
-      case 'ACCEPTED':
-        return 'kd-status-accepted';
       case 'COOKING':
         return 'kd-status-cooking';
       case 'READY':
@@ -183,12 +175,6 @@ const KitchenDashboard = () => {
                 </div>
               </div>
               <div className="col-xl-2 col-md-4 col-6">
-                <div className="kd-stat-card kd-stat-accepted">
-                  <div className="kd-stat-label">Accepted</div>
-                  <div className="kd-stat-value">{summary.acceptedCount}</div>
-                </div>
-              </div>
-              <div className="col-xl-2 col-md-4 col-6">
                 <div className="kd-stat-card kd-stat-cooking">
                   <div className="kd-stat-label">Cooking</div>
                   <div className="kd-stat-value">{summary.cookingCount}</div>
@@ -202,7 +188,7 @@ const KitchenDashboard = () => {
               </div>
               <div className="col-xl-2 col-md-4 col-6">
                 <div className="kd-stat-card kd-stat-total">
-                  <div className="kd-stat-label">Open Total</div>
+                  <div className="kd-stat-label">Total Active</div>
                   <div className="kd-stat-value">{summary.totalOpen}</div>
                 </div>
               </div>
@@ -276,7 +262,7 @@ const KitchenDashboard = () => {
             </div>
 
             <div className="kd-footnote">
-              Auto-refresh every 15 seconds. Urgent orders are NEW or ACCEPTED for 15+ minutes.
+              Auto-refresh every 15 seconds. Urgent orders are NEW for 15+ minutes.
             </div>
           </div>
         </div>
