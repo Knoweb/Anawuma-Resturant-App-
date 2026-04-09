@@ -411,7 +411,14 @@ const CustomerQROrder = ({ isManual = false }) => {
 
   const renderFoodCard = (item) => {
     return (
-      <div key={item.foodItemId} className="modern-category-card">
+      <div 
+        key={item.foodItemId} 
+        className="modern-category-card"
+        onClick={() => {
+          setActiveItemDetail(item);
+          setModalQty(1);
+        }}
+      >
         <h2 className="category-title-red">{item.itemName}</h2>
         <div className="card-media-wrapper">
           <FoodItemImageCarousel item={item} getImageUrl={getImageUrl} className="menu-thumb" />
@@ -421,20 +428,42 @@ const CustomerQROrder = ({ isManual = false }) => {
               Rs. {parseFloat(item.price).toFixed(0)}
             </div>
             <div className="d-flex w-100 mb-1">
-              <button className="media-btn w-50" onClick={(e) => { 
-                e.stopPropagation(); 
-                const displayImage = item.imageUrl1 || item.imageUrl2 || item.imageUrl3 || item.imageUrl4 || item.imageUrl || item.image || item.itemImage;
-                Swal.fire({ 
-                  title: item.itemName, 
-                  text: item.description || 'No description available', 
-                  imageUrl: displayImage ? getImageUrl(displayImage) : null, 
-                  imageWidth: 400, 
-                  imageHeight: 300 
-                }); 
-              }}>Info</button>
-              <button className="media-btn w-50" onClick={(e) => { e.stopPropagation(); addToCart(item); }}>Add</button>
+              <button 
+                className="media-btn w-50" 
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  const displayImage = item.imageUrl1 || item.imageUrl2 || item.imageUrl3 || item.imageUrl4 || item.imageUrl || item.image || item.itemImage;
+                  Swal.fire({ 
+                    title: item.itemName, 
+                    text: item.description || 'No description available', 
+                    imageUrl: displayImage ? getImageUrl(displayImage) : null, 
+                    imageWidth: 400, 
+                    imageHeight: 300 
+                  }); 
+                }}
+              >
+                Info
+              </button>
+              <button 
+                className="media-btn w-50" 
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  addToCart(item); 
+                }}
+              >
+                Add
+              </button>
             </div>
-            <button className="media-btn w-100 bg-primary-yellow text-dark fw-bold" onClick={(e) => { e.stopPropagation(); addToCart(item); }}>Select</button>
+            <button 
+              className="media-btn w-100 bg-primary-yellow text-dark fw-bold" 
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                setActiveItemDetail(item);
+                setModalQty(1);
+              }}
+            >
+              Order Now
+            </button>
           </div>
         </div>
       </div>
@@ -1283,69 +1312,74 @@ const CustomerQROrder = ({ isManual = false }) => {
 
               {/* Right Column: Order Fields */}
               <div className="sketch-modal-right-col flex-grow-1 p-4 bg-light">
-                <div className="mb-4">
-                  <label className="d-block mb-2 fw-bold text-muted small">ORDER LOCATION *</label>
-                  <div className="d-flex gap-2">
-                    <button
-                      className={`flex-grow-1 btn ${orderLocation === 'inside' ? 'btn-primary' : 'btn-outline-primary'}`}
-                      style={orderLocation === 'inside' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }}
-                      onClick={() => {
-                        setOrderLocation('inside');
-                        setModalOrderType('room');
-                        setManualOrderType('ROOM');
-                        setManualTableNo('');
-                      }}
-                    >
-                      IN SIDE
-                    </button>
-                    <button
-                      className={`flex-grow-1 btn ${orderLocation === 'outside' ? 'btn-primary' : 'btn-outline-primary'}`}
-                      style={orderLocation === 'outside' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }}
-                      onClick={() => {
-                        setOrderLocation('outside');
-                        setModalOrderType('table');
-                        setManualOrderType('TABLE');
-                        setManualTableNo('');
-                      }}
-                    >
-                      OUTSIDE
-                    </button>
-                  </div>
-                </div>
+                {isManual && (
+                  <>
+                    <div className="mb-4">
+                      <label className="d-block mb-2 fw-bold text-muted small">ORDER LOCATION *</label>
+                      <div className="d-flex gap-2">
+                        <button
+                          className={`flex-grow-1 btn ${orderLocation === 'inside' ? 'btn-primary' : 'btn-outline-primary'}`}
+                          style={orderLocation === 'inside' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }}
+                          onClick={() => {
+                            setOrderLocation('inside');
+                            setModalOrderType('room');
+                            setManualOrderType('ROOM');
+                            setManualTableNo('');
+                          }}
+                        >
+                          IN SIDE
+                        </button>
+                        <button
+                          className={`flex-grow-1 btn ${orderLocation === 'outside' ? 'btn-primary' : 'btn-outline-primary'}`}
+                          style={orderLocation === 'outside' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }}
+                          onClick={() => {
+                            setOrderLocation('outside');
+                            setModalOrderType('table');
+                            setManualOrderType('TABLE');
+                            setManualTableNo('');
+                          }}
+                        >
+                          OUTSIDE
+                        </button>
+                      </div>
+                    </div>
 
-                <div className="mb-4 fade-in">
-                  <label className="d-block mb-2 fw-bold text-muted small">
-                    SELECT {orderLocation === 'inside' ? 'ROOM' : 'TABLE'} *
-                  </label>
-                  <select
-                    className="form-control sketch-input"
-                    value={manualTableNo}
-                    onChange={(e) => setManualTableNo(e.target.value)}
-                  >
-                    <option value="">Select {orderLocation === 'inside' ? 'Room' : 'Table'} Number</option>
-                    {orderLocation === 'inside' ? (
-                      // Rooms: SV - 201 to SV - 216 and HB - 01 to HB - 08
-                      [
-                        ...Array.from({ length: 16 }, (_, i) => `SV - ${201 + i}`),
-                        ...Array.from({ length: 8 }, (_, i) => `HB - ${String(i + 1).padStart(2, '0')}`)
-                      ].map(no => (
-                        <option key={no} value={no}>{no}</option>
-                      ))
-                    ) : (
-                      // Tables (sticking to 1-25 or similar for tables for now)
-                      Array.from({ length: 25 }, (_, i) => (i + 1).toString()).map(no => (
-                        <option key={no} value={no}>Table {no}</option>
-                      ))
-                    )}
-                  </select>
-                </div>
+                    <div className="mb-4 fade-in">
+                      <label className="d-block mb-2 fw-bold text-muted small">
+                        SELECT {orderLocation === 'inside' ? 'ROOM' : 'TABLE'} *
+                      </label>
+                      <select
+                        className="form-control sketch-input"
+                        value={manualTableNo}
+                        onChange={(e) => setManualTableNo(e.target.value)}
+                        style={{ borderRadius: '8px', border: '1px solid #ddd' }}
+                      >
+                        <option value="">Select {orderLocation === 'inside' ? 'Room' : 'Table'} Number</option>
+                        {orderLocation === 'inside' ? (
+                          // Rooms: SV - 201 to SV - 216 and HB - 01 to HB - 08
+                          [
+                            ...Array.from({ length: 16 }, (_, i) => `SV - ${201 + i}`),
+                            ...Array.from({ length: 8 }, (_, i) => `HB - ${String(i + 1).padStart(2, '0')}`)
+                          ].map(no => (
+                            <option key={no} value={no}>{no}</option>
+                          ))
+                        ) : (
+                          // Tables
+                          Array.from({ length: 25 }, (_, i) => (i + 1).toString()).map(no => (
+                            <option key={no} value={no}>Table {no}</option>
+                          ))
+                        )}
+                      </select>
+                    </div>
+                  </>
+                )}
 
                 <div className="mb-0">
                   <label className="d-block mb-2 fw-bold text-muted small">ORDER NOTES (OPTIONAL)</label>
                   <textarea
                     className="form-control sketch-input"
                     placeholder="Any special requests or instructions..."
-                    rows="4"
+                    rows={isManual ? "4" : "8"}
                     value={modalOrderNotes}
                     onChange={(e) => setModalOrderNotes(e.target.value)}
                   ></textarea>
