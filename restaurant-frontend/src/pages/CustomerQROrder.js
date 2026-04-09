@@ -582,7 +582,7 @@ const CustomerQROrder = ({ isManual = false }) => {
       ));
     } else {
       setCart([...cart, {
-        foodItemId: item.foodItemId,
+        foodItemId: item.foodItemId || item.id,
         name: item.itemName,
         price: parseFloat(item.price),
         qty: modalQty,
@@ -638,8 +638,8 @@ const CustomerQROrder = ({ isManual = false }) => {
         whatsappNumber: normalizedWhatsapp || null,
         notes: orderNotes.trim() || null,
         items: cart.map(item => ({
-          foodItemId: item.foodItemId,
-          qty: item.qty,
+          foodItemId: parseInt(item.foodItemId),
+          qty: parseInt(item.qty),
           notes: item.notes || null
         }))
       };
@@ -719,9 +719,19 @@ const CustomerQROrder = ({ isManual = false }) => {
       }
 
     } catch (error) {
-      console.error('Order error:', error);
-      const errorMsg = error.response?.data?.message || 'Failed to place order. Please try again.';
-      Swal.fire('Order Failed', errorMsg, 'error');
+      console.error('Order error full:', error);
+      let errorMsg = error.response?.data?.message || error.message || 'Failed to place order. Please try again.';
+      
+      if (Array.isArray(errorMsg)) {
+        errorMsg = errorMsg.join(', ');
+      }
+      
+      Swal.fire({
+        title: 'Order Failed',
+        text: String(errorMsg),
+        icon: 'error',
+        confirmButtonColor: '#266668'
+      });
     }
   };
 
