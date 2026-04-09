@@ -1593,6 +1593,7 @@ const CustomerQROrder = ({ isManual = false }) => {
                       onChange={(e) => setManualTableNo(e.target.value)}
                       style={{ borderRadius: '8px', border: '1px solid #ddd' }}
                     >
+                      <option value="">Select {orderLocation === 'inside' ? 'Room' : 'Table'} Number</option>
                       {orderLocation === 'inside' ? (
                         // Rooms: SV - 201 to SV - 216 and HB - 01 to HB - 08
                         [
