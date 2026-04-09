@@ -177,36 +177,36 @@ function Sidebar() {
           {canAccessManualOrder && (
             <li className={`has-submenu ${menuStates.manualDashboard ? 'open' : ''}`}>
               <a href="#" onClick={(e) => { e.preventDefault(); toggleMenu('manualDashboard'); }}>
-                <i className="fas fa-file-invoice-dollar"></i>
-                <span>Manual Order Bills</span>
+                <i className="fas fa-cash-register"></i>
+                <span>Cashier Dashboard</span>
                 <i className={`fas fa-chevron-${menuStates.manualDashboard ? 'down' : 'right'} submenu-arrow`}></i>
               </a>
               <ul className="submenu" style={{ display: menuStates.manualDashboard ? 'block' : 'none' }}>
+                <li className={isActive('/cashier/manual-order')}>
+                  <Link to="/cashier/manual-order">
+                    <i className="fas fa-plus-circle me-2"></i>
+                    Create Manual Order
+                  </Link>
+                </li>
                 <li className={isActive('/manual-orders/tables')}>
                   <Link to="/manual-orders/tables">
+                    <i className="fas fa-table me-2"></i>
                     Table Orders
                   </Link>
                 </li>
                 <li className={isActive('/manual-orders/rooms')}>
                   <Link to="/manual-orders/rooms">
+                    <i className="fas fa-hotel me-2"></i>
                     Room Orders
                   </Link>
                 </li>
                 <li className={isActive('/manual-orders/transfer')}>
                   <Link to="/manual-orders/transfer">
+                    <i className="fas fa-exchange-alt me-2"></i>
                     Transfer Room
                   </Link>
                 </li>
               </ul>
-            </li>
-          )}
-
-          {canAccessManualOrder && (
-            <li className={isActive('/cashier/manual-order')}>
-              <Link to="/cashier/manual-order" onClick={closeSubmenus}>
-                <i className="fas fa-plus-circle"></i>
-                <span>Create Manual Order</span>
-              </Link>
             </li>
           )}
 
