@@ -9,6 +9,25 @@ function DailyReport() {
   const [selectedDate, setSelectedDate] = useState('');
   const [reportData, setReportData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [cashiers, setCashiers] = useState([]);
+  const [selectedCashier, setSelectedCashier] = useState('all');
+
+  useEffect(() => {
+    fetchCashiers();
+  }, []);
+
+  const fetchCashiers = async () => {
+    try {
+      const response = await apiClient.get('/auth/restaurant-staff');
+      if (response.data.success) {
+        // Filter only cashiers from the staff list
+        const onlyCashiers = response.data.data.filter(s => s.role === 'cashier' || s.role === 'admin');
+        setCashiers(onlyCashiers);
+      }
+    } catch (error) {
+      console.error('Error fetching cashiers:', error);
+    }
+  };
 
   const handleGenerateReport = async () => {
     if (!selectedDate) {
@@ -145,6 +164,19 @@ function DailyReport() {
                     max={new Date().toISOString().split('T')[0]}
                   />
                 </div>
+                <div className="form-group">
+                  <label>Cashier</label>
+                  <select 
+                    className="form-control"
+                    value={selectedCashier}
+                    onChange={(e) => setSelectedCashier(e.target.value)}
+                  >
+                    <option value="all">All Cashiers</option>
+                    {cashiers.map(c => (
+                      <option key={c.adminId} value={c.email}>{c.email}</option>
+                    ))}
+                  </select>
+                </div>
                 <button
                   className="btn btn-primary generate-btn"
                   onClick={handleGenerateReport}
@@ -231,8 +263,10 @@ function DailyReport() {
                     </thead>
                     <tbody>
                       {reportData.rows.length > 0 ? (
-                        reportData.rows.map((row, index) => (
-                          <tr key={index}>
+                        reportData.rows
+                          .filter(row => selectedCashier === 'all' || row.cashier === selectedCashier)
+                          .map((row, index) => (
+                            <tr key={index}>
                             <td>{row.orderNo}</td>
                             <td>{row.tableNo}</td>
                             <td>{new Date(row.createdAt).toLocaleString()}</td>
@@ -260,7 +294,15 @@ function DailyReport() {
                       <tfoot>
                         <tr className="total-row">
                           <td colSpan="8" className="text-end"><strong>Grand Total:</strong></td>
-                          <td><strong>{formatCurrency(reportData.totalRevenue)}</strong></td>
+                          <td>
+                            <strong>
+                              {formatCurrency(
+                                reportData.rows
+                                  .filter(row => selectedCashier === 'all' || row.cashier === selectedCashier)
+                                  .reduce((sum, row) => sum + parseFloat(row.lineTotal), 0)
+                              )}
+                            </strong>
+                          </td>
                         </tr>
                       </tfoot>
                     )}
