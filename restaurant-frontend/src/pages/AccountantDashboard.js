@@ -456,47 +456,86 @@ function AccountantDashboard() {
                 ) : pendingTransactions.length === 0 ? (
                   <div className="text-muted text-center py-3">No pending transfer requests for this date.</div>
                 ) : (
-                  <div className="table-responsive">
-                    <table className="table table-sm table-hover mb-0">
-                      <thead>
-                        <tr>
-                          <th style={{ width: '40px' }}>
-                            <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} />
-                          </th>
-                          <th>Invoice</th>
-                          <th>Order</th>
-                          <th>Table</th>
-                          <th>Customer</th>
-                          <th>Total</th>
-                          <th>Payment</th>
-                          <th>Sent At</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {pendingTransactions.map((invoice) => (
-                          <tr key={invoice.invoiceId}>
-                            <td>
-                              <input
-                                type="checkbox"
-                                checked={selectedIds.has(invoice.invoiceId)}
-                                onChange={() => toggleSelection(invoice.invoiceId)}
-                              />
-                            </td>
-                            <td><code>{invoice.invoiceNumber}</code></td>
-                            <td>{invoice.orderNo || invoice.orderId}</td>
-                            <td>{invoice.tableNo || '-'}</td>
-                            <td>{invoice.customerName || '-'}</td>
-                            <td>{formatCurrency(invoice.totalAmount)}</td>
-                            <td>
-                              <span className={`badge ${invoice.paymentMethod === 'CARD' ? 'bg-info' : 'bg-secondary'}`}>
-                                {invoice.paymentMethod || 'CASH'}
-                              </span>
-                            </td>
-                            <td>{formatDateTime(invoice.sentToAccountantAt)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  <div>
+                    {Object.entries(
+                      pendingTransactions.reduce((groups, invoice) => {
+                        const cashierName = invoice.createdBy?.email || 'Unknown Cashier';
+                        if (!groups[cashierName]) groups[cashierName] = [];
+                        groups[cashierName].push(invoice);
+                        return groups;
+                      }, {})
+                    ).map(([cashierName, transactions]) => (
+                      <div key={cashierName} className="mb-4">
+                        <h6 className="fw-bold text-primary mb-2">
+                          <i className="fas fa-user-tag me-2"></i>
+                          Pending From: {cashierName}
+                        </h6>
+                        <div className="table-responsive">
+                          <table className="table table-sm table-hover mb-0 border">
+                            <thead className="table-light">
+                              <tr>
+                                <th style={{ width: '40px' }}>
+                                  <input 
+                                    type="checkbox" 
+                                    checked={transactions.every(t => selectedIds.has(t.invoiceId))} 
+                                    onChange={(e) => {
+                                      const ids = transactions.map(t => t.invoiceId);
+                                      setSelectedIds(prev => {
+                                        const next = new Set(prev);
+                                        if (e.target.checked) {
+                                          ids.forEach(id => next.add(id));
+                                        } else {
+                                          ids.forEach(id => next.delete(id));
+                                        }
+                                        return next;
+                                      });
+                                    }} 
+                                  />
+                                </th>
+                                <th>Invoice</th>
+                                <th>Order</th>
+                                <th>Table</th>
+                                <th>Customer</th>
+                                <th>Total</th>
+                                <th>Payment</th>
+                                <th>Sent At</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {transactions.map((invoice) => (
+                                <tr key={invoice.invoiceId}>
+                                  <td>
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedIds.has(invoice.invoiceId)}
+                                      onChange={() => toggleSelection(invoice.invoiceId)}
+                                    />
+                                  </td>
+                                  <td><code>{invoice.invoiceNumber}</code></td>
+                                  <td>{invoice.orderNo || invoice.orderId}</td>
+                                  <td>{invoice.tableNo || '-'}</td>
+                                  <td>{invoice.customerName || '-'}</td>
+                                  <td>{formatCurrency(invoice.totalAmount)}</td>
+                                  <td>
+                                    <span className={`badge ${invoice.paymentMethod === 'CARD' ? 'bg-info' : 'bg-secondary'}`}>
+                                      {invoice.paymentMethod || 'CASH'}
+                                    </span>
+                                  </td>
+                                  <td>{formatDateTime(invoice.sentToAccountantAt)}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                            <tfoot className="table-light">
+                              <tr>
+                                <td colSpan="5" className="text-end fw-bold">Subtotal for {cashierName}:</td>
+                                <td className="fw-bold">{formatCurrency(transactions.reduce((sum, t) => sum + parseFloat(t.totalAmount || 0), 0))}</td>
+                                <td colSpan="2"></td>
+                              </tr>
+                            </tfoot>
+                          </table>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -516,37 +555,61 @@ function AccountantDashboard() {
                 ) : acceptedTransactions.length === 0 ? (
                   <div className="text-muted text-center py-3">No accepted transfers for this date.</div>
                 ) : (
-                  <div className="table-responsive">
-                    <table className="table table-sm table-striped mb-0">
-                      <thead>
-                        <tr>
-                          <th>Invoice</th>
-                          <th>Order</th>
-                          <th>Table</th>
-                          <th>Customer</th>
-                          <th>Total</th>
-                          <th>Payment</th>
-                          <th>Accepted At</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {acceptedTransactions.map((invoice) => (
-                          <tr key={invoice.invoiceId}>
-                            <td><code>{invoice.invoiceNumber}</code></td>
-                            <td>{invoice.orderNo || invoice.orderId}</td>
-                            <td>{invoice.tableNo || '-'}</td>
-                            <td>{invoice.customerName || '-'}</td>
-                            <td>{formatCurrency(invoice.totalAmount)}</td>
-                            <td>
-                              <span className={`badge ${invoice.paymentMethod === 'CARD' ? 'bg-info' : 'bg-secondary'}`}>
-                                {invoice.paymentMethod || 'CASH'}
-                              </span>
-                            </td>
-                            <td>{formatDateTime(invoice.acceptedByAccountantAt)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  <div>
+                    {Object.entries(
+                      acceptedTransactions.reduce((groups, invoice) => {
+                        const cashierName = invoice.createdBy?.email || 'Unknown Cashier';
+                        if (!groups[cashierName]) groups[cashierName] = [];
+                        groups[cashierName].push(invoice);
+                        return groups;
+                      }, {})
+                    ).map(([cashierName, transactions]) => (
+                      <div key={cashierName} className="mb-4">
+                        <h6 className="fw-bold text-success mb-2">
+                          <i className="fas fa-check-circle me-2"></i>
+                          Accepted From: {cashierName}
+                        </h6>
+                        <div className="table-responsive">
+                          <table className="table table-sm table-striped mb-0 border">
+                            <thead className="table-light">
+                              <tr>
+                                <th>Invoice</th>
+                                <th>Order</th>
+                                <th>Table</th>
+                                <th>Customer</th>
+                                <th>Total</th>
+                                <th>Payment</th>
+                                <th>Accepted At</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {transactions.map((invoice) => (
+                                <tr key={invoice.invoiceId}>
+                                  <td><code>{invoice.invoiceNumber}</code></td>
+                                  <td>{invoice.orderNo || invoice.orderId}</td>
+                                  <td>{invoice.tableNo || '-'}</td>
+                                  <td>{invoice.customerName || '-'}</td>
+                                  <td>{formatCurrency(invoice.totalAmount)}</td>
+                                  <td>
+                                    <span className={`badge ${invoice.paymentMethod === 'CARD' ? 'bg-info' : 'bg-secondary'}`}>
+                                      {invoice.paymentMethod || 'CASH'}
+                                    </span>
+                                  </td>
+                                  <td>{formatDateTime(invoice.acceptedByAccountantAt)}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                            <tfoot className="table-light">
+                              <tr>
+                                <td colSpan="4" className="text-end fw-bold">Subtotal for {cashierName}:</td>
+                                <td className="fw-bold">{formatCurrency(transactions.reduce((sum, t) => sum + parseFloat(t.totalAmount || 0), 0))}</td>
+                                <td colSpan="2"></td>
+                              </tr>
+                            </tfoot>
+                          </table>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

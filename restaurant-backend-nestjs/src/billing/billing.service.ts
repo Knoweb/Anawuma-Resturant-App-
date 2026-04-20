@@ -591,7 +591,8 @@ export class BillingService {
         status: AccountantTransferStatus.PENDING,
       })
       .orderBy('invoice.sentToAccountantAt', 'DESC')
-      .addOrderBy('invoice.updatedAt', 'DESC');
+      .addOrderBy('invoice.updatedAt', 'DESC')
+      .leftJoinAndSelect('invoice.createdBy', 'createdBy');
 
     if (date) {
       const { startDate, endDate } = this.resolveDateBounds(date);
@@ -620,7 +621,8 @@ export class BillingService {
         status: AccountantTransferStatus.ACCEPTED,
       })
       .orderBy('invoice.acceptedByAccountantAt', 'DESC')
-      .addOrderBy('invoice.updatedAt', 'DESC');
+      .addOrderBy('invoice.updatedAt', 'DESC')
+      .leftJoinAndSelect('invoice.createdBy', 'createdBy');
 
     if (date) {
       const { startDate, endDate } = this.resolveDateBounds(date);
