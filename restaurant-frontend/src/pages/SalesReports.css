@@ -157,8 +157,13 @@
 
 .summary-content h3 {
   margin: 5px 0 0 0;
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
+}
+
+.summary-card:hover {
+  transform: translateY(-5px);
+  transition: transform 0.3s ease;
 }
 
 /* Report Table */
@@ -181,6 +186,16 @@
 
 .report-table tbody tr:hover {
   background: #f8f9fa;
+}
+
+.report-table tfoot .total-row {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+.report-table tfoot .grand-total-row {
+  background-color: #e9ecef;
+  font-size: 1.1rem;
 }
 
 /* History Section */

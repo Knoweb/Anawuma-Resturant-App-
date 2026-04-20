@@ -12,6 +12,8 @@ const SalesReports = () => {
   const [reportData, setReportData] = useState(null);
   const [historyData, setHistoryData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [cashiers, setCashiers] = useState([]);
+  const [selectedCashier, setSelectedCashier] = useState('all');
 
   useEffect(() => {
     // Set today's date as default
@@ -19,7 +21,20 @@ const SalesReports = () => {
     setSingleDate(today);
     setFromDate(today);
     setToDate(today);
+    fetchCashiers();
   }, []);
+
+  const fetchCashiers = async () => {
+    try {
+      const response = await apiClient.get('/auth/restaurant-staff');
+      if (response.data.success) {
+        const onlyCashiers = response.data.data.filter(s => s.role === 'cashier' || s.role === 'admin');
+        setCashiers(onlyCashiers);
+      }
+    } catch (error) {
+      console.error('Error fetching cashiers:', error);
+    }
+  };
 
   useEffect(() => {
     if (activeTab === 'history') {
@@ -176,17 +191,17 @@ const SalesReports = () => {
       <div className="main-content">
         <div className="sales-reports-container">
           {/* Header */}
-          <div className="reports-header">
+          <div className="reports-header no-print">
             <h2>
               <i className="fas fa-chart-line me-2"></i>
               Sales Reports
             </h2>
-            <div className="header-actions no-print">
+            <div className="header-actions">
               <button className="btn btn-success me-2" onClick={handleDownloadCSV}>
                 <i className="fas fa-download me-2"></i>
                 Download CSV
               </button>
-              <button className="btn btn-success" onClick={handlePrint}>
+              <button className="btn btn-primary" onClick={handlePrint}>
                 <i className="fas fa-print me-2"></i>
                 Print
               </button>
@@ -217,67 +232,67 @@ const SalesReports = () => {
 
           {/* Tab Content */}
           <div className="tab-content">
-            {/* Single Date Tab */}
-            {activeTab === 'single' && (
-              <div className="filter-section no-print">
-                <div className="row align-items-end">
-                  <div className="col-md-6">
-                    <label className="form-label">Select Date</label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      value={singleDate}
-                      onChange={(e) => setSingleDate(e.target.value)}
-                    />
-                  </div>
-                  <div className="col-md-6">
-                    <button
-                      className="btn btn-primary"
-                      onClick={handleSingleDateFilter}
-                      disabled={loading}
-                    >
-                      <i className="fas fa-filter me-2"></i>
-                      {loading ? 'Loading...' : 'Filter'}
-                    </button>
-                  </div>
+            {/* Filter Sections */}
+            {(activeTab === 'single' || activeTab === 'range') && (
+                <div className="filter-section no-print">
+                    <div className="row align-items-end g-3">
+                        {activeTab === 'single' ? (
+                            <div className="col-md-3">
+                                <label className="form-label">Select Date</label>
+                                <input
+                                    type="date"
+                                    className="form-control"
+                                    value={singleDate}
+                                    onChange={(e) => setSingleDate(e.target.value)}
+                                />
+                            </div>
+                        ) : (
+                            <>
+                                <div className="col-md-3">
+                                    <label className="form-label">From Date</label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        value={fromDate}
+                                        onChange={(e) => setFromDate(e.target.value)}
+                                    />
+                                </div>
+                                <div className="col-md-3">
+                                    <label className="form-label">To Date</label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        value={toDate}
+                                        onChange={(e) => setToDate(e.target.value)}
+                                    />
+                                </div>
+                            </>
+                        )}
+                        <div className="col-md-3">
+                            <label className="form-label">Filter by Cashier</label>
+                            <select 
+                                className="form-control"
+                                value={selectedCashier}
+                                onChange={(e) => setSelectedCashier(e.target.value)}
+                            >
+                                <option value="all">All Cashiers</option>
+                                {cashiers.map(c => (
+                                    <option key={c.adminId} value={c.email}>{c.email}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="col-md-2">
+                            <button
+                                className="btn btn-primary w-100"
+                                onClick={activeTab === 'single' ? handleSingleDateFilter : handleRangeFilter}
+                                disabled={loading}
+                            >
+                                <i className="fas fa-filter me-2"></i>
+                                {loading ? 'Loading...' : 'Filter'}
+                            </button>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            )}
-
-            {/* Date Range Tab */}
-            {activeTab === 'range' && (
-              <div className="filter-section no-print">
-                <div className="row align-items-end">
-                  <div className="col-md-5">
-                    <label className="form-label">From Date</label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      value={fromDate}
-                      onChange={(e) => setFromDate(e.target.value)}
-                    />
-                  </div>
-                  <div className="col-md-5">
-                    <label className="form-label">To Date</label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      value={toDate}
-                      onChange={(e) => setToDate(e.target.value)}
-                    />
-                  </div>
-                  <div className="col-md-2">
-                    <button
-                      className="btn btn-primary w-100"
-                      onClick={handleRangeFilter}
-                      disabled={loading}
-                    >
-                      <i className="fas fa-filter me-2"></i>
-                      {loading ? 'Loading...' : 'Filter'}
-                    </button>
-                  </div>
-                </div>
-              </div>
             )}
 
             {/* Report History Tab */}
@@ -343,64 +358,69 @@ const SalesReports = () => {
             )}
 
             {/* Report Results */}
-            {(activeTab === 'single' || activeTab === 'range') && (
-              <>
-                {reportData && (
+            {(activeTab === 'single' || activeTab === 'range') && reportData && (() => {
+                const filteredRows = reportData.rows.filter(row => selectedCashier === 'all' || row.cashier === selectedCashier);
+                const uniqueInvoiceIds = new Set(filteredRows.map(r => r.invoiceId));
+                
+                const displayServiceCharge = selectedCashier === 'all' 
+                    ? reportData.serviceCharge 
+                    : Array.from(uniqueInvoiceIds).reduce((sum, id) => {
+                        const row = filteredRows.find(r => r.invoiceId === id);
+                        return sum + parseFloat(row.invoiceServiceCharge || 0);
+                    }, 0);
+
+                const displayFoodTotal = filteredRows.reduce((sum, row) => sum + parseFloat(row.lineTotal || 0), 0);
+                const displayGrandTotal = displayFoodTotal + displayServiceCharge;
+                const displayTotalOrders = uniqueInvoiceIds.size;
+
+                return (
                   <div className="report-results">
                     <div className="report-period">
-                      <h5>Showing reports for: {reportData.periodLabel}</h5>
+                      <h5>Reports for: {reportData.periodLabel} {selectedCashier !== 'all' ? `(Cashier: ${selectedCashier})` : ''}</h5>
                     </div>
 
                     {/* Summary Cards */}
-                    <div className="row mb-4">
+                    <div className="row g-3 mb-4">
                       <div className="col-md-3">
                         <div className="summary-card">
-                          <div className="summary-icon">
-                            <i className="fas fa-file-invoice-dollar"></i>
-                          </div>
+                          <div className="summary-icon"><i className="fas fa-file-invoice"></i></div>
                           <div className="summary-content">
-                            <h6>Paid Invoices</h6>
-                            <h3>{reportData.totalOrders}</h3>
+                            <h6>Total Invoices</h6>
+                            <h3>{displayTotalOrders}</h3>
                           </div>
                         </div>
                       </div>
                       <div className="col-md-3">
                         <div className="summary-card revenue">
-                          <div className="summary-icon">
-                            <i className="fas fa-chart-bar"></i>
-                          </div>
+                          <div className="summary-icon"><i className="fas fa-wallet"></i></div>
                           <div className="summary-content">
-                            <h6>Total Revenue</h6>
-                            <h3>{formatCurrency(reportData.totalRevenue)}</h3>
+                            <h6>Grand Total</h6>
+                            <h3>{formatCurrency(displayGrandTotal)}</h3>
                           </div>
                         </div>
                       </div>
                       <div className="col-md-3">
-                        <div className="summary-card cash">
-                          <div className="summary-icon">
-                            <i className="fas fa-money-bill-wave"></i>
-                          </div>
+                        <div className="summary-card bg-light border">
+                          <div className="summary-icon text-primary"><i className="fas fa-utensils"></i></div>
                           <div className="summary-content">
-                            <h6>Cash Revenue</h6>
-                            <h3>{formatCurrency(reportData.cashRevenue)}</h3>
+                            <h6>Food Total</h6>
+                            <h3 className="text-primary">{formatCurrency(displayFoodTotal)}</h3>
                           </div>
                         </div>
                       </div>
                       <div className="col-md-3">
-                        <div className="summary-card card-type">
-                          <div className="summary-icon">
-                            <i className="fas fa-credit-card"></i>
-                          </div>
+                        <div className="summary-card bg-light border">
+                          <div className="summary-icon text-warning"><i className="fas fa-bell"></i></div>
                           <div className="summary-content">
-                            <h6>Card Revenue</h6>
-                            <h3>{formatCurrency(reportData.cardRevenue)}</h3>
+                            <h6>Service Charge</h6>
+                            <h3 className="text-warning">{formatCurrency(displayServiceCharge)}</h3>
                           </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Report Table */}
-                    {reportData.rows && reportData.rows.length > 0 ? (
+                    {filteredRows.length > 0 ? (
                       <div className="table-responsive">
                         <table className="table table-striped report-table">
                           <thead>
@@ -412,11 +432,12 @@ const SalesReports = () => {
                               <th>Qty</th>
                               <th>Unit Price</th>
                               <th>Payment</th>
-                              <th>Line Total</th>
+                              <th>Cashier</th>
+                              <th>Total</th>
                             </tr>
                           </thead>
                           <tbody>
-                            {reportData.rows.map((row, index) => (
+                            {filteredRows.map((row, index) => (
                               <tr key={index}>
                                 <td>{row.orderNo}</td>
                                 <td>{row.tableNo}</td>
@@ -429,30 +450,44 @@ const SalesReports = () => {
                                     {row.paymentMethod || 'CASH'}
                                   </span>
                                 </td>
+                                <td>{row.cashier || 'N/A'}</td>
                                 <td>{formatCurrency(row.lineTotal)}</td>
                               </tr>
                             ))}
                           </tbody>
+                          <tfoot>
+                            <tr className="table-light">
+                              <td colSpan="8" className="text-end py-1 border-0">Food Total:</td>
+                              <td className="py-1 border-0">{formatCurrency(displayFoodTotal)}</td>
+                            </tr>
+                            <tr className="table-light">
+                              <td colSpan="8" className="text-end py-1 border-0">Service Charge:</td>
+                              <td className="py-1 border-0">{formatCurrency(displayServiceCharge)}</td>
+                            </tr>
+                            <tr className="table-secondary">
+                              <td colSpan="8" className="text-end"><strong>Grand Total:</strong></td>
+                              <td><strong>{formatCurrency(displayGrandTotal)}</strong></td>
+                            </tr>
+                          </tfoot>
                         </table>
                       </div>
                     ) : (
                       <div className="empty-state">
-                        <i className="fas fa-chart-line fa-4x text-muted mb-3"></i>
-                        <h5>No Sales Data</h5>
-                        <p className="text-muted">No served orders found for the selected period</p>
+                        <i className="fas fa-search fa-4x text-muted mb-3"></i>
+                        <h5>No Data Found</h5>
+                        <p className="text-muted">No orders found for this selection</p>
                       </div>
                     )}
                   </div>
-                )}
+                );
+            })()}
 
-                {!reportData && !loading && (activeTab === 'single' || activeTab === 'range') && (
-                  <div className="empty-state">
-                    <i className="fas fa-calendar-alt fa-4x text-muted mb-3"></i>
-                    <h5>No Report Generated</h5>
-                    <p className="text-muted">Select a date and click Filter to generate report</p>
-                  </div>
-                )}
-              </>
+            {!reportData && !loading && (activeTab === 'single' || activeTab === 'range') && (
+              <div className="empty-state">
+                <i className="fas fa-calendar-alt fa-4x text-muted mb-3"></i>
+                <h5>No Report Generated</h5>
+                <p className="text-muted">Select filters and click Filter to generate report</p>
+              </div>
             )}
           </div>
         </div>

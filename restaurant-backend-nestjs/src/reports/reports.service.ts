@@ -137,18 +137,28 @@ export class ReportsService {
     
     const rows: any[] = [];
     let totalRevenue = 0;
+    let foodRevenue = 0;
+    let serviceCharge = 0;
     let cashRevenue = 0;
     let cardRevenue = 0;
 
     invoices.forEach((inv) => {
       const amount = parseFloat(inv.totalAmount.toString());
+      const sub = parseFloat(inv.subtotal.toString());
+      const sc = parseFloat(inv.serviceCharge.toString());
+
       totalRevenue += amount;
+      foodRevenue += sub;
+      serviceCharge += sc;
+
       if (inv.paymentMethod === PaymentMethod.CASH) cashRevenue += amount;
       if (inv.paymentMethod === PaymentMethod.CARD) cardRevenue += amount;
 
       const items = Array.isArray(inv.orderItemsJson) ? inv.orderItemsJson : [];
       items.forEach((item: any) => {
         rows.push({
+          invoiceId: inv.invoiceId,
+          invoiceNumber: inv.invoiceNumber,
           orderNo: item.orderNo || inv.invoiceNumber,
           tableNo: inv.tableNo,
           createdAt: inv.createdAt,
@@ -158,6 +168,8 @@ export class ReportsService {
           lineTotal: item.lineTotal,
           paymentMethod: inv.paymentMethod,
           cashier: inv.createdBy?.email || 'N/A',
+          invoiceServiceCharge: sc,
+          invoiceSubtotal: sub,
         });
       });
     });
@@ -171,6 +183,8 @@ export class ReportsService {
       periodLabel,
       totalOrders,
       totalRevenue: parseFloat(totalRevenue.toFixed(2)),
+      foodRevenue: parseFloat(foodRevenue.toFixed(2)),
+      serviceCharge: parseFloat(serviceCharge.toFixed(2)),
       cashRevenue: parseFloat(cashRevenue.toFixed(2)),
       cardRevenue: parseFloat(cardRevenue.toFixed(2)),
       rows,
@@ -202,23 +216,34 @@ export class ReportsService {
           toDate,
         }),
       },
+      relations: ['createdBy'],
       order: { createdAt: 'DESC' },
     });
 
     const rows: any[] = [];
     let totalRevenue = 0;
+    let foodRevenue = 0;
+    let serviceCharge = 0;
     let cashRevenue = 0;
     let cardRevenue = 0;
 
     invoices.forEach((inv) => {
       const amount = parseFloat(inv.totalAmount.toString());
+      const sub = parseFloat(inv.subtotal.toString());
+      const sc = parseFloat(inv.serviceCharge.toString());
+
       totalRevenue += amount;
+      foodRevenue += sub;
+      serviceCharge += sc;
+      
       if (inv.paymentMethod === PaymentMethod.CASH) cashRevenue += amount;
       if (inv.paymentMethod === PaymentMethod.CARD) cardRevenue += amount;
 
       const items = Array.isArray(inv.orderItemsJson) ? inv.orderItemsJson : [];
       items.forEach((item: any) => {
         rows.push({
+          invoiceId: inv.invoiceId,
+          invoiceNumber: inv.invoiceNumber,
           orderNo: item.orderNo || inv.invoiceNumber,
           tableNo: inv.tableNo,
           createdAt: inv.createdAt,
@@ -228,6 +253,8 @@ export class ReportsService {
           lineTotal: item.lineTotal,
           paymentMethod: inv.paymentMethod,
           cashier: inv.createdBy?.email || 'N/A',
+          invoiceServiceCharge: sc,
+          invoiceSubtotal: sub,
         });
       });
     });
@@ -241,6 +268,8 @@ export class ReportsService {
       periodLabel,
       totalOrders,
       totalRevenue: parseFloat(totalRevenue.toFixed(2)),
+      foodRevenue: parseFloat(foodRevenue.toFixed(2)),
+      serviceCharge: parseFloat(serviceCharge.toFixed(2)),
       cashRevenue: parseFloat(cashRevenue.toFixed(2)),
       cardRevenue: parseFloat(cardRevenue.toFixed(2)),
       rows,
@@ -269,23 +298,34 @@ export class ReportsService {
           toDate,
         }),
       },
+      relations: ['createdBy'],
       order: { createdAt: 'DESC' },
     });
 
     const rows: any[] = [];
     let totalRevenue = 0;
+    let foodRevenue = 0;
+    let serviceCharge = 0;
     let cashRevenue = 0;
     let cardRevenue = 0;
 
     invoices.forEach((inv) => {
       const amount = parseFloat(inv.totalAmount.toString());
+      const sub = parseFloat(inv.subtotal.toString());
+      const sc = parseFloat(inv.serviceCharge.toString());
+
       totalRevenue += amount;
+      foodRevenue += sub;
+      serviceCharge += sc;
+      
       if (inv.paymentMethod === PaymentMethod.CASH) cashRevenue += amount;
       if (inv.paymentMethod === PaymentMethod.CARD) cardRevenue += amount;
 
       const items = Array.isArray(inv.orderItemsJson) ? inv.orderItemsJson : [];
       items.forEach((item: any) => {
         rows.push({
+          invoiceId: inv.invoiceId,
+          invoiceNumber: inv.invoiceNumber,
           orderNo: item.orderNo || inv.invoiceNumber,
           tableNo: inv.tableNo,
           createdAt: inv.createdAt,
@@ -295,6 +335,8 @@ export class ReportsService {
           lineTotal: item.lineTotal,
           paymentMethod: inv.paymentMethod,
           cashier: inv.createdBy?.email || 'N/A',
+          invoiceServiceCharge: sc,
+          invoiceSubtotal: sub,
         });
       });
     });
@@ -308,6 +350,8 @@ export class ReportsService {
       periodLabel,
       totalOrders,
       totalRevenue: parseFloat(totalRevenue.toFixed(2)),
+      foodRevenue: parseFloat(foodRevenue.toFixed(2)),
+      serviceCharge: parseFloat(serviceCharge.toFixed(2)),
       cashRevenue: parseFloat(cashRevenue.toFixed(2)),
       cardRevenue: parseFloat(cardRevenue.toFixed(2)),
       rows,
@@ -335,17 +379,19 @@ export class ReportsService {
   async generateDailyCsv(restaurantId: number, date: string): Promise<string> {
     const report = await this.getDailyReport(restaurantId, date);
 
-    let csv = 'Order No,Table No,Date/Time,Item Name,Qty,Unit Price,Payment,Line Total\n';
+    let csv = 'Order No,Table No,Date/Time,Item Name,Qty,Unit Price,Payment,Cashier,Line Total\n';
     
     for (const row of report.rows) {
       const dateTime = new Date(row.createdAt).toLocaleString();
-      csv += `${row.orderNo},"${row.tableNo}","${dateTime}","${row.itemName}",${row.qty},${row.unitPrice},${row.paymentMethod},${row.lineTotal}\n`;
+      csv += `${row.orderNo},"${row.tableNo}","${dateTime}","${row.itemName}",${row.qty},${row.unitPrice},${row.paymentMethod},"${row.cashier}",${row.lineTotal}\n`;
     }
 
-    csv += `\n,,,,Total Orders:,${report.totalOrders},,\n`;
-    csv += `,,,,Total Revenue:,,,${report.totalRevenue}\n`;
-    csv += `,,,,Cash Revenue:,,,${report.cashRevenue || 0}\n`;
-    csv += `,,,,Card Revenue:,,,${report.cardRevenue || 0}\n`;
+    csv += `\n,,,,Total Orders:,${report.totalOrders},,,\n`;
+    csv += `,,,,Food Total:,,,${report.foodRevenue || 0},\n`;
+    csv += `,,,,Service Charge:,,,${report.serviceCharge || 0},\n`;
+    csv += `,,,,Total Revenue:,,,${report.totalRevenue},\n`;
+    csv += `,,,,Cash Revenue:,,,${report.cashRevenue || 0},\n`;
+    csv += `,,,,Card Revenue:,,,${report.cardRevenue || 0},\n`;
 
     return csv;
   }
@@ -353,17 +399,19 @@ export class ReportsService {
   async generateRangeCsv(restaurantId: number, fromDate: string, toDate: string): Promise<string> {
     const report = await this.getRangeReport(restaurantId, fromDate, toDate);
 
-    let csv = 'Order No,Table No,Date/Time,Item Name,Qty,Unit Price,Payment,Line Total\n';
+    let csv = 'Order No,Table No,Date/Time,Item Name,Qty,Unit Price,Payment,Cashier,Line Total\n';
     
     for (const row of report.rows) {
       const dateTime = new Date(row.createdAt).toLocaleString();
-      csv += `${row.orderNo},"${row.tableNo}","${dateTime}","${row.itemName}",${row.qty},${row.unitPrice},${row.paymentMethod},${row.lineTotal}\n`;
+      csv += `${row.orderNo},"${row.tableNo}","${dateTime}","${row.itemName}",${row.qty},${row.unitPrice},${row.paymentMethod},"${row.cashier}",${row.lineTotal}\n`;
     }
 
-    csv += `\n,,,,Total Orders:,${report.totalOrders},,\n`;
-    csv += `,,,,Total Revenue:,,,${report.totalRevenue}\n`;
-    csv += `,,,,Cash Revenue:,,,${report.cashRevenue || 0}\n`;
-    csv += `,,,,Card Revenue:,,,${report.cardRevenue || 0}\n`;
+    csv += `\n,,,,Total Orders:,${report.totalOrders},,,\n`;
+    csv += `,,,,Food Total:,,,${report.foodRevenue || 0},\n`;
+    csv += `,,,,Service Charge:,,,${report.serviceCharge || 0},\n`;
+    csv += `,,,,Total Revenue:,,,${report.totalRevenue},\n`;
+    csv += `,,,,Cash Revenue:,,,${report.cashRevenue || 0},\n`;
+    csv += `,,,,Card Revenue:,,,${report.cardRevenue || 0},\n`;
 
     return csv;
   }
@@ -371,17 +419,19 @@ export class ReportsService {
   async generateMonthlyCsv(restaurantId: number, year: number, month: number): Promise<string> {
     const report = await this.getMonthlyReport(restaurantId, year, month);
 
-    let csv = 'Order No,Table No,Date/Time,Item Name,Qty,Unit Price,Payment,Line Total\n';
+    let csv = 'Order No,Table No,Date/Time,Item Name,Qty,Unit Price,Payment,Cashier,Line Total\n';
     
     for (const row of report.rows) {
       const dateTime = new Date(row.createdAt).toLocaleString();
-      csv += `${row.orderNo},"${row.tableNo}","${dateTime}","${row.itemName}",${row.qty},${row.unitPrice},${row.paymentMethod},${row.lineTotal}\n`;
+      csv += `${row.orderNo},"${row.tableNo}","${dateTime}","${row.itemName}",${row.qty},${row.unitPrice},${row.paymentMethod},"${row.cashier}",${row.lineTotal}\n`;
     }
 
-    csv += `\n,,,,Total Orders:,${report.totalOrders},,\n`;
-    csv += `,,,,Total Revenue:,,,${report.totalRevenue}\n`;
-    csv += `,,,,Cash Revenue:,,,${report.cashRevenue || 0}\n`;
-    csv += `,,,,Card Revenue:,,,${report.cardRevenue || 0}\n`;
+    csv += `\n,,,,Total Orders:,${report.totalOrders},,,\n`;
+    csv += `,,,,Food Total:,,,${report.foodRevenue || 0},\n`;
+    csv += `,,,,Service Charge:,,,${report.serviceCharge || 0},\n`;
+    csv += `,,,,Total Revenue:,,,${report.totalRevenue},\n`;
+    csv += `,,,,Cash Revenue:,,,${report.cashRevenue || 0},\n`;
+    csv += `,,,,Card Revenue:,,,${report.cardRevenue || 0},\n`;
 
     return csv;
   }

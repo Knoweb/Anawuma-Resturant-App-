@@ -10,6 +10,7 @@ function MonthlyReport() {
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
   const [reportData, setReportData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [selectedCashier, setSelectedCashier] = useState('all');
 
   const months = [
     { value: 1, label: 'January' },
@@ -203,106 +204,160 @@ function MonthlyReport() {
           </div>
 
           {/* Report Content */}
-          {reportData && (
-            <>
-              {/* Summary Cards */}
-              <div className="summary-cards">
-                <div className="summary-card orders-card">
-                  <div className="card-icon">
-                    <i className="fas fa-shopping-cart"></i>
-                  </div>
-                  <div className="card-content">
-                    <h3>{reportData.totalOrders}</h3>
-                    <p>Total Orders</p>
-                  </div>
-                </div>
-                <div className="summary-card revenue-card">
-                  <div className="card-icon">
-                    <i className="fas fa-dollar-sign"></i>
-                  </div>
-                  <div className="card-content">
-                    <h3>{formatCurrency(reportData.totalRevenue)}</h3>
-                    <p>Total Revenue</p>
-                  </div>
-                </div>
-                <div className="summary-card cash-card">
-                  <div className="card-icon text-success">
-                    <i className="fas fa-money-bill-wave"></i>
-                  </div>
-                  <div className="card-content">
-                    <h3>{formatCurrency(reportData.cashRevenue)}</h3>
-                    <p>Cash Revenue</p>
+          {reportData && (() => {
+            const cashierList = Array.from(new Set(reportData.rows.map(r => r.cashier))).filter(Boolean);
+            
+            return (
+              <>
+                <div className="filter-section no-print mt-3">
+                  <div className="filter-card py-2">
+                    <div className="filter-row justify-content-start">
+                      <div className="form-group mb-0" style={{ minWidth: '250px' }}>
+                        <label className="mb-1">Filter by Cashier</label>
+                        <select 
+                          className="form-control"
+                          value={selectedCashier}
+                          onChange={(e) => setSelectedCashier(e.target.value)}
+                        >
+                          <option value="all">All Cashiers</option>
+                          {cashierList.map(email => (
+                            <option key={email} value={email}>{email}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="summary-card card-card">
-                  <div className="card-icon text-info">
-                    <i className="fas fa-credit-card"></i>
-                  </div>
-                  <div className="card-content">
-                    <h3>{formatCurrency(reportData.cardRevenue)}</h3>
-                    <p>Card Revenue</p>
-                  </div>
-                </div>
-              </div>
 
-              {/* Report Table */}
-              <div className="report-table-container">
-                <div className="report-table-header">
-                  <h5>{reportData.periodLabel}</h5>
-                </div>
-                <div className="table-responsive">
-                  <table className="table report-table">
-                    <thead>
-                      <tr>
-                        <th>Order No</th>
-                        <th>Table No</th>
-                        <th>Date & Time</th>
-                        <th>Item Name</th>
-                        <th>Qty</th>
-                        <th>Unit Price</th>
-                        <th>Payment</th>
-                        <th>Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {reportData.rows.length > 0 ? (
-                        reportData.rows.map((row, index) => (
-                          <tr key={index}>
-                            <td>{row.orderNo}</td>
-                            <td>{row.tableNo}</td>
-                            <td>{new Date(row.createdAt).toLocaleString()}</td>
-                            <td>{row.itemName}</td>
-                            <td>{row.qty}</td>
-                            <td>{formatCurrency(row.unitPrice)}</td>
-                            <td>
-                              <span className={`badge ${row.paymentMethod === 'CARD' ? 'bg-info' : 'bg-secondary'}`}>
-                                {row.paymentMethod || 'CASH'}
-                              </span>
-                            </td>
-                            <td>{formatCurrency(row.lineTotal)}</td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="8" className="text-center text-muted py-4">
-                            No orders found for this month
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                    {reportData.rows.length > 0 && (
-                      <tfoot>
-                        <tr className="total-row">
-                          <td colSpan="7" className="text-end"><strong>Grand Total:</strong></td>
-                          <td><strong>{formatCurrency(reportData.totalRevenue)}</strong></td>
-                        </tr>
-                      </tfoot>
-                    )}
-                  </table>
-                </div>
-              </div>
-            </>
-          )}
+                {(() => {
+                  const filteredRows = reportData.rows.filter(row => selectedCashier === 'all' || row.cashier === selectedCashier);
+                  const uniqueInvoiceIds = new Set(filteredRows.map(r => r.invoiceId));
+                  
+                  const displayServiceCharge = selectedCashier === 'all' 
+                    ? reportData.serviceCharge 
+                    : Array.from(uniqueInvoiceIds).reduce((sum, id) => {
+                        const row = filteredRows.find(r => r.invoiceId === id);
+                        return sum + parseFloat(row.invoiceServiceCharge || 0);
+                      }, 0);
+
+                  const displayFoodTotal = filteredRows.reduce((sum, row) => sum + parseFloat(row.lineTotal || 0), 0);
+                  const displayGrandTotal = displayFoodTotal + displayServiceCharge;
+                  const displayTotalOrders = uniqueInvoiceIds.size;
+
+                  return (
+                    <>
+                      {/* Summary Cards */}
+                      <div className="summary-cards mt-4">
+                        <div className="summary-card orders-card">
+                          <div className="card-icon">
+                            <i className="fas fa-shopping-cart"></i>
+                          </div>
+                          <div className="card-content">
+                            <h3>{displayTotalOrders}</h3>
+                            <p>Total Orders</p>
+                          </div>
+                        </div>
+                        <div className="summary-card revenue-card">
+                          <div className="card-icon">
+                            <i className="fas fa-money-bill-wave"></i>
+                          </div>
+                          <div className="card-content">
+                            <h3>{formatCurrency(displayGrandTotal)}</h3>
+                            <p>Total Revenue</p>
+                          </div>
+                        </div>
+                        <div className="summary-card bg-primary text-white">
+                          <div className="card-icon">
+                            <i className="fas fa-utensils"></i>
+                          </div>
+                          <div className="card-content">
+                            <h3 className="text-white">{formatCurrency(displayFoodTotal)}</h3>
+                            <p className="text-white">Food Total</p>
+                          </div>
+                        </div>
+                        <div className="summary-card bg-warning text-dark">
+                          <div className="card-icon">
+                            <i className="fas fa-concierge-bell"></i>
+                          </div>
+                          <div className="card-content">
+                            <h3 className="text-dark">{formatCurrency(displayServiceCharge)}</h3>
+                            <p className="text-dark">Service Charge</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Report Table */}
+                      <div className="report-table-container">
+                        <div className="report-table-header">
+                          <h5>{reportData.periodLabel} {selectedCashier !== 'all' ? `- Cashier: ${selectedCashier}` : ''}</h5>
+                        </div>
+                        <div className="table-responsive">
+                          <table className="table report-table">
+                            <thead>
+                              <tr>
+                                <th>Order No</th>
+                                <th>Table No</th>
+                                <th>Date & Time</th>
+                                <th>Item Name</th>
+                                <th>Qty</th>
+                                <th>Unit Price</th>
+                                <th>Payment</th>
+                                <th>Cashier</th>
+                                <th>Total</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {filteredRows.length > 0 ? (
+                                filteredRows.map((row, index) => (
+                                  <tr key={index}>
+                                    <td>{row.orderNo}</td>
+                                    <td>{row.tableNo}</td>
+                                    <td>{new Date(row.createdAt).toLocaleString()}</td>
+                                    <td>{row.itemName}</td>
+                                    <td>{row.qty}</td>
+                                    <td>{formatCurrency(row.unitPrice)}</td>
+                                    <td>
+                                      <span className={`badge ${row.paymentMethod === 'CARD' ? 'bg-info' : 'bg-secondary'}`}>
+                                        {row.paymentMethod || 'CASH'}
+                                      </span>
+                                    </td>
+                                    <td>{row.cashier || 'N/A'}</td>
+                                    <td>{formatCurrency(row.lineTotal)}</td>
+                                  </tr>
+                                ))
+                              ) : (
+                                <tr>
+                                  <td colSpan="9" className="text-center text-muted py-4">
+                                    No orders found for this selection
+                                  </td>
+                                </tr>
+                              )}
+                            </tbody>
+                            {filteredRows.length > 0 && (
+                              <tfoot>
+                                <tr className="total-row bg-light">
+                                  <td colSpan="8" className="text-end border-0 pb-1">Food Total:</td>
+                                  <td className="border-0 pb-1">{formatCurrency(displayFoodTotal)}</td>
+                                </tr>
+                                <tr className="total-row bg-light">
+                                  <td colSpan="8" className="text-end border-0 py-1">Service Charge:</td>
+                                  <td className="border-0 py-1">{formatCurrency(displayServiceCharge)}</td>
+                                </tr>
+                                <tr className="total-row">
+                                  <td colSpan="8" className="text-end"><strong>Grand Total:</strong></td>
+                                  <td><strong>{formatCurrency(displayGrandTotal)}</strong></td>
+                                </tr>
+                              </tfoot>
+                            )}
+                          </table>
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
+              </>
+            );
+          })()}
 
           {/* Empty State */}
           {!reportData && !loading && (

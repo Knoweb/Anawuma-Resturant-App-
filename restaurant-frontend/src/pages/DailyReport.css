@@ -159,6 +159,14 @@
   color: white;
 }
 
+.bg-primary {
+  background: linear-gradient(135deg, #266668 0%, #1a4648 100%) !important;
+}
+
+.bg-warning {
+  background: linear-gradient(135deg, #f5d142 0%, #f5a442 100%) !important;
+}
+
 .summary-card .card-content h3 {
   margin: 0;
   font-size: 1.75rem;
@@ -236,8 +244,14 @@
 }
 
 .report-table tfoot td {
-  padding: 1rem;
-  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+}
+
+.report-table tfoot .grand-total {
+  font-size: 1.1rem;
+  font-weight: 700;
+  background: #e9ecef;
 }
 
 /* Empty State */
