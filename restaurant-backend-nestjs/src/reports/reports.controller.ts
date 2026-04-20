@@ -18,7 +18,8 @@ export class ReportsController {
       throw new Error('Date parameter is required (YYYY-MM-DD)');
     }
     const restaurantId = req.user.restaurantId;
-    return this.reportsService.getSummary(restaurantId, date);
+    const adminId = req.user.role === UserRole.CASHIER ? req.user.userId : undefined;
+    return this.reportsService.getSummary(restaurantId, date, adminId);
   }
 
   @Get('daily')

@@ -19,7 +19,7 @@ export class ReportsService {
     private invoicesRepository: Repository<Invoice>,
   ) {}
 
-  async getSummary(restaurantId: number, date: string) {
+  async getSummary(restaurantId: number, date: string, adminId?: number) {
     const dateObj = new Date(date);
     if (Number.isNaN(dateObj.getTime())) {
       throw new Error('Invalid date format. Date parameter must be YYYY-MM-DD');
@@ -34,8 +34,8 @@ export class ReportsService {
     const monthEndDate = monthEnd.toISOString().split('T')[0];
 
     const [dailyTotals, monthlyTotals] = await Promise.all([
-      this.getTotalsForDateRange(restaurantId, date, date),
-      this.getTotalsForDateRange(restaurantId, monthStartDate, monthEndDate),
+      this.getTotalsForDateRange(restaurantId, date, date, adminId),
+      this.getTotalsForDateRange(restaurantId, monthStartDate, monthEndDate, adminId),
     ]);
 
     const dayOfWeek = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
@@ -70,15 +70,22 @@ export class ReportsService {
     restaurantId: number,
     fromDate: string,
     toDate: string,
+    adminId?: number,
   ) {
-    const result = await this.invoicesRepository
+    const query = this.invoicesRepository
       .createQueryBuilder('invoice')
       .where('invoice.restaurantId = :restaurantId', { restaurantId })
       .andWhere('invoice.invoiceStatus = :status', { status: 'PAID' })
       .andWhere('DATE(invoice.createdAt) BETWEEN :fromDate AND :toDate', {
         fromDate,
         toDate,
-      })
+      });
+
+    if (adminId) {
+      query.andWhere('invoice.createdByAdminId = :adminId', { adminId });
+    }
+
+    const result = await query
       .select('COUNT(invoice.invoiceId)', 'totalInvoices')
       .addSelect('COALESCE(SUM(invoice.totalAmount), 0)', 'totalRevenue')
       .addSelect(

@@ -465,10 +465,11 @@ export class BillingService {
   async getCashierTransactionsForDate(
     restaurantId: number,
     date?: string,
+    adminId?: number,
   ): Promise<Invoice[]> {
     const { startDate, endDate } = this.resolveDateBounds(date);
 
-    const invoices = await this.invoicesRepository
+    const query = this.invoicesRepository
       .createQueryBuilder('invoice')
       .where('invoice.restaurantId = :restaurantId', { restaurantId })
       .andWhere('invoice.invoiceStatus = :status', {
@@ -484,9 +485,13 @@ export class BillingService {
           noneStatus: AccountantTransferStatus.NONE,
           acceptedStatus: AccountantTransferStatus.ACCEPTED,
         },
-      )
-      .orderBy('invoice.updatedAt', 'DESC')
-      .getMany();
+      );
+
+    if (adminId) {
+      query.andWhere('invoice.createdByAdminId = :adminId', { adminId });
+    }
+
+    const invoices = await query.orderBy('invoice.updatedAt', 'DESC').getMany();
 
     return this.hydrateOrderNos(invoices);
   }
@@ -810,6 +815,7 @@ export class BillingService {
   async findAllInvoices(
     restaurantId: number,
     queryDto: QueryInvoicesDto = {},
+    adminId?: number,
   ): Promise<Invoice[]> {
     const { status, from, to, tableNo, invoiceNumber } = queryDto;
 
@@ -817,6 +823,10 @@ export class BillingService {
       .createQueryBuilder('invoice')
       .where('invoice.restaurantId = :restaurantId', { restaurantId })
       .orderBy('invoice.createdAt', 'DESC');
+
+    if (adminId) {
+      query.andWhere('invoice.createdByAdminId = :adminId', { adminId });
+    }
 
     if (status) {
       query.andWhere('invoice.invoiceStatus = :status', { status });

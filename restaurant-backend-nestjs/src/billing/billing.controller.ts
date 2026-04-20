@@ -120,7 +120,8 @@ export class BillingController {
     @Query() queryDto: QueryInvoicesDto,
     @Request() req: RequestWithUser,
   ) {
-    return this.billingService.findAllInvoices(req.user.restaurantId, queryDto);
+    const adminId = req.user.role === UserRole.CASHIER ? req.user.userId : undefined;
+    return this.billingService.findAllInvoices(req.user.restaurantId, queryDto, adminId);
   }
 
   /**
@@ -143,9 +144,11 @@ export class BillingController {
     @Query() query: AccountantDateQueryDto,
     @Request() req: RequestWithUser,
   ) {
+    const adminId = req.user.role === UserRole.CASHIER ? req.user.userId : undefined;
     return this.billingService.getCashierTransactionsForDate(
       req.user.restaurantId,
       query.date,
+      adminId,
     );
   }
 
