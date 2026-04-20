@@ -94,6 +94,8 @@ function AccountantDashboard() {
             typeof daily.totalRevenue === 'number'
               ? daily.totalRevenue
               : Number(daily.totalRevenue),
+          foodRevenue: Number(daily.foodRevenue || 0),
+          serviceCharge: Number(daily.serviceCharge || 0),
           cashRevenue: Number(daily.cashRevenue || 0),
           cardRevenue: Number(daily.cardRevenue || 0),
         });
@@ -112,6 +114,8 @@ function AccountantDashboard() {
             typeof monthly.totalRevenue === 'number'
               ? monthly.totalRevenue
               : Number(monthly.totalRevenue),
+          foodRevenue: Number(monthly.foodRevenue || 0),
+          serviceCharge: Number(monthly.serviceCharge || 0),
           cashRevenue: Number(monthly.cashRevenue || 0),
           cardRevenue: Number(monthly.cardRevenue || 0),
         });
@@ -380,6 +384,31 @@ function AccountantDashboard() {
                           {formatCurrency(dailySummary?.cardRevenue || 0)}
                         </div>
                         <div className="small text-muted mt-2">Paid Card</div>
+                      </div>
+                    </div>
+
+                    <div className="col-md-2 col-sm-4">
+                      <div className="border rounded p-3 h-100 bg-white shadow-sm border-start-warning" style={{borderLeftWidth: '4px'}}>
+                        <div className="text-muted small mb-1">
+                          <i className="fas fa-concierge-bell me-1 text-warning"></i>
+                          Daily Service
+                        </div>
+                        <div className="h5 text-warning mb-0">
+                          {formatCurrency(dailySummary?.serviceCharge || 0)}
+                        </div>
+                        <div className="small text-muted mt-2">S. Charge</div>
+                      </div>
+                    </div>
+                    <div className="col-md-2 col-sm-4">
+                      <div className="border rounded p-3 h-100 bg-white shadow-sm border-start-primary" style={{borderLeftWidth: '4px'}}>
+                        <div className="text-muted small mb-1">
+                          <i className="fas fa-utensils me-1 text-primary"></i>
+                          Daily Food
+                        </div>
+                        <div className="h5 text-primary mb-0">
+                          {formatCurrency(dailySummary?.foodRevenue || 0)}
+                        </div>
+                        <div className="small text-muted mt-2">Food Total</div>
                       </div>
                     </div>
 

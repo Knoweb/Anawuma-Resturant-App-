@@ -53,6 +53,8 @@ export class ReportsService {
         periodLabel: `${formattedDate} (${dayOfWeek})`,
         totalOrders: dailyTotals.totalOrders,
         totalRevenue: dailyTotals.totalRevenue,
+        foodRevenue: dailyTotals.foodRevenue,
+        serviceCharge: dailyTotals.serviceCharge,
         cashRevenue: dailyTotals.cashRevenue,
         cardRevenue: dailyTotals.cardRevenue,
       },
@@ -60,6 +62,8 @@ export class ReportsService {
         periodLabel: `${monthNames[month - 1]} ${year}`,
         totalOrders: monthlyTotals.totalOrders,
         totalRevenue: monthlyTotals.totalRevenue,
+        foodRevenue: monthlyTotals.foodRevenue,
+        serviceCharge: monthlyTotals.serviceCharge,
         cashRevenue: monthlyTotals.cashRevenue,
         cardRevenue: monthlyTotals.cardRevenue,
       },
@@ -88,6 +92,8 @@ export class ReportsService {
     const result = await query
       .select('COUNT(invoice.invoiceId)', 'totalInvoices')
       .addSelect('COALESCE(SUM(invoice.totalAmount), 0)', 'totalRevenue')
+      .addSelect('COALESCE(SUM(invoice.subtotal), 0)', 'foodRevenue')
+      .addSelect('COALESCE(SUM(invoice.serviceCharge), 0)', 'serviceCharge')
       .addSelect(
         `COALESCE(SUM(CASE WHEN invoice.payment_method = '${PaymentMethod.CASH}' THEN invoice.totalAmount ELSE 0 END), 0)`,
         'cashRevenue',
@@ -101,6 +107,8 @@ export class ReportsService {
     return {
       totalOrders: parseInt(result?.totalInvoices || '0', 10),
       totalRevenue: parseFloat(result?.totalRevenue || '0'),
+      foodRevenue: parseFloat(result?.foodRevenue || '0'),
+      serviceCharge: parseFloat(result?.serviceCharge || '0'),
       cashRevenue: parseFloat(result?.cashRevenue || '0'),
       cardRevenue: parseFloat(result?.cardRevenue || '0'),
     };
