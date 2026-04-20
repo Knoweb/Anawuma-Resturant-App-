@@ -879,6 +879,7 @@ export class BillingService {
     async markInvoicePaid(
         invoiceId: number,
         restaurantId: number,
+        adminId: number,
         paymentMethod: PaymentMethod = PaymentMethod.CASH,
     ): Promise<Invoice> {
         const invoice = await this.findOneInvoice(invoiceId, restaurantId);
@@ -902,6 +903,7 @@ export class BillingService {
 
     invoice.invoiceStatus = InvoiceStatus.PAID;
     invoice.paymentMethod = paymentMethod;
+    invoice.createdByAdminId = adminId;
     const savedInvoice = await this.invoicesRepository.save(invoice);
     return this.hydrateOrderNo(savedInvoice);
   }

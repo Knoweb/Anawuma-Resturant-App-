@@ -323,7 +323,12 @@ export class BillingController {
     @Body() payload: { paymentMethod: PaymentMethod },
     @Request() req: RequestWithUser,
   ) {
-    return this.billingService.markInvoicePaid(id, req.user.restaurantId, payload.paymentMethod);
+    return this.billingService.markInvoicePaid(
+      id, 
+      req.user.restaurantId, 
+      req.user.adminId ?? req.user.id,
+      payload.paymentMethod
+    );
   }
 
   /**
