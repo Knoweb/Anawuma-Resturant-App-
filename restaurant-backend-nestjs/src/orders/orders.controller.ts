@@ -72,13 +72,12 @@ export class OrdersController {
     }
 
     // For manual orders from cashier dashboard, we use a distinct orderType if provided, 
-    // or default to MANUAL_CASHIER
     const orderData = {
       ...createOrderDto,
       orderType: createOrderDto.orderType || 'MANUAL_CASHIER' as any
     };
 
-    return this.ordersService.create(orderData, restaurantId);
+    return this.ordersService.create(orderData, restaurantId, req.user.userId);
   }
 
   @Get()

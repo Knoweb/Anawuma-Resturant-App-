@@ -313,8 +313,14 @@ export class AuthService {
   /**
    * Get all admins (Super Admin only)
    */
-  async getAllAdmins(): Promise<Admin[]> {
+  async getAllAdmins(restaurantId?: number): Promise<Admin[]> {
+    const where: any = {};
+    if (restaurantId) {
+      where.restaurantId = restaurantId;
+    }
+
     return this.adminRepository.find({
+      where,
       relations: ['restaurant'],
       order: { adminId: 'DESC' },
     });

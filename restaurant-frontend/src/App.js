@@ -52,6 +52,8 @@ import AboutPage from './pages/AboutPage';
 import ManualRoomOrders from './pages/ManualRoomOrders';
 import ManualTableOrders from './pages/ManualTableOrders';
 import TransferRoom from './pages/TransferRoom';
+import ManageStaff from './pages/ManageStaff';
+import AddStaff from './pages/AddStaff';
 
 import PrivateRoute from './components/auth/PrivateRoute';
 import RoleRoute from './components/auth/RoleRoute';
@@ -468,6 +470,28 @@ function App() {
                 <PrivateRoute>
                   <RoleRoute allowedRoles={['admin', 'super_admin']}>
                     <RestaurantSettings />
+                  </RoleRoute>
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/settings/staff"
+              element={
+                <PrivateRoute>
+                  <RoleRoute allowedRoles={['admin', 'super_admin']}>
+                    <ManageStaff />
+                  </RoleRoute>
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/settings/staff/add"
+              element={
+                <PrivateRoute>
+                  <RoleRoute allowedRoles={['admin', 'super_admin']}>
+                    <AddStaff />
                   </RoleRoute>
                 </PrivateRoute>
               }

@@ -4,7 +4,10 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
+import { Admin } from '../../auth/entities/admin.entity';
 
 export enum InvoiceStatus {
   PENDING = 'PENDING',
@@ -165,6 +168,10 @@ export class Invoice {
 
   @Column({ name: 'created_by_admin_id', type: 'int', nullable: true })
   createdByAdminId: number | null;
+
+  @ManyToOne(() => Admin, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'created_by_admin_id' })
+  createdBy: Admin;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

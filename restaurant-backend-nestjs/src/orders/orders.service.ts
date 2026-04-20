@@ -30,7 +30,7 @@ export class OrdersService {
     private roomQrService: RoomQrService,
   ) { }
 
-  async create(createOrderDto: CreateOrderDto, restaurantId: number) {
+  async create(createOrderDto: CreateOrderDto, restaurantId: number, adminId?: number) {
     const { tableNo, roomNo, orderType, customerName, whatsappNumber, notes, items } = createOrderDto;
 
     // Normalize WhatsApp number if provided
@@ -109,6 +109,7 @@ export class OrdersService {
       totalAmount,
       restaurantId,
       status: orderType === OrderType.MANUAL_CASHIER ? OrderStatus.SERVED : OrderStatus.NEW,
+      createdByAdminId: adminId || null,
       orderItems: orderItems as OrderItem[],
     });
 

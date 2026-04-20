@@ -116,6 +116,7 @@ export class ReportsService {
         invoiceStatus: InvoiceStatus.PAID,
         createdAt: Raw((alias) => `DATE(${alias}) = :date`, { date }),
       },
+      relations: ['createdBy'],
       order: { createdAt: 'DESC' },
     });
     
@@ -141,6 +142,7 @@ export class ReportsService {
           unitPrice: item.unitPrice,
           lineTotal: item.lineTotal,
           paymentMethod: inv.paymentMethod,
+          cashier: inv.createdBy?.email || 'N/A',
         });
       });
     });
@@ -210,6 +212,7 @@ export class ReportsService {
           unitPrice: item.unitPrice,
           lineTotal: item.lineTotal,
           paymentMethod: inv.paymentMethod,
+          cashier: inv.createdBy?.email || 'N/A',
         });
       });
     });
@@ -276,6 +279,7 @@ export class ReportsService {
           unitPrice: item.unitPrice,
           lineTotal: item.lineTotal,
           paymentMethod: inv.paymentMethod,
+          cashier: inv.createdBy?.email || 'N/A',
         });
       });
     });

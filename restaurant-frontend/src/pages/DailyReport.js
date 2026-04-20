@@ -225,6 +225,7 @@ function DailyReport() {
                         <th>Qty</th>
                         <th>Unit Price</th>
                         <th>Payment</th>
+                        <th>Cashier</th>
                         <th>Total</th>
                       </tr>
                     </thead>
@@ -243,6 +244,7 @@ function DailyReport() {
                                 {row.paymentMethod || 'CASH'}
                               </span>
                             </td>
+                            <td>{row.cashier || 'N/A'}</td>
                             <td>{formatCurrency(row.lineTotal)}</td>
                           </tr>
                         ))
@@ -257,7 +259,7 @@ function DailyReport() {
                     {reportData.rows.length > 0 && (
                       <tfoot>
                         <tr className="total-row">
-                          <td colSpan="7" className="text-end"><strong>Grand Total:</strong></td>
+                          <td colSpan="8" className="text-end"><strong>Grand Total:</strong></td>
                           <td><strong>{formatCurrency(reportData.totalRevenue)}</strong></td>
                         </tr>
                       </tfoot>

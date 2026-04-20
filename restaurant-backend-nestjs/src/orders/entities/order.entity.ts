@@ -5,6 +5,8 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { OrderItem } from './order-item.entity';
 
@@ -23,6 +25,8 @@ export enum OrderType {
   ROOM = 'ROOM',
   MANUAL_CASHIER = 'MANUAL_CASHIER',
 }
+
+import { Admin } from '../../auth/entities/admin.entity';
 
 @Entity('kitchen_orders_tbl')
 export class Order {
@@ -76,6 +80,13 @@ export class Order {
 
   @Column({ name: 'restaurant_id', type: 'int' })
   restaurantId: number;
+
+  @Column({ name: 'created_by_admin_id', type: 'int', nullable: true })
+  createdByAdminId: number | null;
+
+  @ManyToOne(() => Admin, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'created_by_admin_id' })
+  creator: Admin;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

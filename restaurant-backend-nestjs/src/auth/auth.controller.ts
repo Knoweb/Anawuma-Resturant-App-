@@ -132,11 +132,24 @@ export class AuthController {
   @Get('admins')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
-  async getAllAdmins() {
-    const admins = await this.authService.getAllAdmins();
+  async getAllAdmins(@Request() req) {
+    const ownerRestaurantId = req.user.role === UserRole.ADMIN ? req.user.restaurantId : undefined;
+    const admins = await this.authService.getAllAdmins(ownerRestaurantId);
     return {
       success: true,
       data: admins,
+    };
+  }
+
+  @Get('restaurant-staff')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async getRestaurantStaff(@Request() req) {
+    const restaurantId = req.user.restaurantId;
+    const staff = await this.authService.getAllAdmins(restaurantId);
+    return {
+      success: true,
+      data: staff,
     };
   }
 
