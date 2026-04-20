@@ -88,7 +88,7 @@ export class BillingController {
     return this.billingService.createInvoice(
       dto,
       req.user.restaurantId,
-      req.user.adminId ?? req.user.id,
+      req.user.userId,
     );
   }
 
@@ -105,7 +105,7 @@ export class BillingController {
     return this.billingService.createOrGetInvoiceForOrder(
       id,
       req.user.restaurantId,
-      req.user.adminId ?? req.user.id,
+      req.user.userId,
     );
   }
 
@@ -307,7 +307,7 @@ export class BillingController {
   ) {
     return this.billingService.finalizeManualCheckout(
       req.user.restaurantId,
-      req.user.adminId ?? req.user.id,
+      req.user.userId,
       payload,
     );
   }
@@ -326,7 +326,7 @@ export class BillingController {
     return this.billingService.markInvoicePaid(
       id, 
       req.user.restaurantId, 
-      req.user.adminId ?? req.user.id,
+      req.user.userId,
       payload.paymentMethod
     );
   }
