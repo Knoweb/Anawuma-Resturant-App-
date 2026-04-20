@@ -28,6 +28,7 @@ import { PaymentMethod } from './entities/invoice.entity';
 
 interface RequestWithUser {
   user: {
+    userId: number;
     id: number;
     adminId?: number;
     role: UserRole;
