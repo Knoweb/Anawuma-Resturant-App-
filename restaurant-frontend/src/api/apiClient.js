@@ -115,6 +115,11 @@ export const sanitizeUrl = (url) => {
 const sanitizeData = (data, parentKey = '') => {
   if (!data) return data;
 
+  // Skip sanitization for Blobs to avoid corrupting file downloads (e.g., CSV reports)
+  if (typeof window !== 'undefined' && data instanceof window.Blob) {
+    return data;
+  }
+
   if (typeof data === 'string') {
     const lowerKey = parentKey.toLowerCase();
     const isUrlKey = lowerKey.includes('url') || lowerKey.includes('image') || lowerKey.includes('logo') || lowerKey === 'qrimage';
