@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Sidebar from '../components/common/Sidebar';
 import apiClient from '../api/apiClient';
 import Swal from 'sweetalert2';
+import Navbar from '../components/common/Navbar';
 import './MonthlyReport.css';
 
 function MonthlyReport() {
@@ -128,6 +129,7 @@ function MonthlyReport() {
     <div className="page-container">
       <Sidebar />
       <div className="main-content">
+        <Navbar />
         <div className="monthly-report-container">
           {/* Header */}
           <div className="report-header no-print">

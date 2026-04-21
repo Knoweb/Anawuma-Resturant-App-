@@ -168,129 +168,131 @@ const ChangePassword = () => {
       <Sidebar />
       <div className="main-content">
         <Navbar />
-        <div className="change-password-container">
-          <div className="change-password-header">
-            <h2>Change Password</h2>
-            <p className="change-password-subtitle">Update your account password</p>
-          </div>
+        <div className="dashboard-content">
+          <div className="change-password-container">
+            <div className="change-password-header">
+              <h2>Change Password</h2>
+              <p className="change-password-subtitle">Update your account password</p>
+            </div>
 
-          <div className="change-password-card">
-            <form onSubmit={handleSubmit} className="change-password-form">
-              <div className="form-group">
-                <label htmlFor="currentPassword">Current Password</label>
-                <div className="password-input-wrapper">
-                  <input
-                    type={showPasswords.current ? 'text' : 'password'}
-                    id="currentPassword"
-                    name="currentPassword"
-                    value={formData.currentPassword}
-                    onChange={handleChange}
-                    className="form-control"
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="toggle-password"
-                    onClick={() => togglePasswordVisibility('current')}
-                  >
-                    {showPasswords.current ? '👁️' : '👁️‍🗨️'}
-                  </button>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="newPassword">New Password</label>
-                <div className="password-input-wrapper">
-                  <input
-                    type={showPasswords.new ? 'text' : 'password'}
-                    id="newPassword"
-                    name="newPassword"
-                    value={formData.newPassword}
-                    onChange={handleChange}
-                    className="form-control"
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="toggle-password"
-                    onClick={() => togglePasswordVisibility('new')}
-                  >
-                    {showPasswords.new ? '👁️' : '👁️‍🗨️'}
-                  </button>
-                </div>
-                {formData.newPassword && (
-                  <div className="password-strength">
-                    <div className="strength-bar">
-                      <div
-                        className="strength-fill"
-                        style={{
-                          width: `${(passwordStrength.strength / 5) * 100}%`,
-                          backgroundColor: passwordStrength.color,
-                        }}
-                      ></div>
-                    </div>
-                    <span
-                      className="strength-label"
-                      style={{ color: passwordStrength.color }}
+            <div className="change-password-card">
+              <form onSubmit={handleSubmit} className="change-password-form">
+                <div className="form-group">
+                  <label htmlFor="currentPassword">Current Password</label>
+                  <div className="password-input-wrapper">
+                    <input
+                      type={showPasswords.current ? 'text' : 'password'}
+                      id="currentPassword"
+                      name="currentPassword"
+                      value={formData.currentPassword}
+                      onChange={handleChange}
+                      className="form-control"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="toggle-password"
+                      onClick={() => togglePasswordVisibility('current')}
                     >
-                      {passwordStrength.label}
-                    </span>
+                      {showPasswords.current ? '👁️' : '👁️‍🗨️'}
+                    </button>
                   </div>
-                )}
-                <small className="form-text">
-                  Password must be at least 6 characters long
-                </small>
-              </div>
+                </div>
 
-              <div className="form-group">
-                <label htmlFor="confirmPassword">Confirm New Password</label>
-                <div className="password-input-wrapper">
-                  <input
-                    type={showPasswords.confirm ? 'text' : 'password'}
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className="form-control"
-                    required
-                  />
+                <div className="form-group">
+                  <label htmlFor="newPassword">New Password</label>
+                  <div className="password-input-wrapper">
+                    <input
+                      type={showPasswords.new ? 'text' : 'password'}
+                      id="newPassword"
+                      name="newPassword"
+                      value={formData.newPassword}
+                      onChange={handleChange}
+                      className="form-control"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="toggle-password"
+                      onClick={() => togglePasswordVisibility('new')}
+                    >
+                      {showPasswords.new ? '👁️' : '👁️‍🗨️'}
+                    </button>
+                  </div>
+                  {formData.newPassword && (
+                    <div className="password-strength">
+                      <div className="strength-bar">
+                        <div
+                          className="strength-fill"
+                          style={{
+                            width: `${(passwordStrength.strength / 5) * 100}%`,
+                            backgroundColor: passwordStrength.color,
+                          }}
+                        ></div>
+                      </div>
+                      <span
+                        className="strength-label"
+                        style={{ color: passwordStrength.color }}
+                      >
+                        {passwordStrength.label}
+                      </span>
+                    </div>
+                  )}
+                  <small className="form-text">
+                    Password must be at least 6 characters long
+                  </small>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="confirmPassword">Confirm New Password</label>
+                  <div className="password-input-wrapper">
+                    <input
+                      type={showPasswords.confirm ? 'text' : 'password'}
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      className="form-control"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="toggle-password"
+                      onClick={() => togglePasswordVisibility('confirm')}
+                    >
+                      {showPasswords.confirm ? '👁️' : '👁️‍🗨️'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="form-actions">
                   <button
                     type="button"
-                    className="toggle-password"
-                    onClick={() => togglePasswordVisibility('confirm')}
+                    onClick={handleCancel}
+                    className="btn btn-cancel"
+                    disabled={loading}
                   >
-                    {showPasswords.confirm ? '👁️' : '👁️‍🗨️'}
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-save"
+                    disabled={loading}
+                  >
+                    {loading ? 'Changing Password...' : 'Change Password'}
                   </button>
                 </div>
-              </div>
+              </form>
 
-              <div className="form-actions">
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  className="btn btn-cancel"
-                  disabled={loading}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-save"
-                  disabled={loading}
-                >
-                  {loading ? 'Changing Password...' : 'Change Password'}
-                </button>
+              <div className="security-tips">
+                <h4>Password Security Tips:</h4>
+                <ul>
+                  <li>Use a combination of uppercase and lowercase letters</li>
+                  <li>Include numbers and special characters</li>
+                  <li>Avoid using personal information</li>
+                  <li>Don't reuse passwords from other accounts</li>
+                </ul>
               </div>
-            </form>
-
-            <div className="security-tips">
-              <h4>Password Security Tips:</h4>
-              <ul>
-                <li>Use a combination of uppercase and lowercase letters</li>
-                <li>Include numbers and special characters</li>
-                <li>Avoid using personal information</li>
-                <li>Don't reuse passwords from other accounts</li>
-              </ul>
             </div>
           </div>
         </div>

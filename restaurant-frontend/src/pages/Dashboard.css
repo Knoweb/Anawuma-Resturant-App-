@@ -13,7 +13,7 @@
 }
 
 .dashboard-content {
-  margin-top: 60px;
+  margin-top: 75px;
   padding: 2rem;
   flex: 1;
 }
@@ -198,6 +198,7 @@
 
   .dashboard-content {
     padding: 1rem;
+    margin-top: 75px;
   }
 
   .welcome-card h2 {
