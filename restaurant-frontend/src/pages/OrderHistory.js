@@ -4,6 +4,9 @@ import Swal from 'sweetalert2';
 import OrderDetailsModal from '../components/orders/OrderDetailsModal';
 import './OrderManagement.css';
 
+import Sidebar from '../components/common/Sidebar';
+import Navbar from '../components/common/Navbar';
+
 const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -157,245 +160,253 @@ const OrderHistory = () => {
   };
 
   return (
-    <div className="order-management-container">
-      <div className="page-header">
-        <h2>
-          <i className="fas fa-history me-2"></i>
-          Order History
-        </h2>
+    <div className="dashboard-layout">
+      <Sidebar />
+      <div className="main-content">
+        <Navbar />
+        <div className="dashboard-content">
+          <div className="order-management-container">
+            <div className="page-header">
+              <h2>
+                <i className="fas fa-history me-2"></i>
+                Order History
+              </h2>
+            </div>
+
+            {/* Statistics Cards */}
+            <div className="row mb-4">
+              <div className="col-md-3">
+                <div className="card stat-card">
+                  <div className="card-body">
+                    <div className="stat-icon bg-primary">
+                      <i className="fas fa-receipt"></i>
+                    </div>
+                    <div className="stat-details">
+                      <h3>{stats.totalOrders}</h3>
+                      <p>Total Orders</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="card stat-card">
+                  <div className="card-body">
+                    <div className="stat-icon bg-success">
+                      <i className="fas fa-check-circle"></i>
+                    </div>
+                    <div className="stat-details">
+                      <h3>{stats.servedOrders}</h3>
+                      <p>Served Orders</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="card stat-card">
+                  <div className="card-body">
+                    <div className="stat-icon bg-danger">
+                      <i className="fas fa-ban"></i>
+                    </div>
+                    <div className="stat-details">
+                      <h3>{stats.cancelledOrders}</h3>
+                      <p>Cancelled Orders</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="card stat-card">
+                  <div className="card-body">
+                    <div className="stat-icon bg-info">
+                      <i className="fas fa-dollar-sign"></i>
+                    </div>
+                    <div className="stat-details">
+                      <h3>{formatCurrency(stats.totalRevenue)}</h3>
+                      <p>Total Revenue</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Filter Bar */}
+            <div className="filter-bar card mb-4">
+              <div className="card-body">
+                <div className="row g-3">
+                  <div className="col-md-2">
+                    <label className="form-label">Status</label>
+                    <select
+                      className="form-select"
+                      value={filters.status}
+                      onChange={(e) => handleFilterChange('status', e.target.value)}
+                    >
+                      <option value="">All Completed</option>
+                      {historyStatuses.map(status => (
+                        <option key={status} value={status}>{status}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="col-md-2">
+                    <label className="form-label">From Date</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={filters.from}
+                      onChange={(e) => handleFilterChange('from', e.target.value)}
+                    />
+                  </div>
+
+                  <div className="col-md-2">
+                    <label className="form-label">To Date</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={filters.to}
+                      onChange={(e) => handleFilterChange('to', e.target.value)}
+                    />
+                  </div>
+
+                  <div className="col-md-2">
+                    <label className="form-label">Table No</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g., T-05"
+                      value={filters.tableNo}
+                      onChange={(e) => handleFilterChange('tableNo', e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="col-md-2">
+                    <label className="form-label">Room No</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g., R-101"
+                      value={filters.roomNo}
+                      onChange={(e) => handleFilterChange('roomNo', e.target.value)}
+                    />
+                  </div>
+
+                  <div className="col-md-2">
+                    <label className="form-label">Order No</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g., ORD-001"
+                      value={filters.orderNo}
+                      onChange={(e) => handleFilterChange('orderNo', e.target.value)}
+                    />
+                  </div>
+
+                  <div className="col-md-2 d-flex align-items-end">
+                    <button
+                      className="btn btn-primary me-2"
+                      onClick={handleFilter}
+                    >
+                      <i className="fas fa-filter me-1"></i>
+                      Filter
+                    </button>
+                    <button
+                      className="btn btn-secondary"
+                      onClick={handleClearFilters}
+                    >
+                      <i className="fas fa-times me-1"></i>
+                      Clear
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Orders Table */}
+            <div className="card">
+              <div className="card-body">
+                {loading ? (
+                  <div className="text-center py-5">
+                    <div className="spinner-border text-primary" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <p className="mt-2 text-muted">Loading order history...</p>
+                  </div>
+                ) : orders.length === 0 ? (
+                  <div className="text-center py-5">
+                    <i className="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <p className="text-muted">No orders found for the selected period</p>
+                  </div>
+                ) : (
+                  <div className="table-responsive">
+                    <table className="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>Order No</th>
+                          <th>Table/Room</th>
+                          <th>Status</th>
+                          <th>Items</th>
+                          <th>Total Amount</th>
+                          <th>Order Time</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {orders.map(order => (
+                          <tr key={order.orderId}>
+                            <td>
+                              <strong>{order.orderNo}</strong>
+                            </td>
+                            <td>
+                              {order.tableNo ? (
+                                <span className="badge bg-dark">{order.tableNo}</span>
+                              ) : order.roomNo ? (
+                                <span className="badge bg-info">Room {order.roomNo}</span>
+                              ) : (
+                                <span className="badge bg-secondary">N/A</span>
+                              )}
+                            </td>
+                            <td>
+                              <span className={`badge ${getStatusBadgeClass(order.status)}`}>
+                                {order.status}
+                              </span>
+                            </td>
+                            <td>
+                              <span className="badge bg-secondary">
+                                {order.orderItems?.length || 0} items
+                              </span>
+                            </td>
+                            <td>
+                              <strong>{formatCurrency(order.totalAmount)}</strong>
+                            </td>
+                            <td>{formatDateTime(order.createdAt)}</td>
+                            <td>
+                              <button
+                                className="btn btn-sm btn-info"
+                                onClick={() => handleViewOrder(order.orderId)}
+                                title="View Details"
+                              >
+                                <i className="fas fa-eye"></i>
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Order Details Modal */}
+            {showModal && selectedOrder && (
+              <OrderDetailsModal
+                order={selectedOrder}
+                onClose={() => setShowModal(false)}
+                readOnly={true} // History orders cannot be modified
+              />
+            )}
+          </div>
+        </div>
       </div>
-
-      {/* Statistics Cards */}
-      <div className="row mb-4">
-        <div className="col-md-3">
-          <div className="card stat-card">
-            <div className="card-body">
-              <div className="stat-icon bg-primary">
-                <i className="fas fa-receipt"></i>
-              </div>
-              <div className="stat-details">
-                <h3>{stats.totalOrders}</h3>
-                <p>Total Orders</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card stat-card">
-            <div className="card-body">
-              <div className="stat-icon bg-success">
-                <i className="fas fa-check-circle"></i>
-              </div>
-              <div className="stat-details">
-                <h3>{stats.servedOrders}</h3>
-                <p>Served Orders</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card stat-card">
-            <div className="card-body">
-              <div className="stat-icon bg-danger">
-                <i className="fas fa-ban"></i>
-              </div>
-              <div className="stat-details">
-                <h3>{stats.cancelledOrders}</h3>
-                <p>Cancelled Orders</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card stat-card">
-            <div className="card-body">
-              <div className="stat-icon bg-info">
-                <i className="fas fa-dollar-sign"></i>
-              </div>
-              <div className="stat-details">
-                <h3>{formatCurrency(stats.totalRevenue)}</h3>
-                <p>Total Revenue</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Filter Bar */}
-      <div className="filter-bar card mb-4">
-        <div className="card-body">
-          <div className="row g-3">
-            <div className="col-md-2">
-              <label className="form-label">Status</label>
-              <select
-                className="form-select"
-                value={filters.status}
-                onChange={(e) => handleFilterChange('status', e.target.value)}
-              >
-                <option value="">All Completed</option>
-                {historyStatuses.map(status => (
-                  <option key={status} value={status}>{status}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="col-md-2">
-              <label className="form-label">From Date</label>
-              <input
-                type="date"
-                className="form-control"
-                value={filters.from}
-                onChange={(e) => handleFilterChange('from', e.target.value)}
-              />
-            </div>
-
-            <div className="col-md-2">
-              <label className="form-label">To Date</label>
-              <input
-                type="date"
-                className="form-control"
-                value={filters.to}
-                onChange={(e) => handleFilterChange('to', e.target.value)}
-              />
-            </div>
-
-            <div className="col-md-2">
-              <label className="form-label">Table No</label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="e.g., T-05"
-                value={filters.tableNo}
-                onChange={(e) => handleFilterChange('tableNo', e.target.value)}
-              />
-            </div>
-            
-            <div className="col-md-2">
-              <label className="form-label">Room No</label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="e.g., R-101"
-                value={filters.roomNo}
-                onChange={(e) => handleFilterChange('roomNo', e.target.value)}
-              />
-            </div>
-
-            <div className="col-md-2">
-              <label className="form-label">Order No</label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="e.g., ORD-001"
-                value={filters.orderNo}
-                onChange={(e) => handleFilterChange('orderNo', e.target.value)}
-              />
-            </div>
-
-            <div className="col-md-2 d-flex align-items-end">
-              <button
-                className="btn btn-primary me-2"
-                onClick={handleFilter}
-              >
-                <i className="fas fa-filter me-1"></i>
-                Filter
-              </button>
-              <button
-                className="btn btn-secondary"
-                onClick={handleClearFilters}
-              >
-                <i className="fas fa-times me-1"></i>
-                Clear
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Orders Table */}
-      <div className="card">
-        <div className="card-body">
-          {loading ? (
-            <div className="text-center py-5">
-              <div className="spinner-border text-primary" role="status">
-                <span className="visually-hidden">Loading...</span>
-              </div>
-              <p className="mt-2 text-muted">Loading order history...</p>
-            </div>
-          ) : orders.length === 0 ? (
-            <div className="text-center py-5">
-              <i className="fas fa-inbox fa-3x text-muted mb-3"></i>
-              <p className="text-muted">No orders found for the selected period</p>
-            </div>
-          ) : (
-            <div className="table-responsive">
-              <table className="table table-hover">
-                <thead>
-                  <tr>
-                    <th>Order No</th>
-                    <th>Table/Room</th>
-                    <th>Status</th>
-                    <th>Items</th>
-                    <th>Total Amount</th>
-                    <th>Order Time</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {orders.map(order => (
-                    <tr key={order.orderId}>
-                      <td>
-                        <strong>{order.orderNo}</strong>
-                      </td>
-                      <td>
-                        {order.tableNo ? (
-                          <span className="badge bg-dark">{order.tableNo}</span>
-                        ) : order.roomNo ? (
-                          <span className="badge bg-info">Room {order.roomNo}</span>
-                        ) : (
-                          <span className="badge bg-secondary">N/A</span>
-                        )}
-                      </td>
-                      <td>
-                        <span className={`badge ${getStatusBadgeClass(order.status)}`}>
-                          {order.status}
-                        </span>
-                      </td>
-                      <td>
-                        <span className="badge bg-secondary">
-                          {order.orderItems?.length || 0} items
-                        </span>
-                      </td>
-                      <td>
-                        <strong>{formatCurrency(order.totalAmount)}</strong>
-                      </td>
-                      <td>{formatDateTime(order.createdAt)}</td>
-                      <td>
-                        <button
-                          className="btn btn-sm btn-info"
-                          onClick={() => handleViewOrder(order.orderId)}
-                          title="View Details"
-                        >
-                          <i className="fas fa-eye"></i>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Order Details Modal */}
-      {showModal && selectedOrder && (
-        <OrderDetailsModal
-          order={selectedOrder}
-          onClose={() => setShowModal(false)}
-          readOnly={true} // History orders cannot be modified
-        />
-      )}
     </div>
   );
 };
