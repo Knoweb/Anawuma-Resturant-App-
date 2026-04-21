@@ -237,10 +237,10 @@ const SalesReports = () => {
             {/* Filter Sections */}
             {(activeTab === 'single' || activeTab === 'range') && (
                 <div className="filter-section no-print">
-                    <div className="row align-items-end g-3">
+                    <div className="filter-row-flex">
                         {activeTab === 'single' ? (
-                            <div className="col-md-3">
-                                <label className="form-label">Select Date</label>
+                            <div className="filter-group">
+                                <label>Select Date</label>
                                 <input
                                     type="date"
                                     className="form-control"
@@ -250,8 +250,8 @@ const SalesReports = () => {
                             </div>
                         ) : (
                             <>
-                                <div className="col-md-3">
-                                    <label className="form-label">From Date</label>
+                                <div className="filter-group">
+                                    <label>From</label>
                                     <input
                                         type="date"
                                         className="form-control"
@@ -259,8 +259,8 @@ const SalesReports = () => {
                                         onChange={(e) => setFromDate(e.target.value)}
                                     />
                                 </div>
-                                <div className="col-md-3">
-                                    <label className="form-label">To Date</label>
+                                <div className="filter-group">
+                                    <label>To</label>
                                     <input
                                         type="date"
                                         className="form-control"
@@ -270,8 +270,8 @@ const SalesReports = () => {
                                 </div>
                             </>
                         )}
-                        <div className="col-md-3">
-                            <label className="form-label">Filter by Cashier</label>
+                        <div className="filter-group">
+                            <label>Cashier</label>
                             <select 
                                 className="form-control"
                                 value={selectedCashier}
@@ -283,9 +283,9 @@ const SalesReports = () => {
                                 ))}
                             </select>
                         </div>
-                        <div className="col-md-2">
+                        <div className="filter-btn-container">
                             <button
-                                className="btn btn-primary w-100"
+                                className="btn btn-primary filter-btn-wide"
                                 onClick={activeTab === 'single' ? handleSingleDateFilter : handleRangeFilter}
                                 disabled={loading}
                             >

@@ -60,8 +60,15 @@
 .filter-bar .form-label {
   font-weight: 500;
   color: #495057;
-  font-size: 14px;
-  margin-bottom: 5px;
+  font-size: 0.95rem;
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+
+.filter-bar .form-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .filter-bar .form-select,
@@ -89,13 +96,13 @@
 .filter-bar .btn-primary {
   background-color: #3498db;
   border-color: #3498db;
-}
-
-.filter-bar .btn-primary:hover {
-  background-color: #2980b9;
-  border-color: #2980b9;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+  padding: 10px 30px;
+  min-width: 150px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .filter-bar .btn-secondary {

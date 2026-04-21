@@ -51,6 +51,17 @@
 }
 
 /* Filter Section */
+.filter-bar .btn-primary {
+  background-color: #3498db;
+  border-color: #3498db;
+  padding: 10px 30px;
+  min-width: 150px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .filter-section {
   margin-bottom: 2rem;
 }
@@ -70,24 +81,42 @@
 
 .filter-row {
   display: flex;
-  gap: 1rem;
-  align-items: flex-end;
+  gap: 1.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-bar .form-label {
+  font-weight: 500;
+  color: #495057;
+  font-size: 0.95rem;
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+
+.filter-bar .form-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .filter-row .form-group {
-  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 0 1 auto;
 }
 
 .filter-row .form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0;
   color: #495057;
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  white-space: nowrap;
 }
 
 .filter-row .form-control {
-  width: 100%;
+  min-width: 200px;
   padding: 0.6rem;
   border: 1px solid #ced4da;
   border-radius: 6px;
@@ -97,12 +126,17 @@
 .filter-row .form-control:focus {
   border-color: #266668;
   outline: none;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 0 0 3px rgba(38, 102, 104, 0.1);
 }
 
 .generate-btn {
-  padding: 0.6rem 1.5rem;
+  padding: 0.625rem 2rem;
   white-space: nowrap;
+  font-weight: 600;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Summary Cards */
