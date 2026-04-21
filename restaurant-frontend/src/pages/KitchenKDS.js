@@ -697,17 +697,26 @@ const KitchenKDS = () => {
             
             // Removed download script block as per requirement (No Download option)
 
-            printBtn.addEventListener('click', function () {
-              setStatus('Opening print dialog...', 'info');
-              // Disable print button during print
-              printBtn.disabled = true;
-              window.print();
-            });
+            // Robust auto-trigger print on load and close window after
+            window.onload = function () {
+              setTimeout(function () {
+                window.print();
+              }, 300);
+            };
 
             window.addEventListener('afterprint', function () {
-              setStatus('Print completed. You may now close this window.', 'success');
-              // Re-enable print button for potential retry
-              printBtn.disabled = false;
+              window.close();
+            });
+
+            // Safety fallback to close after 5 seconds if afterprint doesn't trigger
+            setTimeout(function() {
+               if (!window.closed) window.close();
+            }, 5000);
+
+            printBtn.addEventListener('click', function () {
+              setStatus('Opening print dialog...', 'info');
+              printBtn.disabled = true;
+              window.print();
             });
 
 
