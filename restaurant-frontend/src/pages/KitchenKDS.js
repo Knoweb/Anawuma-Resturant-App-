@@ -697,21 +697,23 @@ const KitchenKDS = () => {
             
             // Removed download script block as per requirement (No Download option)
 
-            // Robust auto-trigger print on load and close window after
+            // Optimized auto-trigger print on load and immediate close after interaction
             window.onload = function () {
               setTimeout(function () {
+                window.focus();
                 window.print();
-              }, 300);
+                window.close();
+              }, 400);
             };
 
             window.addEventListener('afterprint', function () {
               window.close();
             });
 
-            // Safety fallback to close after 5 seconds if afterprint doesn't trigger
+            // Extra safety fallback
             setTimeout(function() {
                if (!window.closed) window.close();
-            }, 5000);
+            }, 10000);
 
             printBtn.addEventListener('click', function () {
               setStatus('Opening print dialog...', 'info');
