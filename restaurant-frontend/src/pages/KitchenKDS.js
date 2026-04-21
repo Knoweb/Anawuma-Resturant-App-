@@ -617,7 +617,7 @@ const KitchenKDS = () => {
       </head>
       <body>
         <div class="bill-wrap">
-          <div class="bill-actions">
+          <div class="bill-actions" style="display: none;">
             <button id="printBillBtn" class="bill-btn bill-btn-print" type="button" title="Print Bill"><i class="fas fa-print me-2"></i>Print Bill</button>
             <button id="backToKdsBtn" class="bill-btn bill-btn-back" type="button" title="Return to KDS"><i class="fas fa-times"></i></button>
           </div>
@@ -693,18 +693,12 @@ const KitchenKDS = () => {
               });
             }
 
-            // Send to Cashier logic removed from print window as per requirement
-            
-            // Removed download script block as per requirement (No Download option)
-
-            // Optimized auto-trigger print on load and immediate close after interaction
-            window.onload = function () {
-              setTimeout(function () {
-                window.focus();
-                window.print();
-                window.close();
-              }, 400);
-            };
+            // Immediate auto-trigger print for better reliability
+            setTimeout(function () {
+              window.focus();
+              window.print();
+              window.close();
+            }, 400);
 
             window.addEventListener('afterprint', function () {
               window.close();
@@ -713,7 +707,7 @@ const KitchenKDS = () => {
             // Extra safety fallback
             setTimeout(function() {
                if (!window.closed) window.close();
-            }, 10000);
+            }, 5000);
 
             printBtn.addEventListener('click', function () {
               setStatus('Opening print dialog...', 'info');
