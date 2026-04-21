@@ -431,9 +431,10 @@ const SalesReports = () => {
                               <th>Item Name</th>
                               <th>Qty</th>
                               <th>Unit Price</th>
+                              <th>Total</th>
+                              <th>Service Charge</th>
                               <th>Payment</th>
                               <th>Cashier</th>
-                              <th>Total</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -445,13 +446,14 @@ const SalesReports = () => {
                                 <td>{row.itemName}</td>
                                 <td>{row.qty}</td>
                                 <td>{formatCurrency(row.unitPrice)}</td>
+                                <td>{formatCurrency(row.lineTotal)}</td>
+                                <td>{formatCurrency(row.serviceCharge)}</td>
                                 <td>
                                   <span className={`badge ${row.paymentMethod === 'CARD' ? 'bg-info' : 'bg-secondary'}`}>
                                     {row.paymentMethod || 'CASH'}
                                   </span>
                                 </td>
                                 <td>{row.cashier || 'N/A'}</td>
-                                <td>{formatCurrency(row.lineTotal)}</td>
                               </tr>
                             ))}
                           </tbody>

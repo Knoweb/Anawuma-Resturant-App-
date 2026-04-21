@@ -166,6 +166,7 @@ export class ReportsService {
           qty: item.qty,
           unitPrice: item.unitPrice,
           lineTotal: item.lineTotal,
+          serviceCharge: sub > 0 ? parseFloat(((item.lineTotal / sub) * sc).toFixed(2)) : 0,
           paymentMethod: inv.paymentMethod,
           cashier: inv.createdBy?.email || 'N/A',
           invoiceServiceCharge: sc,
@@ -251,6 +252,7 @@ export class ReportsService {
           qty: item.qty,
           unitPrice: item.unitPrice,
           lineTotal: item.lineTotal,
+          serviceCharge: sub > 0 ? parseFloat(((item.lineTotal / sub) * sc).toFixed(2)) : 0,
           paymentMethod: inv.paymentMethod,
           cashier: inv.createdBy?.email || 'N/A',
           invoiceServiceCharge: sc,
@@ -333,6 +335,7 @@ export class ReportsService {
           qty: item.qty,
           unitPrice: item.unitPrice,
           lineTotal: item.lineTotal,
+          serviceCharge: sub > 0 ? parseFloat(((item.lineTotal / sub) * sc).toFixed(2)) : 0,
           paymentMethod: inv.paymentMethod,
           cashier: inv.createdBy?.email || 'N/A',
           invoiceServiceCharge: sc,
@@ -379,11 +382,11 @@ export class ReportsService {
   async generateDailyCsv(restaurantId: number, date: string): Promise<string> {
     const report = await this.getDailyReport(restaurantId, date);
 
-    let csv = 'Order No,Table No,Date/Time,Item Name,Qty,Unit Price,Payment,Cashier,Line Total\n';
+    let csv = 'Order No,Table No,Date/Time,Item Name,Qty,Unit Price,Line Total,Service Charge,Payment,Cashier\n';
     
     for (const row of report.rows) {
       const dateTime = new Date(row.createdAt).toLocaleString();
-      csv += `${row.orderNo},"${row.tableNo}","${dateTime}","${row.itemName}",${row.qty},${row.unitPrice},${row.paymentMethod},"${row.cashier}",${row.lineTotal}\n`;
+      csv += `${row.orderNo},"${row.tableNo}","${dateTime}","${row.itemName}",${row.qty},${row.unitPrice},${row.lineTotal},${row.serviceCharge},${row.paymentMethod},"${row.cashier}"\n`;
     }
 
     csv += `\n,,,,Total Orders:,${report.totalOrders},,,\n`;
@@ -399,11 +402,11 @@ export class ReportsService {
   async generateRangeCsv(restaurantId: number, fromDate: string, toDate: string): Promise<string> {
     const report = await this.getRangeReport(restaurantId, fromDate, toDate);
 
-    let csv = 'Order No,Table No,Date/Time,Item Name,Qty,Unit Price,Payment,Cashier,Line Total\n';
+    let csv = 'Order No,Table No,Date/Time,Item Name,Qty,Unit Price,Line Total,Service Charge,Payment,Cashier\n';
     
     for (const row of report.rows) {
       const dateTime = new Date(row.createdAt).toLocaleString();
-      csv += `${row.orderNo},"${row.tableNo}","${dateTime}","${row.itemName}",${row.qty},${row.unitPrice},${row.paymentMethod},"${row.cashier}",${row.lineTotal}\n`;
+      csv += `${row.orderNo},"${row.tableNo}","${dateTime}","${row.itemName}",${row.qty},${row.unitPrice},${row.lineTotal},${row.serviceCharge},${row.paymentMethod},"${row.cashier}"\n`;
     }
 
     csv += `\n,,,,Total Orders:,${report.totalOrders},,,\n`;
@@ -419,11 +422,11 @@ export class ReportsService {
   async generateMonthlyCsv(restaurantId: number, year: number, month: number): Promise<string> {
     const report = await this.getMonthlyReport(restaurantId, year, month);
 
-    let csv = 'Order No,Table No,Date/Time,Item Name,Qty,Unit Price,Payment,Cashier,Line Total\n';
+    let csv = 'Order No,Table No,Date/Time,Item Name,Qty,Unit Price,Line Total,Service Charge,Payment,Cashier\n';
     
     for (const row of report.rows) {
       const dateTime = new Date(row.createdAt).toLocaleString();
-      csv += `${row.orderNo},"${row.tableNo}","${dateTime}","${row.itemName}",${row.qty},${row.unitPrice},${row.paymentMethod},"${row.cashier}",${row.lineTotal}\n`;
+      csv += `${row.orderNo},"${row.tableNo}","${dateTime}","${row.itemName}",${row.qty},${row.unitPrice},${row.lineTotal},${row.serviceCharge},${row.paymentMethod},"${row.cashier}"\n`;
     }
 
     csv += `\n,,,,Total Orders:,${report.totalOrders},,,\n`;
