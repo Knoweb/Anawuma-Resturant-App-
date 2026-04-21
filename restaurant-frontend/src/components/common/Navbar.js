@@ -17,7 +17,7 @@ function Navbar({ cartCount, onCartClick }) {
   const { subscribe, connected } = useWebSocket();
 
   // Check if we can show back button (not on main dashboard pages)
-  const hideBackBtn = ['/dashboard', '/kitchen/dashboard', '/accountant/dashboard', '/cashier/dashboard', '/super-admin/dashboard'].includes(location.pathname);
+  const hideBackBtn = ['/dashboard', '/kitchen/dashboard', '/cashier/dashboard', '/super-admin/dashboard'].includes(location.pathname);
 
   const getRoleLabel = (role) => {
     const normalizedRole = role?.toString().trim().toLowerCase();

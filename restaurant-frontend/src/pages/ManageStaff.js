@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import apiClient from '../api/apiClient';
 import Swal from 'sweetalert2';
 import { useAuthStore } from '../store/authStore';
+import Navbar from '../components/common/Navbar';
+import Sidebar from '../components/common/Sidebar';
 
 const ROLE_LABELS = {
   admin: 'Admin',
@@ -79,107 +81,114 @@ function ManageStaff() {
   };
 
   return (
-    <div className="container-fluid py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h2 className="mb-1">Staff Management</h2>
-          <p className="text-muted">Manage your restaurant's cashiers, kitchen staff, and other users.</p>
-        </div>
-        <Link to="/settings/staff/add" className="btn btn-primary">
-          <i className="fas fa-plus me-2"></i> Add New Staff
-        </Link>
-      </div>
-
-      <div className="card shadow-sm border-0">
-        <div className="card-body p-0">
-          <div className="table-responsive">
-            <table className="table table-hover align-middle mb-0">
-              <thead className="bg-light">
-                <tr>
-                  <th className="px-4 py-3">User</th>
-                  <th className="py-3">Role</th>
-                  <th className="py-3">Email</th>
-                  <th className="py-3 text-end px-4">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan="4" className="text-center py-5">
-                      <div className="spinner-border text-primary" role="status">
-                        <span className="visually-hidden">Loading...</span>
-                      </div>
-                    </td>
-                  </tr>
-                ) : staff.length === 0 ? (
-                  <tr>
-                    <td colSpan="4" className="text-center py-5 text-muted">
-                      No staff members found. Add your first team member!
-                    </td>
-                  </tr>
-                ) : (
-                  staff.map((member) => (
-                    <tr key={member.adminId}>
-                      <td className="px-4">
-                        <div className="d-flex align-items-center">
-                          <div className="avatar-circle me-3 bg-light text-primary fw-bold">
-                            {member.email.charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <div className="fw-bold">{member.email.split('@')[0]}</div>
-                            <small className="text-muted">ID: {member.adminId}</small>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <span className={`badge ${ROLE_BADGES[member.role] || 'bg-dark'}`}>
-                          {ROLE_LABELS[member.role] || member.role}
-                        </span>
-                      </td>
-                      <td>{member.email}</td>
-                      <td className="text-end px-4">
-                        <button 
-                          className="btn btn-sm btn-outline-danger"
-                          onClick={() => handleDelete(member.adminId)}
-                          disabled={member.adminId === user.id}
-                          title="Delete Staff"
-                        >
-                          <i className="fas fa-trash"></i>
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+    <div className="dashboard-layout">
+      <Sidebar />
+      <div className="main-content">
+        <Navbar />
+        <div className="container-fluid py-4">
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h2 className="mb-1">Staff Management</h2>
+              <p className="text-muted">Manage your restaurant's cashiers, kitchen staff, and other users.</p>
+            </div>
+            <Link to="/settings/staff/add" className="btn btn-primary">
+              <i className="fas fa-plus me-2"></i> Add New Staff
+            </Link>
           </div>
+
+          <div className="card shadow-sm border-0">
+            <div className="card-body p-0">
+              <div className="table-responsive">
+                <table className="table table-hover align-middle mb-0">
+                  <thead className="bg-light">
+                    <tr>
+                      <th className="px-4 py-3">User</th>
+                      <th className="py-3">Role</th>
+                      <th className="py-3">Email</th>
+                      <th className="py-3 text-end px-4">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {loading ? (
+                      <tr>
+                        <td colSpan="4" className="text-center py-5">
+                          <div className="spinner-border text-primary" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : staff.length === 0 ? (
+                      <tr>
+                        <td colSpan="4" className="text-center py-5 text-muted">
+                          No staff members found. Add your first team member!
+                        </td>
+                      </tr>
+                    ) : (
+                      staff.map((member) => (
+                        <tr key={member.adminId}>
+                          <td className="px-4">
+                            <div className="d-flex align-items-center">
+                              <div className="avatar-circle me-3 bg-light text-primary fw-bold">
+                                {member.email.charAt(0).toUpperCase()}
+                              </div>
+                              <div>
+                                <div className="fw-bold">{member.email.split('@')[0]}</div>
+                                <small className="text-muted">ID: {member.adminId}</small>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <span className={`badge ${ROLE_BADGES[member.role] || 'bg-dark'}`}>
+                              {ROLE_LABELS[member.role] || member.role}
+                            </span>
+                          </td>
+                          <td>{member.email}</td>
+                          <td className="text-end px-4">
+                            <button
+                              className="btn btn-sm btn-outline-danger"
+                              onClick={() => handleDelete(member.adminId)}
+                              disabled={member.adminId === user.id}
+                              title="Delete Staff"
+                            >
+                              <i className="fas fa-trash"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <style dangerouslySetInnerHTML={{
+            __html: `
+            .avatar-circle {
+              width: 40px;
+              height: 40px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 1.2rem;
+            }
+            .table thead th {
+              font-weight: 600;
+              text-transform: uppercase;
+              font-size: 0.8rem;
+              letter-spacing: 0.5px;
+              border-bottom: none;
+            }
+            .table tbody tr {
+              border-bottom: 1px solid #f0f0f0;
+            }
+            .table tbody tr:last-child {
+              border-bottom: none;
+            }
+          `}} />
         </div>
       </div>
-
-      <style dangerouslySetInnerHTML={{ __html: `
-        .avatar-circle {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 1.2rem;
-        }
-        .table thead th {
-          font-weight: 600;
-          text-transform: uppercase;
-          font-size: 0.8rem;
-          letter-spacing: 0.5px;
-          border-bottom: none;
-        }
-        .table tbody tr {
-          border-bottom: 1px solid #f0f0f0;
-        }
-        .table tbody tr:last-child {
-          border-bottom: none;
-        }
-      `}} />
     </div>
   );
 }

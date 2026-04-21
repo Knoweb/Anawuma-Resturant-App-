@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { authAPI } from '../api/apiClient';
 import Swal from 'sweetalert2';
+import Navbar from '../components/common/Navbar';
+import Sidebar from '../components/common/Sidebar';
 import './Profile.css';
 
 const Profile = () => {
@@ -147,69 +149,75 @@ const Profile = () => {
   }
 
   return (
-    <div className="profile-container">
-      <div className="profile-header">
-        <h2>Profile Settings</h2>
-        <p className="profile-subtitle">Manage your account information</p>
-      </div>
+    <div className="dashboard-layout">
+      <Sidebar />
+      <div className="main-content">
+        <Navbar />
+        <div className="profile-container">
+          <div className="profile-header">
+            <h2>Profile Settings</h2>
+            <p className="profile-subtitle">Manage your account information</p>
+          </div>
 
-      <div className="profile-card">
-        <div className="profile-info">
-          <div className="info-item">
-            <span className="info-label">Account Type:</span>
-            <span className="info-value">
-              {profile.type === 'super_admin' ? 'Super Admin' : 'Admin'}
-            </span>
+          <div className="profile-card">
+            <div className="profile-info">
+              <div className="info-item">
+                <span className="info-label">Account Type:</span>
+                <span className="info-value">
+                  {profile.type === 'super_admin' ? 'Super Admin' : 'Admin'}
+                </span>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="profile-form">
+              <div className="form-group">
+                <label htmlFor="email">Email Address</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="form-control"
+                  required
+                />
+              </div>
+
+              {profile.type === 'super_admin' && (
+                <div className="form-group">
+                  <label htmlFor="name">Name</label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    className="form-control"
+                    placeholder="Enter your name"
+                  />
+                </div>
+              )}
+
+              <div className="form-actions">
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  className="btn btn-cancel"
+                  disabled={saving}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-save"
+                  disabled={saving}
+                >
+                  {saving ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
-
-        <form onSubmit={handleSubmit} className="profile-form">
-          <div className="form-group">
-            <label htmlFor="email">Email Address</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="form-control"
-              required
-            />
-          </div>
-
-          {profile.type === 'super_admin' && (
-            <div className="form-group">
-              <label htmlFor="name">Name</label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="form-control"
-                placeholder="Enter your name"
-              />
-            </div>
-          )}
-
-          <div className="form-actions">
-            <button
-              type="button"
-              onClick={handleCancel}
-              className="btn btn-cancel"
-              disabled={saving}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="btn btn-save"
-              disabled={saving}
-            >
-              {saving ? 'Saving...' : 'Save Changes'}
-            </button>
-          </div>
-        </form>
       </div>
     </div>
   );
