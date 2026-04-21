@@ -1654,14 +1654,15 @@ const CustomerQROrder = ({ isManual = false }) => {
                 </>
               )}
 
-              <div className="mb-3">
-                <label className="form-label">Order Notes (Optional)</label>
+              <div className="mb-2">
+                <label className="form-label small fw-bold text-muted">Order Notes (Optional)</label>
                 <textarea
                   className="form-control"
-                  rows="2"
+                  rows="1"
                   placeholder="Any special requests?"
                   value={orderNotes}
                   onChange={(e) => setOrderNotes(e.target.value)}
+                  style={{ minHeight: '45px', borderRadius: '10px', fontSize: '0.9rem' }}
                 ></textarea>
               </div>
             </div>
