@@ -1519,34 +1519,45 @@ const CustomerQROrder = ({ isManual = false }) => {
           ) : (
             <div className="cart-items">
               {cart.map(item => (
-                <div key={item.foodItemId} className="cart-item-modern">
-                  <div className="cart-item-info" style={{ flex: 1, paddingRight: '10px' }}>
-                    <h5>{item.name}</h5>
-                    <p>Rs. {parseFloat(item.price).toFixed(0)}</p>
-                    <input
-                      type="text"
-                      className="form-control form-control-sm mt-2"
-                      placeholder="Special instructions..."
-                      value={item.notes}
-                      onChange={(e) => updateCartItemNotes(item.foodItemId, e.target.value)}
-                      style={{ borderRadius: '8px', fontSize: '0.85rem' }}
-                    />
-                  </div>
-                  <div className="cart-item-controls" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-                    <button
-                      className="remove-btn"
-                      onClick={() => removeFromCart(item.foodItemId)}
-                    >
-                      <i className="fas fa-trash"></i>
-                    </button>
-                    <div className="qty-controls">
-                      <button onClick={() => updateCartItemQty(item.foodItemId, -1)}>
-                        <i className="fas fa-minus"></i>
-                      </button>
-                      <span>{item.qty}</span>
-                      <button onClick={() => updateCartItemQty(item.foodItemId, 1)}>
-                        <i className="fas fa-plus"></i>
-                      </button>
+                <div key={item.foodItemId} className="cart-item-modern p-3 mb-3 border rounded-3 position-relative" style={{ backgroundColor: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                  <button
+                    className="remove-btn position-absolute top-0 end-0 m-2"
+                    onClick={() => removeFromCart(item.foodItemId)}
+                    style={{ background: '#FFF1F1', color: '#EF4444', border: 'none', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                  >
+                    <i className="fas fa-times"></i>
+                  </button>
+                  <div className="cart-item-info">
+                    <h5 className="mb-1 pe-4" style={{ fontSize: '1rem', fontWeight: '700' }}>{item.name}</h5>
+                    <p className="text-primary fw-bold mb-2">Rs. {parseFloat(item.price).toFixed(0)}</p>
+                    
+                    <div className="d-flex align-items-end justify-content-between gap-3 mt-2">
+                      <div className="flex-grow-1">
+                        <label className="text-muted small mb-1">Instructions:</label>
+                        <input
+                          type="text"
+                          className="form-control form-control-sm border-light-subtle"
+                          placeholder="Example: Less spicy, no ice..."
+                          value={item.notes}
+                          onChange={(e) => updateCartItemNotes(item.foodItemId, e.target.value)}
+                          style={{ borderRadius: '6px', fontSize: '0.8rem', backgroundColor: '#F9FAFB' }}
+                        />
+                      </div>
+                      <div className="qty-controls" style={{ background: '#F3F4F6', padding: '3px', borderRadius: '10px' }}>
+                        <button 
+                          onClick={() => updateCartItemQty(item.foodItemId, -1)}
+                          style={{ width: '28px', height: '28px', border: 'none', borderRadius: '8px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}
+                        >
+                          <i className="fas fa-minus" style={{ fontSize: '0.7rem' }}></i>
+                        </button>
+                        <span className="px-2 fw-bold" style={{ minWidth: '24px', textAlign: 'center', fontSize: '0.9rem' }}>{item.qty}</span>
+                        <button 
+                          onClick={() => updateCartItemQty(item.foodItemId, 1)}
+                          style={{ width: '28px', height: '28px', border: 'none', borderRadius: '8px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}
+                        >
+                          <i className="fas fa-plus" style={{ fontSize: '0.7rem' }}></i>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1562,30 +1573,30 @@ const CustomerQROrder = ({ isManual = false }) => {
                 {isManual ? (
                   <div className="manual-table-select mb-3">
                     <label className="form-label small fw-bold text-muted text-uppercase letter-spacing-1">Order Location <span className="text-danger">*</span></label>
-                    <div className="d-flex gap-2 mb-3">
+                    <div className="modern-segment-control mb-4" style={{ backgroundColor: '#F3F4F6', padding: '6px', borderRadius: '14px', display: 'flex' }}>
                       <button
-                        className={`btn btn-sm flex-grow-1 ${orderLocation === 'inside' ? 'btn-primary' : 'btn-outline-primary'}`}
+                        className={`flex-grow-1 border-0 ${orderLocation === 'inside' ? 'bg-white shadow-sm' : 'bg-transparent text-muted'}`}
                         onClick={() => {
                           setOrderLocation('inside');
                           setManualOrderType('ROOM');
                           setModalOrderType('room');
                           setManualTableNo('');
                         }}
-                        style={orderLocation === 'inside' ? { backgroundColor: '#266668', border: 'none' } : { color: '#266668', borderColor: '#266668' }}
+                        style={{ borderRadius: '10px', padding: '10px', fontSize: '0.85rem', fontWeight: '700', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', color: orderLocation === 'inside' ? '#266668' : '#6B7280' }}
                       >
-                        IN SIDE
+                        <i className="fas fa-home me-2"></i> IN SIDE
                       </button>
                       <button
-                        className={`btn btn-sm flex-grow-1 ${orderLocation === 'outside' ? 'btn-primary' : 'btn-outline-primary'}`}
+                        className={`flex-grow-1 border-0 ${orderLocation === 'outside' ? 'bg-white shadow-sm' : 'bg-transparent text-muted'}`}
                         onClick={() => {
                           setOrderLocation('outside');
                           setManualOrderType('TABLE');
                           setModalOrderType('table');
                           setManualTableNo('');
                         }}
-                        style={orderLocation === 'outside' ? { backgroundColor: '#266668', border: 'none' } : { color: '#266668', borderColor: '#266668' }}
+                        style={{ borderRadius: '10px', padding: '10px', fontSize: '0.85rem', fontWeight: '700', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', color: orderLocation === 'outside' ? '#266668' : '#6B7280' }}
                       >
-                        OUTSIDE
+                        <i className="fas fa-umbrella-beach me-2"></i> OUTSIDE
                       </button>
                     </div>
 
@@ -1655,27 +1666,27 @@ const CustomerQROrder = ({ isManual = false }) => {
               </div>
             </div>
 
-            <div className="cart-total">
-              <div className="d-flex justify-content-between mb-1 text-muted small">
-                <span>Subtotal:</span>
-                <span>Rs. {calculateSubtotal().toFixed(0)}</span>
+            <div className="cart-total bg-light-subtle p-3 rounded-4 mb-3" style={{ border: '1px solid #E5E7EB' }}>
+              <div className="d-flex justify-content-between mb-2 text-muted" style={{ fontSize: '0.9rem' }}>
+                <span className="fw-medium">Items Subtotal:</span>
+                <span className="fw-bold text-dark">Rs. {calculateSubtotal().toFixed(0)}</span>
               </div>
-              <div className="d-flex justify-content-between mb-2 text-muted small">
-                <span>Service Charge (10%):</span>
-                <span>Rs. {calculateServiceCharge().toFixed(0)}</span>
+              <div className="d-flex justify-content-between mb-3 text-muted" style={{ fontSize: '0.9rem' }}>
+                <span className="fw-medium">Service Charge (10%):</span>
+                <span className="fw-bold text-dark">Rs. {calculateServiceCharge().toFixed(0)}</span>
               </div>
-              <div className="d-flex justify-content-between fw-bold h5 mb-0">
-                <span>Total:</span>
-                <span>Rs. {parseFloat(calculateTotal()).toFixed(0)}</span>
+              <div className="d-flex justify-content-between align-items-center pt-2 border-top">
+                <span className="h6 mb-0 fw-bold">Grand Total:</span>
+                <span className="h4 mb-0 fw-bold" style={{ color: '#266668' }}>Rs. {parseFloat(calculateTotal()).toFixed(0)}</span>
               </div>
             </div>
 
             <button
               className="btn btn-lg w-100 text-white"
               onClick={placeOrder}
-              style={{ borderRadius: '8px', background: 'var(--primary-color)', border: 'none', fontWeight: '700', padding: '14px', fontSize: '1.05rem', boxShadow: '0 4px 12px rgba(38, 102, 104, 0.2)' }}
+              style={{ borderRadius: '16px', background: 'var(--primary-color)', border: 'none', fontWeight: '800', padding: '16px', fontSize: '1.1rem', boxShadow: '0 8px 24px rgba(38, 102, 104, 0.25)', transition: 'all 0.2s' }}
             >
-              <i className="fas fa-check me-2"></i> Place Order
+              <i className="fas fa-paper-plane me-2"></i> PLACE ORDER NOW
             </button>
           </div>
         )}
