@@ -53,40 +53,35 @@
   font-weight: 600;
 }
 
-.filter-row {
-  display: flex;
+.filter-row-flex {
+  display: flex !important;
+  flex-direction: row !important;
   gap: 1.5rem;
   align-items: center;
   flex-wrap: wrap;
 }
 
-.filter-row .form-group {
-  display: flex;
+.filter-group {
+  display: flex !important;
+  flex-direction: row !important;
   align-items: center;
   gap: 0.75rem;
-  flex: 0 1 auto;
 }
 
-.filter-row .form-group label {
-  margin-bottom: 0;
-  color: #495057;
-  font-weight: 500;
-  font-size: 0.95rem;
-  white-space: nowrap;
+.filter-group label {
+  margin-bottom: 0 !important;
+  color: #495057 !important;
+  font-weight: 500 !important;
+  font-size: 0.95rem !important;
+  white-space: nowrap !important;
 }
 
-.filter-row .form-control {
+.filter-group .form-control {
   min-width: 150px;
   padding: 0.6rem;
   border: 1px solid #ced4da;
   border-radius: 6px;
   font-size: 0.95rem;
-}
-
-.filter-row .form-control:focus {
-  border-color: #266668;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(38, 102, 104, 0.1);
 }
 
 .generate-btn {
@@ -97,6 +92,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 180px;
 }
 
 /* Summary Cards */

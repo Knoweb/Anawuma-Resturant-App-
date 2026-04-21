@@ -152,9 +152,8 @@ function DailyReport() {
           {/* Filter Section */}
           <div className="filter-section no-print">
             <div className="filter-card">
-              <h5>Select Date</h5>
-              <div className="filter-row">
-                <div className="form-group">
+              <div className="filter-row-flex">
+                <div className="filter-group">
                   <label>Date</label>
                   <input
                     type="date"
@@ -164,7 +163,7 @@ function DailyReport() {
                     max={new Date().toISOString().split('T')[0]}
                   />
                 </div>
-                <div className="form-group">
+                <div className="filter-group">
                   <label>Cashier</label>
                   <select 
                     className="form-control"

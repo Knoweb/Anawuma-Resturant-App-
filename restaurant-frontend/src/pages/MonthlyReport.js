@@ -154,9 +154,8 @@ function MonthlyReport() {
           {/* Filter Section */}
           <div className="filter-section no-print">
             <div className="filter-card">
-              <h5>Select Month & Year</h5>
-              <div className="filter-row">
-                <div className="form-group">
+              <div className="filter-row-flex">
+                <div className="filter-group">
                   <label>Month</label>
                   <select
                     className="form-control"
@@ -170,7 +169,7 @@ function MonthlyReport() {
                     ))}
                   </select>
                 </div>
-                <div className="form-group">
+                <div className="filter-group">
                   <label>Year</label>
                   <select
                     className="form-control"
