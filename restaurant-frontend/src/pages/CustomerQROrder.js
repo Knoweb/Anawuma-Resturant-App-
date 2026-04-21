@@ -1490,40 +1490,9 @@ const CustomerQROrder = ({ isManual = false }) => {
       <main className="customer-main-content">
         {isManual ? (
           <div className="wrapper">
-            <Navbar />
+            <Navbar cartCount={cart.length} onCartClick={() => setShowCart(true)} />
             <Sidebar />
             <div className="content-wrapper" style={{ padding: '0', backgroundColor: '#fcfcfc', minHeight: 'calc(100vh - 70px)', marginTop: '0', position: 'relative' }}>
-              {/* Floating Quick Cart Cart Icon - Top Right of content - Exactly Below Navbar */}
-              <button
-                className="manual-quick-cart-btn"
-                onClick={() => setShowCart(true)}
-                onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#f8f9fa'; e.currentTarget.style.transform = 'scale(1.05)'; }}
-                onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.transform = 'scale(1)'; }}
-                style={{
-                  position: 'fixed',
-                  top: '80px',
-                  right: '25px',
-                  zIndex: 1100,
-                  width: '56px',
-                  height: '56px',
-                  backgroundColor: '#fff',
-                  border: '1px solid #eee',
-                  borderRadius: '16px',
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '1.5rem',
-                  color: '#266668',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  cursor: 'pointer'
-                }}
-              >
-                <i className="fas fa-shopping-bag"></i>
-                {cart.length > 0 && (
-                  <span className="cart-badge-v2" style={{ top: '-8px', right: '-8px', width: '24px', height: '24px', fontSize: '0.8rem', background: '#e74c3c' }}>{cart.length}</span>
-                )}
-              </button>
 
               {renderMainContent()}
             </div>

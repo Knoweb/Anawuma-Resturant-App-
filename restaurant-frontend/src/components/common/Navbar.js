@@ -6,7 +6,7 @@ import apiClient, { BASE_URL, sanitizeUrl } from '../../api/apiClient';
 import Swal from 'sweetalert2';
 import './Navbar.css';
 
-function Navbar() {
+function Navbar({ cartCount, onCartClick }) {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
   const [showDropdown, setShowDropdown] = useState(false);
@@ -178,6 +178,26 @@ function Navbar() {
         </button>
 
         <div className="ms-auto d-flex align-items-center">
+          {/* Cart Icon for Manuel Orders */}
+          {onCartClick && (
+            <div className="me-3 position-relative">
+              <button
+                className="btn btn-link text-white position-relative p-0"
+                type="button"
+                onClick={onCartClick}
+                title="View Cart"
+                style={{ width: '40px', height: '40px', background: 'rgba(255,255,255,0.1)', borderRadius: '10px' }}
+              >
+                <i className="fas fa-shopping-bag fa-lg"></i>
+                {cartCount > 0 && (
+                  <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{ fontSize: '0.65rem', padding: '0.35em 0.5em', marginTop: '2px', marginLeft: '-2px' }}>
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
+
           {/* Notifications */}
           <div className="dropdown me-3 position-relative">
             <button
