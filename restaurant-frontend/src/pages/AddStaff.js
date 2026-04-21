@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import apiClient from '../api/apiClient';
 import Swal from 'sweetalert2';
 import { useAuthStore } from '../store/authStore';
+import Sidebar from '../components/common/Sidebar';
+import Navbar from '../components/common/Navbar';
 
 const ALLOWED_ROLES = ['housekeeper', 'kitchen', 'cashier', 'accountant', 'steward'];
 
@@ -14,8 +16,6 @@ const ROLE_LABELS = {
   steward: 'Steward',
 };
 
-import Sidebar from '../components/common/Sidebar';
-import Navbar from '../components/common/Navbar';
 
 function AddStaff() {
   const navigate = useNavigate();
@@ -67,7 +67,7 @@ function AddStaff() {
         Swal.fire({
           icon: 'success',
           title: 'Success!',
-          text: `${ROLE_BADGES[formData.role] ? formData.role : 'Staff'} created successfully`,
+          text: `${ROLE_LABELS[formData.role] || 'Staff'} created successfully`,
         });
         navigate('/settings/staff');
       }
