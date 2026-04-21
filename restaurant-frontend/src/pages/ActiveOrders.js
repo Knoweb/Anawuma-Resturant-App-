@@ -24,6 +24,82 @@ const ActiveOrders = () => {
 
   const activeStatuses = ['NEW', 'COOKING', 'READY'];
 
+  const fetchOrders = async (filterParams = {}, silent = false) => {
+    try {
+      if (!silent) setLoading(true);
+      
+      const params = {};
+      
+      // Only fetch active orders (not SERVED or CANCELLED)
+      const statusFilter = filterParams.status || '';
+      if (statusFilter && activeStatuses.includes(statusFilter)) {
+        params.status = statusFilter;
+      }
+      
+      // Add other filters
+      if (filterParams.from) params.from = filterParams.from;
+      if (filterParams.to) params.to = filterParams.to;
+      if (filterParams.tableNo) params.tableNo = filterParams.tableNo;
+      if (filterParams.orderNo) params.orderNo = filterParams.orderNo;
+
+      const response = await apiClient.get('/orders', { params });
+      
+      // Filter to show only active orders
+      const activeOrders = response.data.filter(order => 
+        activeStatuses.includes(order.status)
+      );
+      
+      setOrders(activeOrders);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      if (!silent) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to fetch active orders. Please try again.',
+        });
+      }
+    } finally {
+      if (!silent) setLoading(false);
+    }
+  };
+
+  const getStatusBadgeClass = (status) => {
+    const statusClasses = {
+      NEW: 'badge-primary',
+      COOKING: 'badge-info',
+      READY: 'badge-success'
+    };
+    return statusClasses[status] || 'badge-secondary';
+  };
+
+  const formatCurrency = (amount) => {
+    return `Rs. ${parseFloat(amount).toFixed(2)}`;
+  };
+
+  const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getOrderAge = (dateString) => {
+    const created = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - created;
+    const diffMins = Math.floor(diffMs / 60000);
+    
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} min ago`;
+    const hours = Math.floor(diffMins / 60);
+    return `${hours} hr ${diffMins % 60} min ago`;
+  };
+
   useEffect(() => {
     fetchOrders();
   }, []);
@@ -65,46 +141,6 @@ const ActiveOrders = () => {
       if (interval) clearInterval(interval);
     };
   }, [autoRefresh, filters, fetchOrders]);
-
-  const fetchOrders = async (filterParams = {}, silent = false) => {
-    try {
-      if (!silent) setLoading(true);
-      
-      const params = {};
-      
-      // Only fetch active orders (not SERVED or CANCELLED)
-      const statusFilter = filterParams.status || '';
-      if (statusFilter && activeStatuses.includes(statusFilter)) {
-        params.status = statusFilter;
-      }
-      
-      // Add other filters
-      if (filterParams.from) params.from = filterParams.from;
-      if (filterParams.to) params.to = filterParams.to;
-      if (filterParams.tableNo) params.tableNo = filterParams.tableNo;
-      if (filterParams.orderNo) params.orderNo = filterParams.orderNo;
-
-      const response = await apiClient.get('/orders', { params });
-      
-      // Filter to show only active orders
-      const activeOrders = response.data.filter(order => 
-        activeStatuses.includes(order.status)
-      );
-      
-      setOrders(activeOrders);
-    } catch (error) {
-      console.error('Error fetching orders:', error);
-      if (!silent) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Failed to fetch active orders. Please try again.',
-        });
-      }
-    } finally {
-      if (!silent) setLoading(false);
-    }
-  };
 
   const handleFilterChange = (field, value) => {
     setFilters(prev => ({
@@ -200,41 +236,6 @@ const ActiveOrders = () => {
     }
   };
 
-  const getStatusBadgeClass = (status) => {
-    const statusClasses = {
-      NEW: 'badge-primary',
-      COOKING: 'badge-info',
-      READY: 'badge-success'
-    };
-    return statusClasses[status] || 'badge-secondary';
-  };
-
-  const formatCurrency = (amount) => {
-    return `Rs. ${parseFloat(amount).toFixed(2)}`;
-  };
-
-  const formatDateTime = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const getOrderAge = (dateString) => {
-    const created = new Date(dateString);
-    const now = new Date();
-    const diffMs = now - created;
-    const diffMins = Math.floor(diffMs / 60000);
-    
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins} min ago`;
-    const hours = Math.floor(diffMins / 60);
-    return `${hours} hr ${diffMins % 60} min ago`;
-  };
 
   return (
     <div className="order-management-container">
