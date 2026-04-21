@@ -620,10 +620,7 @@ const CustomerQROrder = ({ isManual = false }) => {
       return;
     }
 
-    if (!isManual && !customerName.trim()) {
-      Swal.fire('Validation Error', 'Please enter your name', 'warning');
-      return;
-    }
+    // Customer name is optional/not needed as per latest request
 
     const normalizedWhatsapp = whatsappNumber ? normalizeWhatsAppNumber(whatsappNumber) : '';
 
@@ -634,7 +631,7 @@ const CustomerQROrder = ({ isManual = false }) => {
 
     try {
       const orderPayload = {
-        customerName: customerName.trim() || 'Manual Order',
+        customerName: customerName.trim() || (isManual ? 'Manual Order' : 'Guest'),
         whatsappNumber: normalizedWhatsapp || null,
         notes: orderNotes.trim() || null,
         items: cart.map(item => ({
@@ -678,7 +675,7 @@ const CustomerQROrder = ({ isManual = false }) => {
       // Success
       const orderData = {
         ...response.data,
-        customerName: customerName.trim(),
+        customerName: customerName.trim() || (isManual ? 'Manual Order' : 'Guest'),
         whatsappNumber: normalizedWhatsapp
       };
 
@@ -1659,16 +1656,7 @@ const CustomerQROrder = ({ isManual = false }) => {
 
               {!isManual && (
                 <>
-                  <div className="mb-3">
-                    <label className="form-label">Your Name <span className="text-danger">*</span></label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Enter your name"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                    />
-                  </div>
+                  {/* Customer name removed as per request */}
 
                   <div className="mb-3">
                     <label className="form-label">WhatsApp Number <span className="text-danger">*</span></label>
