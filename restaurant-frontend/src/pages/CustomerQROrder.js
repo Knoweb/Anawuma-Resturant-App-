@@ -1519,45 +1519,64 @@ const CustomerQROrder = ({ isManual = false }) => {
           ) : (
             <div className="cart-items">
               {cart.map(item => (
-                <div key={item.foodItemId} className="cart-item-modern p-3 mb-3 border rounded-3 position-relative" style={{ backgroundColor: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                  <button
-                    className="remove-btn position-absolute top-0 end-0 m-2"
-                    onClick={() => removeFromCart(item.foodItemId)}
-                    style={{ background: '#FFF1F1', color: '#EF4444', border: 'none', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
-                  >
-                    <i className="fas fa-times"></i>
-                  </button>
-                  <div className="cart-item-info">
-                    <h5 className="mb-1 pe-4" style={{ fontSize: '1rem', fontWeight: '700' }}>{item.name}</h5>
-                    <p className="text-primary fw-bold mb-2">Rs. {parseFloat(item.price).toFixed(0)}</p>
-                    
-                    <div className="d-flex align-items-end justify-content-between gap-3 mt-2">
-                      <div className="flex-grow-1">
-                        <label className="text-muted small mb-1">Instructions:</label>
-                        <input
-                          type="text"
-                          className="form-control form-control-sm border-light-subtle"
-                          placeholder="Example: Less spicy, no ice..."
-                          value={item.notes}
-                          onChange={(e) => updateCartItemNotes(item.foodItemId, e.target.value)}
-                          style={{ borderRadius: '6px', fontSize: '0.8rem', backgroundColor: '#F9FAFB' }}
-                        />
+                <div key={item.foodItemId} className="cart-item-row p-3 mb-2 border-bottom" style={{ background: '#fff' }}>
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <div className="item-main-details">
+                      <h6 className="mb-0 fw-bold text-dark" style={{ fontSize: '1.05rem' }}>{item.name}</h6>
+                      <div className="item-price-info mt-1">
+                        <span className="text-primary fw-bold" style={{ fontSize: '0.95rem' }}>Rs. {parseFloat(item.price).toFixed(0)}</span>
+                        <span className="text-muted mx-2">×</span>
+                        <span className="fw-medium">{item.qty}</span>
                       </div>
-                      <div className="qty-controls" style={{ background: '#F3F4F6', padding: '3px', borderRadius: '10px' }}>
+                    </div>
+                    <div className="item-actions d-flex align-items-center gap-3">
+                      <div className="qty-selector-modern d-flex align-items-center" style={{ background: '#F8F9FA', borderRadius: '12px', border: '1px solid #E9ECEF', padding: '2px' }}>
                         <button 
                           onClick={() => updateCartItemQty(item.foodItemId, -1)}
-                          style={{ width: '28px', height: '28px', border: 'none', borderRadius: '8px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}
+                          className="btn btn-sm bg-white shadow-sm d-flex align-items-center justify-content-center p-0"
+                          style={{ width: '32px', height: '32px', borderRadius: '10px', border: 'none' }}
                         >
-                          <i className="fas fa-minus" style={{ fontSize: '0.7rem' }}></i>
+                          <i className="fas fa-minus text-muted" style={{ fontSize: '0.75rem' }}></i>
                         </button>
-                        <span className="px-2 fw-bold" style={{ minWidth: '24px', textAlign: 'center', fontSize: '0.9rem' }}>{item.qty}</span>
+                        <span className="px-3 fw-bold" style={{ minWidth: '35px', textAlign: 'center', fontSize: '1rem' }}>{item.qty}</span>
                         <button 
                           onClick={() => updateCartItemQty(item.foodItemId, 1)}
-                          style={{ width: '28px', height: '28px', border: 'none', borderRadius: '8px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}
+                          className="btn btn-sm bg-white shadow-sm d-flex align-items-center justify-content-center p-0"
+                          style={{ width: '32px', height: '32px', borderRadius: '10px', border: 'none' }}
                         >
-                          <i className="fas fa-plus" style={{ fontSize: '0.7rem' }}></i>
+                          <i className="fas fa-plus text-primary" style={{ fontSize: '0.75rem' }}></i>
                         </button>
                       </div>
+                      <button
+                        className="btn btn-sm d-flex align-items-center justify-content-center"
+                        onClick={() => removeFromCart(item.foodItemId)}
+                        style={{ color: '#FF4D4D', background: '#FFF0F0', border: 'none', borderRadius: '10px', width: '36px', height: '36px' }}
+                        title="Remove item"
+                      >
+                        <i className="fas fa-trash-alt"></i>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="item-sub-details d-flex justify-content-between align-items-end mt-3">
+                    <div className="flex-grow-1 me-4">
+                      <div className="input-group input-group-sm">
+                        <span className="input-group-text bg-transparent border-0 text-muted ps-0" style={{ fontSize: '0.8rem' }}>
+                          <i className="fas fa-pen-nib me-1"></i> Notes:
+                        </span>
+                        <input
+                          type="text"
+                          className="form-control border-0 bg-light-subtle"
+                          placeholder="Less spicy, extra cheese..."
+                          value={item.notes}
+                          onChange={(e) => updateCartItemNotes(item.foodItemId, e.target.value)}
+                          style={{ borderRadius: '8px', fontSize: '0.85rem', paddingLeft: '8px' }}
+                        />
+                      </div>
+                    </div>
+                    <div className="item-subtotal text-end">
+                      <div className="small text-muted mb-0">Subtotal</div>
+                      <div className="fw-bold text-dark" style={{ fontSize: '1rem' }}>Rs. {(item.price * item.qty).toFixed(0)}</div>
                     </div>
                   </div>
                 </div>
