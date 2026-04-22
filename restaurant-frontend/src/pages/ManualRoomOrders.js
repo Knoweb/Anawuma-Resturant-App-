@@ -102,8 +102,12 @@ const ManualRoomOrders = () => {
         printWindow.document.close();
     };
 
-    const printAccountBill = (account, id) => {
+    const printAccountBill = (account, id, currency = 'LKR', rate = 1, symbol = 'Rs.') => {
         const printWindow = window.open('', '_blank');
+        const subtotal = account.orders.reduce((sum, o) => sum + parseFloat(o.subtotal), 0);
+        const serviceCharge = account.orders.reduce((sum, o) => sum + parseFloat(o.serviceCharge), 0);
+        const total = parseFloat(account.totalAmount);
+
         const content = `
             <html>
                 <head>
@@ -121,18 +125,18 @@ const ManualRoomOrders = () => {
                 <body>
                     <div class="header">
                         <h1 style="margin:0">ANAWUMA</h1>
-                        <h3>ACCUMULATED ROOM BILL</h3>
-                        <p>${id}</p>
+                        <h3>BILL SUMMARY (${id})</h3>
+                        <p>Currency: ${currency}</p>
                         <p>Printed: ${new Date().toLocaleString()}</p>
                     </div>
                     
                     ${account.orders.map(order => `
                         <div class="order-block">
-                            <div style="font-weight:bold; font-size: 11px; margin-bottom: 5px;">#${order.orderNo} (Room: ${order.originalRoomNo || order.roomNo}) - ${new Date(order.createdAt).toLocaleTimeString()}</div>
+                            <div style="font-weight:bold; font-size: 11px; margin-bottom: 5px;">#${order.orderNo} - ${new Date(order.createdAt).toLocaleTimeString()}</div>
                             ${order.orderItems.map(item => `
                                 <div class="item-row">
                                     <span>${item.itemName} x${item.qty}</span>
-                                    <span>${parseFloat(item.lineTotal).toFixed(0)}</span>
+                                    <span>${symbol} ${(parseFloat(item.lineTotal) / rate).toFixed(2)}</span>
                                 </div>
                             `).join('')}
                         </div>
@@ -141,15 +145,15 @@ const ManualRoomOrders = () => {
                     <div class="total-section">
                         <div class="item-row" style="font-size: 14px; margin-bottom: 5px;">
                             <span>Subtotal:</span>
-                            <span>Rs. ${parseFloat(account.orders.reduce((sum, o) => sum + parseFloat(o.subtotal), 0)).toFixed(0)}</span>
+                            <span>${symbol} ${(subtotal / rate).toFixed(2)}</span>
                         </div>
                         <div class="item-row" style="font-size: 14px; margin-bottom: 5px;">
                             <span>Service Charge (10%):</span>
-                            <span>Rs. ${parseFloat(account.orders.reduce((sum, o) => sum + parseFloat(o.serviceCharge), 0)).toFixed(0)}</span>
+                            <span>${symbol} ${(serviceCharge / rate).toFixed(2)}</span>
                         </div>
                         <div class="grand-total" style="border-top: 1px solid #000; padding-top: 5px;">
                             <span>TOTAL DUE:</span>
-                            <span>Rs. ${parseFloat(account.totalAmount).toFixed(0)}</span>
+                            <span>${symbol} ${(total / rate).toFixed(2)}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; font-size: 14px; margin-top: 8px; font-weight: bold; border-top: 1px dashed #000; padding-top: 5px;">
                             <span>PAYMENT METHOD:</span>
@@ -157,8 +161,7 @@ const ManualRoomOrders = () => {
                         </div>
                     </div>
                     <div class="footer">
-                        <p>Please present this at the cashier for checkout.</p>
-                        <p>Thank You for Dining with Anawuma!</p>
+                        <p>Thank You For Dining With Us!</p>
                     </div>
                     <script>window.print(); window.close();</script>
                 </body>
@@ -210,24 +213,58 @@ const ManualRoomOrders = () => {
         const now = new Date();
         const dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
         const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        // Generate a temporary invoice number for preview
         const tempInv = `INV-MAN-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-TEMP`;
+
+        // Default Exchange Rates (Can be fetched from settings in future)
+        const exchangeRates = {
+            'LKR': { rate: 1, symbol: 'Rs.' },
+            'USD': { rate: 300, symbol: '$' },
+            'EUR': { rate: 325, symbol: '€' }
+        };
+
+        // Modal Local State
+        let selectedCurrency = 'LKR';
+        const totalLKR = parseFloat(account.totalAmount);
+
+        const updateInvoiceDisplay = (currency) => {
+            const rate = exchangeRates[currency].rate;
+            const symbol = exchangeRates[currency].symbol;
+            const subtotal = account.orders.reduce((sum, o) => sum + parseFloat(o.subtotal), 0);
+            const serviceCharge = account.orders.reduce((sum, o) => sum + parseFloat(o.serviceCharge), 0);
+            const total = totalLKR;
+
+            // Update DOM elements manually in SweetAlert
+            const subtotalEl = document.getElementById('modal-subtotal');
+            const scEl = document.getElementById('modal-service-charge');
+            const totalEl = document.getElementById('modal-grand-total');
+
+            if (subtotalEl) subtotalEl.innerText = `${symbol} ${(subtotal / rate).toFixed(2)}`;
+            if (scEl) scEl.innerText = `${symbol} ${(serviceCharge / rate).toFixed(2)}`;
+            if (totalEl) totalEl.innerText = `${symbol} ${(total / rate).toFixed(2)}`;
+        };
 
         const invoiceHtml = `
             <div class="invoice-container modern-invoice">
                 <div class="invoice-header text-center mb-4">
-                    <h2 class="mb-0">serene1</h2>
+                    <h2 class="mb-0">ANAWUMA</h2>
                     <div class="border-top border-bottom my-2 py-1 font-weight-bold">TAX INVOICE</div>
                     <div class="small d-flex justify-content-between px-2">
                         <span>Invoice #: ${tempInv}</span>
-                    </div>
-                    <div class="small d-flex justify-content-between px-2">
                         <span>Date: ${dateStr}, ${timeStr}</span>
                     </div>
                     <div class="small d-flex justify-content-between px-2">
-                        <span>ID: ${roomNo}</span>
-                        <span>Customer: Manual Order</span>
+                        <span>Room: ${roomNo}</span>
+                        <span>Customer: Guest</span>
                     </div>
+                </div>
+
+                <div class="currency-selector-section mb-3 px-2">
+                    <div class="small fw-bold text-muted mb-1 text-start">DISPLAY CURRENCY</div>
+                    <select id="modal-currency-select" class="form-select form-select-sm mb-2 shadow-none border-primary-soft" style="border-radius: 8px;">
+                        <option value="LKR">LKR (Default)</option>
+                        <option value="USD">USD (Dollar)</option>
+                        <option value="EUR">EUR (Euro)</option>
+                    </select>
                 </div>
 
                 <div class="invoice-body">
@@ -236,25 +273,16 @@ const ManualRoomOrders = () => {
                             <tr class="border-bottom">
                                 <th class="text-start">Item</th>
                                 <th class="text-center">Qty</th>
-                                <th class="text-center">Unit</th>
                                 <th class="text-end">Total</th>
                             </tr>
                         </thead>
                         <tbody>
                              ${account.orders.map(order => `
-                                <tr class="bg-light shadow-none">
-                                    <td colspan="4" class="text-start py-1" style="font-size: 0.9em; background: #f8f9fa;">
-                                        <strong>Order #${order.orderNo}</strong> 
-                                        <span class="badge bg-secondary-soft text-secondary ms-2" style="font-size:0.8em">ID: ${order.originalRoomNo || order.roomNo || roomNo}</span>
-                                        <small class="text-muted ms-2">${new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
-                                    </td>
-                                </tr>
                                 ${order.orderItems.map(item => `
                                     <tr>
-                                        <td class="text-start ps-3 small">${item.itemName}</td>
+                                        <td class="text-start small">${item.itemName}</td>
                                         <td class="text-center small">${item.qty}</td>
-                                        <td class="text-center small">Rs. ${parseFloat(item.unitPrice).toFixed(2)}</td>
-                                        <td class="text-end small">Rs. ${parseFloat(item.lineTotal).toFixed(2)}</td>
+                                        <td class="text-end small">Rs. ${parseFloat(item.lineTotal).toFixed(0)}</td>
                                     </tr>
                                 `).join('')}
                             `).join('')}
@@ -265,35 +293,29 @@ const ManualRoomOrders = () => {
                 <div class="invoice-footer border-top pt-2">
                     <div class="d-flex justify-content-between px-2 mb-1">
                         <span>Subtotal</span>
-                        <span>Rs. ${parseFloat(account.orders.reduce((sum, o) => sum + parseFloat(o.subtotal), 0)).toFixed(2)}</span>
+                        <span id="modal-subtotal">Rs. ${parseFloat(account.orders.reduce((sum, o) => sum + parseFloat(o.subtotal), 0)).toFixed(2)}</span>
                     </div>
                     <div class="d-flex justify-content-between px-2 mb-1">
-                        <span>Service Charge</span>
-                        <span>Rs. ${parseFloat(account.orders.reduce((sum, o) => sum + parseFloat(o.serviceCharge), 0)).toFixed(2)}</span>
+                        <span>Service Charge (10%)</span>
+                        <span id="modal-service-charge">Rs. ${parseFloat(account.orders.reduce((sum, o) => sum + parseFloat(o.serviceCharge), 0)).toFixed(2)}</span>
                     </div>
                     <div class="d-flex justify-content-between px-2 font-weight-bold border-top pt-1 h5">
-                        <span>TOTAL</span>
-                        <span>Rs. ${parseFloat(account.totalAmount).toFixed(2)}</span>
+                        <span>TOTAL DUE</span>
+                        <span id="modal-grand-total">Rs. ${totalLKR.toFixed(2)}</span>
                     </div>
 
                     <div class="payment-method-selector mt-4 pt-3 border-top">
                         <div class="small fw-bold text-muted mb-2 text-start px-2">
                             PAYMENT METHOD <span class="text-danger">*</span>
-                            ${account.isPrinted ? ' <span class="badge bg-secondary-soft text-secondary ms-1"><i class="fas fa-lock me-1"></i> LOCKED</span>' : ''}
                         </div>
                         <div class="d-flex gap-2 px-2">
-                            <button id="modal-pay-cash-btn" class="btn flex-grow-1 payment-opt-btn ${account.selectedPaymentMethod !== 'CARD' ? 'active' : ''}" ${account.isPrinted ? 'disabled style="opacity: 0.7; pointer-events: none;"' : ''}>
+                            <button id="modal-pay-cash-btn" class="btn flex-grow-1 payment-opt-btn ${account.selectedPaymentMethod !== 'CARD' ? 'active' : ''}">
                                 <i class="fas fa-money-bill-wave me-2"></i> CASH
                             </button>
-                            <button id="modal-pay-card-btn" class="btn flex-grow-1 payment-opt-btn ${account.selectedPaymentMethod === 'CARD' ? 'active' : ''}" ${account.isPrinted ? 'disabled style="opacity: 0.7; pointer-events: none;"' : ''}>
+                            <button id="modal-pay-card-btn" class="btn flex-grow-1 payment-opt-btn ${account.selectedPaymentMethod === 'CARD' ? 'active' : ''}">
                                 <i class="fas fa-credit-card me-2"></i> CARD
                             </button>
                         </div>
-                        ${account.isPrinted ? '<div class="small text-muted mt-2 text-center px-2 italic">Payment method is locked after reprinting.</div>' : ''}
-                    </div>
-
-                    <div class="text-center mt-3 small italic">
-                        <div class="border-top border-bottom py-1">Thank you for dining with us!</div>
                     </div>
                 </div>
             </div>
@@ -301,27 +323,27 @@ const ManualRoomOrders = () => {
 
         Swal.fire({
             title: `<div class="d-flex justify-content-between align-items-center w-100 pe-3">
-                        <span class="small text-muted">Invoice #${tempInv}</span>
+                        <span class="small text-muted">Invoice Preview</span>
                         <span class="badge bg-success-soft text-success small" style="font-size:0.5em"><i class="fas fa-print"></i> DRAFT</span>
                     </div>`,
             html: invoiceHtml,
-            width: '500px',
-            showConfirmButton: true, 
-            confirmButtonText: '<i class="fas fa-check-circle me-1"></i> Pay',
+            width: '450px',
+            showConfirmButton: true,
+            confirmButtonText: '<i class="fas fa-check-circle me-1"></i> Pay & Print',
             cancelButtonText: 'Close',
-            denyButtonText: '<i class="fas fa-print me-1"></i> Reprint',
+            denyButtonText: '<i class="fas fa-print me-1"></i> Print LKR Draft',
             showDenyButton: true,
-            confirmButtonColor: '#1cc88a', 
-            denyButtonColor: '#2c3e50', 
+            confirmButtonColor: '#1cc88a',
+            denyButtonColor: '#2c3e50',
             cancelButtonColor: '#858796',
-            customClass: {
-                popup: 'modal-radius'
-            },
+            customClass: { popup: 'modal-radius' },
             didOpen: () => {
                 const popup = Swal.getPopup();
-                if (!account.selectedPaymentMethod) account.selectedPaymentMethod = 'CASH'; 
+                if (!account.selectedPaymentMethod) account.selectedPaymentMethod = 'CASH';
+                
                 const cashBtn = popup.querySelector('#modal-pay-cash-btn');
                 const cardBtn = popup.querySelector('#modal-pay-card-btn');
+                const currencySelect = popup.querySelector('#modal-currency-select');
                 
                 cashBtn.addEventListener('click', () => {
                     account.selectedPaymentMethod = 'CASH';
@@ -334,16 +356,20 @@ const ManualRoomOrders = () => {
                     cardBtn.classList.add('active');
                     cashBtn.classList.remove('active');
                 });
+
+                currencySelect.addEventListener('change', (e) => {
+                    selectedCurrency = e.target.value;
+                    updateInvoiceDisplay(selectedCurrency);
+                });
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                // PAY & PRINT
-                finalizeCheckout(account, roomNo, account.selectedPaymentMethod || 'CASH', true);
+                // Finalize and print with selected currency
+                const config = exchangeRates[selectedCurrency];
+                printAccountBill(account, roomNo, selectedCurrency, config.rate, config.symbol);
+                finalizeCheckout(account, roomNo, account.selectedPaymentMethod || 'CASH', false);
             } else if (result.isDenied) {
-                // PRINT DRAFT
-                printAccountBill(account, roomNo);
-                account.isPrinted = true; 
-                showInvoiceModal(account, roomNo);
+                printAccountBill(account, roomNo, 'LKR', 1, 'Rs.');
             }
         });
     };
