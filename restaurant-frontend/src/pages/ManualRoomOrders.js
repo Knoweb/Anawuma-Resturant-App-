@@ -215,7 +215,7 @@ const ManualRoomOrders = () => {
         const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         const tempInv = `INV-MAN-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-TEMP`;
 
-        // Default Exchange Rates (Can be fetched from settings in future)
+        // Default Exchange Rates
         const exchangeRates = {
             'LKR': { rate: 1, symbol: 'Rs.' },
             'USD': { rate: 300, symbol: '$' },
@@ -224,23 +224,22 @@ const ManualRoomOrders = () => {
 
         // Modal Local State
         let selectedCurrency = 'LKR';
+        let currentRate = 1;
         const totalLKR = parseFloat(account.totalAmount);
 
-        const updateInvoiceDisplay = (currency) => {
-            const rate = exchangeRates[currency].rate;
+        const updateInvoiceDisplay = (currency, rateValue) => {
+            const rate = parseFloat(rateValue) || 1;
             const symbol = exchangeRates[currency].symbol;
             const subtotal = account.orders.reduce((sum, o) => sum + parseFloat(o.subtotal), 0);
             const serviceCharge = account.orders.reduce((sum, o) => sum + parseFloat(o.serviceCharge), 0);
-            const total = totalLKR;
 
-            // Update DOM elements manually in SweetAlert
             const subtotalEl = document.getElementById('modal-subtotal');
             const scEl = document.getElementById('modal-service-charge');
             const totalEl = document.getElementById('modal-grand-total');
 
             if (subtotalEl) subtotalEl.innerText = `${symbol} ${(subtotal / rate).toFixed(2)}`;
             if (scEl) scEl.innerText = `${symbol} ${(serviceCharge / rate).toFixed(2)}`;
-            if (totalEl) totalEl.innerText = `${symbol} ${(total / rate).toFixed(2)}`;
+            if (totalEl) totalEl.innerText = `${symbol} ${(totalLKR / rate).toFixed(2)}`;
         };
 
         const invoiceHtml = `
@@ -252,19 +251,23 @@ const ManualRoomOrders = () => {
                         <span>Invoice #: ${tempInv}</span>
                         <span>Date: ${dateStr}, ${timeStr}</span>
                     </div>
-                    <div class="small d-flex justify-content-between px-2">
-                        <span>Room: ${roomNo}</span>
-                        <span>Customer: Guest</span>
-                    </div>
                 </div>
 
-                <div class="currency-selector-section mb-3 px-2">
-                    <div class="small fw-bold text-muted mb-1 text-start">DISPLAY CURRENCY</div>
-                    <select id="modal-currency-select" class="form-select form-select-sm mb-2 shadow-none border-primary-soft" style="border-radius: 8px;">
-                        <option value="LKR">LKR (Default)</option>
-                        <option value="USD">USD (Dollar)</option>
-                        <option value="EUR">EUR (Euro)</option>
-                    </select>
+                <div class="currency-config-section mb-3 px-2 bg-light p-2 rounded border">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="small fw-bold text-muted mb-1 d-block text-start">CURRENCY</label>
+                            <select id="modal-currency-select" class="form-select form-select-sm shadow-none">
+                                <option value="LKR">LKR (Rs.)</option>
+                                <option value="USD">USD ($)</option>
+                                <option value="EUR">EUR (€)</option>
+                            </select>
+                        </div>
+                        <div class="col-6" id="rate-input-wrapper" style="display: none;">
+                            <label class="small fw-bold text-muted mb-1 d-block text-start">RATE (1 CUR = ? LKR)</label>
+                            <input type="number" id="modal-exchange-rate-input" class="form-control form-select-sm shadow-none" step="0.01">
+                        </div>
+                    </div>
                 </div>
 
                 <div class="invoice-body">
@@ -344,6 +347,8 @@ const ManualRoomOrders = () => {
                 const cashBtn = popup.querySelector('#modal-pay-cash-btn');
                 const cardBtn = popup.querySelector('#modal-pay-card-btn');
                 const currencySelect = popup.querySelector('#modal-currency-select');
+                const rateInput = popup.querySelector('#modal-exchange-rate-input');
+                const rateWrapper = popup.querySelector('#rate-input-wrapper');
                 
                 cashBtn.addEventListener('click', () => {
                     account.selectedPaymentMethod = 'CASH';
@@ -359,14 +364,27 @@ const ManualRoomOrders = () => {
 
                 currencySelect.addEventListener('change', (e) => {
                     selectedCurrency = e.target.value;
-                    updateInvoiceDisplay(selectedCurrency);
+                    const config = exchangeRates[selectedCurrency];
+                    currentRate = config.rate;
+                    
+                    if (selectedCurrency === 'LKR') {
+                        rateWrapper.style.display = 'none';
+                    } else {
+                        rateWrapper.style.display = 'block';
+                        rateInput.value = currentRate;
+                    }
+                    updateInvoiceDisplay(selectedCurrency, currentRate);
+                });
+
+                rateInput.addEventListener('input', (e) => {
+                    currentRate = parseFloat(e.target.value) || 1;
+                    updateInvoiceDisplay(selectedCurrency, currentRate);
                 });
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                // Finalize and print with selected currency
-                const config = exchangeRates[selectedCurrency];
-                printAccountBill(account, roomNo, selectedCurrency, config.rate, config.symbol);
+                const symbol = exchangeRates[selectedCurrency].symbol;
+                printAccountBill(account, roomNo, selectedCurrency, currentRate, symbol);
                 finalizeCheckout(account, roomNo, account.selectedPaymentMethod || 'CASH', false);
             } else if (result.isDenied) {
                 printAccountBill(account, roomNo, 'LKR', 1, 'Rs.');

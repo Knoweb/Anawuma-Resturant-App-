@@ -215,14 +215,14 @@ const ManualTableOrders = () => {
 
         // Modal Local State
         let selectedCurrency = 'LKR';
+        let currentRate = 1;
         const totalLKR = parseFloat(account.totalAmount);
 
-        const updateInvoiceDisplay = (currency) => {
-            const rate = exchangeRates[currency].rate;
+        const updateInvoiceDisplay = (currency, rateValue) => {
+            const rate = parseFloat(rateValue) || 1;
             const symbol = exchangeRates[currency].symbol;
             const subtotal = account.orders.reduce((sum, o) => sum + parseFloat(o.subtotal), 0);
             const serviceCharge = account.orders.reduce((sum, o) => sum + parseFloat(o.serviceCharge), 0);
-            const total = totalLKR;
 
             const subtotalEl = document.getElementById('modal-subtotal-table');
             const scEl = document.getElementById('modal-service-charge-table');
@@ -230,7 +230,7 @@ const ManualTableOrders = () => {
 
             if (subtotalEl) subtotalEl.innerText = `${symbol} ${(subtotal / rate).toFixed(2)}`;
             if (scEl) scEl.innerText = `${symbol} ${(serviceCharge / rate).toFixed(2)}`;
-            if (totalEl) totalEl.innerText = `${symbol} ${(total / rate).toFixed(2)}`;
+            if (totalEl) totalEl.innerText = `${symbol} ${(totalLKR / rate).toFixed(2)}`;
         };
 
         const invoiceHtml = `
@@ -242,19 +242,23 @@ const ManualTableOrders = () => {
                         <span>Invoice #: ${tempInv}</span>
                         <span>Date: ${dateStr}, ${timeStr}</span>
                     </div>
-                    <div class="small d-flex justify-content-between px-2">
-                        <span>Table: ${tableNo}</span>
-                        <span>Customer: Guest</span>
-                    </div>
                 </div>
 
-                <div class="currency-selector-section mb-3 px-2">
-                    <div class="small fw-bold text-muted mb-1 text-start">DISPLAY CURRENCY</div>
-                    <select id="modal-currency-select-table" class="form-select form-select-sm mb-2 shadow-none border-primary-soft" style="border-radius: 8px;">
-                        <option value="LKR">LKR (Default)</option>
-                        <option value="USD">USD (Dollar)</option>
-                        <option value="EUR">EUR (Euro)</option>
-                    </select>
+                <div class="currency-config-section mb-3 px-2 bg-light p-2 rounded border">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="small fw-bold text-muted mb-1 d-block text-start">CURRENCY</label>
+                            <select id="modal-currency-select-table" class="form-select form-select-sm shadow-none">
+                                <option value="LKR">LKR (Rs.)</option>
+                                <option value="USD">USD ($)</option>
+                                <option value="EUR">EUR (€)</option>
+                            </select>
+                        </div>
+                        <div class="col-6" id="rate-input-wrapper-table" style="display: none;">
+                            <label class="small fw-bold text-muted mb-1 d-block text-start">RATE (1 CUR = ? LKR)</label>
+                            <input type="number" id="modal-exchange-rate-input-table" class="form-control form-select-sm shadow-none" step="0.01">
+                        </div>
+                    </div>
                 </div>
 
                 <div class="invoice-body">
@@ -318,22 +322,24 @@ const ManualTableOrders = () => {
                     </div>`,
             html: invoiceHtml,
             width: '450px',
-            showConfirmButton: true, 
+            showConfirmButton: true,
             confirmButtonText: '<i class="fas fa-check-circle me-1"></i> Pay & Print',
             cancelButtonText: 'Close',
             denyButtonText: '<i class="fas fa-print me-1"></i> Print LKR Draft',
             showDenyButton: true,
-            confirmButtonColor: '#1cc88a', 
-            denyButtonColor: '#2c3e50', 
+            confirmButtonColor: '#1cc88a',
+            denyButtonColor: '#2c3e50',
             cancelButtonColor: '#858796',
             customClass: { popup: 'modal-radius' },
             didOpen: () => {
                 const popup = Swal.getPopup();
-                if (!account.selectedPaymentMethod) account.selectedPaymentMethod = 'CASH'; 
+                if (!account.selectedPaymentMethod) account.selectedPaymentMethod = 'CASH';
                 
                 const cashBtn = popup.querySelector('#modal-pay-cash-btn-table');
                 const cardBtn = popup.querySelector('#modal-pay-card-btn-table');
                 const currencySelect = popup.querySelector('#modal-currency-select-table');
+                const rateInput = popup.querySelector('#modal-exchange-rate-input-table');
+                const rateWrapper = popup.querySelector('#rate-input-wrapper-table');
                 
                 cashBtn.addEventListener('click', () => {
                     account.selectedPaymentMethod = 'CASH';
@@ -349,13 +355,27 @@ const ManualTableOrders = () => {
 
                 currencySelect.addEventListener('change', (e) => {
                     selectedCurrency = e.target.value;
-                    updateInvoiceDisplay(selectedCurrency);
+                    const config = exchangeRates[selectedCurrency];
+                    currentRate = config.rate;
+                    
+                    if (selectedCurrency === 'LKR') {
+                        rateWrapper.style.display = 'none';
+                    } else {
+                        rateWrapper.style.display = 'block';
+                        rateInput.value = currentRate;
+                    }
+                    updateInvoiceDisplay(selectedCurrency, currentRate);
+                });
+
+                rateInput.addEventListener('input', (e) => {
+                    currentRate = parseFloat(e.target.value) || 1;
+                    updateInvoiceDisplay(selectedCurrency, currentRate);
                 });
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                const config = exchangeRates[selectedCurrency];
-                printAccountBill(account, tableNo, selectedCurrency, config.rate, config.symbol);
+                const symbol = exchangeRates[selectedCurrency].symbol;
+                printAccountBill(account, tableNo, selectedCurrency, currentRate, symbol);
                 finalizeCheckout(account, tableNo, account.selectedPaymentMethod || 'CASH', false);
             } else if (result.isDenied) {
                 printAccountBill(account, tableNo, 'LKR', 1, 'Rs.');
