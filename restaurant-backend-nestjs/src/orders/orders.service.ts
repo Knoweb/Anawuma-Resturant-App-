@@ -377,7 +377,6 @@ export class OrdersService {
       .createQueryBuilder('order')
       .leftJoinAndSelect('order.orderItems', 'orderItems')
       .where('order.restaurantId = :restaurantId', { restaurantId })
-      .andWhere('order.orderType = :orderType', { orderType: OrderType.MANUAL_CASHIER })
       .andWhere('order.status IN (:...activeStatuses)', { activeStatuses });
 
     if (type === 'ROOM') {

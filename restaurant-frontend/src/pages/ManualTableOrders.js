@@ -349,6 +349,10 @@ const ManualTableOrders = () => {
               <span class="order-group-no">
                 <i class="fas fa-receipt me-1"></i> ${order.orderNo}
                 <small class="badge bg-light text-dark ms-1 border" style="font-size:0.7em">${order.originalRoomNo ? `Room: ${order.originalRoomNo}` : (order.roomNo ? `Room: ${order.roomNo}` : `Table: ${order.tableNo}`)}</small>
+                <small class="badge ${order.orderType === 'MANUAL_CASHIER' ? 'bg-info' : 'bg-warning'} text-white ms-2" style="font-size: 0.7em;">
+                    <i class="fas ${order.orderType === 'MANUAL_CASHIER' ? 'fa-user-edit' : 'fa-qrcode'} me-1"></i>
+                    ${order.orderType === 'MANUAL_CASHIER' ? 'Manual' : 'QR Scan'}
+                </small>
                 <button class="btn btn-sm btn-light ms-2 print-single-order" data-index="${idx}" title="Print this order">
                   <i class="fas fa-print"></i>
                 </button>
