@@ -392,6 +392,31 @@ const ManualRoomOrders = () => {
         });
     };
 
+    const handleCancelOrder = async (orderId, orderNo) => {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: `Do you really want to cancel order #${orderNo}? This action cannot be undone.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, cancel it!',
+            cancelButtonText: 'No, keep it'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await apiClient.post(`/orders/${orderId}/cancel`);
+                Swal.fire('Cancelled!', `Order #${orderNo} has been cancelled.`, 'success');
+                fetchAccounts(); 
+                Swal.close(); 
+            } catch (error) {
+                console.error('Cancellation error:', error);
+                Swal.fire('Error', error?.response?.data?.message || 'Failed to cancel order', 'error');
+            }
+        }
+    };
+
     const handleRoomClick = (roomNo, account) => {
         if (!account) {
             Swal.fire({
@@ -418,6 +443,9 @@ const ManualRoomOrders = () => {
                 </small>
                 <button class="btn btn-sm btn-light ms-2 print-single-order" data-index="${idx}" title="Print this order">
                   <i class="fas fa-print"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger ms-2 cancel-single-order" data-id="${order.orderId}" data-no="${order.orderNo}" title="Cancel this order">
+                  <i class="fas fa-times-circle"></i>
                 </button>
               </span>
               <span class="order-group-date">${new Date(order.createdAt).toLocaleDateString()} ${new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
@@ -470,6 +498,15 @@ const ManualRoomOrders = () => {
                     btn.addEventListener('click', () => {
                         const idx = btn.getAttribute('data-index');
                         printOrder(account.orders[idx], roomNo);
+                    });
+                });
+
+                const cancelBtns = popup.querySelectorAll('.cancel-single-order');
+                cancelBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = btn.getAttribute('data-id');
+                        const no = btn.getAttribute('data-no');
+                        handleCancelOrder(id, no);
                     });
                 });
             },

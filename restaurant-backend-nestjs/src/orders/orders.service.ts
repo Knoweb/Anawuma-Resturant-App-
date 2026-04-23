@@ -322,6 +322,31 @@ export class OrdersService {
     return updatedOrder;
   }
 
+  async cancel(id: number, restaurantId?: number) {
+    const order = await this.findOne(id, restaurantId);
+
+    if (order.status === OrderStatus.BILLED || order.status === OrderStatus.SERVED) {
+      throw new BadRequestException('Cannot cancel an order that has already been billed or served');
+    }
+
+    order.status = OrderStatus.CANCELLED;
+    const updatedOrder = await this.ordersRepository.save(order);
+
+    // Emit real-time notification
+    this.websocketGateway.emitOrderStatusUpdate({
+      orderId: updatedOrder.orderId,
+      orderNo: updatedOrder.orderNo,
+      tableNo: updatedOrder.tableNo,
+      status: updatedOrder.status,
+      restaurantId: updatedOrder.restaurantId,
+    });
+
+    // Emit dashboard update
+    this.websocketGateway.server.emit('dashboard:refresh');
+
+    return updatedOrder;
+  }
+
   async remove(id: number, restaurantId?: number) {
     const order = await this.findOne(id, restaurantId);
     await this.ordersRepository.remove(order);

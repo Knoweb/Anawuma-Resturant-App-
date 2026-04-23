@@ -162,6 +162,15 @@ export class OrdersController {
     return this.ordersService.updateStatus(id, updateOrderStatusDto, restaurantId);
   }
 
+  @Post(':id/cancel')
+  @SkipThrottle()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.CASHIER)
+  cancel(@Param('id', ParseIntPipe) id: number, @Request() req) {
+    const restaurantId = req.user.restaurantId;
+    return this.ordersService.cancel(id, restaurantId);
+  }
+
   @Delete(':id')
   @SkipThrottle() // Skip rate limiting for authenticated requests
   @UseGuards(JwtAuthGuard, RolesGuard)
