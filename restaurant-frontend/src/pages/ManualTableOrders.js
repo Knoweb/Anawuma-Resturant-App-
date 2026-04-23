@@ -425,9 +425,11 @@ const ManualTableOrders = () => {
                 <button class="btn btn-sm btn-light ms-2 print-single-order" data-index="${idx}" title="Print this order">
                   <i class="fas fa-print"></i>
                 </button>
-                <button class="btn btn-sm btn-outline-danger ms-2 cancel-single-order" data-id="${order.orderId}" data-no="${order.orderNo}" title="Cancel this order">
-                  <i class="fas fa-times-circle"></i>
-                </button>
+                ${order.orderType !== 'MANUAL_CASHIER' ? `
+                  <button class="btn btn-sm btn-outline-danger ms-2 cancel-single-order" data-id="${order.orderId}" data-no="${order.orderNo}" title="Cancel this order">
+                    <i class="fas fa-times-circle"></i>
+                  </button>
+                ` : ''}
               </span>
               <span class="order-group-date">${new Date(order.createdAt).toLocaleDateString()} ${new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
             </div>
