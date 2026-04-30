@@ -341,6 +341,7 @@ function AddFoodItem() {
                       placeholder="Optional (must be a valid URL)"
                     />
                   </div>
+                </div>
                 <div className="row mt-4 mb-5">
                   <div className="col-12">
                     <div className="d-flex align-items-center p-3 bg-light rounded border">
