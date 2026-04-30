@@ -76,7 +76,8 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
         imageUrl3: foodItem.imageUrl3 || '',
         imageUrl4: foodItem.imageUrl4 || '',
         videoLink: foodItem.videoLink || '',
-        blogLink: foodItem.blogLink || ''
+        blogLink: foodItem.blogLink || '',
+        isAvailable: foodItem.isAvailable !== undefined ? foodItem.isAvailable : true
       });
       setPreviews({
         image1: foodItem.imageUrl1 || null,
@@ -196,7 +197,8 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
         imageUrl3: imageUrls.imageUrl3,
         imageUrl4: imageUrls.imageUrl4,
         videoLink: formData.videoLink.trim(),
-        blogLink: formData.blogLink.trim()
+        blogLink: formData.blogLink.trim(),
+        isAvailable: formData.isAvailable
       };
 
       await apiClient.patch(`/food-items/${foodItem.foodItemId}`, submitData);
@@ -383,7 +385,7 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
               </Form.Group>
             </div>
 
-            <div className="col-md-6 mb-3">
+            <div class="col-md-6 mb-3">
               <Form.Group>
                 <Form.Label>Blog Link</Form.Label>
                 <Form.Control
@@ -393,6 +395,23 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
                   onChange={handleChange}
                   placeholder="Enter blog URL"
                   maxLength={255}
+                />
+              </Form.Group>
+            </div>
+
+            <div className="col-12 mb-3">
+              <Form.Group className="d-flex align-items-center p-3 bg-light rounded border">
+                <div className="flex-grow-1">
+                  <Form.Label className="mb-0 fw-bold">Availability Status</Form.Label>
+                  <div className="small text-muted">When disabled, this item will not be visible for ordering.</div>
+                </div>
+                <Form.Check 
+                  type="switch"
+                  id="isAvailable-switch"
+                  name="isAvailable"
+                  checked={formData.isAvailable}
+                  onChange={(e) => setFormData(prev => ({ ...prev, isAvailable: e.target.checked }))}
+                  className="custom-switch-lg"
                 />
               </Form.Group>
             </div>

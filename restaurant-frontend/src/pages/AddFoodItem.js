@@ -21,6 +21,7 @@ function AddFoodItem() {
     menuId: '',
     categoryId: '',
     blogLink: '',
+    isAvailable: true,
   });
 
   const [errors, setErrors] = useState({});
@@ -171,7 +172,8 @@ function AddFoodItem() {
         imageUrl4: imageUrls.image4,
         videoLink: videoUrl,
         blogLink: formData.blogLink.trim(),
-        currencyId: 1 // Default to LKR
+        currencyId: 1, // Default to LKR
+        isAvailable: formData.isAvailable
       };
 
       console.log('DEBUG: Final Food Item Payload ready to send:', JSON.stringify(payload, null, 2));
@@ -338,6 +340,25 @@ function AddFoodItem() {
                       onChange={handleChange}
                       placeholder="Optional (must be a valid URL)"
                     />
+                  </div>
+                <div className="row mt-4 mb-5">
+                  <div className="col-12">
+                    <div className="d-flex align-items-center p-3 bg-light rounded border">
+                      <div className="flex-grow-1">
+                        <label className="form-label mb-0 fw-bold">Availability Status</label>
+                        <div className="small text-muted">When disabled, this item will not be visible for ordering.</div>
+                      </div>
+                      <div className="form-check form-switch">
+                        <input 
+                          className="form-check-input" 
+                          type="checkbox" 
+                          id="isAvailableSwitch"
+                          checked={formData.isAvailable}
+                          onChange={(e) => setFormData(prev => ({ ...prev, isAvailable: e.target.checked }))}
+                          style={{ width: '2.5em', height: '1.25em', cursor: 'pointer' }}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
 

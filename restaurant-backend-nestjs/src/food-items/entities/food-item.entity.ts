@@ -60,6 +60,9 @@ export class FoodItem {
   @Column({ name: 'restaurant_id' })
   restaurantId: number;
 
+  @Column({ name: 'is_available', type: 'boolean', default: true })
+  isAvailable: boolean;
+
   @ManyToOne(() => Menu, { onDelete: 'SET NULL', nullable: true })
   @JoinColumn({ name: 'menu_id' })
   menu: Menu;

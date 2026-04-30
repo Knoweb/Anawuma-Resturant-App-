@@ -344,6 +344,9 @@ function FoodItems() {
                                 {foodItem.category.categoryName}
                               </span>
                             )}
+                            <span className={`badge ${foodItem.isAvailable !== false ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'} border`}>
+                              {foodItem.isAvailable !== false ? 'Available' : 'Unavailable'}
+                            </span>
                           </div>
                           <h5 className="food-item-title mb-2">{foodItem.itemName}</h5>
                           <h6 className="food-item-price mb-3">LKR {formatPrice(foodItem.price)}</h6>

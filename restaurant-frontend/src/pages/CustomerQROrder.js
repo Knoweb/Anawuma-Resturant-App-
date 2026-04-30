@@ -326,7 +326,7 @@ const CustomerQROrder = ({ isManual = false }) => {
       );
       const restaurantCategories = categoriesRes.data || [];
       const restaurantFoodItems = (foodItemsRes.data || []).filter(
-        item => item.restaurantId === restaurantId
+        item => item.restaurantId === restaurantId && item.isAvailable !== false
       );
 
       console.log('restaurantFoodItems fetched:', restaurantFoodItems);

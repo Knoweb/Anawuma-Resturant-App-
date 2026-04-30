@@ -6,9 +6,13 @@ import {
   IsInt,
   MaxLength,
   Min,
+  IsBoolean,
 } from 'class-validator';
 
 export class CreateFoodItemDto {
+  @IsBoolean()
+  @IsOptional()
+  isAvailable?: boolean;
   @IsString()
   @IsNotEmpty()
   @MaxLength(100)
