@@ -166,6 +166,30 @@ const ManualTableOrders = () => {
         printWindow.document.close();
     };
 
+    const normalizeWhatsAppNumber = (raw) => {
+        if (!raw) return null;
+        let digits = raw.replace(/\D/g, '');
+        if (digits.startsWith('0')) digits = '94' + digits.slice(1);
+        if (!digits.startsWith('94')) digits = '94' + digits;
+        return digits;
+    };
+
+    const handleWhatsAppBill = (order) => {
+        const phone = normalizeWhatsAppNumber(order.whatsappNumber);
+        if (!phone) {
+            Swal.fire({
+                title: 'No WhatsApp Number',
+                text: 'This order does not have a WhatsApp number associated with it.',
+                icon: 'warning',
+                confirmButtonColor: '#4e73df'
+            });
+            return;
+        }
+        const itemLines = (order.orderItems || []).map((i) => `  • ${i.itemName} x${i.qty}`).join('\n');
+        const msg = `🍽️ *Order Ready!*\nOrder: ${order.orderNo}\nTable: ${order.tableNo || '–'}\n\n${itemLines}\n\n*Total: Rs. ${parseFloat(order.totalAmount).toFixed(0)}*`;
+        window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`, '_blank');
+    };
+
     const finalizeCheckout = async (account, tableNo, paymentMethod = 'CASH', shouldPrint = false) => {
         if (isProcessingManual) return;
         setIsProcessingManual(true);
@@ -429,6 +453,9 @@ const ManualTableOrders = () => {
                   <i class="fas fa-print"></i>
                 </button>
                 ${order.orderType !== 'MANUAL_CASHIER' ? `
+                  <button class="btn btn-sm btn-success ms-2 whatsapp-single-order" data-index="${idx}" title="Send via WhatsApp">
+                    <i class="fab fa-whatsapp"></i>
+                  </button>
                   <button class="btn btn-sm btn-outline-danger ms-2 cancel-single-order" data-id="${order.orderId}" data-no="${order.orderNo}" title="Cancel this order">
                     <i class="fas fa-times-circle"></i>
                   </button>
@@ -493,6 +520,14 @@ const ManualTableOrders = () => {
                         const id = btn.getAttribute('data-id');
                         const no = btn.getAttribute('data-no');
                         handleCancelOrder(id, no);
+                    });
+                });
+
+                const whatsappBtns = popup.querySelectorAll('.whatsapp-single-order');
+                whatsappBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const idx = btn.getAttribute('data-index');
+                        handleWhatsAppBill(account.orders[idx]);
                     });
                 });
             },

@@ -392,8 +392,7 @@ const ServiceBillingDashboard = ({
   const resolvedCashierTab = isCashierDashboard ? cashierTab : 'queue';
   const showCashierTransfersSection =
     isCashierDashboard && resolvedCashierTab === 'transfers';
-  const showCashierQueueSection =
-    !isCashierDashboard || resolvedCashierTab === 'queue';
+  const showCashierQueueSection = false; // Temporarily removed as per user request
   const showInvoiceHistorySection =
     !isCashierDashboard || resolvedCashierTab === 'history';
   const autoTransferStorageKey = `cashier-auto-transfer:${user?.restaurantId || 'global'}`;
