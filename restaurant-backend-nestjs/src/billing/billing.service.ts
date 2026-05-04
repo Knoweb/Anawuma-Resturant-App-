@@ -47,7 +47,7 @@ export class BillingService {
     const finalTotal = parseFloat(order.totalAmount.toString());
 
     const invCount = await this.invoicesRepository.count({ where: { restaurantId: order.restaurantId } });
-    const invoiceNumber = `INV-${String(invCount).padStart(3, '0')}`;
+    const invoiceNumber = `INV-${order.restaurantId}-${String(invCount).padStart(4, '0')}`;
 
     const orderItemsSnapshot = (order.orderItems || []).map((item) => ({
       itemName: item.itemName,
@@ -212,7 +212,7 @@ export class BillingService {
 
     const now = new Date();
     const invCount = await this.invoicesRepository.count({ where: { restaurantId } });
-    const invoiceNumber = `INV-${String(invCount).padStart(3, '0')}`;
+    const invoiceNumber = `INV-${restaurantId}-${String(invCount).padStart(4, '0')}`;
 
     // 3. Create Aggregated Invoice
     const invoice = (this.invoicesRepository.create as any)({
