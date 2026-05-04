@@ -221,14 +221,29 @@ const GenerateRoomQRCodes = () => {
           <form onSubmit={handleGenerateSingle}>
             <div className="mb-3">
               <label className="form-label">Room Number</label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="e.g., Room 101, Suite A"
+              <select
+                className="form-select"
                 value={singleRoomNo}
                 onChange={(e) => setSingleRoomNo(e.target.value)}
                 disabled={loading}
-              />
+              >
+                <option value="">Select Room Number</option>
+                <optgroup label="Standard Rooms">
+                  {[1, 2, 3, 4, 5].map(floor => (
+                    Array.from({ length: 10 }, (_, i) => floor * 100 + (i + 1)).map(num => (
+                      <option key={num} value={num}>Room {num}</option>
+                    ))
+                  ))}
+                </optgroup>
+                <optgroup label="Special Wings">
+                  {Array.from({ length: 16 }, (_, i) => `SV - ${201 + i}`).map(room => (
+                    <option key={room} value={room}>{room}</option>
+                  ))}
+                  {Array.from({ length: 8 }, (_, i) => `HB - ${String(i + 1).padStart(2, '0')}`).map(room => (
+                    <option key={room} value={room}>{room}</option>
+                  ))}
+                </optgroup>
+              </select>
             </div>
             <button
               type="submit"

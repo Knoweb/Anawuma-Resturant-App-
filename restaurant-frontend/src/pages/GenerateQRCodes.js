@@ -146,15 +146,20 @@ const GenerateQRCodes = () => {
               <div className="row align-items-end">
                 <div className="col-md-6">
                   <label className="form-label">Table Number</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="e.g., Table 1, T-5, etc."
+                  <select
+                    className="form-select"
                     value={tableNo}
                     onChange={(e) => setTableNo(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleGenerateQR()}
                     disabled={loading}
-                  />
+                  >
+                    <option value="">Select Table Number</option>
+                    {Array.from({ length: 100 }, (_, i) => i + 1).map(num => (
+                      <option key={num} value={num}>Table {num}</option>
+                    ))}
+                    {Array.from({ length: 20 }, (_, i) => i + 1).map(num => (
+                      <option key={`T-${num}`} value={`T-${num}`}>T-{num}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="col-md-6">
                   <div className="d-flex gap-2">
