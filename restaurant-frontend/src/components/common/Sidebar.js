@@ -130,7 +130,7 @@ function Sidebar() {
   const dashboardPath = isKitchen
     ? '/kitchen/dashboard'
     : isCashier
-      ? '/cashier/dashboard/queue'
+      ? '/cashier/dashboard/history'
       : isAccountant
         ? '/accountant/dashboard'
         : '/dashboard';
@@ -221,12 +221,6 @@ function Sidebar() {
 
           {canAccessCashierDashboard && (
             <>
-              <li className={isCashierTabActive('queue')}>
-                <Link to="/cashier/dashboard/queue" onClick={closeSubmenus}>
-                  <i className="fas fa-cash-register"></i>
-                  <span>Cashier Queue</span>
-                </Link>
-              </li>
               <li className={isCashierTabActive('transfers')}>
                 <Link to="/cashier/dashboard/transfers" onClick={closeSubmenus}>
                   <i className="fas fa-share-square"></i>
