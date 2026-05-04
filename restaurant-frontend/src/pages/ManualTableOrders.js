@@ -4,12 +4,15 @@ import Sidebar from '../components/common/Sidebar';
 import Navbar from '../components/common/Navbar';
 import Swal from 'sweetalert2';
 import { useWebSocket } from '../hooks/useWebSocket';
+import { useAuthStore } from '../store/authStore';
 import './ManualOrders.css';
 
 const ManualTableOrders = () => {
     const [accounts, setAccounts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isProcessingManual, setIsProcessingManual] = useState(false);
+    const user = useAuthStore(state => state.user);
+    const restaurantName = user?.restaurantName || user?.restaurant?.restaurantName || 'Restaurant';
 
     const fetchAccounts = async () => {
         try {
@@ -55,7 +58,7 @@ const ManualTableOrders = () => {
                 </head>
                 <body>
                     <div class="header">
-                        <h2 style="margin:0">ANAWUMA</h2>
+                        <h2 style="margin:0">${restaurantName}</h2>
                         <p style="margin:5px 0">Order Receipt</p>
                         <p style="margin:2px 0">#${order.orderNo}</p>
                         <p style="margin:2px 0">${new Date(order.createdAt).toLocaleString()}</p>
@@ -116,7 +119,7 @@ const ManualTableOrders = () => {
                 </head>
                 <body>
                     <div class="header">
-                        <h1 style="margin:0">ANAWUMA</h1>
+                        <h1 style="margin:0">${restaurantName}</h1>
                         <h3>BILL SUMMARY (TABLE ${id})</h3>
                         <p>Currency: ${currency}</p>
                         <p>Printed: ${new Date().toLocaleString()}</p>

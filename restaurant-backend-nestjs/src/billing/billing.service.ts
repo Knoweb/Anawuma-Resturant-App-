@@ -46,9 +46,8 @@ export class BillingService {
     const serviceCharge = order.serviceCharge ? parseFloat(order.serviceCharge.toString()) : 0;
     const finalTotal = parseFloat(order.totalAmount.toString());
 
-    const today = new Date();
-    const datePart = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
-    const invoiceNumber = `INV-${datePart}-${order.orderId}`;
+    const invCount = await this.invoicesRepository.count({ where: { restaurantId: order.restaurantId } });
+    const invoiceNumber = `INV-${invCount + 1}`;
 
     const orderItemsSnapshot = (order.orderItems || []).map((item) => ({
       itemName: item.itemName,
@@ -211,16 +210,8 @@ export class BillingService {
       });
     });
 
-    const now = new Date();
-    const datePart = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(
-      2,
-      '0',
-    )}${String(now.getDate()).padStart(2, '0')}`;
-    const timePart = `${String(now.getHours()).padStart(2, '0')}${String(
-      now.getMinutes(),
-    ).padStart(2, '0')}`;
-    const randomPart = Math.floor(Math.random() * 900) + 100;
-    const invoiceNumber = `INV-MAN-${datePart}-${timePart}-${randomPart}`;
+    const invCount = await this.invoicesRepository.count({ where: { restaurantId } });
+    const invoiceNumber = `INV-${invCount + 1}`;
 
     // 3. Create Aggregated Invoice
     const invoice = (this.invoicesRepository.create as any)({

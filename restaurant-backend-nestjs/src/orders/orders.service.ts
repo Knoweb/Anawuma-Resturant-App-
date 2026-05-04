@@ -91,8 +91,9 @@ export class OrdersService {
     const serviceCharge = subtotal * 0.1;
     const totalAmount = subtotal + serviceCharge;
 
-    // Generate order number (simple timestamp-based for MVP)
-    const orderNo = `ORD-${Date.now()}`;
+    // Generate sequential order number starting from 1 for this restaurant
+    const count = await this.ordersRepository.count({ where: { restaurantId } });
+    const orderNo = `${count + 1}`;
 
     // Create order with cascade
     const order = this.ordersRepository.create({
