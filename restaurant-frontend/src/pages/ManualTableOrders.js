@@ -185,8 +185,16 @@ const ManualTableOrders = () => {
             });
             return;
         }
-        const itemLines = (order.orderItems || []).map((i) => `  • ${i.itemName} x${i.qty}`).join('\n');
-        const msg = `🍽️ *Order Ready!*\nOrder: ${order.orderNo}\nTable: ${order.tableNo || '–'}\n\n${itemLines}\n\n*Total: Rs. ${parseFloat(order.totalAmount).toFixed(0)}*`;
+        
+        const itemLines = (order.orderItems || []).map((i) => `  • ${i.itemName} x${i.qty} - Rs. ${parseFloat(i.lineTotal).toFixed(2)}`).join('\n');
+        
+        const subtotal = parseFloat(order.subtotal);
+        const serviceCharge = parseFloat(order.serviceCharge);
+        const total = parseFloat(order.totalAmount);
+        const locationLabel = order.roomNo ? `Room: ${order.roomNo}` : (order.tableNo ? `Table: ${order.tableNo}` : '–');
+
+        const msg = `Hello Guest 👋\nHere is your bill for order #${order.orderNo}.\n\nOrder ID: ${order.orderNo}\n${locationLabel}\n\nItems:\n${itemLines}\n\nSubtotal: Rs. ${subtotal.toFixed(2)}\nService Charge (10%): Rs. ${serviceCharge.toFixed(2)}\n*Total: Rs. ${total.toFixed(2)}*\n\nThank you for ordering with us 🍔`;
+        
         window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`, '_blank');
     };
 
@@ -449,15 +457,9 @@ const ManualTableOrders = () => {
                     <i class="fas ${order.orderType === 'MANUAL_CASHIER' ? 'fa-user-edit' : 'fa-qrcode'} me-1"></i>
                     ${order.orderType === 'MANUAL_CASHIER' ? 'Manual' : 'QR Scan'}
                 </small>
-                <button class="btn btn-sm btn-light ms-2 print-single-order" data-index="${idx}" title="Print this order">
-                  <i class="fas fa-print"></i>
-                </button>
                 ${order.orderType !== 'MANUAL_CASHIER' ? `
                   <button class="btn btn-sm btn-success ms-2 whatsapp-single-order" data-index="${idx}" title="Send via WhatsApp">
                     <i class="fab fa-whatsapp"></i>
-                  </button>
-                  <button class="btn btn-sm btn-outline-danger ms-2 cancel-single-order" data-id="${order.orderId}" data-no="${order.orderNo}" title="Cancel this order">
-                    <i class="fas fa-times-circle"></i>
                   </button>
                 ` : ''}
               </span>
