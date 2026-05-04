@@ -153,11 +153,8 @@ const GenerateQRCodes = () => {
                     disabled={loading}
                   >
                     <option value="">Select Table Number</option>
-                    {Array.from({ length: 100 }, (_, i) => i + 1).map(num => (
-                      <option key={num} value={num}>Table {num}</option>
-                    ))}
-                    {Array.from({ length: 20 }, (_, i) => i + 1).map(num => (
-                      <option key={`T-${num}`} value={`T-${num}`}>T-{num}</option>
+                    {Array.from({ length: 25 }, (_, i) => i + 1).map(num => (
+                      <option key={num} value={`Table-${num}`}>Table-{num}</option>
                     ))}
                   </select>
                 </div>
