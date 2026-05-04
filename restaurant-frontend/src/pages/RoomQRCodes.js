@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { QRCodeCanvas } from 'qrcode.react';
 import Swal from 'sweetalert2';
 import apiClient from '../api/apiClient';
+import Navbar from '../components/common/Navbar';
+import Sidebar from '../components/common/Sidebar';
 import './RoomQRCodes.css';
 
 const RoomQRCodes = () => {
@@ -103,7 +105,11 @@ const RoomQRCodes = () => {
   };
 
   return (
-    <div className="room-qr-codes-container">
+    <div className="wrapper">
+      <Navbar />
+      <Sidebar />
+      <div className="content-wrapper">
+        <div className="room-qr-codes-container">
       {/* Header */}
       <div className="page-header-card fade-in">
         <div className="d-flex justify-content-between align-items-center">
@@ -255,6 +261,8 @@ const RoomQRCodes = () => {
           ))}
         </div>
       )}
+        </div>
+      </div>
     </div>
   );
 };
