@@ -6,6 +6,7 @@ import { useAuthStore } from '../store/authStore';
 import Swal from 'sweetalert2';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
+import Navbar from '../components/common/Navbar';
 import Sidebar from '../components/common/Sidebar';
 import './PremiumShopifyTheme.css';
 import './CustomerQROrder.css';
