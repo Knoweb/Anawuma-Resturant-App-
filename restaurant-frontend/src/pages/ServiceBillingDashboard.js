@@ -394,7 +394,7 @@ const ServiceBillingDashboard = ({
     isCashierDashboard && resolvedCashierTab === 'transfers';
   const showCashierQueueSection = false; // Temporarily removed as per user request
   const showInvoiceHistorySection =
-    !isCashierDashboard || resolvedCashierTab === 'history';
+    !isCashierDashboard || resolvedCashierTab === 'history' || resolvedCashierTab === 'queue';
   const autoTransferStorageKey = `cashier-auto-transfer:${user?.restaurantId || 'global'}`;
   const autoSendInFlightRef = useRef(false);
   const toastTimerRef = useRef(null);
@@ -1038,7 +1038,9 @@ const ServiceBillingDashboard = ({
                       </thead>
                       <tbody>
                         {cashierTransactions.map((inv) => {
-                          const isPendingReview = (inv.accountantTransferStatus || 'NONE') === 'PENDING';
+                          const transferStatus = inv.accountantTransferStatus || 'NONE';
+                          const isPendingReview = transferStatus === 'PENDING';
+                          const isRejected = transferStatus === 'REJECTED';
                           return (
                             <tr key={inv.invoiceId}>
                               <td>
@@ -1055,8 +1057,8 @@ const ServiceBillingDashboard = ({
                               <td>{formatCurrency(inv.totalAmount)}</td>
                               <td>{formatDateTime(inv.updatedAt)}</td>
                               <td>
-                                <span className={`badge ${isPendingReview ? 'bg-warning text-dark' : 'bg-primary'}`}>
-                                  {isPendingReview ? 'Pending Accountant' : 'With Cashier'}
+                                <span className={`badge ${isRejected ? 'bg-danger' : (isPendingReview ? 'bg-warning text-dark' : 'bg-primary')}`}>
+                                  {isRejected ? 'Rejected by Accountant' : (isPendingReview ? 'Pending Accountant' : 'With Cashier')}
                                 </span>
                               </td>
                             </tr>
