@@ -1680,7 +1680,7 @@ const CustomerQROrder = ({ isManual = false }) => {
         </div>
 
         {cart.length > 0 && (
-          <div className="cart-footer p-3 bg-white border-top">
+          <div className="cart-footer">
 
             <div className="cart-total bg-light-subtle p-3 rounded-4 mb-3" style={{ border: '1px solid #E5E7EB' }}>
               <div className="d-flex justify-content-between mb-2 text-muted" style={{ fontSize: '0.9rem' }}>
