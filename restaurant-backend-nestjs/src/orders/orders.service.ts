@@ -392,11 +392,8 @@ export class OrdersService {
 
   async getManualActiveAccounts(restaurantId: number, type: 'ROOM' | 'TABLE') {
     const activeStatuses: OrderStatus[] = [
-      OrderStatus.NEW,
-      OrderStatus.ACCEPTED,
-      OrderStatus.COOKING,
-      OrderStatus.READY,
       OrderStatus.SERVED,
+      OrderStatus.BILLED,
     ];
 
     const query = this.ordersRepository
@@ -420,8 +417,9 @@ export class OrdersService {
       const rawKey = type === 'ROOM' ? order.roomNo : order.tableNo;
       if (!rawKey) return;
 
-      // Normalize key by removing leading zeros (e.g., "03" -> "3")
-      const key = rawKey.trim().replace(/^0+/, '') || rawKey.trim();
+      // Standardize the key: uppercase, remove spaces, and strip leading zeros
+      // This makes "HB-01" match "HB - 01" or "hb 01"
+      const key = rawKey.toUpperCase().replace(/\s+/g, '').replace(/^0+/, '') || rawKey.trim();
 
       if (!accounts[key]) {
         accounts[key] = {

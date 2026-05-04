@@ -45,8 +45,14 @@ const ManualRoomOrders = () => {
         return () => unsubscribe();
     }, [subscribe]);
 
+    const normalizeIdentifier = (id) => {
+        if (!id) return '';
+        return id.toString().toUpperCase().replace(/\s+/g, '').replace(/^0+/, '') || id.toString().trim();
+    };
+
     const getAccountForRoom = (roomNo) => {
-        return accounts.find(acc => acc.identifier === roomNo);
+        const target = normalizeIdentifier(roomNo);
+        return accounts.find(acc => normalizeIdentifier(acc.identifier) === target);
     };
 
     const printOrder = (order, roomNo = null) => {
