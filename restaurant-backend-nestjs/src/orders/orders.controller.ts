@@ -171,6 +171,19 @@ export class OrdersController {
     return this.ordersService.cancel(id, restaurantId);
   }
 
+  @Post('cancel-account/:type/:identifier')
+  @SkipThrottle()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.CASHIER)
+  cancelAccount(
+    @Param('type') type: 'ROOM' | 'TABLE',
+    @Param('identifier') identifier: string,
+    @Request() req
+  ) {
+    const restaurantId = req.user.restaurantId;
+    return this.ordersService.cancelByAccount(restaurantId, type, identifier);
+  }
+
   @Delete(':id')
   @SkipThrottle() // Skip rate limiting for authenticated requests
   @UseGuards(JwtAuthGuard, RolesGuard)

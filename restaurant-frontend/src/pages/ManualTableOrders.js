@@ -506,6 +506,9 @@ const ManualTableOrders = () => {
             cancelButtonText: 'Close',
             confirmButtonColor: '#1cc88a', // Success Green
             cancelButtonColor: '#858796',
+            showDenyButton: true,
+            denyButtonText: '<i class="fas fa-trash-alt me-1"></i> Clear All',
+            denyButtonColor: '#e74a3b',
             didOpen: () => {
                 const popup = Swal.getPopup();
                 const printBtns = popup.querySelectorAll('.print-single-order');
@@ -536,9 +539,27 @@ const ManualTableOrders = () => {
             customClass: {
                 popup: 'modal-radius'
             }
-        }).then((result) => {
+        }).then(async (result) => {
             if (result.isConfirmed) {
                 showInvoiceModal(account, tableNo);
+            } else if (result.isDenied) {
+                const confirmClear = await Swal.fire({
+                    title: 'Clear All Orders?',
+                    text: `This will cancel all active orders for Table ${tableNo}. Are you sure?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#e74a3b',
+                    confirmButtonText: 'Yes, clear all'
+                });
+                if (confirmClear.isConfirmed) {
+                    try {
+                        await apiClient.post(`/orders/cancel-account/TABLE/${tableNo}`);
+                        Swal.fire('Cleared!', 'All orders for this table have been cancelled.', 'success');
+                        fetchAccounts();
+                    } catch (error) {
+                        Swal.fire('Error', 'Failed to clear orders', 'error');
+                    }
+                }
             }
         });
     };

@@ -402,6 +402,11 @@ export class OrdersService {
       .where('order.restaurantId = :restaurantId', { restaurantId })
       .andWhere('order.status IN (:...activeStatuses)', { activeStatuses });
 
+    // Hide extremely old data (older than 7 days) to keep dashboard clean
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    query.andWhere('order.createdAt >= :sevenDaysAgo', { sevenDaysAgo });
+
     if (type === 'ROOM') {
       query.andWhere('order.roomNo IS NOT NULL');
     } else {
@@ -441,5 +446,40 @@ export class OrdersService {
     });
 
     return Object.values(accounts);
+  }
+
+  async cancelByAccount(restaurantId: number, type: 'ROOM' | 'TABLE', identifier: string) {
+    const activeStatuses: OrderStatus[] = [
+      OrderStatus.NEW,
+      OrderStatus.ACCEPTED,
+      OrderStatus.COOKING,
+      OrderStatus.READY,
+      OrderStatus.SERVED,
+    ];
+
+    const query = this.ordersRepository
+      .createQueryBuilder('order')
+      .where('order.restaurantId = :restaurantId', { restaurantId })
+      .andWhere('order.status IN (:...activeStatuses)', { activeStatuses });
+
+    // We match by the raw identifier stored in DB
+    // To be thorough, we'll try to find any order that normalizes to this identifier
+    // But for a specific cancel action, usually the frontend provides the exact string
+    if (type === 'ROOM') {
+      query.andWhere('order.roomNo = :identifier', { identifier });
+    } else {
+      query.andWhere('order.tableNo = :identifier', { identifier });
+    }
+
+    const orders = await query.getMany();
+    if (orders.length === 0) return { message: 'No active orders found' };
+
+    for (const order of orders) {
+      order.status = OrderStatus.CANCELLED;
+    }
+
+    await this.ordersRepository.save(orders);
+    this.websocketGateway.server.emit('dashboard:refresh');
+    return { message: `${orders.length} orders cancelled` };
   }
 }
