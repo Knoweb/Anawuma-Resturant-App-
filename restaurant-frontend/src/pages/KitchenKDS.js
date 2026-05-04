@@ -299,26 +299,22 @@ const KitchenKDS = () => {
           if (currentStatus === 'READY') {
             const servedOrder = { ...order, status: 'SERVED' };
 
-          // Simplified: Just hand over to cashier directly as per new workflow.
-          // The kitchen can still print the bill separately using the new card button.
-          const cashierHandoverResult = await Swal.fire({
-            icon: 'success',
-            title: 'Order Completed in Kitchen',
-            text: 'Do you want to send this bill to the Cashier desk now?',
-            showCancelButton: true,
-            confirmButtonColor: '#0d6efd',
-            confirmButtonText: 'Send to Cashier',
-            cancelButtonText: 'Later',
-            allowOutsideClick: false,
-          });
-
-          if (cashierHandoverResult.isConfirmed) {
-            await sendPaymentDetailsToCashier(servedOrder);
+            // Automatically send to cashier directly as per new workflow.
+            await sendPaymentDetailsToCashier(servedOrder, { showFeedback: false });
+            
+            Swal.fire({
+              icon: 'success',
+              title: 'Order Completed',
+              text: 'Order served and bill sent to cashier desk.',
+              timer: 2000,
+              showConfirmButton: false,
+              toast: true,
+              position: 'top-end'
+            });
           }
         }
       }
-    }
-  });
+    });
 };
 
   const handleCancelOrder = (orderId, orderNo) => {
