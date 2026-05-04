@@ -21,7 +21,7 @@ const blogs = [
     id: 3,
     title: 'How Smart Analytics Can Transform Your Restaurant Revenue',
     date: 'August 2025',
-    image: 'Blog Post 3.png',
+    image: 'blog3.jpg',
     tags: ['Analytics', 'Revenue', 'Data'],
   },
 ];

@@ -293,7 +293,7 @@ export class OrdersService {
       meta: {
         limit,
         urgentThresholdMinutes,
-        generatedAt: new Date().toISOString(),
+        generatedAt: new Date().toISOString(),
       },
     };
   }
@@ -317,9 +317,6 @@ export class OrdersService {
       restaurantId: updatedOrder.restaurantId,
     });
 
-    // Emit dashboard update
-    this.websocketGateway.server.emit('dashboard:refresh');
-
     return updatedOrder;
   }
 
@@ -342,9 +339,6 @@ export class OrdersService {
       restaurantId: updatedOrder.restaurantId,
     });
 
-    // Emit dashboard update
-    this.websocketGateway.server.emit('dashboard:refresh');
-
     return updatedOrder;
   }
 
@@ -353,7 +347,6 @@ export class OrdersService {
     await this.ordersRepository.remove(order);
     return { message: 'Order deleted successfully' };
   }
-
   // Track order by QR key (for customers/guests)
   async trackOrderByQrKey(orderId: number, tableKey?: string, roomKey?: string) {
     let restaurantId: number;
@@ -483,7 +476,6 @@ export class OrdersService {
     }
 
     await this.ordersRepository.save(orders);
-    this.websocketGateway.server.emit('dashboard:refresh');
     return { message: `${orders.length} orders cancelled` };
   }
 }

@@ -367,7 +367,6 @@ export class BillingService {
       status: order.status,
       restaurantId: order.restaurantId,
     });
-    this.websocketGateway.server.emit('dashboard:refresh');
 
     return savedInvoice;
   }
@@ -425,7 +424,6 @@ export class BillingService {
     invoice.sentToCashierAt = new Date();
     const savedInvoice = await this.invoicesRepository.save(invoice);
 
-    this.websocketGateway.server.emit('dashboard:refresh');
     this.websocketGateway.emitToRole('cashier', 'cashier:queue-update', {
       invoiceId: savedInvoice.invoiceId,
       orderId: savedInvoice.orderId,
