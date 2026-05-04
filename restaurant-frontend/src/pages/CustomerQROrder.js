@@ -6,9 +6,9 @@ import { useAuthStore } from '../store/authStore';
 import Swal from 'sweetalert2';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
-import './CustomerQROrder.css';
-import Navbar from '../components/common/Navbar';
 import Sidebar from '../components/common/Sidebar';
+import './PremiumShopifyTheme.css';
+import './CustomerQROrder.css';
 
 const normalizeWhatsAppNumber = (phone) => {
   if (!phone) return '';
@@ -408,6 +408,11 @@ const CustomerQROrder = ({ isManual = false }) => {
   }, [tableKey, roomKey, isManual, fetchTableInfo, fetchMenuData]);
 
   const [expandedCategories, setExpandedCategories] = useState(new Set());
+  const [activeAccordion, setActiveAccordion] = useState('description');
+
+  const toggleAccordion = (id) => {
+    setActiveAccordion(activeAccordion === id ? null : id);
+  };
 
   const renderFoodCard = (item) => {
     return (
@@ -1256,461 +1261,520 @@ const CustomerQROrder = ({ isManual = false }) => {
     return apiClient.sanitizeUrl ? apiClient.sanitizeUrl(fullUrl) : fullUrl;
   };
 
+  const AnnouncementBar = () => (
+    <div className="announcement-bar">
+      WE PROVIDE ISLANDWIDE DELIVERY INSIDE SRI LANKA | EXCLUSIVE OFFERS
+    </div>
+  );
+
+  const ShopifyHeader = () => (
+    <header className="shopify-header">
+      <div className="hamburger-icon" style={{ fontSize: '20px' }}>
+        <i className="fas fa-bars"></i>
+      </div>
+      <div className="brand-logo" style={{ textAlign: 'center' }}>
+        {tableInfo?.restaurantName || 'ANAWUMA'}
+      </div>
+      <div className="cart-trigger" onClick={() => setShowCart(true)} style={{ position: 'relative', fontSize: '20px' }}>
+        <i className="fas fa-shopping-bag"></i>
+        {cart.length > 0 && (
+          <span style={{
+            position: 'absolute',
+            top: '-5px',
+            right: '-10px',
+            background: 'var(--shopify-orange)',
+            color: 'white',
+            borderRadius: '50%',
+            width: '18px',
+            height: '18px',
+            fontSize: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 'bold'
+          }}>
+            {cart.length}
+          </span>
+        )}
+      </div>
+    </header>
+  );
+
+  const ShopifyFooter = () => (
+    <footer className="shopify-footer">
+      <div className="newsletter-wrap">
+        <h3 className="newsletter-title">EXCLUSIVE OFFERS STRAIGHT TO YOUR INBOX</h3>
+        <p className="newsletter-subtitle">Join to get special offers, free giveaways, and once-in-a-lifetime deals.</p>
+        <div className="newsletter-form">
+          <input type="email" placeholder="your-email@example.com" />
+          <i className="fas fa-arrow-right"></i>
+        </div>
+      </div>
+
+      <div className="footer-links">
+        <div className="accordion-item-header" style={{ color: 'white', borderTop: '1px solid rgba(255,255,255,0.2)' }}>
+          MAIN MENU <i className="fas fa-chevron-right small"></i>
+        </div>
+        <div className="accordion-item-header" style={{ color: 'white', borderTop: '1px solid rgba(255,255,255,0.2)' }}>
+          LINKS <i className="fas fa-chevron-right small"></i>
+        </div>
+        <div className="accordion-item-header" style={{ color: 'white', borderTop: '1px solid rgba(255,255,255,0.2)' }}>
+          CONTACT US <i className="fas fa-chevron-right small"></i>
+        </div>
+      </div>
+
+      <div style={{ marginTop: '40px' }}>
+        <h4 style={{ fontSize: '24px', fontWeight: '900', letterSpacing: '1px', marginBottom: '20px' }}>STAY IN TOUCH.</h4>
+        <div className="social-links">
+          <a href="#"><i className="fab fa-facebook-f"></i></a>
+          <a href="#"><i className="fab fa-tiktok"></i></a>
+          <a href="#"><i className="fab fa-instagram"></i></a>
+          <a href="#"><i className="fab fa-youtube"></i></a>
+        </div>
+      </div>
+
+      <div className="currency-selector">
+        SRI LANKA (LKR ₨) <i className="fas fa-chevron-down ms-2"></i>
+      </div>
+
+      <div className="copyright-text">
+        © {tableInfo?.restaurantName} {new Date().getFullYear()} <br />
+        POWERED BY ANAWUMA
+      </div>
+    </footer>
+  );
+
+  const FloatingQuestionButton = () => (
+    <div className="vertical-floating-btn" onClick={() => window.open('https://wa.me/94771234567', '_blank')}>
+      <i className="far fa-envelope me-2"></i>
+      SEND US YOUR QUESTION
+    </div>
+  );
+
+  const renderShopifyProductPage = () => {
+    const item = activeItemDetail;
+    const images = [item.imageUrl1, item.imageUrl2, item.imageUrl3, item.imageUrl4].filter(img => !!img);
+    if (images.length === 0 && (item.imageUrl || item.image || item.itemImage)) {
+      images.push(item.imageUrl || item.image || item.itemImage);
+    }
+
+    return (
+      <div className="shopify-product-view fade-in">
+        <div className="shopify-gallery">
+          <div className="main-image-wrap">
+             <img src={getImageUrl(images[0])} alt={item.itemName} />
+          </div>
+          {images.length > 1 && (
+            <div className="thumbnail-scroll">
+              {images.map((img, idx) => (
+                <div key={idx} className="thumb-item">
+                  <img src={getImageUrl(img)} alt={item.itemName} />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="shopify-details-pane">
+          <h1 className="product-title-bold" style={{ fontSize: '22px', textAlign: 'left' }}>{item.itemName}</h1>
+          <div className="product-rating" style={{ justifyContent: 'flex-start', margin: '12px 0' }}>
+            <div className="stars text-dark">
+              <i className="fas fa-star"></i>
+              <i className="fas fa-star"></i>
+              <i className="fas fa-star"></i>
+              <i className="fas fa-star"></i>
+              <i className="fas fa-star"></i>
+            </div>
+            <span className="ms-2 small fw-bold">2685 reviews</span>
+          </div>
+
+          <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '20px' }}>
+            Rs. {parseFloat(item.price).toFixed(0)}
+          </div>
+
+          <div className="mb-4">
+             <label className="info-label mb-2">Quantity</label>
+             <div className="d-flex align-items-center gap-4" style={{ background: '#f5f5f5', padding: '10px 15px', borderRadius: '4px', width: 'fit-content' }}>
+                <button className="border-0 bg-transparent" onClick={() => setModalQty(Math.max(1, modalQty - 1))}><i className="fas fa-minus small"></i></button>
+                <span className="fw-bold">{modalQty}</span>
+                <button className="border-0 bg-transparent" onClick={() => setModalQty(modalQty + 1)}><i className="fas fa-plus small"></i></button>
+             </div>
+          </div>
+
+          <button className="shopify-add-to-cart" onClick={() => addToCartFromModal(true)}>
+            ADD TO CART
+          </button>
+
+          <div className="shopify-accordion mt-5">
+            <div className="accordion-item">
+              <div className="accordion-item-header" onClick={() => toggleAccordion('description')}>
+                DESCRIPTION <i className={`fas ${activeAccordion === 'description' ? 'fa-minus' : 'fa-plus'} small`}></i>
+              </div>
+              {activeAccordion === 'description' && (
+                <div className="accordion-item-content fade-in">
+                  {item.description || 'No description available for this item. Experience the finest flavors at our restaurant.'}
+                </div>
+              )}
+            </div>
+
+            <div className="accordion-item">
+              <div className="accordion-item-header" onClick={() => toggleAccordion('benefits')}>
+                BENEFITS <i className={`fas ${activeAccordion === 'benefits' ? 'fa-minus' : 'fa-plus'} small`}></i>
+              </div>
+              {activeAccordion === 'benefits' && (
+                <div className="accordion-item-content fade-in">
+                  <ul className="ps-3 mb-0">
+                    <li>Freshly prepared using premium ingredients</li>
+                    <li>Authentic local flavors and recipes</li>
+                    <li>Quick delivery and hygiene guaranteed</li>
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <div className="accordion-item">
+              <div className="accordion-item-header" onClick={() => toggleAccordion('how-to')}>
+                HOW TO ORDER <i className={`fas ${activeAccordion === 'how-to' ? 'fa-minus' : 'fa-plus'} small`}></i>
+              </div>
+              {activeAccordion === 'how-to' && (
+                <div className="accordion-item-content fade-in">
+                  Simply select your quantity and click "Add to Cart". You can track your order status in real-time from the dashboard.
+                </div>
+              )}
+            </div>
+          </div>
+
+          <button 
+            className="btn btn-link text-dark fw-bold text-decoration-none mt-4 p-0 small"
+            onClick={() => setActiveItemDetail(null)}
+          >
+            <i className="fas fa-arrow-left me-2"></i> BACK TO COLLECTION
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const renderShopifyCollectionPage = () => {
+    if (orderSuccess && showStatusScreen) {
+       // Keep existing status screen but within shopify context
+       const statusDisplay = getStatusDisplay(currentOrderStatus || orderSuccess.status);
+       const isCancelled = (currentOrderStatus || orderSuccess.status) === 'CANCELLED';
+
+       return (
+         <div className="p-4 bg-white min-vh-100 fade-in">
+           <div className="text-center mb-5">
+              <div className={`mb-3 ${isCancelled ? 'text-danger' : 'text-success'}`} style={{ fontSize: '60px' }}>
+                <i className={`fas ${isCancelled ? 'fa-times-circle' : 'fa-check-circle'}`}></i>
+              </div>
+              <h1 className="fw-bold">{isCancelled ? 'Order Cancelled' : 'Order Placed!'}</h1>
+              <div className="mt-2 text-muted uppercase small tracking-widest">Order Number: #{orderSuccess.orderNo}</div>
+           </div>
+
+           <div className="p-4 border rounded bg-light mb-4">
+              <h5 className="fw-bold mb-3">Track Progress</h5>
+              <div className={`badge bg-${statusDisplay.color} p-2 px-3 rounded-pill mb-4`}>
+                {statusDisplay.text}
+              </div>
+              
+              <div className="d-flex flex-column gap-3">
+                 <div className="d-flex align-items-center gap-3">
+                    <div className={`rounded-circle d-flex align-items-center justify-content-center ${['NEW', 'COOKING', 'READY', 'SERVED'].indexOf(currentOrderStatus || orderSuccess.status) >= 0 ? 'bg-success text-white' : 'bg-secondary text-white'}`} style={{ width: '30px', height: '30px' }}><i className="fas fa-check small"></i></div>
+                    <span className="small fw-bold">Received</span>
+                 </div>
+                 <div className="d-flex align-items-center gap-3">
+                    <div className={`rounded-circle d-flex align-items-center justify-content-center ${['COOKING', 'READY', 'SERVED'].indexOf(currentOrderStatus || orderSuccess.status) >= 0 ? 'bg-success text-white' : 'bg-secondary text-white'}`} style={{ width: '30px', height: '30px' }}><i className="fas fa-check small"></i></div>
+                    <span className="small fw-bold">Cooking</span>
+                 </div>
+                 <div className="d-flex align-items-center gap-3">
+                    <div className={`rounded-circle d-flex align-items-center justify-content-center ${['READY', 'SERVED'].indexOf(currentOrderStatus || orderSuccess.status) >= 0 ? 'bg-success text-white' : 'bg-secondary text-white'}`} style={{ width: '30px', height: '30px' }}><i className="fas fa-check small"></i></div>
+                    <span className="small fw-bold">Ready</span>
+                 </div>
+              </div>
+           </div>
+
+           <button className="shopify-add-to-cart" onClick={() => setShowStatusScreen(false)}>
+              GO BACK TO MENU
+           </button>
+           <button className="btn btn-outline-dark w-100 p-3 fw-bold mt-2" onClick={startNewOrder}>
+              PLACE ANOTHER ORDER
+           </button>
+         </div>
+       );
+    }
+
+    return (
+      <div className="fade-in">
+        {/* Collection Selector */}
+        <div className="collection-tabs">
+          <div className={`collection-tab ${!selectedMenu ? 'active' : ''}`} onClick={() => setSelectedMenu(null)}>
+            All Collections
+          </div>
+          {menus.map(menu => (
+            <div 
+              key={menu.menuId} 
+              className={`collection-tab ${selectedMenu === menu.menuId ? 'active' : ''}`} 
+              onClick={() => setSelectedMenu(menu.menuId)}
+            >
+              {menu.menuName}
+            </div>
+          ))}
+        </div>
+
+        <div className="p-3">
+          {!selectedMenu ? (
+             <div className="row g-3">
+                {menus.map(menu => (
+                  <div key={menu.menuId} className="col-6">
+                    <div className="shopify-product-card" onClick={() => setSelectedMenu(menu.menuId)}>
+                      <div style={{ height: '180px' }}>
+                        {menu.imageUrl ? (
+                          <img src={getImageUrl(menu.imageUrl)} className="shopify-product-image" alt={menu.menuName} />
+                        ) : (
+                          <div className="h-100 d-flex align-items-center justify-content-center bg-light"><i className="fas fa-utensils text-muted"></i></div>
+                        )}
+                      </div>
+                      <div className="p-3 text-center">
+                        <div className="product-title-bold" style={{ fontSize: '11px' }}>{menu.menuName}</div>
+                        <div className="small text-muted">View Collection</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+             </div>
+          ) : (
+            <div className="row g-3">
+               {filteredItems.map(item => (
+                 <div key={item.foodItemId} className="col-6">
+                   <div className="shopify-product-card" onClick={() => setActiveItemDetail(item)}>
+                      <div style={{ height: '180px' }}>
+                        <img src={getImageUrl(item.imageUrl1 || item.imageUrl || item.image)} className="shopify-product-image" alt={item.itemName} />
+                      </div>
+                      <div className="shopify-product-info">
+                        <div className="product-title-bold" style={{ fontSize: '11px' }}>{item.itemName}</div>
+                        <div className="product-rating" style={{ fontSize: '10px' }}>
+                           <i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i>
+                        </div>
+                        <div className="product-price-clean small">Rs. {parseFloat(item.price).toFixed(0)}</div>
+                      </div>
+                   </div>
+                 </div>
+               ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="shopify-page d-flex align-items-center justify-content-center">
+        <div className="spinner-border text-dark" role="status"></div>
+      </div>
+    );
+  }
+
+  if (!tableInfo) {
+    return (
+      <div className="shopify-page d-flex align-items-center justify-content-center p-4 text-center">
+        <div>
+          <i className="fas fa-exclamation-triangle fa-3x mb-3 text-muted"></i>
+          <h2 className="fw-bold">Invalid QR Code</h2>
+          <p className="text-muted">Please scan a valid QR code from your table or room.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // --- MAIN RENDER LOGIC ---
+  if (!isManual) {
+    return (
+      <div className="shopify-page">
+        <AnnouncementBar />
+        <ShopifyHeader />
+        <FloatingQuestionButton />
+        
+        <main className="shopify-main">
+          {activeItemDetail ? renderShopifyProductPage() : renderShopifyCollectionPage()}
+        </main>
+        
+        <ShopifyFooter />
+
+        {/* Existing Cart Components for compatibility */}
+        <div className={`cart-drawer ${showCart ? 'open' : ''}`}>
+          <div className="cart-header">
+            <h4 className="fw-bold">YOUR CART</h4>
+            <button className="btn-close" onClick={() => setShowCart(false)}></button>
+          </div>
+          <div className="cart-body">
+            {cart.length === 0 ? (
+              <div className="text-center py-5">
+                <i className="fas fa-shopping-bag fa-3x mb-3 text-muted opacity-25"></i>
+                <p className="text-muted">Your cart is currently empty.</p>
+                <button className="btn btn-dark mt-3 rounded-0 px-4" onClick={() => setShowCart(false)}>CONTINUE SHOPPING</button>
+              </div>
+            ) : (
+              <div className="cart-items">
+                {cart.map(item => (
+                  <div key={item.foodItemId} className="d-flex gap-3 mb-4 border-bottom pb-3">
+                    <div className="flex-grow-1">
+                      <div className="fw-bold uppercase small mb-1">{item.name}</div>
+                      <div className="small text-muted mb-2">Rs. {item.price.toFixed(0)}</div>
+                      <div className="d-flex align-items-center gap-3">
+                        <div className="d-flex align-items-center gap-3 border p-1 px-2">
+                          <button className="border-0 bg-transparent" onClick={() => updateCartItemQty(item.foodItemId, -1)}>-</button>
+                          <span className="small fw-bold">{item.qty}</span>
+                          <button className="border-0 bg-transparent" onClick={() => updateCartItemQty(item.foodItemId, 1)}>+</button>
+                        </div>
+                        <button className="btn btn-sm text-muted p-0" onClick={() => removeFromCart(item.foodItemId)}>Remove</button>
+                      </div>
+                    </div>
+                    <div className="fw-bold small">Rs. {(item.price * item.qty).toFixed(0)}</div>
+                  </div>
+                ))}
+
+                <div className="mt-4">
+                  <div className="mb-3">
+                    <label className="small fw-bold text-muted uppercase mb-2">WhatsApp Number *</label>
+                    <PhoneInput
+                      country={'lk'}
+                      value={whatsappNumber}
+                      onChange={setWhatsappNumber}
+                      inputStyle={{ width: '100%', borderRadius: '0' }}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="small fw-bold text-muted uppercase mb-2">Order Notes</label>
+                    <textarea 
+                      className="form-control rounded-0" 
+                      rows="2" 
+                      placeholder="Special instructions..."
+                      value={orderNotes}
+                      onChange={(e) => setOrderNotes(e.target.value)}
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          {cart.length > 0 && (
+            <div className="cart-footer p-4 border-top">
+              <div className="d-flex justify-content-between mb-2">
+                <span className="small text-muted uppercase">Subtotal</span>
+                <span className="fw-bold">Rs. {calculateSubtotal().toFixed(0)}</span>
+              </div>
+              <div className="d-flex justify-content-between mb-3">
+                <span className="small text-muted uppercase">Service Charge</span>
+                <span className="fw-bold">Rs. {calculateServiceCharge().toFixed(0)}</span>
+              </div>
+              <div className="d-flex justify-content-between mb-4 pt-2 border-top">
+                <span className="fw-bold uppercase">Total</span>
+                <span className="h4 mb-0 fw-bold">Rs. {parseFloat(calculateTotal()).toFixed(0)}</span>
+              </div>
+              <button className="shopify-add-to-cart m-0" onClick={placeOrder}>
+                COMPLETE ORDER
+              </button>
+            </div>
+          )}
+        </div>
+        {showCart && <div className="cart-overlay" onClick={() => setShowCart(false)}></div>}
+      </div>
+    );
+  }
+
+  // Fallback for Manual Cashier View (Existing UI)
   return (
     <div className="customer-qr-order-container">
-      {/* Item Detail Modal as per Sketch */}
       {activeItemDetail && (
         <div className="sketch-modal-overlay" onClick={() => setActiveItemDetail(null)}>
           <div className="sketch-modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="sketch-modal-header py-3">
               <span className="fw-bold fs-5 text-uppercase">{activeItemDetail.category?.categoryName || 'Product Info'}</span>
             </div>
-
             <div className="sketch-modal-body d-flex flex-wrap p-0">
-              {/* Left Column: Product Info */}
-              <div className="sketch-modal-left-col p-4 border-end">
-                <div className="sketch-modal-image-area mb-4" style={{ height: '300px', position: 'relative', overflow: 'hidden', borderRadius: '12px' }}>
-                  <FoodItemImageCarousel item={activeItemDetail} getImageUrl={getImageUrl} className="" />
-                </div>
-
-                <div className="sketch-modal-info-rows">
-                  <div className="sketch-detail-row">
-                    <span className="label">Name :</span>
-                    <span className="value fw-bold">{activeItemDetail.itemName}</span>
+               <div className="sketch-modal-left-col p-4 border-end">
+                  <div className="sketch-modal-image-area mb-4" style={{ height: '300px', position: 'relative', overflow: 'hidden', borderRadius: '12px' }}>
+                    <FoodItemImageCarousel item={activeItemDetail} getImageUrl={getImageUrl} className="" />
                   </div>
-                  <div className="sketch-detail-row">
-                    <span className="label">Code :</span>
-                    <span className="value">{activeItemDetail.foodItemId}</span>
-                  </div>
-                  <div className="sketch-detail-row">
-                    <span className="label">Price :</span>
-                    <span className="value">Rs. {parseFloat(activeItemDetail.price).toFixed(0)}</span>
-                  </div>
-                  <div className="sketch-detail-row quantity-row my-3 py-2 border-top border-bottom">
-                    <span className="label">Quantity :</span>
-                    <div className="qty-controls">
-                      <button className="qty-btn" onClick={() => setModalQty(Math.max(1, modalQty - 1))}>-</button>
-                      <span className="qty-value">{modalQty}</span>
-                      <button className="qty-btn" onClick={() => setModalQty(modalQty + 1)}>+</button>
-                    </div>
-                  </div>
-
-                  <div className="sketch-price-breakdown bg-light p-3 rounded">
-                    <div className="sketch-detail-row mb-1">
-                      <span className="label small text-muted">Food Subtotal :</span>
-                      <span className="value small">Rs. {parseFloat(activeItemDetail.price * modalQty).toFixed(0)}</span>
-                    </div>
-                    <div className="sketch-detail-row mb-2">
-                      <span className="label small text-muted">Service Charge (10%) :</span>
-                      <span className="value small">Rs. {parseFloat(activeItemDetail.price * modalQty * 0.1).toFixed(0)}</span>
-                    </div>
-                    <div className="total-row border-top pt-2">
-                      <span className="label fw-bold h5 mb-0 text-nowrap">Total Amount</span>
-                      <span className="value fw-bold h5 mb-0 text-nowrap" style={{ color: '#266668' }}>Rs. {parseFloat(activeItemDetail.price * modalQty * 1.1).toFixed(0)}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column: Order Fields */}
-              <div className="sketch-modal-right-col flex-grow-1 p-4 bg-light">
-                {isManual && (
-                  <>
-                    <div className="mb-4">
-                      <label className="d-block mb-2 fw-bold text-muted small">ORDER LOCATION *</label>
-                      <div className="d-flex gap-2">
-                        <button
-                          className={`flex-grow-1 btn ${orderLocation === 'inside' ? 'btn-primary' : 'btn-outline-primary'}`}
-                          style={orderLocation === 'inside' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }}
-                          onClick={() => {
-                            setOrderLocation('inside');
-                            setModalOrderType('room');
-                            setManualOrderType('ROOM');
-                            setManualTableNo('');
-                          }}
-                        >
-                          IN SIDE
-                        </button>
-                        <button
-                          className={`flex-grow-1 btn ${orderLocation === 'outside' ? 'btn-primary' : 'btn-outline-primary'}`}
-                          style={orderLocation === 'outside' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }}
-                          onClick={() => {
-                            setOrderLocation('outside');
-                            setModalOrderType('table');
-                            setManualOrderType('TABLE');
-                            setManualTableNo('');
-                          }}
-                        >
-                          OUTSIDE
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="mb-4 fade-in">
-                      <label className="d-block mb-2 fw-bold text-muted small">
-                        SELECT {orderLocation === 'inside' ? 'ROOM' : 'TABLE'} *
-                      </label>
-                      <select
-                        className="form-control sketch-input"
-                        value={manualTableNo}
-                        onChange={(e) => setManualTableNo(e.target.value)}
-                        style={{ borderRadius: '8px', border: '1px solid #ddd' }}
-                      >
-                        <option value="">Select {orderLocation === 'inside' ? 'Room' : 'Table'} Number</option>
-                        {orderLocation === 'inside' ? (
-                          // Rooms: SV - 201 to SV - 216 and HB - 01 to HB - 08
-                          [
-                            ...Array.from({ length: 16 }, (_, i) => `SV - ${201 + i}`),
-                            ...Array.from({ length: 8 }, (_, i) => `HB - ${String(i + 1).padStart(2, '0')}`)
-                          ].map(no => (
-                            <option key={no} value={no}>{no}</option>
-                          ))
-                        ) : (
-                          // Tables
-                          Array.from({ length: 25 }, (_, i) => (i + 1).toString()).map(no => (
-                            <option key={no} value={no}>Table {no}</option>
-                          ))
-                        )}
-                      </select>
-                    </div>
-                  </>
-                )}
-
-                <div className="mb-0">
-                  <label className="d-block mb-2 fw-bold text-muted small">ORDER NOTES (OPTIONAL)</label>
-                  <textarea
-                    className="form-control sketch-input"
-                    placeholder="Any special requests or instructions..."
-                    rows={isManual ? "4" : "8"}
-                    value={modalOrderNotes}
-                    onChange={(e) => setModalOrderNotes(e.target.value)}
-                  ></textarea>
-                </div>
-              </div>
-            </div>
-
-            <div className="sticky-bottom-btn p-3 bg-white border-top d-flex gap-2">
-              <button
-                className="btn btn-outline-primary flex-grow-1"
-                onClick={() => addToCartFromModal(false)}
-                style={{
-                  padding: '14px',
-                  fontWeight: '700',
-                  borderColor: '#266668',
-                  color: '#266668'
-                }}
-              >
-                ADD TO CART
-              </button>
-              <button
-                className="order-now-btn flex-grow-1"
-                onClick={() => addToCartFromModal(true)}
-              >
-                ORDER NOW
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Premium Elegant Header */}
-      {!isManual && (
-        <header className={`customer-header-v2 ${selectedMenu ? 'header-scrolled' : ''}`}>
-          <div className="header-container">
-            <div className="restaurant-brand-v2">
-              {tableInfo?.logo ? (
-                <img src={getImageUrl(tableInfo.logo)} alt={tableInfo.restaurantName} className="brand-logo-v2" />
-              ) : (
-                <div className="brand-placeholder-v2">
-                  <i className="fas fa-utensils"></i>
-                </div>
-              )}
-              <div className="brand-text-v2">
-                <h1 className="hotel-name-v2">{tableInfo.restaurantName}</h1>
-                <div className="room-badge-v2">
-                  <i className={`fas ${tableInfo?.isRoom || manualOrderType === 'ROOM' ? 'fa-concierge-bell' : 'fa-chair'}`}></i>
-                  <span>
-                    {isManual ? (
-                      manualTableNo ? manualTableNo : `${manualOrderType === 'ROOM' ? 'Select Room' : 'Select Table'}`
-                    ) : (
-                      `${tableInfo?.isRoom ? '' : 'Table '}${tableInfo?.tableNo || tableInfo?.roomNo}`
-                    )}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="cart-trigger-v2" onClick={() => setShowCart(true)}>
-              <div className={`cart-btn-v2 ${cart.length > 0 ? 'pulse' : ''}`}>
-                <i className="fas fa-shopping-bag"></i>
-                {cart.length > 0 && <span className="cart-badge-v2">{cart.length}</span>}
-              </div>
-            </div>
-          </div>
-        </header>
-      )}
-
-      {/* Modern Bottom Navigation */}
-      <nav className="mobile-bottom-nav">
-        <button
-          className={`nav-item ${!showStatusScreen ? 'active' : ''}`}
-          onClick={() => setShowStatusScreen(false)}
-        >
-          <i className="fas fa-utensils"></i>
-          <span>Menu</span>
-        </button>
-        <button
-          className={`nav-item ${showStatusScreen ? 'active' : ''} ${orderSuccess ? 'has-active-order' : ''}`}
-          onClick={() => {
-            if (orderSuccess) {
-              setShowStatusScreen(true);
-            } else {
-              Swal.fire({
-                title: 'No Active Order',
-                text: 'You haven\'t placed an order yet.',
-                icon: 'info',
-                toast: true,
-                position: 'bottom',
-                timer: 3000,
-                showConfirmButton: false
-              });
-            }
-          }}
-        >
-          <div className="track-icon-wrapper">
-            <i className="fas fa-receipt"></i>
-            {orderSuccess && <span className="notification-dot"></span>}
-          </div>
-          <span>Track Order</span>
-        </button>
-      </nav>
-
-      {/* Main Content Area */}
-      <main className="customer-main-content">
-        {isManual ? (
-          <div className="wrapper">
-            <Navbar cartCount={cart.length} onCartClick={() => setShowCart(true)} />
-            <Sidebar />
-            <div className="content-wrapper" style={{ padding: '0', backgroundColor: '#fcfcfc', minHeight: 'calc(100vh - 70px)', marginTop: '0', position: 'relative' }}>
-
-              {renderMainContent()}
-            </div>
-          </div>
-        ) : (
-          renderMainContent()
-        )}
-      </main>
-
-      {/* Cart Drawer */}
-      <div className={`cart-drawer ${showCart ? 'open' : ''}`}>
-        <div className="cart-header">
-          <h4><i className="fas fa-shopping-cart me-2" style={{ marginRight: '8px' }}></i> Your Order</h4>
-          <button className="btn-close" onClick={() => setShowCart(false)} style={{ fontSize: '1.5rem', opacity: 0.7 }}>
-            <i className="fas fa-times"></i>
-          </button>
-        </div>
-        <div className="cart-body">
-          {cart.length === 0 ? (
-            <div className="empty-cart-modern">
-              <i className="fas fa-shopping-basket"></i>
-              <p>Your cart is empty</p>
-            </div>
-          ) : (
-            <>
-              <div className="cart-items">
-                {cart.map(item => (
-                  <div key={item.foodItemId} className="cart-item-row p-3 mb-2 border-bottom" style={{ background: '#fff' }}>
-                    <div className="d-flex justify-content-between align-items-center mb-2">
-                      <div className="item-main-details">
-                        <h6 className="mb-0 fw-bold text-dark" style={{ fontSize: '1.05rem' }}>{item.name}</h6>
-                        <div className="item-price-info mt-1">
-                          <span className="text-primary fw-bold" style={{ fontSize: '0.95rem' }}>Rs. {parseFloat(item.price).toFixed(0)}</span>
-                          <span className="text-muted mx-2">×</span>
-                          <span className="fw-medium">{item.qty}</span>
-                        </div>
-                      </div>
-                      <div className="item-actions d-flex align-items-center gap-3">
-                        <div className="qty-selector-modern d-flex align-items-center" style={{ background: '#F8F9FA', borderRadius: '12px', border: '1px solid #E9ECEF', padding: '2px' }}>
-                          <button 
-                            onClick={() => updateCartItemQty(item.foodItemId, -1)}
-                            className="btn btn-sm bg-white shadow-sm d-flex align-items-center justify-content-center p-0"
-                            style={{ width: '32px', height: '32px', borderRadius: '10px', border: 'none' }}
-                          >
-                            <i className="fas fa-minus text-muted" style={{ fontSize: '0.75rem' }}></i>
-                          </button>
-                          <span className="px-3 fw-bold" style={{ minWidth: '35px', textAlign: 'center', fontSize: '1rem' }}>{item.qty}</span>
-                          <button 
-                            onClick={() => updateCartItemQty(item.foodItemId, 1)}
-                            className="btn btn-sm bg-white shadow-sm d-flex align-items-center justify-content-center p-0"
-                            style={{ width: '32px', height: '32px', borderRadius: '10px', border: 'none' }}
-                          >
-                            <i className="fas fa-plus text-primary" style={{ fontSize: '0.75rem' }}></i>
-                          </button>
-                        </div>
-                        <button
-                          className="btn btn-sm d-flex align-items-center justify-content-center"
-                          onClick={() => removeFromCart(item.foodItemId)}
-                          style={{ color: '#FF4D4D', background: '#FFF0F0', border: 'none', borderRadius: '10px', width: '36px', height: '36px' }}
-                          title="Remove item"
-                        >
-                          <i className="fas fa-trash-alt"></i>
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <div className="item-sub-details d-flex justify-content-between align-items-end mt-3">
-                      <div className="flex-grow-1 me-4">
-                        <div className="input-group input-group-sm">
-                          <span className="input-group-text bg-transparent border-0 text-muted ps-0" style={{ fontSize: '0.8rem' }}>
-                            <i className="fas fa-pen-nib me-1"></i> Notes:
-                          </span>
-                          <input
-                            type="text"
-                            className="form-control border-0 bg-light-subtle"
-                            placeholder="Less spicy, extra cheese..."
-                            value={item.notes}
-                            onChange={(e) => updateCartItemNotes(item.foodItemId, e.target.value)}
-                            style={{ borderRadius: '8px', fontSize: '0.85rem', paddingLeft: '8px' }}
-                          />
-                        </div>
-                      </div>
-                      <div className="item-subtotal text-end">
-                        <div className="small text-muted mb-0">Subtotal</div>
-                        <div className="fw-bold text-dark" style={{ fontSize: '1rem' }}>Rs. {(item.price * item.qty).toFixed(0)}</div>
+                  <div className="sketch-modal-info-rows">
+                    <div className="sketch-detail-row"><span className="label">Name :</span><span className="value fw-bold">{activeItemDetail.itemName}</span></div>
+                    <div className="sketch-detail-row"><span className="label">Price :</span><span className="value">Rs. {parseFloat(activeItemDetail.price).toFixed(0)}</span></div>
+                    <div className="sketch-detail-row quantity-row my-3 py-2 border-top border-bottom">
+                      <span className="label">Quantity :</span>
+                      <div className="qty-controls">
+                        <button className="qty-btn" onClick={() => setModalQty(Math.max(1, modalQty - 1))}>-</button>
+                        <span className="qty-value">{modalQty}</span>
+                        <button className="qty-btn" onClick={() => setModalQty(modalQty + 1)}>+</button>
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
-              
-              <div className="order-inputs mt-4 pt-3 border-top">
-              <div className="table-info-display mb-3">
-                {isManual ? (
-                  <div className="manual-table-select mb-3">
-                    <label className="form-label small fw-bold text-muted text-uppercase letter-spacing-1">Order Location <span className="text-danger">*</span></label>
-                    <div className="modern-segment-control mb-4" style={{ backgroundColor: '#F3F4F6', padding: '6px', borderRadius: '14px', display: 'flex' }}>
-                      <button
-                        className={`flex-grow-1 border-0 ${orderLocation === 'inside' ? 'bg-white shadow-sm' : 'bg-transparent text-muted'}`}
-                        onClick={() => {
-                          setOrderLocation('inside');
-                          setManualOrderType('ROOM');
-                          setModalOrderType('room');
-                          setManualTableNo('');
-                        }}
-                        style={{ borderRadius: '10px', padding: '10px', fontSize: '0.85rem', fontWeight: '700', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', color: orderLocation === 'inside' ? '#266668' : '#6B7280' }}
-                      >
-                        <i className="fas fa-home me-2"></i> IN SIDE
-                      </button>
-                      <button
-                        className={`flex-grow-1 border-0 ${orderLocation === 'outside' ? 'bg-white shadow-sm' : 'bg-transparent text-muted'}`}
-                        onClick={() => {
-                          setOrderLocation('outside');
-                          setManualOrderType('TABLE');
-                          setModalOrderType('table');
-                          setManualTableNo('');
-                        }}
-                        style={{ borderRadius: '10px', padding: '10px', fontSize: '0.85rem', fontWeight: '700', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', color: orderLocation === 'outside' ? '#266668' : '#6B7280' }}
-                      >
-                        <i className="fas fa-umbrella-beach me-2"></i> OUTSIDE
-                      </button>
+               </div>
+               <div className="sketch-modal-right-col flex-grow-1 p-4 bg-light">
+                  <div className="mb-4">
+                    <label className="d-block mb-2 fw-bold text-muted small">ORDER LOCATION *</label>
+                    <div className="d-flex gap-2">
+                      <button className={`flex-grow-1 btn ${orderLocation === 'inside' ? 'btn-primary' : 'btn-outline-primary'}`} onClick={() => { setOrderLocation('inside'); setModalOrderType('room'); setManualOrderType('ROOM'); }}>IN SIDE</button>
+                      <button className={`flex-grow-1 btn ${orderLocation === 'outside' ? 'btn-primary' : 'btn-outline-primary'}`} onClick={() => { setOrderLocation('outside'); setModalOrderType('table'); setManualOrderType('TABLE'); }}>OUTSIDE</button>
                     </div>
-
-                    <label className="form-label small fw-bold text-muted text-uppercase letter-spacing-1">
-                      Select {orderLocation === 'inside' ? 'Room' : 'Table'} <span className="text-danger">*</span>
-                    </label>
-                    <select
-                      className="form-control"
-                      value={manualTableNo}
-                      onChange={(e) => setManualTableNo(e.target.value)}
-                      style={{ borderRadius: '8px', border: '1px solid #ddd' }}
-                    >
-                      <option value="">Select {orderLocation === 'inside' ? 'Room' : 'Table'} Number</option>
+                  </div>
+                  <div className="mb-4">
+                    <label className="d-block mb-2 fw-bold text-muted small">SELECT {orderLocation === 'inside' ? 'ROOM' : 'TABLE'} *</label>
+                    <select className="form-control" value={manualTableNo} onChange={(e) => setManualTableNo(e.target.value)}>
+                      <option value="">Select No</option>
                       {orderLocation === 'inside' ? (
-                        [
-                          ...Array.from({ length: 16 }, (_, i) => `SV - ${201 + i}`),
-                          ...Array.from({ length: 8 }, (_, i) => `HB - ${String(i + 1).padStart(2, '0')}`)
-                        ].map(no => (
-                          <option key={no} value={no}>{no}</option>
-                        ))
+                        [...Array.from({ length: 16 }, (_, i) => `SV - ${201 + i}`), ...Array.from({ length: 8 }, (_, i) => `HB - ${String(i + 1).padStart(2, '0')}`)].map(no => <option key={no} value={no}>{no}</option>)
                       ) : (
-                        Array.from({ length: 25 }, (_, i) => (i + 1).toString()).map(no => (
-                          <option key={no} value={no}>Table {no}</option>
-                        ))
+                        Array.from({ length: 25 }, (_, i) => (i + 1).toString()).map(no => <option key={no} value={no}>Table {no}</option>)
                       )}
                     </select>
                   </div>
-                ) : (
-                  <div className="p-3 bg-light rounded-3 d-flex align-items-center mb-3">
-                    <i className={`fas ${tableInfo?.isRoom ? 'fa-concierge-bell' : 'fa-chair'} me-2 text-primary`}></i>
-                    <span className="fw-bold">{tableInfo?.isRoom ? 'Room' : 'Table'}: {tableInfo?.tableNo || tableInfo?.roomNo}</span>
-                  </div>
-                )}
-              </div>
-
-              {!isManual && (
-                <div className="mb-3">
-                  <label className="form-label small fw-bold text-muted">WhatsApp Number <span className="text-danger">*</span></label>
-                  <PhoneInput
-                    country={'lk'}
-                    value={whatsappNumber}
-                    onChange={setWhatsappNumber}
-                    inputStyle={{ width: '100%' }}
-                    containerClass="phone-input-container"
-                    placeholder="Enter WhatsApp Number"
-                    enableSearch={true}
-                  />
-                  <small className="text-muted d-block mt-1">We'll send your bill to this WhatsApp number.</small>
-                </div>
-              )}
-
-              <div className="mb-2">
-                <label className="form-label small fw-bold text-muted">Order Notes (Optional)</label>
-                <textarea
-                  className="form-control"
-                  rows="1"
-                  placeholder="Any special requests?"
-                  value={orderNotes}
-                  onChange={(e) => setOrderNotes(e.target.value)}
-                  style={{ minHeight: '45px', borderRadius: '10px', fontSize: '0.9rem' }}
-                ></textarea>
-              </div>
-              </div>
-            </>
-          )}
-        </div>
-
-        {cart.length > 0 && (
-          <div className="cart-footer">
-
-            <div className="cart-total bg-light-subtle p-3 rounded-4 mb-3" style={{ border: '1px solid #E5E7EB' }}>
-              <div className="d-flex justify-content-between mb-2 text-muted" style={{ fontSize: '0.9rem' }}>
-                <span className="fw-medium">Items Subtotal:</span>
-                <span className="fw-bold text-dark">Rs. {calculateSubtotal().toFixed(0)}</span>
-              </div>
-              <div className="d-flex justify-content-between mb-3 text-muted" style={{ fontSize: '0.9rem' }}>
-                <span className="fw-medium">Service Charge (10%):</span>
-                <span className="fw-bold text-dark">Rs. {calculateServiceCharge().toFixed(0)}</span>
-              </div>
-              <div className="d-flex justify-content-between align-items-center pt-2 border-top">
-                <span className="h6 mb-0 fw-bold">Grand Total:</span>
-                <span className="h4 mb-0 fw-bold" style={{ color: '#266668' }}>Rs. {parseFloat(calculateTotal()).toFixed(0)}</span>
-              </div>
+               </div>
             </div>
-
-            <button
-              className="btn btn-lg w-100 text-white"
-              onClick={placeOrder}
-              style={{ borderRadius: '16px', background: 'var(--primary-color)', border: 'none', fontWeight: '800', padding: '16px', fontSize: '1.1rem', boxShadow: '0 8px 24px rgba(38, 102, 104, 0.25)', transition: 'all 0.2s' }}
-            >
-              <i className="fas fa-paper-plane me-2"></i> PLACE ORDER NOW
-            </button>
+            <div className="sticky-bottom-btn p-3 bg-white border-top d-flex gap-2">
+               <button className="btn btn-outline-primary flex-grow-1" onClick={() => addToCartFromModal(false)}>ADD TO CART</button>
+               <button className="order-now-btn flex-grow-1" onClick={() => addToCartFromModal(true)}>ORDER NOW</button>
+            </div>
           </div>
-        )}
+        </div>
+      )}
+      
+      <div className="wrapper">
+        <Navbar cartCount={cart.length} onCartClick={() => setShowCart(true)} />
+        <Sidebar />
+        <div className="content-wrapper p-4 bg-white">
+           <h1 className="fw-bold mb-4">Manual Order</h1>
+           <div className="menu-grid-yellow">
+              {foodItems.map(item => renderManualItemCard(item))}
+           </div>
+        </div>
       </div>
 
-      {/* Cart Overlay */}
+      <div className={`cart-drawer ${showCart ? 'open' : ''}`}>
+        <div className="cart-header"><h4><i className="fas fa-shopping-cart me-2"></i> Cart</h4><button className="btn-close" onClick={() => setShowCart(false)}></button></div>
+        <div className="cart-body">
+          {cart.map(item => (
+            <div key={item.foodItemId} className="p-3 border-bottom mb-2 bg-light">
+              <div className="fw-bold">{item.name}</div>
+              <div className="d-flex justify-content-between align-items-center mt-2">
+                <span>Rs. {item.price.toFixed(0)} x {item.qty}</span>
+                <div className="d-flex gap-2">
+                  <button className="btn btn-sm btn-outline-secondary" onClick={() => updateCartItemQty(item.foodItemId, -1)}>-</button>
+                  <button className="btn btn-sm btn-outline-secondary" onClick={() => updateCartItemQty(item.foodItemId, 1)}>+</button>
+                </div>
+              </div>
+            </div>
+          ))}
+          {cart.length > 0 && (
+            <div className="mt-4 p-3 border rounded">
+               <div className="d-flex justify-content-between fw-bold h5"><span>Total:</span><span>Rs. {calculateTotal()}</span></div>
+               <button className="btn btn-primary w-100 mt-3 p-3 fw-bold" onClick={placeOrder}>PLACE MANUAL ORDER</button>
+            </div>
+          )}
+        </div>
+      </div>
       {showCart && <div className="cart-overlay" onClick={() => setShowCart(false)}></div>}
-    </div >
+    </div>
   );
 };
 
