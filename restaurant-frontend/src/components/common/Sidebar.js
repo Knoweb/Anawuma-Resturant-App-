@@ -274,11 +274,28 @@ function Sidebar() {
 
           {/* QR Codes Section - Admin Only */}
           {canAccessAdminFeatures && (
-            <li className={isActive('/qr-codes/generate')}>
-              <Link to="/qr-codes/generate" onClick={closeSubmenus}>
+            <li className={`has-submenu ${menuStates.qrcodes ? 'open' : ''}`}>
+              <a href="#" onClick={(e) => { e.preventDefault(); toggleMenu('qrcodes'); }}>
                 <i className="fas fa-qrcode"></i>
-                <span>QR Codes</span>
-              </Link>
+                <span>QR Management</span>
+                <i className={`fas fa-chevron-${menuStates.qrcodes ? 'down' : 'right'} submenu-arrow`}></i>
+              </a>
+              <ul className="submenu" style={{ display: menuStates.qrcodes ? 'block' : 'none' }}>
+                <li className={isActive('/qr-codes/generate')}>
+                  <Link to="/qr-codes/generate">
+                    <i className="fas fa-table me-2"></i>
+                    Table QR Codes
+                  </Link>
+                </li>
+                {isHousekeepingEnabled && (
+                  <li className={isActive('/housekeeping/room-qr')}>
+                    <Link to="/housekeeping/room-qr">
+                      <i className="fas fa-door-open me-2"></i>
+                      Room QR Codes
+                    </Link>
+                  </li>
+                )}
+              </ul>
             </li>
           )}
 
@@ -342,16 +359,10 @@ function Sidebar() {
                     Track Orders
                   </Link>
                 </li>
-                <li className={isActive('/housekeeping/room-qr')}>
-                  <Link to="/housekeeping/room-qr">
-                    <i className="fas fa-qrcode"></i>
-                    All Room QR codes
-                  </Link>
-                </li>
                 <li className={isActive('/housekeeping/room-qr/generate')}>
                   <Link to="/housekeeping/room-qr/generate">
                     <i className="fas fa-plus-circle"></i>
-                    Generate Room QR Codes
+                    Generate Room QRs
                   </Link>
                 </li>
               </ul>
