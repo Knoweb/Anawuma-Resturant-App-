@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import apiClient from '../api/apiClient';
 import Swal from 'sweetalert2';
 import OrderDetailsModal from '../components/orders/OrderDetailsModal';
@@ -8,6 +9,7 @@ import Sidebar from '../components/common/Sidebar';
 import Navbar from '../components/common/Navbar';
 
 const OrderManagement = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -182,6 +184,12 @@ const OrderManagement = () => {
         <div className="dashboard-content">
           <div className="order-management-container">
             <div className="page-header">
+              <button 
+                className="btn btn-link text-primary p-0 mb-2 text-decoration-none" 
+                onClick={() => navigate(-1)}
+              >
+                <i className="fas fa-arrow-left me-1"></i> Back
+              </button>
               <h2>
                 <i className="fas fa-clipboard-list me-2"></i>
                 Order Management

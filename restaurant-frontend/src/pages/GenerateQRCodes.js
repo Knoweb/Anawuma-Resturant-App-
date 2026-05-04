@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { QRCodeCanvas } from 'qrcode.react';
 import Swal from 'sweetalert2';
 import apiClient from '../api/apiClient';
@@ -7,6 +8,7 @@ import Sidebar from '../components/common/Sidebar';
 import './GenerateQRCodes.css';
 
 const GenerateQRCodes = () => {
+  const navigate = useNavigate();
   const [tableNo, setTableNo] = useState('');
   const [qrCodes, setQrCodes] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -126,9 +128,15 @@ const GenerateQRCodes = () => {
       <div className="content-wrapper">
         <div className="generate-qr-container">
           <div className="page-header">
+            <button 
+              className="btn btn-link text-primary p-0 mb-2 text-decoration-none" 
+              onClick={() => navigate(-1)}
+            >
+              <i className="fas fa-arrow-left me-1"></i> Back
+            </button>
             <h2>
               <i className="fas fa-qrcode me-2"></i>
-              Generate Customer QR Code
+              Table QR Codes
             </h2>
           </div>
 
