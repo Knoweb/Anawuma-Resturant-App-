@@ -1516,77 +1516,74 @@ const CustomerQROrder = ({ isManual = false }) => {
               <p>Your cart is empty</p>
             </div>
           ) : (
-            <div className="cart-items">
-              {cart.map(item => (
-                <div key={item.foodItemId} className="cart-item-row p-3 mb-2 border-bottom" style={{ background: '#fff' }}>
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <div className="item-main-details">
-                      <h6 className="mb-0 fw-bold text-dark" style={{ fontSize: '1.05rem' }}>{item.name}</h6>
-                      <div className="item-price-info mt-1">
-                        <span className="text-primary fw-bold" style={{ fontSize: '0.95rem' }}>Rs. {parseFloat(item.price).toFixed(0)}</span>
-                        <span className="text-muted mx-2">×</span>
-                        <span className="fw-medium">{item.qty}</span>
+            <>
+              <div className="cart-items">
+                {cart.map(item => (
+                  <div key={item.foodItemId} className="cart-item-row p-3 mb-2 border-bottom" style={{ background: '#fff' }}>
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <div className="item-main-details">
+                        <h6 className="mb-0 fw-bold text-dark" style={{ fontSize: '1.05rem' }}>{item.name}</h6>
+                        <div className="item-price-info mt-1">
+                          <span className="text-primary fw-bold" style={{ fontSize: '0.95rem' }}>Rs. {parseFloat(item.price).toFixed(0)}</span>
+                          <span className="text-muted mx-2">×</span>
+                          <span className="fw-medium">{item.qty}</span>
+                        </div>
+                      </div>
+                      <div className="item-actions d-flex align-items-center gap-3">
+                        <div className="qty-selector-modern d-flex align-items-center" style={{ background: '#F8F9FA', borderRadius: '12px', border: '1px solid #E9ECEF', padding: '2px' }}>
+                          <button 
+                            onClick={() => updateCartItemQty(item.foodItemId, -1)}
+                            className="btn btn-sm bg-white shadow-sm d-flex align-items-center justify-content-center p-0"
+                            style={{ width: '32px', height: '32px', borderRadius: '10px', border: 'none' }}
+                          >
+                            <i className="fas fa-minus text-muted" style={{ fontSize: '0.75rem' }}></i>
+                          </button>
+                          <span className="px-3 fw-bold" style={{ minWidth: '35px', textAlign: 'center', fontSize: '1rem' }}>{item.qty}</span>
+                          <button 
+                            onClick={() => updateCartItemQty(item.foodItemId, 1)}
+                            className="btn btn-sm bg-white shadow-sm d-flex align-items-center justify-content-center p-0"
+                            style={{ width: '32px', height: '32px', borderRadius: '10px', border: 'none' }}
+                          >
+                            <i className="fas fa-plus text-primary" style={{ fontSize: '0.75rem' }}></i>
+                          </button>
+                        </div>
+                        <button
+                          className="btn btn-sm d-flex align-items-center justify-content-center"
+                          onClick={() => removeFromCart(item.foodItemId)}
+                          style={{ color: '#FF4D4D', background: '#FFF0F0', border: 'none', borderRadius: '10px', width: '36px', height: '36px' }}
+                          title="Remove item"
+                        >
+                          <i className="fas fa-trash-alt"></i>
+                        </button>
                       </div>
                     </div>
-                    <div className="item-actions d-flex align-items-center gap-3">
-                      <div className="qty-selector-modern d-flex align-items-center" style={{ background: '#F8F9FA', borderRadius: '12px', border: '1px solid #E9ECEF', padding: '2px' }}>
-                        <button 
-                          onClick={() => updateCartItemQty(item.foodItemId, -1)}
-                          className="btn btn-sm bg-white shadow-sm d-flex align-items-center justify-content-center p-0"
-                          style={{ width: '32px', height: '32px', borderRadius: '10px', border: 'none' }}
-                        >
-                          <i className="fas fa-minus text-muted" style={{ fontSize: '0.75rem' }}></i>
-                        </button>
-                        <span className="px-3 fw-bold" style={{ minWidth: '35px', textAlign: 'center', fontSize: '1rem' }}>{item.qty}</span>
-                        <button 
-                          onClick={() => updateCartItemQty(item.foodItemId, 1)}
-                          className="btn btn-sm bg-white shadow-sm d-flex align-items-center justify-content-center p-0"
-                          style={{ width: '32px', height: '32px', borderRadius: '10px', border: 'none' }}
-                        >
-                          <i className="fas fa-plus text-primary" style={{ fontSize: '0.75rem' }}></i>
-                        </button>
+                    
+                    <div className="item-sub-details d-flex justify-content-between align-items-end mt-3">
+                      <div className="flex-grow-1 me-4">
+                        <div className="input-group input-group-sm">
+                          <span className="input-group-text bg-transparent border-0 text-muted ps-0" style={{ fontSize: '0.8rem' }}>
+                            <i className="fas fa-pen-nib me-1"></i> Notes:
+                          </span>
+                          <input
+                            type="text"
+                            className="form-control border-0 bg-light-subtle"
+                            placeholder="Less spicy, extra cheese..."
+                            value={item.notes}
+                            onChange={(e) => updateCartItemNotes(item.foodItemId, e.target.value)}
+                            style={{ borderRadius: '8px', fontSize: '0.85rem', paddingLeft: '8px' }}
+                          />
+                        </div>
                       </div>
-                      <button
-                        className="btn btn-sm d-flex align-items-center justify-content-center"
-                        onClick={() => removeFromCart(item.foodItemId)}
-                        style={{ color: '#FF4D4D', background: '#FFF0F0', border: 'none', borderRadius: '10px', width: '36px', height: '36px' }}
-                        title="Remove item"
-                      >
-                        <i className="fas fa-trash-alt"></i>
-                      </button>
+                      <div className="item-subtotal text-end">
+                        <div className="small text-muted mb-0">Subtotal</div>
+                        <div className="fw-bold text-dark" style={{ fontSize: '1rem' }}>Rs. {(item.price * item.qty).toFixed(0)}</div>
+                      </div>
                     </div>
                   </div>
-                  
-                  <div className="item-sub-details d-flex justify-content-between align-items-end mt-3">
-                    <div className="flex-grow-1 me-4">
-                      <div className="input-group input-group-sm">
-                        <span className="input-group-text bg-transparent border-0 text-muted ps-0" style={{ fontSize: '0.8rem' }}>
-                          <i className="fas fa-pen-nib me-1"></i> Notes:
-                        </span>
-                        <input
-                          type="text"
-                          className="form-control border-0 bg-light-subtle"
-                          placeholder="Less spicy, extra cheese..."
-                          value={item.notes}
-                          onChange={(e) => updateCartItemNotes(item.foodItemId, e.target.value)}
-                          style={{ borderRadius: '8px', fontSize: '0.85rem', paddingLeft: '8px' }}
-                        />
-                      </div>
-                    </div>
-                    <div className="item-subtotal text-end">
-                      <div className="small text-muted mb-0">Subtotal</div>
-                      <div className="fw-bold text-dark" style={{ fontSize: '1rem' }}>Rs. {(item.price * item.qty).toFixed(0)}</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {cart.length > 0 && (
-          <div className="cart-footer">
-            <div className="order-inputs">
+                ))}
+              </div>
+              
+              <div className="order-inputs mt-4 pt-3 border-top">
               <div className="table-info-display mb-3">
                 {isManual ? (
                   <div className="manual-table-select mb-3">
@@ -1629,7 +1626,6 @@ const CustomerQROrder = ({ isManual = false }) => {
                     >
                       <option value="">Select {orderLocation === 'inside' ? 'Room' : 'Table'} Number</option>
                       {orderLocation === 'inside' ? (
-                        // Rooms: SV - 201 to SV - 216 and HB - 01 to HB - 08
                         [
                           ...Array.from({ length: 16 }, (_, i) => `SV - ${201 + i}`),
                           ...Array.from({ length: 8 }, (_, i) => `HB - ${String(i + 1).padStart(2, '0')}`)
@@ -1637,7 +1633,6 @@ const CustomerQROrder = ({ isManual = false }) => {
                           <option key={no} value={no}>{no}</option>
                         ))
                       ) : (
-                        // Tables
                         Array.from({ length: 25 }, (_, i) => (i + 1).toString()).map(no => (
                           <option key={no} value={no}>Table {no}</option>
                         ))
@@ -1645,31 +1640,27 @@ const CustomerQROrder = ({ isManual = false }) => {
                     </select>
                   </div>
                 ) : (
-                  <>
-                    <i className={`fas ${tableInfo?.isRoom ? 'fa-concierge-bell' : 'fa-chair'} me-2`}></i>
-                    <strong>{tableInfo?.isRoom ? 'Room' : 'Table'}:</strong> {tableInfo?.tableNo || tableInfo?.roomNo}
-                  </>
+                  <div className="p-3 bg-light rounded-3 d-flex align-items-center mb-3">
+                    <i className={`fas ${tableInfo?.isRoom ? 'fa-concierge-bell' : 'fa-chair'} me-2 text-primary`}></i>
+                    <span className="fw-bold">{tableInfo?.isRoom ? 'Room' : 'Table'}: {tableInfo?.tableNo || tableInfo?.roomNo}</span>
+                  </div>
                 )}
               </div>
 
               {!isManual && (
-                <>
-                  {/* Customer name removed as per request */}
-
-                  <div className="mb-3">
-                    <label className="form-label">WhatsApp Number <span className="text-danger">*</span></label>
-                    <PhoneInput
-                      country={'lk'}
-                      value={whatsappNumber}
-                      onChange={setWhatsappNumber}
-                      inputStyle={{ width: '100%' }}
-                      containerClass="phone-input-container"
-                      placeholder="Enter WhatsApp Number"
-                      enableSearch={true}
-                    />
-                    <small className="text-muted">We'll send your bill to this WhatsApp number.</small>
-                  </div>
-                </>
+                <div className="mb-3">
+                  <label className="form-label small fw-bold text-muted">WhatsApp Number <span className="text-danger">*</span></label>
+                  <PhoneInput
+                    country={'lk'}
+                    value={whatsappNumber}
+                    onChange={setWhatsappNumber}
+                    inputStyle={{ width: '100%' }}
+                    containerClass="phone-input-container"
+                    placeholder="Enter WhatsApp Number"
+                    enableSearch={true}
+                  />
+                  <small className="text-muted d-block mt-1">We'll send your bill to this WhatsApp number.</small>
+                </div>
               )}
 
               <div className="mb-2">
@@ -1683,7 +1674,13 @@ const CustomerQROrder = ({ isManual = false }) => {
                   style={{ minHeight: '45px', borderRadius: '10px', fontSize: '0.9rem' }}
                 ></textarea>
               </div>
-            </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        {cart.length > 0 && (
+          <div className="cart-footer p-3 bg-white border-top">
 
             <div className="cart-total bg-light-subtle p-3 rounded-4 mb-3" style={{ border: '1px solid #E5E7EB' }}>
               <div className="d-flex justify-content-between mb-2 text-muted" style={{ fontSize: '0.9rem' }}>
