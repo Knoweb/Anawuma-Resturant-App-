@@ -254,7 +254,7 @@ const ManualRoomOrders = () => {
         const now = new Date();
         const dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
         const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const tempInv = `INV-MAN-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-TEMP`;
+        const tempInv = 'INV-DRAFT';
 
         // Default Exchange Rates
         const exchangeRates = {

@@ -239,7 +239,7 @@ const ManualTableOrders = () => {
         const now = new Date();
         const dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
         const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const tempInv = `INV-MAN-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-TEMP`;
+        const tempInv = 'INV-DRAFT';
 
         // Default Exchange Rates
         const exchangeRates = {
@@ -271,7 +271,7 @@ const ManualTableOrders = () => {
         const invoiceHtml = `
             <div class="invoice-container modern-invoice">
                 <div class="invoice-header text-center mb-4">
-                    <h2 class="mb-0">ANAWUMA</h2>
+                    <h2 class="mb-0">${restaurantName}</h2>
                     <div class="border-top border-bottom my-2 py-1 font-weight-bold">TAX INVOICE</div>
                     <div class="small d-flex justify-content-between px-2">
                         <span>Invoice #: ${tempInv}</span>
