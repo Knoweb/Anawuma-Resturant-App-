@@ -411,6 +411,10 @@ export class OrdersService {
       query.andWhere('order.roomNo IS NOT NULL');
     } else {
       query.andWhere('order.tableNo IS NOT NULL');
+      // Exclude identifiers that look like rooms to clean up the table view
+      query.andWhere('order.tableNo NOT LIKE :roomPattern', { roomPattern: '%ROOM%' });
+      query.andWhere('order.tableNo NOT LIKE :svPattern', { svPattern: 'SV%' });
+      query.andWhere('order.tableNo NOT LIKE :hbPattern', { hbPattern: 'HB%' });
     }
 
     const orders = await query.getMany();
