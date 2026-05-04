@@ -5,9 +5,12 @@ import Sidebar from '../components/common/Sidebar';
 import Swal from 'sweetalert2';
 import apiClient, { billingAPI } from '../api/apiClient';
 import { useWebSocket } from '../hooks/useWebSocket';
+import { useAuthStore } from '../store/authStore';
 import './KitchenKDS.css';
 
 const KitchenKDS = () => {
+  const { user } = useAuthStore();
+  const restaurantName = user?.restaurantName || 'ANAWUMA';
   const [orders, setOrders] = useState({
     NEW: [],
     COOKING: [],
@@ -597,6 +600,15 @@ const KitchenKDS = () => {
           .bill-status-success { background: #e8f7ed; color: #146c43; }
           .bill-status-error { background: #fce8ea; color: #b02a37; }
 
+          .receipt-header { text-align: center; border-bottom: 2px dashed #444; padding-bottom: 15px; margin-bottom: 20px; }
+          .receipt-footer { border-top: 2px dashed #444; padding-top: 15px; margin-top: 20px; text-align: center; }
+          .invoice-label { font-size: 18px; font-weight: bold; margin-top: 5px; color: #555; text-transform: uppercase; letter-spacing: 2px; }
+          .restaurant-name { font-size: 32px; font-weight: 900; margin: 0; color: #000; text-transform: uppercase; }
+          .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; font-size: 14px; }
+          .info-item { display: flex; flex-direction: column; }
+          .info-label { font-weight: bold; color: #666; font-size: 11px; text-transform: uppercase; }
+          .info-value { font-weight: bold; color: #000; }
+
           @media print {
             .bill-actions,
             .bill-hint,
@@ -619,13 +631,29 @@ const KitchenKDS = () => {
           </div>
           <div id="billStatus" class="bill-status" role="status" aria-live="polite"></div>
           <div id="billContent">
-          <h2 style="margin:0 0 8px 0;">Customer Bill</h2>
-          <div style="margin-bottom:14px;font-size:14px;">
-            <div><strong>Order No:</strong> ${escapeHtml(order.orderNo || '-')}</div>
-            <div><strong>${order.orderType === 'ROOM' ? 'Room' : 'Table'}:</strong> ${escapeHtml(order.roomNo || order.tableNo || '-')}</div>
-            <div><strong>Customer:</strong> ${escapeHtml(order.customerName || '-')}</div>
-            <div><strong>Date:</strong> ${new Date().toLocaleString()}</div>
-          </div>
+            <div class="receipt-header">
+              <h1 class="restaurant-name">${escapeHtml(restaurantName)}</h1>
+              <div class="invoice-label">Tax Invoice</div>
+            </div>
+
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">Order No</span>
+                <span class="info-value">#${escapeHtml(order.orderNo || '-')}</span>
+              </div>
+              <div class="info-item" style="text-align: right;">
+                <span class="info-label">Date & Time</span>
+                <span class="info-value">${new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">${order.orderType === 'ROOM' ? 'Room' : 'Table'}</span>
+                <span class="info-value">${escapeHtml(order.roomNo || order.tableNo || '-')}</span>
+              </div>
+              <div class="info-item" style="text-align: right;">
+                <span class="info-label">Customer</span>
+                <span class="info-value">${escapeHtml(order.customerName || 'Guest')}</span>
+              </div>
+            </div>
           <table style="width:100%;border-collapse:collapse;font-size:14px;">
             <thead>
               <tr>
@@ -654,7 +682,10 @@ const KitchenKDS = () => {
               <span>${formatBillCurrency(order.totalAmount)}</span>
             </div>
           </div>
-          <div style="margin-top:24px;font-size:13px;color:#555;text-align:center;">Thank you!</div>
+          <div class="receipt-footer">
+            <div style="font-size: 14px; font-weight: bold; margin-bottom: 5px;">THANK YOU FOR VISITING!</div>
+            <div style="font-size: 12px; color: #666;">Please come again.</div>
+          </div>
           </div>
         </div>
 
