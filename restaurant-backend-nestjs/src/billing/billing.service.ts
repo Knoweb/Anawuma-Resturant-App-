@@ -33,11 +33,11 @@ export class BillingService {
     private websocketGateway: WebsocketGateway,
   ) { }
 
-  private buildInvoiceSnapshot(
+  private async buildInvoiceSnapshot(
     order: Order,
     adminId?: number,
     overrides: Partial<Invoice> = {},
-  ): Invoice {
+  ): Promise<Invoice> {
     const subtotal = order.subtotal && parseFloat(order.subtotal.toString()) > 0
       ? parseFloat(order.subtotal.toString())
       : parseFloat(order.totalAmount.toString());
@@ -210,6 +210,7 @@ export class BillingService {
       });
     });
 
+    const now = new Date();
     const invCount = await this.invoicesRepository.count({ where: { restaurantId } });
     const invoiceNumber = `INV-${invCount + 1}`;
 
@@ -341,7 +342,7 @@ export class BillingService {
       ? InvoiceStatus.PAID 
       : InvoiceStatus.PENDING;
 
-    const invoice = this.buildInvoiceSnapshot(order, adminId, {
+    const invoice = await this.buildInvoiceSnapshot(order, adminId, {
       subtotal,
       taxAmount: tax,
       serviceCharge: charge,
@@ -402,7 +403,7 @@ export class BillingService {
       );
     }
 
-    const invoice = this.buildInvoiceSnapshot(order, adminId);
+    const invoice = await this.buildInvoiceSnapshot(order, adminId);
     const savedInvoice = await this.invoicesRepository.save(invoice);
     savedInvoice.orderNo = order.orderNo || undefined;
     return savedInvoice;
