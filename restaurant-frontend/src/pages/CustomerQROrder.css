@@ -1432,6 +1432,14 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 10;
   background: white;
   border-top: 1px solid #eee;
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px !important;
+}
+
+.sticky-bottom-btn > button {
+  flex: 1;
+  white-space: nowrap;
 }
 
 .sketch-modal-image-area {
@@ -1456,9 +1464,12 @@ h1, h2, h3, h4, h5, h6 {
 .sketch-detail-row {
   display: flex;
   justify-content: space-between;
-  padding: 10px 0;
+  align-items: center;
+  padding: 12px 0;
   border-bottom: 1px dashed #eee;
-  font-size: 1.05rem;
+  font-size: 1rem;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .sketch-detail-row .label {
@@ -1473,17 +1484,26 @@ h1, h2, h3, h4, h5, h6 {
 
 .total-row {
   background: #f8f9fa;
-  padding: 15px;
+  padding: 15px 20px;
   border-radius: 0;
   margin-top: 20px;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .total-row .label {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #444;
 }
 
 .total-row .value {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #266668;
 }
 
 .quantity-row {

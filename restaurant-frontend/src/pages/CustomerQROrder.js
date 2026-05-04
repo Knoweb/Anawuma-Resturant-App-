@@ -1304,7 +1304,7 @@ const CustomerQROrder = ({ isManual = false }) => {
                       <span className="label small text-muted">Service Charge (10%) :</span>
                       <span className="value small">Rs. {parseFloat(activeItemDetail.price * modalQty * 0.1).toFixed(0)}</span>
                     </div>
-                    <div className="sketch-detail-row total-row border-top pt-2 d-flex justify-content-between align-items-center flex-nowrap">
+                    <div className="total-row border-top pt-2">
                       <span className="label fw-bold h5 mb-0 text-nowrap">Total Amount</span>
                       <span className="value fw-bold h5 mb-0 text-nowrap" style={{ color: '#266668' }}>Rs. {parseFloat(activeItemDetail.price * modalQty * 1.1).toFixed(0)}</span>
                     </div>
@@ -1395,7 +1395,6 @@ const CustomerQROrder = ({ isManual = false }) => {
                 onClick={() => addToCartFromModal(false)}
                 style={{
                   padding: '14px',
-                  borderRadius: '12px',
                   fontWeight: '700',
                   borderColor: '#266668',
                   color: '#266668'
