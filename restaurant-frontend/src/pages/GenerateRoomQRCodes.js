@@ -191,13 +191,6 @@ const GenerateRoomQRCodes = () => {
       <div className="page-header-card fade-in">
         <div className="d-flex justify-content-between align-items-center">
           <div>
-            <button 
-              className="btn btn-link text-white p-0 mb-2 text-decoration-none" 
-              onClick={() => navigate(-1)}
-              style={{ fontSize: '0.9rem' }}
-            >
-              <i className="fas fa-arrow-left me-1"></i> Back
-            </button>
             <h2 className="mb-1">
               <i className="fas fa-plus-circle me-2"></i>
               Generate Room QR Codes

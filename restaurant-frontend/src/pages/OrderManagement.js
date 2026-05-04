@@ -184,12 +184,6 @@ const OrderManagement = () => {
         <div className="dashboard-content">
           <div className="order-management-container">
             <div className="page-header">
-              <button 
-                className="btn btn-link text-primary p-0 mb-2 text-decoration-none" 
-                onClick={() => navigate(-1)}
-              >
-                <i className="fas fa-arrow-left me-1"></i> Back
-              </button>
               <h2>
                 <i className="fas fa-clipboard-list me-2"></i>
                 Order Management
