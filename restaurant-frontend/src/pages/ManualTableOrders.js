@@ -60,7 +60,7 @@ const ManualTableOrders = () => {
                     <div class="header">
                         <h2 style="margin:0">${restaurantName}</h2>
                         <p style="margin:5px 0">Order Receipt</p>
-                        <p style="margin:2px 0">#${order.orderNo}</p>
+                        <p style="margin:2px 0">Order No: ${order.orderNo}</p>
                         <p style="margin:2px 0">${new Date(order.createdAt).toLocaleString()}</p>
                         ${tableNo ? `<p style="margin:2px 0">Table: ${tableNo}</p>` : ''}
                     </div>
@@ -127,7 +127,7 @@ const ManualTableOrders = () => {
                     
                     ${account.orders.map(order => `
                         <div class="order-block">
-                            <div style="font-weight:bold; font-size: 11px; margin-bottom: 5px;">#${order.orderNo} - ${new Date(order.createdAt).toLocaleTimeString()}</div>
+                            <div style="font-weight:bold; font-size: 11px; margin-bottom: 5px;">Order No: ${order.orderNo} - ${new Date(order.createdAt).toLocaleTimeString()}</div>
                             ${order.orderItems.map(item => `
                                 <div class="item-row">
                                     <span>${item.itemName} x${item.qty}</span>

@@ -755,7 +755,7 @@ const CustomerQROrder = ({ isManual = false }) => {
                 <div class="header">
                     <h2 style="margin:0">${tableInfo?.restaurantName || 'Restaurant'}</h2>
                     <p style="margin:5px 0">Order Receipt</p>
-                    <p style="margin:2px 0">#${order.orderNo}</p>
+                    <p style="margin:2px 0">Order No: ${order.orderNo}</p>
                     <p style="margin:2px 0">${new Date(order.createdAt).toLocaleString()}</p>
                     ${identifier ? `<p style="margin:2px 0">${modalOrderType === 'room' ? 'Room' : 'Table'}: ${identifier}</p>` : ''}
                 </div>
