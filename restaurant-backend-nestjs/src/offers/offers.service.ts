@@ -4,8 +4,9 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { Repository, LessThanOrEqual, MoreThanOrEqual, In } from 'typeorm';
 import { Offer } from './entities/offer.entity';
+import { FoodItem } from '../food-items/entities/food-item.entity';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { UpdateOfferDto } from './dto/update-offer.dto';
 
@@ -14,6 +15,8 @@ export class OffersService {
   constructor(
     @InjectRepository(Offer)
     private offersRepository: Repository<Offer>,
+    @InjectRepository(FoodItem)
+    private foodItemRepository: Repository<FoodItem>,
   ) { }
 
   /**
@@ -43,6 +46,13 @@ export class OffersService {
       restaurantId,
     });
 
+    if (createOfferDto.foodItemIds && createOfferDto.foodItemIds.length > 0) {
+      const foodItems = await this.foodItemRepository.find({
+        where: { foodItemId: In(createOfferDto.foodItemIds) },
+      });
+      offer.foodItems = foodItems;
+    }
+
     const savedOffer = await this.offersRepository.save(offer);
     return this.resolveImageUrl(savedOffer);
   }
@@ -54,6 +64,7 @@ export class OffersService {
     const offers = await this.offersRepository.find({
       where: { restaurantId },
       order: { createdAt: 'DESC' },
+      relations: ['foodItems'],
     });
     return offers.map(offer => this.resolveImageUrl(offer));
   }
@@ -72,6 +83,7 @@ export class OffersService {
         endDate: MoreThanOrEqual(now),
       },
       order: { createdAt: 'DESC' },
+      relations: ['foodItems'],
     });
     return offers.map(offer => this.resolveImageUrl(offer));
   }
@@ -82,6 +94,7 @@ export class OffersService {
   async findOne(offerId: number, restaurantId: number): Promise<Offer> {
     const offer = await this.offersRepository.findOne({
       where: { offerId, restaurantId },
+      relations: ['foodItems'],
     });
 
     if (!offer) {
@@ -129,6 +142,17 @@ export class OffersService {
 
     // Merge the updates
     Object.assign(offer, updateOfferDto);
+
+    if (updateOfferDto.foodItemIds) {
+      if (updateOfferDto.foodItemIds.length > 0) {
+        const foodItems = await this.foodItemRepository.find({
+          where: { foodItemId: In(updateOfferDto.foodItemIds) },
+        });
+        offer.foodItems = foodItems;
+      } else {
+        offer.foodItems = [];
+      }
+    }
 
     const updatedOffer = await this.offersRepository.save(offer);
     return this.resolveImageUrl(updatedOffer);

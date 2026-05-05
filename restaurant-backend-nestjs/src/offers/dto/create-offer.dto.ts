@@ -7,6 +7,7 @@ import {
   IsNumber,
   Min,
   IsDateString,
+  IsArray,
 } from 'class-validator';
 
 export class CreateOfferDto {
@@ -45,4 +46,8 @@ export class CreateOfferDto {
 
   @IsOptional()
   isActive?: boolean;
+
+  @IsArray()
+  @IsOptional()
+  foodItemIds?: number[];
 }

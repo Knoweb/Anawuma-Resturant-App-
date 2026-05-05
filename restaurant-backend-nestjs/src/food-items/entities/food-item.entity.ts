@@ -4,7 +4,9 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  ManyToMany,
 } from 'typeorm';
+import { Offer } from '../../offers/entities/offer.entity';
 import { Category } from '../../categories/entities/category.entity';
 import { Subcategory } from '../../subcategories/entities/subcategory.entity';
 import { Restaurant } from '../../restaurants/entities/restaurant.entity';
@@ -78,4 +80,7 @@ export class FoodItem {
   @ManyToOne(() => Restaurant)
   @JoinColumn({ name: 'restaurant_id' })
   restaurant: Restaurant;
+
+  @ManyToMany(() => Offer, (offer) => offer.foodItems)
+  offers: Offer[];
 }

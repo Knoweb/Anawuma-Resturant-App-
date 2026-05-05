@@ -6,7 +6,10 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
+import { FoodItem } from '../../food-items/entities/food-item.entity';
 import { Restaurant } from '../../restaurants/entities/restaurant.entity';
 
 @Entity('offers_tbl')
@@ -59,4 +62,12 @@ export class Offer {
   @ManyToOne(() => Restaurant)
   @JoinColumn({ name: 'restaurant_id' })
   restaurant: Restaurant;
+
+  @ManyToMany(() => FoodItem)
+  @JoinTable({
+    name: 'offer_food_items_tbl',
+    joinColumn: { name: 'offer_id', referencedColumnName: 'offerId' },
+    inverseJoinColumn: { name: 'food_item_id', referencedColumnName: 'foodItemId' },
+  })
+  foodItems: FoodItem[];
 }

@@ -113,6 +113,11 @@ function EditOffer() {
         setImagePreview(getImageUrl(offer.imageUrl));
       }
 
+      // Set selected food items
+      if (offer.foodItems) {
+        setSelectedFoodItems(offer.foodItems);
+      }
+
       setTitleCount(100 - (offer.title?.length || 0));
       setDescCount(500 - (offer.description?.length || 0));
     } catch (error) {
@@ -281,7 +286,8 @@ function EditOffer() {
         discountValue: Number(formData.discountValue),
         startDate: formData.startDate,
         endDate: formData.endDate,
-        imageUrl: imageUrl
+        imageUrl: imageUrl,
+        foodItemIds: selectedFoodItems.map(item => item.foodItemId)
       };
 
       await apiClient.patch(`/offers/${id}`, dataToSend);
@@ -539,16 +545,19 @@ function EditOffer() {
                           {foodItems.filter(item => 
                             (item.itemName || '').toLowerCase().includes(searchQuery.toLowerCase())
                           ).map(item => (
-                            <div key={item.foodItemId} className="form-check p-2 hover-bg-light" onClick={(e) => e.stopPropagation()}>
-                              <input 
-                                className="form-check-input" 
-                                type="checkbox" 
-                                id={`food-${item.foodItemId}`}
-                                checked={selectedFoodItems.some(i => i.foodItemId === item.foodItemId)}
-                                onChange={() => handleToggleFoodItem(item)}
-                              />
-                              <label className="form-check-label w-100 ms-2" htmlFor={`food-${item.foodItemId}`}>
-                                {item.itemName} <span className="text-muted small">(Rs. {item.price})</span>
+                            <div key={item.foodItemId} className="dropdown-item p-0" onClick={(e) => e.stopPropagation()}>
+                              <label className="d-flex align-items-center w-100 px-3 py-2" style={{ cursor: 'pointer', margin: 0 }}>
+                                <input 
+                                  className="form-check-input me-3" 
+                                  type="checkbox" 
+                                  id={`food-${item.foodItemId}`}
+                                  checked={selectedFoodItems.some(i => i.foodItemId === item.foodItemId)}
+                                  onChange={() => handleToggleFoodItem(item)}
+                                  style={{ marginTop: 0, width: '18px', height: '18px' }}
+                                />
+                                <span className="flex-grow-1 text-dark">
+                                  {item.itemName} <span className="text-muted small ms-1">(Rs. {Number(item.price).toFixed(2)})</span>
+                                </span>
                               </label>
                             </div>
                           ))}

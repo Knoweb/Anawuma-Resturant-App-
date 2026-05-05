@@ -107,7 +107,8 @@ export class FoodItemsService {
       .createQueryBuilder('foodItem')
       .leftJoinAndSelect('foodItem.menu', 'menu')
       .leftJoinAndSelect('foodItem.category', 'category')
-      .leftJoinAndSelect('foodItem.subcategory', 'subcategory');
+      .leftJoinAndSelect('foodItem.subcategory', 'subcategory')
+      .leftJoinAndSelect('foodItem.offers', 'offers', 'offers.isActive = :isActive AND offers.startDate <= :now AND offers.endDate >= :now', { isActive: true, now: new Date() });
 
     if (restaurantId) {
       query.andWhere('foodItem.restaurantId = :restaurantId', { restaurantId });
@@ -139,8 +140,39 @@ export class FoodItemsService {
 
     const foodItems = await query.getMany();
 
-    // Add API URL prefix to image URLs
-    return foodItems.map((item) => this.resolveImageUrls(item));
+    // Add API URL prefix to image URLs and calculate discounted price
+    return foodItems.map((item) => {
+      const resolvedItem = this.resolveImageUrls(item);
+      return this.addDiscountedPrice(resolvedItem);
+    });
+  }
+
+  private addDiscountedPrice(item: FoodItem): any {
+    let discountedPrice = Number(item.price);
+    let bestOffer = null;
+
+    if (item.offers && item.offers.length > 0) {
+      // Find the best discount
+      item.offers.forEach(offer => {
+        let currentDiscounted = Number(item.price);
+        if (offer.discountType === 'PERCENTAGE') {
+          currentDiscounted = item.price - (item.price * Number(offer.discountValue) / 100);
+        } else if (offer.discountType === 'FIXED') {
+          currentDiscounted = item.price - Number(offer.discountValue);
+        }
+
+        if (currentDiscounted < discountedPrice) {
+          discountedPrice = Math.max(0, currentDiscounted);
+          bestOffer = offer;
+        }
+      });
+    }
+
+    return {
+      ...item,
+      discountedPrice: parseFloat(discountedPrice.toFixed(2)),
+      activeOffer: bestOffer
+    };
   }
 
   private resolveImageUrls(item: FoodItem): FoodItem {
@@ -171,17 +203,28 @@ export class FoodItemsService {
     return item;
   }
 
-  async findOne(id: number, restaurantId: number): Promise<FoodItem> {
+  async findOne(id: number, restaurantId: number): Promise<any> {
+    const now = new Date();
     const foodItem = await this.foodItemsRepository.findOne({
       where: { foodItemId: id, restaurantId },
-      relations: ['menu', 'category', 'subcategory'],
+      relations: ['menu', 'category', 'subcategory', 'offers'],
     });
+
+    if (foodItem) {
+      // Manually filter active offers
+      foodItem.offers = (foodItem.offers || []).filter(offer => 
+        offer.isActive && 
+        new Date(offer.startDate) <= now && 
+        new Date(offer.endDate) >= now
+      );
+    }
 
     if (!foodItem) {
       throw new NotFoundException(`Food item with ID ${id} not found`);
     }
 
-    return this.resolveImageUrls(foodItem);
+    const resolvedItem = this.resolveImageUrls(foodItem);
+    return this.addDiscountedPrice(resolvedItem);
   }
 
   async update(

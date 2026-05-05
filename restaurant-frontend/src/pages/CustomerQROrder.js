@@ -469,7 +469,14 @@ const CustomerQROrder = ({ isManual = false }) => {
 
           <div className="media-overlay flex-column">
             <div className="mb-2 text-white fw-bold" style={{ fontSize: '1.2rem', textShadow: '1px 1px 4px rgba(0,0,0,0.8)' }}>
-              Rs. {parseFloat(item.price).toFixed(0)}
+              {item.discountedPrice < item.price ? (
+                <>
+                  <span className="text-decoration-line-through text-white-50 me-2 small">Rs. {parseFloat(item.price).toFixed(0)}</span>
+                  <span className="text-warning">Rs. {item.discountedPrice.toFixed(0)}</span>
+                </>
+              ) : (
+                `Rs. ${parseFloat(item.price).toFixed(0)}`
+              )}
             </div>
             <div className="d-flex w-100 mb-1">
               <button 
@@ -531,7 +538,16 @@ const CustomerQROrder = ({ isManual = false }) => {
         </div>
         <div className="sketch-box-label">
           <span>{item.itemName}</span>
-          <div className="small fw-bold" style={{ color: '#266668' }}>Rs. {parseFloat(item.price).toFixed(0)}</div>
+          <div className="small fw-bold" style={{ color: '#266668' }}>
+            {item.discountedPrice < item.price ? (
+              <>
+                <span className="text-decoration-line-through text-muted me-1 small">Rs. {parseFloat(item.price).toFixed(0)}</span>
+                <span className="text-danger">Rs. {item.discountedPrice.toFixed(0)}</span>
+              </>
+            ) : (
+              `Rs. ${parseFloat(item.price).toFixed(0)}`
+            )}
+          </div>
         </div>
         <div className="sketch-box-media" style={{ width: '100%', height: '140px', background: '#fafafa', position: 'relative' }}>
           <FoodItemImageCarousel item={item} getImageUrl={getImageUrl} className="" />
@@ -572,7 +588,7 @@ const CustomerQROrder = ({ isManual = false }) => {
       setCart([...cart, {
         foodItemId: item.foodItemId,
         name: item.itemName,
-        price: parseFloat(item.price),
+        price: parseFloat(item.discountedPrice || item.price),
         qty: 1,
         notes: ''
       }]);
@@ -628,7 +644,7 @@ const CustomerQROrder = ({ isManual = false }) => {
       setCart([...cart, {
         foodItemId: item.foodItemId || item.id,
         name: item.itemName,
-        price: parseFloat(item.price),
+        price: parseFloat(item.discountedPrice || item.price),
         qty: modalQty,
         notes: modalOrderNotes || ''
       }]);
@@ -1603,7 +1619,19 @@ const CustomerQROrder = ({ isManual = false }) => {
           </div>
 
           <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '20px' }}>
-            Rs. {parseFloat(item.price).toFixed(0)}
+            {item.discountedPrice < item.price ? (
+              <>
+                <span className="text-decoration-line-through text-muted me-2">Rs. {parseFloat(item.price).toFixed(0)}</span>
+                <span className="text-danger">Rs. {item.discountedPrice.toFixed(0)}</span>
+                {item.activeOffer && (
+                  <div className="badge bg-danger ms-2 p-2 px-3 rounded-pill" style={{ fontSize: '12px' }}>
+                    {item.activeOffer.title}
+                  </div>
+                )}
+              </>
+            ) : (
+              `Rs. ${parseFloat(item.price).toFixed(0)}`
+            )}
           </div>
 
           <div className="mb-4">
@@ -1818,7 +1846,16 @@ const CustomerQROrder = ({ isManual = false }) => {
                         <div className="product-rating" style={{ fontSize: '10px' }}>
                            <i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i>
                         </div>
-                        <div className="product-price-clean small">Rs. {parseFloat(item.price).toFixed(0)}</div>
+                        <div className="product-price-clean small">
+                          {item.discountedPrice < item.price ? (
+                            <>
+                              <span className="text-decoration-line-through text-muted me-1 small" style={{ fontSize: '10px' }}>Rs. {parseFloat(item.price).toFixed(0)}</span>
+                              <span className="text-danger fw-bold">Rs. {item.discountedPrice.toFixed(0)}</span>
+                            </>
+                          ) : (
+                            `Rs. ${parseFloat(item.price).toFixed(0)}`
+                          )}
+                        </div>
                       </div>
                    </div>
                  </div>
@@ -1977,7 +2014,16 @@ const CustomerQROrder = ({ isManual = false }) => {
                     </div>
                     <div className="sketch-modal-info-rows">
                       <div className="sketch-detail-row"><span className="label">Name :</span><span className="value fw-bold">{activeItemDetail.itemName}</span></div>
-                      <div className="sketch-detail-row"><span className="label">Price :</span><span className="value">Rs. {parseFloat(activeItemDetail.price).toFixed(0)}</span></div>
+                      <div className="sketch-detail-row"><span className="label">Price :</span><span className="value">
+                        {activeItemDetail.discountedPrice < activeItemDetail.price ? (
+                          <>
+                            <span className="text-decoration-line-through text-muted me-2">Rs. {parseFloat(activeItemDetail.price).toFixed(0)}</span>
+                            <span className="text-danger fw-bold">Rs. {activeItemDetail.discountedPrice.toFixed(0)}</span>
+                          </>
+                        ) : (
+                          `Rs. ${parseFloat(activeItemDetail.price).toFixed(0)}`
+                        )}
+                      </span></div>
                       <div className="sketch-detail-row quantity-row my-3 py-2 border-top border-bottom">
                         <span className="label">Quantity :</span>
                         <div className="qty-controls">
