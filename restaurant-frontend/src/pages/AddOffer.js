@@ -25,6 +25,7 @@ function AddOffer() {
   const [foodItems, setFoodItems] = useState([]);
   const [selectedFoodItems, setSelectedFoodItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showFoodDropdown, setShowFoodDropdown] = useState(false);
 
   useEffect(() => {
     fetchFoodItems();
@@ -431,15 +432,28 @@ function AddOffer() {
                       <i className="fas fa-utensils me-2"></i>Apply to Food Items:
                     </label>
                     <div className="food-selection-container border rounded p-3 bg-light">
-                      <div className="dropdown w-100">
+                      <div className="dropdown w-100 position-relative">
                       <div 
                         className="form-control dropdown-toggle bg-white d-flex align-items-center justify-content-between" 
-                        data-bs-toggle="dropdown"
+                        onClick={() => setShowFoodDropdown(!showFoodDropdown)}
                         style={{ cursor: 'pointer' }}
                       >
                         {selectedFoodItems.length > 0 ? `${selectedFoodItems.length} items selected` : 'Select food items...'}
                       </div>
-                      <div className="dropdown-menu w-100 p-2" style={{ maxHeight: '250px', overflowY: 'auto' }}>
+                      {showFoodDropdown && (
+                        <div 
+                          className="dropdown-menu w-100 p-2 show" 
+                          style={{ 
+                            maxHeight: '250px', 
+                            overflowY: 'auto',
+                            display: 'block',
+                            position: 'absolute',
+                            zIndex: 1000,
+                            top: '100%',
+                            left: 0,
+                            boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                          }}
+                        >
                         <div className="input-group mb-2">
                           <span className="input-group-text border-0"><i className="fas fa-search"></i></span>
                           <input 
