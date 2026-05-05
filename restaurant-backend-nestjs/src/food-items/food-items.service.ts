@@ -7,6 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FoodItem } from './entities/food-item.entity';
+import { Offer } from '../offers/entities/offer.entity';
 import { Category } from '../categories/entities/category.entity';
 import { Subcategory } from '../subcategories/entities/subcategory.entity';
 import { Menu } from '../menus/entities/menu.entity';
