@@ -413,14 +413,6 @@ function Sidebar() {
             </li>
           )}
 
-          {canAccessAdminFeatures && (
-            <li className={isActive('/settings/staff')}>
-              <Link to="/settings/staff" onClick={closeSubmenus}>
-                <i className="fas fa-users-cog"></i>
-                <span>Staff Management</span>
-              </Link>
-            </li>
-          )}
 
           {/* User Settings */}
           <li className={`has-submenu ${menuStates.settings ? 'open' : ''}`}>
