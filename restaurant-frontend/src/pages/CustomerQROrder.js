@@ -1296,42 +1296,50 @@ const CustomerQROrder = ({ isManual = false }) => {
   );
 
   const ShopifyHeader = () => (
-    <header className="shopify-header">
-      <div className="hamburger-icon" style={{ fontSize: '20px' }} onClick={() => setShowShopifyMenu(true)}>
-        <i className="fas fa-bars"></i>
+    <header className="shopify-header d-flex align-items-center justify-content-between px-3">
+      {/* Left side: Hamburger */}
+      <div style={{ width: '60px' }}>
+        <div className="hamburger-icon" style={{ fontSize: '20px', cursor: 'pointer' }} onClick={() => setShowShopifyMenu(true)}>
+          <i className="fas fa-bars"></i>
+        </div>
       </div>
-      <div className="brand-logo" style={{ textAlign: 'center', marginLeft: '40px' }}>
+
+      {/* Center: Brand Logo */}
+      <div className="brand-logo mb-0 flex-grow-1 text-center" style={{ fontSize: '22px' }}>
         {tableInfo?.restaurantName || 'Serene1'}
       </div>
-      <div className="d-flex align-items-center gap-3">
+
+      {/* Right side: Search & Cart */}
+      <div className="d-flex align-items-center justify-content-end gap-3" style={{ width: '60px' }}>
         <div className="search-icon" style={{ fontSize: '18px', cursor: 'pointer' }}>
           <i className="fas fa-search"></i>
         </div>
-        <div className="cart-trigger" onClick={() => setShowCart(true)} style={{ position: 'relative', fontSize: '20px' }}>
+        <div className="cart-trigger" onClick={() => setShowCart(true)} style={{ position: 'relative', fontSize: '20px', cursor: 'pointer' }}>
           <i className="fas fa-shopping-cart"></i>
-        {cart.length > 0 && (
-          <span style={{
-            position: 'absolute',
-            top: '-5px',
-            right: '-10px',
-            background: 'var(--shopify-orange)',
-            color: 'white',
-            borderRadius: '50%',
-            width: '18px',
-            height: '18px',
-            fontSize: '10px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 'bold'
-          }}>
-            {cart.length}
-          </span>
-        )}
+          {cart.length > 0 && (
+            <span style={{
+              position: 'absolute',
+              top: '-8px',
+              right: '-10px',
+              background: 'var(--shopify-orange)',
+              color: 'white',
+              borderRadius: '50%',
+              width: '18px',
+              height: '18px',
+              fontSize: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 'bold',
+              border: '2px solid white'
+            }}>
+              {cart.length}
+            </span>
+          )}
+        </div>
       </div>
-    </div>
-  </header>
-);
+    </header>
+  );
 
   const ShopifyFooter = () => (
     <footer className="shopify-footer">
