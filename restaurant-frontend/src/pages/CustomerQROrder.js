@@ -1378,7 +1378,7 @@ const CustomerQROrder = ({ isManual = false }) => {
   );
 
   const FloatingQuestionButton = () => (
-    <div className="vertical-floating-btn" onClick={() => window.open('https://wa.me/94771234567', '_blank')}>
+    <div className="vertical-floating-btn" onClick={() => window.open('https://wa.me/94704998787', '_blank')}>
       <i className="far fa-envelope me-2"></i>
       SEND US YOUR QUESTION
     </div>
