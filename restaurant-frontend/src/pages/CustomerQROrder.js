@@ -1297,19 +1297,18 @@ const CustomerQROrder = ({ isManual = false }) => {
 
   const ShopifyHeader = () => (
     <header className="shopify-header">
+      <div className="hamburger-icon" style={{ fontSize: '20px' }} onClick={() => setShowShopifyMenu(true)}>
+        <i className="fas fa-bars"></i>
+      </div>
+      <div className="brand-logo" style={{ textAlign: 'center', marginLeft: '40px' }}>
+        {tableInfo?.restaurantName || 'Serene1'}
+      </div>
       <div className="d-flex align-items-center gap-3">
-        <div className="hamburger-icon" style={{ fontSize: '20px' }} onClick={() => setShowShopifyMenu(true)}>
-          <i className="fas fa-bars"></i>
-        </div>
         <div className="search-icon" style={{ fontSize: '18px', cursor: 'pointer' }}>
           <i className="fas fa-search"></i>
         </div>
-      </div>
-      <div className="brand-logo" style={{ textAlign: 'center', flexGrow: 1 }}>
-        {tableInfo?.restaurantName || 'Serene1'}
-      </div>
-      <div className="cart-trigger" onClick={() => setShowCart(true)} style={{ position: 'relative', fontSize: '20px' }}>
-        <i className="fas fa-shopping-cart"></i>
+        <div className="cart-trigger" onClick={() => setShowCart(true)} style={{ position: 'relative', fontSize: '20px' }}>
+          <i className="fas fa-shopping-cart"></i>
         {cart.length > 0 && (
           <span style={{
             position: 'absolute',
