@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../api/apiClient';
 import Swal from 'sweetalert2';
@@ -22,6 +22,45 @@ function AddOffer() {
   const [submitting, setSubmitting] = useState(false);
   const [titleCount, setTitleCount] = useState(100);
   const [descCount, setDescCount] = useState(500);
+  const [foodItems, setFoodItems] = useState([]);
+  const [selectedFoodItems, setSelectedFoodItems] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    fetchFoodItems();
+  }, []);
+
+  const fetchFoodItems = async () => {
+    try {
+      const response = await apiClient.get('/food-items');
+      setFoodItems(response.data || []);
+    } catch (error) {
+      console.error('Error fetching food items:', error);
+    }
+  };
+
+  const handleToggleFoodItem = (item) => {
+    setSelectedFoodItems(prev => {
+      const exists = prev.find(i => i.foodId === item.foodId);
+      if (exists) {
+        return prev.filter(i => i.foodId !== item.foodId);
+      } else {
+        return [...prev, item];
+      }
+    });
+  };
+
+  const calculateDiscountedPrice = (originalPrice) => {
+    if (!formData.discountValue || isNaN(formData.discountValue)) return originalPrice;
+    
+    const discount = Number(formData.discountValue);
+    if (formData.discountType === 'PERCENTAGE') {
+      return Math.max(0, originalPrice - (originalPrice * discount / 100));
+    } else if (formData.discountType === 'FIXED') {
+      return Math.max(0, originalPrice - discount);
+    }
+    return originalPrice;
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -385,6 +424,81 @@ function AddOffer() {
                     </small>
                     {errors.discountValue && <div className="invalid-feedback d-block">{errors.discountValue}</div>}
                   </div>
+
+                  {/* Food Item Selection */}
+                  <div className="form-group mb-4">
+                    <label className="form-label fw-bold text-dark">
+                      <i className="fas fa-utensils me-2"></i>Apply to Food Items:
+                    </label>
+                    <div className="food-selection-container border rounded p-3 bg-light">
+                      <div className="input-group mb-3">
+                        <span className="input-group-text"><i className="fas fa-search"></i></span>
+                        <input 
+                          type="text" 
+                          className="form-control" 
+                          placeholder="Search food items..." 
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                      </div>
+                      <div className="food-items-list" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                        {foodItems.filter(item => 
+                          item.name.toLowerCase().includes(searchQuery.toLowerCase())
+                        ).map(item => (
+                          <div key={item.foodId} className="form-check p-2 border-bottom hover-bg-white">
+                            <input 
+                              className="form-check-input ms-0 me-2" 
+                              type="checkbox" 
+                              id={`food-${item.foodId}`}
+                              checked={selectedFoodItems.some(i => i.foodId === item.foodId)}
+                              onChange={() => handleToggleFoodItem(item)}
+                            />
+                            <label className="form-check-label w-100 cursor-pointer" htmlFor={`food-${item.foodId}`}>
+                              {item.name} - <span className="text-primary fw-bold">Rs. {item.price}</span>
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Price Calculation Summary */}
+                  {selectedFoodItems.length > 0 && (
+                    <div className="price-summary-container mb-4 p-3 border rounded bg-white shadow-sm">
+                      <h6 className="fw-bold text-primary mb-3">
+                        <i className="fas fa-calculator me-2"></i>Discount Calculation Summary
+                      </h6>
+                      <div className="table-responsive">
+                        <table className="table table-sm table-hover align-middle">
+                          <thead className="table-light">
+                            <tr>
+                              <th>Food Item</th>
+                              <th>Original Price</th>
+                              <th>Discounted Price</th>
+                              <th>Saving</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {selectedFoodItems.map(item => {
+                              const discPrice = calculateDiscountedPrice(item.price);
+                              const saving = item.price - discPrice;
+                              return (
+                                <tr key={item.foodId}>
+                                  <td>{item.name}</td>
+                                  <td className="text-muted">Rs. {item.price}</td>
+                                  <td className="fw-bold text-success">Rs. {discPrice.toFixed(2)}</td>
+                                  <td className="text-danger small">
+                                    <i className="fas fa-arrow-down me-1"></i>
+                                    Rs. {saving.toFixed(2)}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Date Range */}
                   <div className="row">
