@@ -1604,9 +1604,13 @@ const CustomerQROrder = ({ isManual = false }) => {
 
         {/* Existing Cart Components for compatibility */}
         <div className={`cart-drawer ${showCart ? 'open' : ''}`}>
-          <div className="cart-header">
-            <h4 className="fw-bold">YOUR CART</h4>
-            <button className="btn-close" onClick={() => setShowCart(false)}></button>
+          <div className="cart-header d-flex align-items-center justify-content-between p-3 border-bottom">
+            <div className="d-flex align-items-center gap-2" onClick={() => setShowCart(false)} style={{ cursor: 'pointer' }}>
+              <i className="fas fa-chevron-left"></i>
+              <span className="fw-bold small uppercase">BACK</span>
+            </div>
+            <h4 className="fw-bold mb-0" style={{ fontSize: '18px', letterSpacing: '1px' }}>YOUR CART</h4>
+            <div style={{ width: '40px' }}></div> {/* Spacer for symmetry */}
           </div>
           <div className="cart-body">
             {cart.length === 0 ? (
@@ -1675,6 +1679,12 @@ const CustomerQROrder = ({ isManual = false }) => {
               </div>
               <button className="shopify-add-to-cart m-0" onClick={placeOrder}>
                 COMPLETE ORDER
+              </button>
+              <button 
+                className="btn btn-link w-100 mt-2 text-dark fw-bold text-decoration-none small uppercase" 
+                onClick={() => setShowCart(false)}
+              >
+                Continue Shopping
               </button>
             </div>
           )}
