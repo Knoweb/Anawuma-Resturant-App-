@@ -1315,27 +1315,28 @@ const CustomerQROrder = ({ isManual = false }) => {
       borderBottom: '1px solid #E5E5E5'
     }}>
       {/* LEFT: HAMBURGER */}
-      <div className="anawuma-header-col-left" style={{ width: '60px', display: 'flex', justifyContent: 'flex-start' }}>
+      <div className="anawuma-header-col-left" style={{ flex: '0 0 80px', display: 'flex', justifyContent: 'flex-start' }}>
         <div onClick={() => setShowShopifyMenu(true)} style={{ fontSize: '22px', cursor: 'pointer' }}>
           <i className="fas fa-bars"></i>
         </div>
       </div>
 
       {/* CENTER: LOGO */}
-      <div className="anawuma-header-col-center" style={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
+      <div className="anawuma-header-col-center" style={{ flexGrow: 1, display: 'flex', justifyContent: 'center', overflow: 'hidden' }}>
         <h1 style={{ 
           fontFamily: "'Playfair Display', serif", 
           fontSize: '24px', 
           fontWeight: '900', 
           margin: 0, 
-          letterSpacing: '-0.5px'
+          letterSpacing: '-0.5px',
+          whiteSpace: 'nowrap'
         }}>
           {tableInfo?.restaurantName || 'Serene1'}
         </h1>
       </div>
 
       {/* RIGHT: SEARCH & CART */}
-      <div className="anawuma-header-col-right" style={{ width: '60px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '15px' }}>
+      <div className="anawuma-header-col-right" style={{ flex: '0 0 80px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '20px' }}>
         <div style={{ fontSize: '18px', cursor: 'pointer' }} onClick={() => setShowSearch(true)}>
           <i className="fas fa-search"></i>
         </div>
