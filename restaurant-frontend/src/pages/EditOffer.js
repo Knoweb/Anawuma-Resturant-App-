@@ -56,9 +56,9 @@ function EditOffer() {
 
   const handleToggleFoodItem = (item) => {
     setSelectedFoodItems(prev => {
-      const exists = prev.find(i => i.foodId === item.foodId);
+      const exists = prev.find(i => i.foodItemId === item.foodItemId);
       if (exists) {
-        return prev.filter(i => i.foodId !== item.foodId);
+        return prev.filter(i => i.foodItemId !== item.foodItemId);
       } else {
         return [...prev, item];
       }
@@ -499,31 +499,39 @@ function EditOffer() {
                     <label className="form-label fw-bold text-dark">
                       <i className="fas fa-utensils me-2"></i>Apply to Food Items (Selection for calculation):
                     </label>
-                    <div className="food-selection-container border rounded p-3 bg-light">
-                      <div className="input-group mb-3">
-                        <span className="input-group-text"><i className="fas fa-search"></i></span>
-                        <input 
-                          type="text" 
-                          className="form-control" 
-                          placeholder="Search food items..." 
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                        />
+                    <div className="dropdown w-100">
+                      <div 
+                        className="form-control dropdown-toggle bg-white d-flex align-items-center justify-content-between" 
+                        data-bs-toggle="dropdown"
+                        style={{ cursor: 'pointer' }}
+                      >
+                        {selectedFoodItems.length > 0 ? `${selectedFoodItems.length} items selected` : 'Select food items...'}
                       </div>
-                      <div className="food-items-list" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                      <div className="dropdown-menu w-100 p-2" style={{ maxHeight: '250px', overflowY: 'auto' }}>
+                        <div className="input-group mb-2">
+                          <span className="input-group-text border-0"><i className="fas fa-search"></i></span>
+                          <input 
+                            type="text" 
+                            className="form-control border-0 bg-light" 
+                            placeholder="Search..." 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
                         {foodItems.filter(item => 
-                          (item.name || '').toLowerCase().includes(searchQuery.toLowerCase())
+                          (item.itemName || '').toLowerCase().includes(searchQuery.toLowerCase())
                         ).map(item => (
-                          <div key={item.foodId} className="form-check p-2 border-bottom hover-bg-white">
+                          <div key={item.foodItemId} className="form-check p-2 hover-bg-light" onClick={(e) => e.stopPropagation()}>
                             <input 
-                              className="form-check-input ms-0 me-2" 
+                              className="form-check-input" 
                               type="checkbox" 
-                              id={`food-${item.foodId}`}
-                              checked={selectedFoodItems.some(i => i.foodId === item.foodId)}
+                              id={`food-${item.foodItemId}`}
+                              checked={selectedFoodItems.some(i => i.foodItemId === item.foodItemId)}
                               onChange={() => handleToggleFoodItem(item)}
                             />
-                            <label className="form-check-label w-100 cursor-pointer" htmlFor={`food-${item.foodId}`}>
-                              {item.name} - <span className="text-primary fw-bold">Rs. {item.price}</span>
+                            <label className="form-check-label w-100 ms-2" htmlFor={`food-${item.foodItemId}`}>
+                              {item.itemName} <span className="text-muted small">(Rs. {item.price})</span>
                             </label>
                           </div>
                         ))}
@@ -552,8 +560,8 @@ function EditOffer() {
                               const discPrice = calculateDiscountedPrice(item.price);
                               const saving = item.price - discPrice;
                               return (
-                                <tr key={item.foodId}>
-                                  <td>{item.name}</td>
+                                <tr key={item.foodItemId}>
+                                  <td>{item.itemName}</td>
                                   <td className="text-muted">Rs. {item.price}</td>
                                   <td className="fw-bold text-success">Rs. {discPrice.toFixed(2)}</td>
                                   <td className="text-danger small">
