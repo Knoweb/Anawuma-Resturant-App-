@@ -178,6 +178,12 @@ apiClient.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
+      // Don't redirect to login if we are on a customer-facing public page
+      const path = window.location.pathname;
+      if (path.includes('/qr/') || path.includes('/room/')) {
+        return Promise.reject(error);
+      }
+
       // Clear auth and redirect to login
       localStorage.removeItem('auth-storage');
       window.location.href = '/login';
