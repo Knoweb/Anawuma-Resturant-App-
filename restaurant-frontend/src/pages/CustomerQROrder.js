@@ -1311,11 +1311,8 @@ const CustomerQROrder = ({ isManual = false }) => {
         </h1>
       </div>
 
-      {/* RIGHT: SEARCH & CART */}
-      <div className="anawuma-header-col-right" style={{ flex: '1', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '20px', zIndex: 1001 }}>
-        <div style={{ fontSize: '18px', cursor: 'pointer', padding: '5px' }}>
-          <i className="fas fa-search"></i>
-        </div>
+      {/* RIGHT: CART ONLY */}
+      <div className="anawuma-header-col-right" style={{ flex: '1', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', zIndex: 1001 }}>
         <div onClick={() => setShowCart(true)} style={{ position: 'relative', fontSize: '22px', cursor: 'pointer', padding: '5px' }}>
           <i className="fas fa-shopping-cart"></i>
           {cart.length > 0 && (
