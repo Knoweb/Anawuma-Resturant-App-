@@ -149,7 +149,7 @@ export class FoodItemsService {
 
   private addDiscountedPrice(item: FoodItem): any {
     let discountedPrice = Number(item.price);
-    let bestOffer = null;
+    let bestOffer: Offer | null = null;
 
     if (item.offers && item.offers.length > 0) {
       // Find the best discount
