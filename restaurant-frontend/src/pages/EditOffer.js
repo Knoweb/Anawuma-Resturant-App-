@@ -512,7 +512,7 @@ function EditOffer() {
                       </div>
                       <div className="food-items-list" style={{ maxHeight: '200px', overflowY: 'auto' }}>
                         {foodItems.filter(item => 
-                          item.name.toLowerCase().includes(searchQuery.toLowerCase())
+                          (item.name || '').toLowerCase().includes(searchQuery.toLowerCase())
                         ).map(item => (
                           <div key={item.foodId} className="form-check p-2 border-bottom hover-bg-white">
                             <input 
