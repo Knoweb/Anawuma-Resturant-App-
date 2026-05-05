@@ -27,6 +27,8 @@ import {
   maxFileSize,
 } from '../config/multer.config';
 
+import { Public } from '../auth/decorators/public.decorator';
+
 @Controller('offers')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
@@ -71,6 +73,12 @@ export class OffersController {
   findActiveOffers(@Request() req) {
     const restaurantId = req.user.restaurantId;
     return this.offersService.findActiveOffers(restaurantId);
+  }
+
+  @Public()
+  @Get('public/:restaurantId')
+  findPublicOffers(@Param('restaurantId', ParseIntPipe) restaurantId: number) {
+    return this.offersService.findAll(restaurantId);
   }
 
   @Get(':id')

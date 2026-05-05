@@ -308,7 +308,7 @@ const CustomerQROrder = ({ isManual = false }) => {
 
   const fetchOffers = useCallback(async (restaurantId) => {
     try {
-      const response = await apiClient.get(`/offers?restaurantId=${restaurantId}`);
+      const response = await apiClient.get(`/offers/public/${restaurantId}`);
       // Filter for currently active offers
       const now = new Date();
       const activeOffers = (response.data || []).filter(offer => {
