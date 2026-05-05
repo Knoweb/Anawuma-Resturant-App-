@@ -1684,99 +1684,115 @@ const CustomerQROrder = ({ isManual = false }) => {
     );
   }
 
-  // Fallback for Manual Cashier View (Existing UI)
-  return (
-    <div className="customer-qr-order-container">
-      {activeItemDetail && (
-        <div className="sketch-modal-overlay" onClick={() => setActiveItemDetail(null)}>
-          <div className="sketch-modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="sketch-modal-header py-3">
-              <span className="fw-bold fs-5 text-uppercase">{activeItemDetail.category?.categoryName || 'Product Info'}</span>
+  // Final Render: Revert Manual view to original robust dashboard layout
+  if (isManual) {
+    return (
+      <div className="customer-qr-order-container p-0 bg-white">
+        {activeItemDetail && (
+          <div className="sketch-modal-overlay" onClick={() => setActiveItemDetail(null)}>
+            <div className="sketch-modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="sketch-modal-header py-3">
+                <span className="fw-bold fs-5 text-uppercase">{activeItemDetail.category?.categoryName || 'Product Info'}</span>
+              </div>
+              <div className="sketch-modal-body d-flex flex-wrap p-0">
+                 {/* Left Column: Product Info */}
+                 <div className="sketch-modal-left-col p-4 border-end">
+                    <div className="sketch-modal-image-area mb-4" style={{ height: '300px', position: 'relative', overflow: 'hidden', borderRadius: '12px' }}>
+                      <FoodItemImageCarousel item={activeItemDetail} getImageUrl={getImageUrl} className="" />
+                    </div>
+                    <div className="sketch-modal-info-rows">
+                      <div className="sketch-detail-row"><span className="label">Name :</span><span className="value fw-bold">{activeItemDetail.itemName}</span></div>
+                      <div className="sketch-detail-row"><span className="label">Price :</span><span className="value">Rs. {parseFloat(activeItemDetail.price).toFixed(0)}</span></div>
+                      <div className="sketch-detail-row quantity-row my-3 py-2 border-top border-bottom">
+                        <span className="label">Quantity :</span>
+                        <div className="qty-controls">
+                          <button className="qty-btn" onClick={() => setModalQty(Math.max(1, modalQty - 1))}>-</button>
+                          <span className="qty-value">{modalQty}</span>
+                          <button className="qty-btn" onClick={() => setModalQty(modalQty + 1)}>+</button>
+                        </div>
+                      </div>
+                    </div>
+                 </div>
+                 {/* Right Column: Order Fields */}
+                 <div className="sketch-modal-right-col flex-grow-1 p-4 bg-light">
+                    <div className="mb-4">
+                      <label className="d-block mb-2 fw-bold text-muted small">ORDER LOCATION *</label>
+                      <div className="d-flex gap-2">
+                        <button className={`flex-grow-1 btn ${orderLocation === 'inside' ? 'btn-primary' : 'btn-outline-primary'}`} style={orderLocation === 'inside' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }} onClick={() => { setOrderLocation('inside'); setModalOrderType('room'); setManualOrderType('ROOM'); setManualTableNo(''); }}>IN SIDE</button>
+                        <button className={`flex-grow-1 btn ${orderLocation === 'outside' ? 'btn-primary' : 'btn-outline-primary'}`} style={orderLocation === 'outside' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }} onClick={() => { setOrderLocation('outside'); setModalOrderType('table'); setManualOrderType('TABLE'); setManualTableNo(''); }}>OUTSIDE</button>
+                      </div>
+                    </div>
+                    <div className="mb-4">
+                      <label className="d-block mb-2 fw-bold text-muted small">SELECT {orderLocation === 'inside' ? 'ROOM' : 'TABLE'} *</label>
+                      <select className="form-control sketch-input" value={manualTableNo} onChange={(e) => setManualTableNo(e.target.value)}>
+                        <option value="">Select No</option>
+                        {orderLocation === 'inside' ? (
+                          [...Array.from({ length: 16 }, (_, i) => `SV - ${201 + i}`), ...Array.from({ length: 8 }, (_, i) => `HB - ${String(i + 1).padStart(2, '0')}`)].map(no => <option key={no} value={no}>{no}</option>)
+                        ) : (
+                          Array.from({ length: 25 }, (_, i) => (i + 1).toString()).map(no => <option key={no} value={no}>Table {no}</option>)
+                        )}
+                      </select>
+                    </div>
+                    <div className="mb-0">
+                      <label className="d-block mb-2 fw-bold text-muted small">ORDER NOTES (OPTIONAL)</label>
+                      <textarea className="form-control sketch-input" placeholder="Any special requests..." rows="4" value={modalOrderNotes} onChange={(e) => setModalOrderNotes(e.target.value)}></textarea>
+                    </div>
+                 </div>
+              </div>
+              <div className="sticky-bottom-btn p-3 bg-white border-top d-flex gap-2">
+                 <button className="btn btn-outline-primary flex-grow-1" onClick={() => addToCartFromModal(false)} style={{ padding: '14px', fontWeight: '700', borderColor: '#266668', color: '#266668' }}>ADD TO CART</button>
+                 <button className="order-now-btn flex-grow-1" onClick={() => addToCartFromModal(true)}>ORDER NOW</button>
+              </div>
             </div>
-            <div className="sketch-modal-body d-flex flex-wrap p-0">
-               <div className="sketch-modal-left-col p-4 border-end">
-                  <div className="sketch-modal-image-area mb-4" style={{ height: '300px', position: 'relative', overflow: 'hidden', borderRadius: '12px' }}>
-                    <FoodItemImageCarousel item={activeItemDetail} getImageUrl={getImageUrl} className="" />
-                  </div>
-                  <div className="sketch-modal-info-rows">
-                    <div className="sketch-detail-row"><span className="label">Name :</span><span className="value fw-bold">{activeItemDetail.itemName}</span></div>
-                    <div className="sketch-detail-row"><span className="label">Price :</span><span className="value">Rs. {parseFloat(activeItemDetail.price).toFixed(0)}</span></div>
-                    <div className="sketch-detail-row quantity-row my-3 py-2 border-top border-bottom">
-                      <span className="label">Quantity :</span>
-                      <div className="qty-controls">
-                        <button className="qty-btn" onClick={() => setModalQty(Math.max(1, modalQty - 1))}>-</button>
-                        <span className="qty-value">{modalQty}</span>
-                        <button className="qty-btn" onClick={() => setModalQty(modalQty + 1)}>+</button>
+          </div>
+        )}
+
+        <div className="wrapper">
+          <Navbar cartCount={cart.length} onCartClick={() => setShowCart(true)} />
+          <Sidebar />
+          <div className="content-wrapper" style={{ minHeight: 'calc(100vh - 80px)', backgroundColor: '#fcfcfc', padding: '0' }}>
+             {renderMainContent()}
+          </div>
+        </div>
+
+        {/* Manual Cart Drawer */}
+        <div className={`cart-drawer ${showCart ? 'open' : ''}`}>
+          <div className="cart-header"><h4><i className="fas fa-shopping-cart me-2"></i> Your Order</h4><button className="btn-close" onClick={() => setShowCart(false)}></button></div>
+          <div className="cart-body">
+            {cart.length === 0 ? (
+              <div className="text-center py-5 opacity-50"><i className="fas fa-shopping-basket fa-3x mb-3"></i><p>Your cart is empty</p></div>
+            ) : (
+              <div className="cart-items">
+                {cart.map(item => (
+                  <div key={item.foodItemId} className="p-3 border-bottom mb-2 bg-light rounded">
+                    <div className="fw-bold">{item.name}</div>
+                    <div className="d-flex justify-content-between align-items-center mt-2">
+                      <span>Rs. {item.price.toFixed(0)} x {item.qty}</span>
+                      <div className="d-flex gap-2">
+                        <button className="btn btn-sm btn-outline-secondary" onClick={() => updateCartItemQty(item.foodItemId, -1)}>-</button>
+                        <button className="btn btn-sm btn-outline-secondary" onClick={() => updateCartItemQty(item.foodItemId, 1)}>+</button>
+                        <button className="btn btn-sm btn-link text-danger" onClick={() => removeFromCart(item.foodItemId)}><i className="fas fa-trash"></i></button>
                       </div>
                     </div>
                   </div>
-               </div>
-               <div className="sketch-modal-right-col flex-grow-1 p-4 bg-light">
-                  <div className="mb-4">
-                    <label className="d-block mb-2 fw-bold text-muted small">ORDER LOCATION *</label>
-                    <div className="d-flex gap-2">
-                      <button className={`flex-grow-1 btn ${orderLocation === 'inside' ? 'btn-primary' : 'btn-outline-primary'}`} onClick={() => { setOrderLocation('inside'); setModalOrderType('room'); setManualOrderType('ROOM'); }}>IN SIDE</button>
-                      <button className={`flex-grow-1 btn ${orderLocation === 'outside' ? 'btn-primary' : 'btn-outline-primary'}`} onClick={() => { setOrderLocation('outside'); setModalOrderType('table'); setManualOrderType('TABLE'); }}>OUTSIDE</button>
-                    </div>
-                  </div>
-                  <div className="mb-4">
-                    <label className="d-block mb-2 fw-bold text-muted small">SELECT {orderLocation === 'inside' ? 'ROOM' : 'TABLE'} *</label>
-                    <select className="form-control" value={manualTableNo} onChange={(e) => setManualTableNo(e.target.value)}>
-                      <option value="">Select No</option>
-                      {orderLocation === 'inside' ? (
-                        [...Array.from({ length: 16 }, (_, i) => `SV - ${201 + i}`), ...Array.from({ length: 8 }, (_, i) => `HB - ${String(i + 1).padStart(2, '0')}`)].map(no => <option key={no} value={no}>{no}</option>)
-                      ) : (
-                        Array.from({ length: 25 }, (_, i) => (i + 1).toString()).map(no => <option key={no} value={no}>Table {no}</option>)
-                      )}
-                    </select>
-                  </div>
-               </div>
-            </div>
-            <div className="sticky-bottom-btn p-3 bg-white border-top d-flex gap-2">
-               <button className="btn btn-outline-primary flex-grow-1" onClick={() => addToCartFromModal(false)}>ADD TO CART</button>
-               <button className="order-now-btn flex-grow-1" onClick={() => addToCartFromModal(true)}>ORDER NOW</button>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      <div className="wrapper">
-        <Navbar cartCount={cart.length} onCartClick={() => setShowCart(true)} />
-        <Sidebar />
-        <div className="content-wrapper p-4 bg-white">
-           <h1 className="fw-bold mb-4">Manual Order</h1>
-           <div className="menu-grid-yellow">
-              {foodItems.map(item => renderManualItemCard(item))}
-           </div>
-        </div>
-      </div>
-
-      <div className={`cart-drawer ${showCart ? 'open' : ''}`}>
-        <div className="cart-header"><h4><i className="fas fa-shopping-cart me-2"></i> Cart</h4><button className="btn-close" onClick={() => setShowCart(false)}></button></div>
-        <div className="cart-body">
-          {cart.map(item => (
-            <div key={item.foodItemId} className="p-3 border-bottom mb-2 bg-light">
-              <div className="fw-bold">{item.name}</div>
-              <div className="d-flex justify-content-between align-items-center mt-2">
-                <span>Rs. {item.price.toFixed(0)} x {item.qty}</span>
-                <div className="d-flex gap-2">
-                  <button className="btn btn-sm btn-outline-secondary" onClick={() => updateCartItemQty(item.foodItemId, -1)}>-</button>
-                  <button className="btn btn-sm btn-outline-secondary" onClick={() => updateCartItemQty(item.foodItemId, 1)}>+</button>
-                </div>
+                ))}
               </div>
-            </div>
-          ))}
+            )}
+          </div>
           {cart.length > 0 && (
-            <div className="mt-4 p-3 border rounded">
-               <div className="d-flex justify-content-between fw-bold h5"><span>Total:</span><span>Rs. {calculateTotal()}</span></div>
-               <button className="btn btn-primary w-100 mt-3 p-3 fw-bold" onClick={placeOrder}>PLACE MANUAL ORDER</button>
+            <div className="cart-footer p-3 border-top bg-light">
+               <div className="d-flex justify-content-between fw-bold h5 mb-3"><span>Total:</span><span style={{ color: '#266668' }}>Rs. {calculateTotal()}</span></div>
+               <button className="btn btn-primary w-100 p-3 fw-bold" style={{ backgroundColor: '#266668', border: 'none' }} onClick={placeOrder}>PLACE MANUAL ORDER</button>
             </div>
           )}
         </div>
+        {showCart && <div className="cart-overlay" onClick={() => setShowCart(false)}></div>}
       </div>
-      {showCart && <div className="cart-overlay" onClick={() => setShowCart(false)}></div>}
-    </div>
-  );
+    );
+  }
+
+  // Fallback (should not be reached)
+  return null;
 };
 
 export default CustomerQROrder;
