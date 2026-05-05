@@ -1288,7 +1288,10 @@ const CustomerQROrder = ({ isManual = false }) => {
 
   const AnnouncementBar = () => (
     <div className="announcement-bar">
-      WE PROVIDE ISLANDWIDE DELIVERY INSIDE SRI LANKA | EXCLUSIVE OFFERS
+      <div className="announcement-marquee">
+        <span>WE PROVIDE ISLANDWIDE DELIVERY INSIDE SRI LANKA | EXCLUSIVE OFFERS & DISCOUNTS | CONTACT US FOR BULK ORDERS</span>
+        <span>WE PROVIDE ISLANDWIDE DELIVERY INSIDE SRI LANKA | EXCLUSIVE OFFERS & DISCOUNTS | CONTACT US FOR BULK ORDERS</span>
+      </div>
     </div>
   );
 

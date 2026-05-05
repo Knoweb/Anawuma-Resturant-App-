@@ -20,12 +20,33 @@
 .announcement-bar {
   background-color: var(--shopify-olive);
   color: white;
-  text-align: center;
+  overflow: hidden;
+  position: relative;
+  height: 32px;
+  display: flex;
+  align-items: center;
+}
+
+.announcement-marquee {
+  display: flex;
+  width: 200%;
+  animation: marquee 20s linear infinite;
+  white-space: nowrap;
+}
+
+.announcement-marquee span {
+  width: 50%;
+  display: inline-block;
   font-size: 11px;
-  letter-spacing: 1px;
-  padding: 8px 0;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
-  font-weight: 500;
+  font-weight: 600;
+  padding: 0 40px;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 /* Sticky Header */
