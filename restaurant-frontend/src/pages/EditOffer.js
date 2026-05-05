@@ -506,63 +506,71 @@ function EditOffer() {
                   {/* Food Item Selection */}
                   <div className="form-group mb-4">
                     <label className="form-label fw-bold text-dark">
-                      <i className="fas fa-utensils me-2"></i>Apply to Food Items (Selection for calculation):
+                      <i className="fas fa-utensils me-2"></i>Apply to Food Items:
                     </label>
-                    <div className="dropdown w-100 position-relative">
-                      <div 
-                        className="form-control dropdown-toggle bg-white d-flex align-items-center justify-content-between" 
-                        onClick={() => setShowFoodDropdown(!showFoodDropdown)}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        {selectedFoodItems.length > 0 ? `${selectedFoodItems.length} items selected` : 'Select food items...'}
+                    <div className="food-selection-container border rounded p-3 bg-white shadow-sm">
+                      <div className="mb-3">
+                        <div className="input-group">
+                          <span className="input-group-text bg-light border-end-0"><i className="fas fa-search text-muted"></i></span>
+                          <input 
+                            type="text" 
+                            className="form-control border-start-0 bg-light" 
+                            placeholder="Search food items..." 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                          />
+                        </div>
                       </div>
                       
-                      {showFoodDropdown && (
-                        <div 
-                          className="dropdown-menu w-100 p-2 show" 
-                          style={{ 
-                            maxHeight: '250px', 
-                            overflowY: 'auto',
-                            display: 'block',
-                            position: 'absolute',
-                            zIndex: 1000,
-                            top: '100%',
-                            left: 0,
-                            boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-                          }}
-                        >
-                          <div className="input-group mb-2">
-                            <span className="input-group-text border-0"><i className="fas fa-search"></i></span>
-                            <input 
-                              type="text" 
-                              className="form-control border-0 bg-light" 
-                              placeholder="Search..." 
-                              value={searchQuery}
-                              onChange={(e) => setSearchQuery(e.target.value)}
-                              onClick={(e) => e.stopPropagation()}
-                            />
+                      <div 
+                        className="food-list-scroll border rounded" 
+                        style={{ 
+                          maxHeight: '300px', 
+                          overflowY: 'auto',
+                          backgroundColor: '#fcfcfc'
+                        }}
+                      >
+                        {foodItems.length === 0 ? (
+                          <div className="p-4 text-center text-muted">
+                            <i className="fas fa-spinner fa-spin me-2"></i>Loading food items...
                           </div>
-                          {foodItems.filter(item => 
+                        ) : (
+                          foodItems.filter(item => 
                             (item.itemName || '').toLowerCase().includes(searchQuery.toLowerCase())
                           ).map(item => (
-                            <div key={item.foodItemId} className="dropdown-item p-0" onClick={(e) => e.stopPropagation()}>
-                              <label className="d-flex align-items-center w-100 px-3 py-2" style={{ cursor: 'pointer', margin: 0 }}>
+                            <div 
+                              key={item.foodItemId} 
+                              className="border-bottom last-child-border-0"
+                              style={{ transition: 'background-color 0.2s' }}
+                            >
+                              <label className="d-flex align-items-center w-100 px-3 py-2 mb-0" style={{ cursor: 'pointer' }}>
                                 <input 
                                   className="form-check-input me-3" 
                                   type="checkbox" 
                                   id={`food-${item.foodItemId}`}
                                   checked={selectedFoodItems.some(i => i.foodItemId === item.foodItemId)}
                                   onChange={() => handleToggleFoodItem(item)}
-                                  style={{ marginTop: 0, width: '18px', height: '18px' }}
+                                  style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                                 />
-                                <span className="flex-grow-1 text-dark">
-                                  {item.itemName} <span className="text-muted small ms-1">(Rs. {Number(item.price).toFixed(2)})</span>
-                                </span>
+                                <div className="flex-grow-1">
+                                  <div className="text-dark fw-bold" style={{ fontSize: '14px' }}>{item.itemName}</div>
+                                  <div className="text-muted extra-small">Rs. {Number(item.price).toFixed(2)} • {item.category?.categoryName || 'No Category'}</div>
+                                </div>
                               </label>
                             </div>
-                          ))}
-                        </div>
-                      )}
+                          ))
+                        )}
+                        {foodItems.length > 0 && foodItems.filter(item => 
+                          (item.itemName || '').toLowerCase().includes(searchQuery.toLowerCase())
+                        ).length === 0 && (
+                          <div className="p-4 text-center text-muted">
+                            No food items match your search.
+                          </div>
+                        )}
+                      </div>
+                      <div className="mt-2 small text-muted text-end">
+                        {selectedFoodItems.length} items selected
+                      </div>
                     </div>
                   </div>
 
