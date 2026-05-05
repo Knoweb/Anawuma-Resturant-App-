@@ -230,12 +230,6 @@ function AddOffer() {
         <div className="dashboard-content">
           <div className="container-fluid">
             <div className="add-offer-page">
-              <div className="add-offer-header">
-                <button className="back-button-modern" onClick={() => navigate(-1)}>
-                  <i className="fas fa-arrow-left"></i>
-                  <span>Back</span>
-                </button>
-              </div>
 
               <div className="add-offer-container">
                 <h2 className="add-offer-title">
