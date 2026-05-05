@@ -411,8 +411,6 @@ const CustomerQROrder = ({ isManual = false }) => {
   const [expandedCategories, setExpandedCategories] = useState(new Set());
   const [activeAccordion, setActiveAccordion] = useState('description');
   const [showShopifyMenu, setShowShopifyMenu] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [sessionOrders, setSessionOrders] = useState([]);
   const [viewingHistoryOrder, setViewingHistoryOrder] = useState(null);
 
@@ -527,17 +525,9 @@ const CustomerQROrder = ({ isManual = false }) => {
       filtered = filtered.filter(item => item.menuId === selectedMenu);
     }
 
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(item => 
-        item.itemName.toLowerCase().includes(query) || 
-        (item.description && item.description.toLowerCase().includes(query))
-      );
-    }
-
     setFilteredItems(filtered);
     console.log('CustomerQROrder: Items loaded/filtered:', filtered.length, filtered);
-  }, [selectedMenu, foodItems, searchQuery]);
+  }, [selectedMenu, foodItems]);
 
   const toggleCategoryExpand = (categoryId) => {
     setExpandedCategories(prev => {
@@ -1306,47 +1296,33 @@ const CustomerQROrder = ({ isManual = false }) => {
   );
 
   const ShopifyHeader = () => (
-    <header className="shopify-header d-flex align-items-center justify-content-between px-3" style={{ 
-      minHeight: '60px', 
-      position: 'sticky', 
-      top: 0, 
-      background: 'white', 
-      zIndex: 1000,
-      borderBottom: '1px solid #E5E5E5'
-    }}>
+    <header className="shopify-header d-flex align-items-center justify-content-between px-3" style={{ minHeight: '60px', position: 'sticky', top: 0, background: 'white', zIndex: 1000 }}>
       {/* LEFT: HAMBURGER */}
-      <div className="anawuma-header-col-left" style={{ flex: '0 0 80px', display: 'flex', justifyContent: 'flex-start' }}>
-        <div onClick={() => setShowShopifyMenu(true)} style={{ fontSize: '22px', cursor: 'pointer' }}>
+      <div className="anawuma-header-col-left" style={{ flex: '1', display: 'flex', justifyContent: 'flex-start', zIndex: 1001 }}>
+        <div onClick={() => setShowShopifyMenu(true)} style={{ fontSize: '22px', cursor: 'pointer', padding: '10px' }}>
           <i className="fas fa-bars"></i>
         </div>
       </div>
 
       {/* CENTER: LOGO */}
-      <div className="anawuma-header-col-center" style={{ flexGrow: 1, display: 'flex', justifyContent: 'center', overflow: 'hidden' }}>
-        <h1 style={{ 
-          fontFamily: "'Playfair Display', serif", 
-          fontSize: '24px', 
-          fontWeight: '900', 
-          margin: 0, 
-          letterSpacing: '-0.5px',
-          whiteSpace: 'nowrap'
-        }}>
+      <div className="anawuma-header-col-center" style={{ flex: '2', display: 'flex', justifyContent: 'center', zIndex: 1001 }}>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '24px', fontWeight: '900', margin: 0, letterSpacing: '-0.5px' }}>
           {tableInfo?.restaurantName || 'Serene1'}
         </h1>
       </div>
 
       {/* RIGHT: SEARCH & CART */}
-      <div className="anawuma-header-col-right" style={{ flex: '0 0 80px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '20px' }}>
-        <div style={{ fontSize: '18px', cursor: 'pointer' }} onClick={() => setShowSearch(true)}>
+      <div className="anawuma-header-col-right" style={{ flex: '1', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '20px', zIndex: 1001 }}>
+        <div style={{ fontSize: '18px', cursor: 'pointer', padding: '5px' }}>
           <i className="fas fa-search"></i>
         </div>
-        <div onClick={() => setShowCart(true)} style={{ position: 'relative', fontSize: '22px', cursor: 'pointer' }}>
+        <div onClick={() => setShowCart(true)} style={{ position: 'relative', fontSize: '22px', cursor: 'pointer', padding: '5px' }}>
           <i className="fas fa-shopping-cart"></i>
           {cart.length > 0 && (
             <span style={{
               position: 'absolute',
-              top: '-8px',
-              right: '-10px',
+              top: '-5px',
+              right: '-8px',
               background: '#FF7F50',
               color: 'white',
               borderRadius: '50%',
@@ -1416,69 +1392,6 @@ const CustomerQROrder = ({ isManual = false }) => {
     <div className="vertical-floating-btn" onClick={() => window.open('https://wa.me/94704998787', '_blank')}>
       <i className="far fa-envelope me-2"></i>
       SEND US YOUR QUESTION
-    </div>
-  );
-
-  const ShopifySearchOverlay = () => (
-    <div className={`search-overlay ${showSearch ? 'open' : ''}`} style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      background: 'white',
-      zIndex: 2000,
-      transition: 'all 0.3s ease',
-      transform: showSearch ? 'translateY(0)' : 'translateY(-100%)',
-      opacity: showSearch ? 1 : 0,
-      visibility: showSearch ? 'visible' : 'hidden',
-      padding: '20px'
-    }}>
-      <div className="d-flex align-items-center mb-4">
-        <div className="flex-grow-1 position-relative">
-          <i className="fas fa-search position-absolute" style={{ left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#999' }}></i>
-          <input 
-            type="text" 
-            placeholder="Search our products..." 
-            className="form-control" 
-            style={{ paddingLeft: '45px', height: '50px', border: '1px solid #ddd', borderRadius: '0' }}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            autoFocus
-          />
-        </div>
-        <div className="ms-3" onClick={() => { setShowSearch(false); setSearchQuery(''); }} style={{ cursor: 'pointer', fontSize: '20px' }}>
-          <i className="fas fa-times"></i>
-        </div>
-      </div>
-      
-      <div className="search-results-info mb-3">
-        {searchQuery ? (
-          <div className="small uppercase fw-bold" style={{ letterSpacing: '1px' }}>
-            {filteredItems.length} results for "{searchQuery}"
-          </div>
-        ) : (
-          <div className="small uppercase fw-bold" style={{ letterSpacing: '1px' }}>Start typing to search</div>
-        )}
-      </div>
-
-      <div className="search-results-list" style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 150px)' }}>
-        <div className="row g-3">
-          {filteredItems.map(item => (
-            <div key={item.foodItemId} className="col-6" onClick={() => { setActiveItemDetail(item); setShowSearch(false); }}>
-              <div className="shopify-product-card mb-0">
-                <div style={{ height: '120px' }}>
-                  <img src={getImageUrl(item.imageUrl1 || item.imageUrl || item.image)} className="shopify-product-image" alt={item.itemName} />
-                </div>
-                <div className="p-2 text-center">
-                  <div className="fw-bold" style={{ fontSize: '10px', textTransform: 'uppercase' }}>{item.itemName}</div>
-                  <div className="small text-muted">Rs. {parseFloat(item.price).toFixed(0)}</div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 
@@ -1838,7 +1751,6 @@ const CustomerQROrder = ({ isManual = false }) => {
       <div className="shopify-page">
         <AnnouncementBar />
         <ShopifyHeader />
-        <ShopifySearchOverlay />
         <ShopifyMenuDrawer />
         <FloatingQuestionButton />
         
