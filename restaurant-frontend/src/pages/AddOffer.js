@@ -431,14 +431,7 @@ function AddOffer() {
                       <i className="fas fa-utensils me-2"></i>Apply to Food Items:
                     </label>
                     <div className="food-selection-container border rounded p-3 bg-light">
-                      <div className="input-group mb-3">
-                        <span className="input-group-text"><i className="fas fa-search"></i></span>
-                        <input 
-                          type="text" 
-                          className="form-control" 
-                          placeholder="Search food items..." 
-                          value={searchQuery}
-                    <div className="dropdown w-100">
+                      <div className="dropdown w-100">
                       <div 
                         className="form-control dropdown-toggle bg-white d-flex align-items-center justify-content-between" 
                         data-bs-toggle="dropdown"
