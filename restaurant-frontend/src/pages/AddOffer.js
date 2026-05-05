@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../api/apiClient';
 import Swal from 'sweetalert2';
+import Navbar from '../components/common/Navbar';
+import Sidebar from '../components/common/Sidebar';
 import './AddOffer.css';
 
 function AddOffer() {
@@ -221,229 +223,239 @@ function AddOffer() {
   };
 
   return (
-    <div className="add-offer-page">
-      <div className="add-offer-header">
-        <button className="back-button-modern" onClick={() => navigate(-1)}>
-          <i className="fas fa-arrow-left"></i>
-          <span>Back</span>
-        </button>
-      </div>
-
-      <div className="add-offer-container">
-        <h2 className="add-offer-title">
-          <i className="fas fa-tag me-2"></i>
-          Add Special Offer
-        </h2>
-
-        <form onSubmit={handleSubmit} className="add-offer-form">
-          {/* Offer Title */}
-          <div className="form-group">
-            <label htmlFor="title" className="form-label">
-              Offer Title:
-            </label>
-            <input
-              type="text"
-              className={`form-control ${errors.title ? 'is-invalid' : ''}`}
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              placeholder="Enter Offer Title"
-              maxLength={100}
-              disabled={submitting}
-            />
-            <div className="char-counter-container">
-              <span className="char-counter">Minimum 3, Maximum 100 characters</span>
-              <span className={`char-counter remaining ${getCounterClass(titleCount)}`}>
-                <span>{titleCount}</span> characters remaining
-              </span>
-            </div>
-            {errors.title && <div className="invalid-feedback d-block">{errors.title}</div>}
-          </div>
-
-          {/* Offer Description */}
-          <div className="form-group">
-            <label htmlFor="description" className="form-label">
-              Offer Description:
-            </label>
-            <textarea
-              className={`form-control ${errors.description ? 'is-invalid' : ''}`}
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Enter Offer Description"
-              rows="4"
-              maxLength={500}
-              disabled={submitting}
-            ></textarea>
-            <div className="char-counter-container">
-              <span className="char-counter">Minimum 10, Maximum 500 characters</span>
-              <span className={`char-counter remaining ${getCounterClass(descCount)}`}>
-                <span>{descCount}</span> characters remaining
-              </span>
-            </div>
-            {errors.description && <div className="invalid-feedback d-block">{errors.description}</div>}
-          </div>
-
-          {/* Offer Image Upload */}
-          <div className="form-group">
-            <label htmlFor="image" className="form-label">
-              <i className="fas fa-image me-2"></i>Offer Image (Optional):
-            </label>
-            <input
-              type="file"
-              className={`form-control ${errors.image ? 'is-invalid' : ''}`}
-              id="image"
-              name="image"
-              accept="image/*"
-              onChange={handleFileChange}
-              disabled={submitting}
-            />
-            <small className="form-text text-muted">
-              Upload an image (jpg, png, gif, webp - Max 5MB)
-            </small>
-            {errors.image && <div className="invalid-feedback d-block">{errors.image}</div>}
-            
-            {/* Image Preview */}
-            {imagePreview ? (
-              <div className="image-preview-container mt-3">
-                <p className="mb-2 fw-bold text-primary">
-                  <i className="fas fa-eye me-2"></i>Image Preview:
-                </p>
-                <div className="preview-wrapper">
-                  <img 
-                    src={imagePreview}
-                    alt="Offer preview" 
-                    className="image-preview"
-                  />
-                  <button
-                    type="button"
-                    className="btn-remove-image"
-                    onClick={() => {
-                      setSelectedFile(null);
-                      setImagePreview(null);
-                      document.getElementById('image').value = '';
-                    }}
-                  >
-                    <i className="fas fa-times"></i>
-                  </button>
-                </div>
+    <div className="dashboard-layout">
+      <Sidebar />
+      <div className="main-content">
+        <Navbar />
+        <div className="dashboard-content">
+          <div className="container-fluid">
+            <div className="add-offer-page">
+              <div className="add-offer-header">
+                <button className="back-button-modern" onClick={() => navigate(-1)}>
+                  <i className="fas fa-arrow-left"></i>
+                  <span>Back</span>
+                </button>
               </div>
-            ) : (
-              <div className="image-placeholder-upload mt-3">
-                <i className="fas fa-image fa-3x"></i>
-                <p className="mt-2 mb-0">No image selected</p>
-                <small className="text-muted">Upload an image to see preview</small>
-              </div>
-            )}
-          </div>
 
-          {/* Select Discount Type */}
-          <div className="form-group">
-            <label htmlFor="discountType" className="form-label">
-              Discount Type:
-            </label>
-            <select
-              className={`form-select ${errors.discountType ? 'is-invalid' : ''}`}
-              id="discountType"
-              name="discountType"
-              value={formData.discountType}
-              onChange={handleChange}
-              disabled={submitting}
-            >
-              <option value="">Select discount type</option>
-              <option value="PERCENTAGE">Percentage (%)</option>
-              <option value="FIXED">Fixed Amount</option>
-            </select>
-            {errors.discountType && <div className="invalid-feedback d-block">{errors.discountType}</div>}
-          </div>
+              <div className="add-offer-container">
+                <h2 className="add-offer-title">
+                  <i className="fas fa-tag me-2"></i>
+                  Add Special Offer
+                </h2>
 
-          {/* Discount Value */}
-          <div className="form-group">
-            <label htmlFor="discountValue" className="form-label">
-              Discount Value:
-            </label>
-            <input
-              type="number"
-              className={`form-control ${errors.discountValue ? 'is-invalid' : ''}`}
-              id="discountValue"
-              name="discountValue"
-              value={formData.discountValue}
-              onChange={handleChange}
-              placeholder={formData.discountType === 'PERCENTAGE' ? 'Enter percentage (0-100)' : 'Enter amount'}
-              min="0"
-              step="0.01"
-              disabled={submitting}
-            />
-            <small className="form-text text-muted">
-              {formData.discountType === 'PERCENTAGE' 
-                ? 'Enter percentage value (e.g., 10 for 10%)' 
-                : 'Enter fixed discount amount'}
-            </small>
-            {errors.discountValue && <div className="invalid-feedback d-block">{errors.discountValue}</div>}
-          </div>
+                <form onSubmit={handleSubmit} className="add-offer-form">
+                  {/* Offer Title */}
+                  <div className="form-group">
+                    <label htmlFor="title" className="form-label">
+                      Offer Title:
+                    </label>
+                    <input
+                      type="text"
+                      className={`form-control ${errors.title ? 'is-invalid' : ''}`}
+                      id="title"
+                      name="title"
+                      value={formData.title}
+                      onChange={handleChange}
+                      placeholder="Enter Offer Title"
+                      maxLength={100}
+                      disabled={submitting}
+                    />
+                    <div className="char-counter-container">
+                      <span className="char-counter">Minimum 3, Maximum 100 characters</span>
+                      <span className={`char-counter remaining ${getCounterClass(titleCount)}`}>
+                        <span>{titleCount}</span> characters remaining
+                      </span>
+                    </div>
+                    {errors.title && <div className="invalid-feedback d-block">{errors.title}</div>}
+                  </div>
 
-          {/* Date Range */}
-          <div className="row">
-            <div className="col-md-6">
-              <div className="form-group">
-                <label htmlFor="startDate" className="form-label">
-                  Start Date:
-                </label>
-                <input
-                  type="datetime-local"
-                  className={`form-control ${errors.startDate ? 'is-invalid' : ''}`}
-                  id="startDate"
-                  name="startDate"
-                  value={formData.startDate}
-                  onChange={handleChange}
-                  disabled={submitting}
-                />
-                {errors.startDate && <div className="invalid-feedback d-block">{errors.startDate}</div>}
+                  {/* Offer Description */}
+                  <div className="form-group">
+                    <label htmlFor="description" className="form-label">
+                      Offer Description:
+                    </label>
+                    <textarea
+                      className={`form-control ${errors.description ? 'is-invalid' : ''}`}
+                      id="description"
+                      name="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      placeholder="Enter Offer Description"
+                      rows="4"
+                      maxLength={500}
+                      disabled={submitting}
+                    ></textarea>
+                    <div className="char-counter-container">
+                      <span className="char-counter">Minimum 10, Maximum 500 characters</span>
+                      <span className={`char-counter remaining ${getCounterClass(descCount)}`}>
+                        <span>{descCount}</span> characters remaining
+                      </span>
+                    </div>
+                    {errors.description && <div className="invalid-feedback d-block">{errors.description}</div>}
+                  </div>
+
+                  {/* Offer Image Upload */}
+                  <div className="form-group">
+                    <label htmlFor="image" className="form-label">
+                      <i className="fas fa-image me-2"></i>Offer Image (Optional):
+                    </label>
+                    <input
+                      type="file"
+                      className={`form-control ${errors.image ? 'is-invalid' : ''}`}
+                      id="image"
+                      name="image"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      disabled={submitting}
+                    />
+                    <small className="form-text text-muted">
+                      Upload an image (jpg, png, gif, webp - Max 5MB)
+                    </small>
+                    {errors.image && <div className="invalid-feedback d-block">{errors.image}</div>}
+                    
+                    {/* Image Preview */}
+                    {imagePreview ? (
+                      <div className="image-preview-container mt-3">
+                        <p className="mb-2 fw-bold text-primary">
+                          <i className="fas fa-eye me-2"></i>Image Preview:
+                        </p>
+                        <div className="preview-wrapper">
+                          <img 
+                            src={imagePreview}
+                            alt="Offer preview" 
+                            className="image-preview"
+                          />
+                          <button
+                            type="button"
+                            className="btn-remove-image"
+                            onClick={() => {
+                              setSelectedFile(null);
+                              setImagePreview(null);
+                              document.getElementById('image').value = '';
+                            }}
+                          >
+                            <i className="fas fa-times"></i>
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="image-placeholder-upload mt-3">
+                        <i className="fas fa-image fa-3x"></i>
+                        <p className="mt-2 mb-0">No image selected</p>
+                        <small className="text-muted">Upload an image to see preview</small>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Select Discount Type */}
+                  <div className="form-group">
+                    <label htmlFor="discountType" className="form-label">
+                      Discount Type:
+                    </label>
+                    <select
+                      className={`form-select ${errors.discountType ? 'is-invalid' : ''}`}
+                      id="discountType"
+                      name="discountType"
+                      value={formData.discountType}
+                      onChange={handleChange}
+                      disabled={submitting}
+                    >
+                      <option value="">Select discount type</option>
+                      <option value="PERCENTAGE">Percentage (%)</option>
+                      <option value="FIXED">Fixed Amount</option>
+                    </select>
+                    {errors.discountType && <div className="invalid-feedback d-block">{errors.discountType}</div>}
+                  </div>
+
+                  {/* Discount Value */}
+                  <div className="form-group">
+                    <label htmlFor="discountValue" className="form-label">
+                      Discount Value:
+                    </label>
+                    <input
+                      type="number"
+                      className={`form-control ${errors.discountValue ? 'is-invalid' : ''}`}
+                      id="discountValue"
+                      name="discountValue"
+                      value={formData.discountValue}
+                      onChange={handleChange}
+                      placeholder={formData.discountType === 'PERCENTAGE' ? 'Enter percentage (0-100)' : 'Enter amount'}
+                      min="0"
+                      step="0.01"
+                      disabled={submitting}
+                    />
+                    <small className="form-text text-muted">
+                      {formData.discountType === 'PERCENTAGE' 
+                        ? 'Enter percentage value (e.g., 10 for 10%)' 
+                        : 'Enter fixed discount amount'}
+                    </small>
+                    {errors.discountValue && <div className="invalid-feedback d-block">{errors.discountValue}</div>}
+                  </div>
+
+                  {/* Date Range */}
+                  <div className="row">
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label htmlFor="startDate" className="form-label">
+                          Start Date:
+                        </label>
+                        <input
+                          type="datetime-local"
+                          className={`form-control ${errors.startDate ? 'is-invalid' : ''}`}
+                          id="startDate"
+                          name="startDate"
+                          value={formData.startDate}
+                          onChange={handleChange}
+                          disabled={submitting}
+                        />
+                        {errors.startDate && <div className="invalid-feedback d-block">{errors.startDate}</div>}
+                      </div>
+                    </div>
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label htmlFor="endDate" className="form-label">
+                          End Date:
+                        </label>
+                        <input
+                          type="datetime-local"
+                          className={`form-control ${errors.endDate ? 'is-invalid' : ''}`}
+                          id="endDate"
+                          name="endDate"
+                          value={formData.endDate}
+                          onChange={handleChange}
+                          min={formData.startDate}
+                          disabled={submitting}
+                        />
+                        {errors.endDate && <div className="invalid-feedback d-block">{errors.endDate}</div>}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Submit Button */}
+                  <div className="form-actions">
+                    <button 
+                      type="submit" 
+                      className="btn btn-primary btn-add-offer"
+                      disabled={submitting}
+                    >
+                      {submitting ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                          Adding Offer...
+                        </>
+                      ) : (
+                        <>
+                          <i className="fas fa-plus-circle me-2"></i>
+                          Add Offer
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
-            <div className="col-md-6">
-              <div className="form-group">
-                <label htmlFor="endDate" className="form-label">
-                  End Date:
-                </label>
-                <input
-                  type="datetime-local"
-                  className={`form-control ${errors.endDate ? 'is-invalid' : ''}`}
-                  id="endDate"
-                  name="endDate"
-                  value={formData.endDate}
-                  onChange={handleChange}
-                  min={formData.startDate}
-                  disabled={submitting}
-                />
-                {errors.endDate && <div className="invalid-feedback d-block">{errors.endDate}</div>}
-              </div>
-            </div>
           </div>
-
-          {/* Submit Button */}
-          <div className="form-actions">
-            <button 
-              type="submit" 
-              className="btn btn-primary btn-add-offer"
-              disabled={submitting}
-            >
-              {submitting ? (
-                <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                  Adding Offer...
-                </>
-              ) : (
-                <>
-                  <i className="fas fa-plus-circle me-2"></i>
-                  Add Offer
-                </>
-              )}
-            </button>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
   );
