@@ -411,6 +411,8 @@ const CustomerQROrder = ({ isManual = false }) => {
   const [expandedCategories, setExpandedCategories] = useState(new Set());
   const [activeAccordion, setActiveAccordion] = useState('description');
   const [showShopifyMenu, setShowShopifyMenu] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [sessionOrders, setSessionOrders] = useState([]);
   const [viewingHistoryOrder, setViewingHistoryOrder] = useState(null);
 
@@ -525,9 +527,17 @@ const CustomerQROrder = ({ isManual = false }) => {
       filtered = filtered.filter(item => item.menuId === selectedMenu);
     }
 
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(item => 
+        item.itemName.toLowerCase().includes(query) || 
+        (item.description && item.description.toLowerCase().includes(query))
+      );
+    }
+
     setFilteredItems(filtered);
     console.log('CustomerQROrder: Items loaded/filtered:', filtered.length, filtered);
-  }, [selectedMenu, foodItems]);
+  }, [selectedMenu, foodItems, searchQuery]);
 
   const toggleCategoryExpand = (categoryId) => {
     setExpandedCategories(prev => {
@@ -1313,7 +1323,7 @@ const CustomerQROrder = ({ isManual = false }) => {
 
       {/* RIGHT: SEARCH & CART */}
       <div className="anawuma-header-col-right" style={{ flex: '1', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '20px', zIndex: 1001 }}>
-        <div style={{ fontSize: '18px', cursor: 'pointer', padding: '5px' }}>
+        <div style={{ fontSize: '18px', cursor: 'pointer', padding: '5px' }} onClick={() => setShowSearch(true)}>
           <i className="fas fa-search"></i>
         </div>
         <div onClick={() => setShowCart(true)} style={{ position: 'relative', fontSize: '22px', cursor: 'pointer', padding: '5px' }}>
@@ -1392,6 +1402,67 @@ const CustomerQROrder = ({ isManual = false }) => {
     <div className="vertical-floating-btn" onClick={() => window.open('https://wa.me/94704998787', '_blank')}>
       <i className="far fa-envelope me-2"></i>
       SEND US YOUR QUESTION
+    </div>
+  );
+
+  const ShopifySearchOverlay = () => (
+    <div className={`search-overlay ${showSearch ? 'open' : ''}`} style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      background: 'white',
+      zIndex: 2000,
+      transition: 'transform 0.3s ease',
+      transform: showSearch ? 'translateY(0)' : 'translateY(-100%)',
+      padding: '20px'
+    }}>
+      <div className="d-flex align-items-center mb-4">
+        <div className="flex-grow-1 position-relative">
+          <i className="fas fa-search position-absolute" style={{ left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#999' }}></i>
+          <input 
+            type="text" 
+            placeholder="Search our products..." 
+            className="form-control" 
+            style={{ paddingLeft: '45px', height: '50px', border: '1px solid #ddd', borderRadius: '0' }}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            autoFocus
+          />
+        </div>
+        <div className="ms-3" onClick={() => { setShowSearch(false); setSearchQuery(''); }} style={{ cursor: 'pointer', fontSize: '20px' }}>
+          <i className="fas fa-times"></i>
+        </div>
+      </div>
+      
+      <div className="search-results-info mb-3">
+        {searchQuery ? (
+          <div className="small uppercase fw-bold" style={{ letterSpacing: '1px' }}>
+            {filteredItems.length} results for "{searchQuery}"
+          </div>
+        ) : (
+          <div className="small uppercase fw-bold" style={{ letterSpacing: '1px' }}>Start typing to search</div>
+        )}
+      </div>
+
+      <div className="search-results-list" style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 150px)' }}>
+        <div className="row g-3">
+          {filteredItems.map(item => (
+            <div key={item.foodItemId} className="col-6" onClick={() => { setActiveItemDetail(item); setShowSearch(false); }}>
+              <div className="shopify-product-card mb-0">
+                <div style={{ height: '120px' }}>
+                  <img src={getImageUrl(item.imageUrl1 || item.imageUrl || item.image)} className="shopify-product-image" alt={item.itemName} />
+                </div>
+                <div className="p-2 text-center">
+                  <div className="fw-bold" style={{ fontSize: '10px', textTransform: 'uppercase' }}>{item.itemName}</div>
+                  <div className="small text-muted">Rs. {parseFloat(item.price).toFixed(0)}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 
@@ -1751,6 +1822,7 @@ const CustomerQROrder = ({ isManual = false }) => {
       <div className="shopify-page">
         <AnnouncementBar />
         <ShopifyHeader />
+        <ShopifySearchOverlay />
         <ShopifyMenuDrawer />
         <FloatingQuestionButton />
         
