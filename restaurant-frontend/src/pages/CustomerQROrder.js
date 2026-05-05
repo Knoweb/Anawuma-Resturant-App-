@@ -1308,25 +1308,25 @@ const CustomerQROrder = ({ isManual = false }) => {
   const ShopifyHeader = () => (
     <header className="shopify-header d-flex align-items-center justify-content-between px-3" style={{ minHeight: '60px', position: 'sticky', top: 0, background: 'white', zIndex: 1000 }}>
       {/* LEFT: HAMBURGER */}
-      <div className="anawuma-header-col-left" style={{ flex: '1', display: 'flex', justifyContent: 'flex-start', zIndex: 1001 }}>
-        <div onClick={() => setShowShopifyMenu(true)} style={{ fontSize: '22px', cursor: 'pointer', padding: '10px' }}>
+      <div className="anawuma-header-col-left" style={{ width: '40px', display: 'flex', justifyContent: 'flex-start', zIndex: 1001 }}>
+        <div onClick={() => setShowShopifyMenu(true)} style={{ fontSize: '22px', cursor: 'pointer' }}>
           <i className="fas fa-bars"></i>
         </div>
       </div>
 
       {/* CENTER: LOGO */}
-      <div className="anawuma-header-col-center" style={{ flex: '2', display: 'flex', justifyContent: 'center', zIndex: 1001 }}>
+      <div className="anawuma-header-col-center" style={{ flexGrow: 1, display: 'flex', justifyContent: 'center', zIndex: 1001 }}>
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '24px', fontWeight: '900', margin: 0, letterSpacing: '-0.5px' }}>
           {tableInfo?.restaurantName || 'Serene1'}
         </h1>
       </div>
 
       {/* RIGHT: SEARCH & CART */}
-      <div className="anawuma-header-col-right" style={{ flex: '1', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '20px', zIndex: 1001 }}>
-        <div style={{ fontSize: '18px', cursor: 'pointer', padding: '5px' }} onClick={() => setShowSearch(true)}>
+      <div className="anawuma-header-col-right" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '30px', zIndex: 1001, width: '80px' }}>
+        <div style={{ fontSize: '18px', cursor: 'pointer' }} onClick={() => setShowSearch(true)}>
           <i className="fas fa-search"></i>
         </div>
-        <div onClick={() => setShowCart(true)} style={{ position: 'relative', fontSize: '22px', cursor: 'pointer', padding: '5px' }}>
+        <div onClick={() => setShowCart(true)} style={{ position: 'relative', fontSize: '22px', cursor: 'pointer' }}>
           <i className="fas fa-shopping-cart"></i>
           {cart.length > 0 && (
             <span style={{
