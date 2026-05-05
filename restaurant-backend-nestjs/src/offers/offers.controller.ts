@@ -27,21 +27,21 @@ import {
   maxFileSize,
 } from '../config/multer.config';
 
-import { Public } from '../auth/decorators/public.decorator';
-
 @Controller('offers')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
 export class OffersController {
   constructor(private readonly offersService: OffersService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   create(@Body() createOfferDto: CreateOfferDto, @Request() req) {
     const restaurantId = req.user.restaurantId;
     return this.offersService.create(createOfferDto, restaurantId);
   }
 
   @Post('upload-image')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @UseInterceptors(
     FileInterceptor('image', {
       storage: offerImageStorage,
@@ -64,30 +64,37 @@ export class OffersController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   findAll(@Request() req) {
     const restaurantId = req.user.restaurantId;
     return this.offersService.findAll(restaurantId);
   }
 
   @Get('active')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   findActiveOffers(@Request() req) {
     const restaurantId = req.user.restaurantId;
     return this.offersService.findActiveOffers(restaurantId);
   }
 
-  @Public()
   @Get('public/:restaurantId')
   findPublicOffers(@Param('restaurantId', ParseIntPipe) restaurantId: number) {
     return this.offersService.findAll(restaurantId);
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   findOne(@Param('id', ParseIntPipe) id: number, @Request() req) {
     const restaurantId = req.user.restaurantId;
     return this.offersService.findOne(id, restaurantId);
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateOfferDto: UpdateOfferDto,
@@ -98,6 +105,8 @@ export class OffersController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   remove(@Param('id', ParseIntPipe) id: number, @Request() req) {
     const restaurantId = req.user.restaurantId;
     return this.offersService.remove(id, restaurantId);
