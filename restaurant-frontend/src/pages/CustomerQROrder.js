@@ -410,6 +410,22 @@ const CustomerQROrder = ({ isManual = false }) => {
 
   const [expandedCategories, setExpandedCategories] = useState(new Set());
   const [activeAccordion, setActiveAccordion] = useState('description');
+  const [showShopifyMenu, setShowShopifyMenu] = useState(false);
+  const [sessionOrders, setSessionOrders] = useState([]);
+  const [viewingHistoryOrder, setViewingHistoryOrder] = useState(null);
+
+  // Load session orders from localStorage
+  useEffect(() => {
+    const key = tableKey || roomKey || 'manual';
+    const saved = localStorage.getItem(`session_orders_${key}`);
+    if (saved) {
+      try {
+        setSessionOrders(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to parse session orders', e);
+      }
+    }
+  }, [tableKey, roomKey]);
 
   const toggleAccordion = (id) => {
     setActiveAccordion(activeAccordion === id ? null : id);
@@ -687,6 +703,14 @@ const CustomerQROrder = ({ isManual = false }) => {
 
       setOrderSuccess(orderData);
       localStorage.setItem(`active_order_${tableKey || roomKey}`, JSON.stringify(orderData));
+
+      // Save to Session History
+      const key = tableKey || roomKey || 'manual';
+      const historyKey = `session_orders_${key}`;
+      const existingHistory = JSON.parse(localStorage.getItem(historyKey) || '[]');
+      const newHistory = [orderData, ...existingHistory].slice(0, 10); // Keep last 10
+      localStorage.setItem(historyKey, JSON.stringify(newHistory));
+      setSessionOrders(newHistory);
 
       if (isManual) {
         // 2. Automatically Generate Invoice (Bill)
@@ -1270,7 +1294,7 @@ const CustomerQROrder = ({ isManual = false }) => {
 
   const ShopifyHeader = () => (
     <header className="shopify-header">
-      <div className="hamburger-icon" style={{ fontSize: '20px' }}>
+      <div className="hamburger-icon" style={{ fontSize: '20px' }} onClick={() => setShowShopifyMenu(true)}>
         <i className="fas fa-bars"></i>
       </div>
       <div className="brand-logo" style={{ textAlign: 'center' }}>
@@ -1350,6 +1374,70 @@ const CustomerQROrder = ({ isManual = false }) => {
       <i className="far fa-envelope me-2"></i>
       SEND US YOUR QUESTION
     </div>
+  );
+
+  const ShopifyMenuDrawer = () => (
+    <>
+      <div className={`shopify-menu-drawer ${showShopifyMenu ? 'open' : ''}`}>
+        <div className="p-4">
+          <div className="d-flex justify-content-between align-items-center mb-5">
+            <h4 className="fw-bold mb-0">MENU</h4>
+            <i className="fas fa-times fs-4" onClick={() => setShowShopifyMenu(false)}></i>
+          </div>
+
+          <div className="d-flex flex-column gap-4">
+            <div className="menu-link-item" onClick={() => { setShowShopifyMenu(false); setActiveItemDetail(null); setViewingHistoryOrder(null); }}>
+              COLLECTIONS
+            </div>
+            {orderSuccess && (
+              <div className="menu-link-item" onClick={() => { setShowShopifyMenu(false); setShowStatusScreen(true); }}>
+                TRACK ACTIVE ORDER
+              </div>
+            )}
+            <div className="menu-link-item d-flex justify-content-between align-items-center" onClick={() => { /* Toggle History sub-menu if needed, or just show below */ }}>
+              ORDER HISTORY <span className="badge bg-dark rounded-circle">{sessionOrders.length}</span>
+            </div>
+
+            <div className="mt-3 ps-3 border-start">
+              {sessionOrders.length === 0 ? (
+                <p className="text-muted small">No orders placed in this session.</p>
+              ) : (
+                <div className="d-flex flex-column gap-3">
+                  {sessionOrders.map((order, idx) => (
+                    <div 
+                      key={order.orderId} 
+                      className="history-order-item"
+                      onClick={async () => {
+                        try {
+                          const res = await apiClient.get(`/orders/track/${order.orderId}`, {
+                            headers: { 'x-table-key': tableKey, 'x-room-key': roomKey }
+                          });
+                          setViewingHistoryOrder(res.data);
+                          setShowShopifyMenu(false);
+                        } catch (err) {
+                          Swal.fire('Error', 'Could not load order details', 'error');
+                        }
+                      }}
+                    >
+                      <div className="d-flex justify-content-between">
+                        <span className="fw-bold small">#{order.orderNo}</span>
+                        <span className="small text-muted">{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      </div>
+                      <div className="small">Rs. {order.totalAmount} • {order.status}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-auto p-4 border-top">
+          <p className="small text-muted mb-0">Need help? WhatsApp us.</p>
+        </div>
+      </div>
+      {showShopifyMenu && <div className="cart-overlay" style={{ z-index: 1004 }} onClick={() => setShowShopifyMenu(false)}></div>}
+    </>
   );
 
   const renderShopifyProductPage = () => {
@@ -1504,8 +1592,57 @@ const CustomerQROrder = ({ isManual = false }) => {
        );
     }
 
-    return (
-      <div className="fade-in">
+    const renderShopifyHistoryDetail = () => {
+       const order = viewingHistoryOrder;
+       const statusDisplay = getStatusDisplay(order.status);
+       
+       return (
+         <div className="p-4 bg-white min-vh-100 fade-in">
+           <div className="d-flex align-items-center gap-2 mb-4" onClick={() => setViewingHistoryOrder(null)} style={{ cursor: 'pointer' }}>
+             <i className="fas fa-chevron-left"></i>
+             <span className="fw-bold small uppercase">BACK TO HISTORY</span>
+           </div>
+
+           <div className="mb-5">
+              <h1 className="fw-bold mb-1">Order Details</h1>
+              <div className="text-muted uppercase small">Order Number: #{order.orderNo}</div>
+              <div className="text-muted small">Placed on: {new Date(order.createdAt).toLocaleString()}</div>
+           </div>
+
+           <div className="p-4 border rounded bg-light mb-4">
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <h5 className="fw-bold mb-0">Status</h5>
+                <div className={`badge bg-${statusDisplay.color} p-2 px-3 rounded-pill`}>
+                  {statusDisplay.text}
+                </div>
+              </div>
+              
+              <div className="order-items-list">
+                {order.items?.map((item, idx) => (
+                  <div key={idx} className="d-flex justify-content-between py-2 border-bottom border-secondary-subtle">
+                    <span className="small">{item.foodItem?.itemName} x {item.qty}</span>
+                    <span className="small fw-bold">Rs. {item.price * item.qty}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 pt-2 border-top d-flex justify-content-between">
+                <span className="fw-bold uppercase">Total</span>
+                <span className="fw-bold">Rs. {order.totalAmount}</span>
+              </div>
+           </div>
+
+           <button className="shopify-add-to-cart" onClick={() => setViewingHistoryOrder(null)}>
+              CLOSE DETAILS
+           </button>
+         </div>
+       );
+     };
+
+     return (
+       <div className="fade-in">
+         {viewingHistoryOrder ? renderShopifyHistoryDetail() : (
+           <>
         {/* Collection Selector */}
         <div className="collection-tabs">
           <div className={`collection-tab ${!selectedMenu ? 'active' : ''}`} onClick={() => setSelectedMenu(null)}>
@@ -1564,9 +1701,10 @@ const CustomerQROrder = ({ isManual = false }) => {
             </div>
           )}
         </div>
-      </div>
-    );
-  };
+      </>)}
+    </div>
+  );
+};
 
   if (loading) {
     return (
@@ -1594,6 +1732,7 @@ const CustomerQROrder = ({ isManual = false }) => {
       <div className="shopify-page">
         <AnnouncementBar />
         <ShopifyHeader />
+        <ShopifyMenuDrawer />
         <FloatingQuestionButton />
         
         <main className="shopify-main">

@@ -309,6 +309,56 @@
   border-bottom-color: var(--shopify-dark);
 }
 
-/* Animations */
-.fade-in { animation: fadeIn 0.3s ease-out; }
+/* Shopify Menu Drawer */
+.shopify-menu-drawer {
+  position: fixed;
+  left: -100%;
+  top: 0;
+  width: 85%;
+  max-width: 320px;
+  height: 100vh;
+  height: 100dvh;
+  background: white;
+  z-index: 1005;
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.05);
+}
+
+.shopify-menu-drawer.open {
+  left: 0;
+}
+
+.menu-link-item {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.menu-link-item:hover {
+  opacity: 0.6;
+}
+
+.history-order-item {
+  background: #f9f9f9;
+  padding: 12px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.history-order-item:hover {
+  background: #f0f0f0;
+}
+
+.order-items-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
