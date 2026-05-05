@@ -433,58 +433,60 @@ function AddOffer() {
                     </label>
                     <div className="food-selection-container border rounded p-3 bg-light">
                       <div className="dropdown w-100 position-relative">
-                      <div 
-                        className="form-control dropdown-toggle bg-white d-flex align-items-center justify-content-between" 
-                        onClick={() => setShowFoodDropdown(!showFoodDropdown)}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        {selectedFoodItems.length > 0 ? `${selectedFoodItems.length} items selected` : 'Select food items...'}
-                      </div>
-                      {showFoodDropdown && (
                         <div 
-                          className="dropdown-menu w-100 p-2 show" 
-                          style={{ 
-                            maxHeight: '250px', 
-                            overflowY: 'auto',
-                            display: 'block',
-                            position: 'absolute',
-                            zIndex: 1000,
-                            top: '100%',
-                            left: 0,
-                            boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-                          }}
+                          className="form-control dropdown-toggle bg-white d-flex align-items-center justify-content-between" 
+                          onClick={() => setShowFoodDropdown(!showFoodDropdown)}
+                          style={{ cursor: 'pointer' }}
                         >
-                        <div className="input-group mb-2">
-                          <span className="input-group-text border-0"><i className="fas fa-search"></i></span>
-                          <input 
-                            type="text" 
-                            className="form-control border-0 bg-light" 
-                            placeholder="Search..." 
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            onClick={(e) => e.stopPropagation()}
-                          />
+                          {selectedFoodItems.length > 0 ? `${selectedFoodItems.length} items selected` : 'Select food items...'}
                         </div>
-                        {foodItems.filter(item => 
-                          (item.itemName || '').toLowerCase().includes(searchQuery.toLowerCase())
-                        ).map(item => (
-                          <div key={item.foodItemId} className="form-check p-2 hover-bg-light" onClick={(e) => e.stopPropagation()}>
-                            <input 
-                              className="form-check-input" 
-                              type="checkbox" 
-                              id={`food-${item.foodItemId}`}
-                              checked={selectedFoodItems.some(i => i.foodItemId === item.foodItemId)}
-                              onChange={() => handleToggleFoodItem(item)}
-                            />
-                            <label className="form-check-label w-100 ms-2" htmlFor={`food-${item.foodItemId}`}>
-                              {item.itemName} <span className="text-muted small">(Rs. {item.price})</span>
-                            </label>
+                        
+                        {showFoodDropdown && (
+                          <div 
+                            className="dropdown-menu w-100 p-2 show" 
+                            style={{ 
+                              maxHeight: '250px', 
+                              overflowY: 'auto',
+                              display: 'block',
+                              position: 'absolute',
+                              zIndex: 1000,
+                              top: '100%',
+                              left: 0,
+                              boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                            }}
+                          >
+                            <div className="input-group mb-2">
+                              <span className="input-group-text border-0"><i className="fas fa-search"></i></span>
+                              <input 
+                                type="text" 
+                                className="form-control border-0 bg-light" 
+                                placeholder="Search..." 
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            </div>
+                            {foodItems.filter(item => 
+                              (item.itemName || '').toLowerCase().includes(searchQuery.toLowerCase())
+                            ).map(item => (
+                              <div key={item.foodItemId} className="form-check p-2 hover-bg-light" onClick={(e) => e.stopPropagation()}>
+                                <input 
+                                  className="form-check-input" 
+                                  type="checkbox" 
+                                  id={`food-${item.foodItemId}`}
+                                  checked={selectedFoodItems.some(i => i.foodItemId === item.foodItemId)}
+                                  onChange={() => handleToggleFoodItem(item)}
+                                />
+                                <label className="form-check-label w-100 ms-2" htmlFor={`food-${item.foodItemId}`}>
+                                  {item.itemName} <span className="text-muted small">(Rs. {item.price})</span>
+                                </label>
+                              </div>
+                            ))}
                           </div>
-                        ))}
+                        )}
                       </div>
                     </div>
                   </div>
-                </div>
 
                 {/* Price Calculation Summary */}
                   {selectedFoodItems.length > 0 && (
