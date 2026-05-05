@@ -1297,8 +1297,8 @@ const CustomerQROrder = ({ isManual = false }) => {
 
   const ShopifyHeader = () => (
     <header className="shopify-header d-flex align-items-center justify-content-between px-3">
-      {/* Left side: Hamburger */}
-      <div style={{ width: '60px' }}>
+      {/* COLUMN 1: LEFT SIDE HAMBURGER */}
+      <div className="header-col-left" style={{ width: '60px', display: 'flex', justifyContent: 'flex-start' }}>
         <div className="hamburger-icon" style={{ fontSize: '20px', cursor: 'pointer' }} onClick={() => setShowShopifyMenu(true)}>
           <i className="fas fa-bars"></i>
         </div>
