@@ -386,7 +386,7 @@ export class OrdersService {
   async getManualActiveAccounts(restaurantId: number, type: 'ROOM' | 'TABLE') {
     const activeStatuses: OrderStatus[] = [
       OrderStatus.SERVED,
-      OrderStatus.BILLED,
+      OrderStatus.READY,
     ];
 
     const query = this.ordersRepository
