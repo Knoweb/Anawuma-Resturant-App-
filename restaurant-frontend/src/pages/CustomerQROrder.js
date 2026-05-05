@@ -1329,8 +1329,9 @@ const CustomerQROrder = ({ isManual = false }) => {
           </span>
         )}
       </div>
-    </header>
-  );
+    </div>
+  </header>
+);
 
   const ShopifyFooter = () => (
     <footer className="shopify-footer">
