@@ -470,8 +470,9 @@ function AddOffer() {
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  {/* Price Calculation Summary */}
+                {/* Price Calculation Summary */}
                   {selectedFoodItems.length > 0 && (
                     <div className="price-summary-container mb-4 p-3 border rounded bg-white shadow-sm">
                       <h6 className="fw-bold text-primary mb-3">
