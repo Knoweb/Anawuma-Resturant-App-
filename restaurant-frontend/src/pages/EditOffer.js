@@ -67,15 +67,17 @@ function EditOffer() {
   };
 
   const calculateDiscountedPrice = (originalPrice) => {
-    if (!formData.discountValue || isNaN(formData.discountValue)) return originalPrice;
+    const price = Number(originalPrice);
+    if (isNaN(price)) return 0;
+    if (!formData.discountValue || isNaN(formData.discountValue)) return price;
     
     const discount = Number(formData.discountValue);
     if (formData.discountType === 'PERCENTAGE') {
-      return Math.max(0, originalPrice - (originalPrice * discount / 100));
+      return Math.max(0, price - (price * discount / 100));
     } else if (formData.discountType === 'FIXED') {
-      return Math.max(0, originalPrice - discount);
+      return Math.max(0, price - discount);
     }
-    return originalPrice;
+    return price;
   };
 
   const fetchOffer = async () => {
@@ -578,11 +580,11 @@ function EditOffer() {
                               return (
                                 <tr key={item.foodItemId}>
                                   <td>{item.itemName}</td>
-                                  <td className="text-muted">Rs. {item.price}</td>
-                                  <td className="fw-bold text-success">Rs. {discPrice.toFixed(2)}</td>
+                                  <td className="text-muted">Rs. {Number(item.price).toFixed(2)}</td>
+                                  <td className="fw-bold text-success">Rs. {Number(discPrice).toFixed(2)}</td>
                                   <td className="text-danger small">
                                     <i className="fas fa-arrow-down me-1"></i>
-                                    Rs. {saving.toFixed(2)}
+                                    Rs. {(Number(item.price) - Number(discPrice)).toFixed(2)}
                                   </td>
                                 </tr>
                               );
