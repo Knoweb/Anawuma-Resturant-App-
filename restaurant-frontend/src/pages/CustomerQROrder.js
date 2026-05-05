@@ -120,6 +120,8 @@ const CustomerQROrder = ({ isManual = false }) => {
   const [shownNotifications, setShownNotifications] = useState(new Set());
   const { subscribe, connected } = useWebSocket();
   const { user, isAuthenticated } = useAuthStore();
+  const [offers, setOffers] = useState([]);
+  const [showOffersModal, setShowOffersModal] = useState(false);
 
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
@@ -304,6 +306,22 @@ const CustomerQROrder = ({ isManual = false }) => {
     }
   }, [tableKey, roomKey, isManual]); // NO 'user' dependency - prevents infinite re-render
 
+  const fetchOffers = useCallback(async (restaurantId) => {
+    try {
+      const response = await apiClient.get(`/offers?restaurantId=${restaurantId}`);
+      // Filter for currently active offers
+      const now = new Date();
+      const activeOffers = (response.data || []).filter(offer => {
+        const start = new Date(offer.startDate);
+        const end = new Date(offer.endDate);
+        return now >= start && now <= end;
+      });
+      setOffers(activeOffers);
+    } catch (error) {
+      console.error('Error fetching offers:', error);
+    }
+  }, []);
+
   const fetchMenuData = useCallback(async (restaurantId) => {
     try {
       // Get token for authenticated requests
@@ -355,7 +373,10 @@ const CustomerQROrder = ({ isManual = false }) => {
       try {
         setLoading(true);
         const restaurantId = await fetchTableInfo();
-        await fetchMenuData(restaurantId);
+        await Promise.all([
+          fetchMenuData(restaurantId),
+          fetchOffers(restaurantId)
+        ]);
 
         // Restore active order for this table/room
         // Skip for manual orders (currentKey=undefined) to prevent stale 'active_order_undefined'
@@ -1297,11 +1318,33 @@ const CustomerQROrder = ({ isManual = false }) => {
 
   const ShopifyHeader = () => (
     <header className="shopify-header d-flex align-items-center justify-content-between px-3" style={{ minHeight: '60px', position: 'sticky', top: 0, background: 'white', zIndex: 1000 }}>
-      {/* LEFT: HAMBURGER */}
-      <div className="anawuma-header-col-left" style={{ flex: '1', display: 'flex', justifyContent: 'flex-start', zIndex: 1001 }}>
+      {/* LEFT: HAMBURGER & OFFERS */}
+      <div className="anawuma-header-col-left" style={{ flex: '1', display: 'flex', justifyContent: 'flex-start', alignItems: 'center', zIndex: 1001 }}>
         <div onClick={() => setShowShopifyMenu(true)} style={{ fontSize: '22px', cursor: 'pointer', padding: '10px' }}>
           <i className="fas fa-bars"></i>
         </div>
+        
+        {offers.length > 0 && (
+          <div 
+            className="offer-blink-badge ms-2" 
+            onClick={() => setShowOffersModal(true)}
+            style={{ 
+              cursor: 'pointer',
+              background: '#e74c3c',
+              color: 'white',
+              padding: '4px 10px',
+              borderRadius: '20px',
+              fontSize: '11px',
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              animation: 'blink-animation 1.5s infinite'
+            }}
+          >
+            <i className="fas fa-tag me-1"></i>
+            OFFERS
+          </div>
+        )}
       </div>
 
       {/* CENTER: LOGO */}
@@ -1339,6 +1382,62 @@ const CustomerQROrder = ({ isManual = false }) => {
         </div>
       </div>
     </header>
+  );
+
+  const OffersModal = () => (
+    <>
+      <div className={`shopify-menu-drawer ${showOffersModal ? 'open' : ''}`} style={{ width: '85%', maxWidth: '400px' }}>
+        <div className="p-4 h-100 d-flex flex-column">
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h4 className="fw-bold mb-0">SPECIAL OFFERS</h4>
+            <i className="fas fa-times fs-4" onClick={() => setShowOffersModal(false)} style={{ cursor: 'pointer' }}></i>
+          </div>
+
+          <div className="flex-grow-1 overflow-auto">
+            {offers.length === 0 ? (
+              <div className="text-center py-5">
+                <i className="fas fa-percentage fa-3x mb-3 text-muted opacity-25"></i>
+                <p className="text-muted">No active offers at the moment.</p>
+              </div>
+            ) : (
+              <div className="d-flex flex-column gap-4">
+                {offers.map(offer => (
+                  <div key={offer.offerId} className="offer-card-item border rounded p-3">
+                    {offer.imageUrl && (
+                      <div className="offer-image-wrap mb-3" style={{ height: '150px', borderRadius: '8px', overflow: 'hidden' }}>
+                        <img 
+                          src={getImageUrl(offer.imageUrl)} 
+                          alt={offer.title} 
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      </div>
+                    )}
+                    <div className="d-flex justify-content-between align-items-start mb-2">
+                      <h5 className="fw-bold mb-0 text-dark">{offer.title}</h5>
+                      <span className="badge bg-danger">
+                        {offer.discountType === 'PERCENTAGE' ? `${offer.discountValue}% OFF` : `Rs. ${offer.discountValue} OFF`}
+                      </span>
+                    </div>
+                    <p className="small text-muted mb-3">{offer.description}</p>
+                    <div className="d-flex align-items-center gap-2 small text-primary fw-bold">
+                      <i className="far fa-calendar-alt"></i>
+                      <span>Ends: {new Date(offer.endDate).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <div className="mt-4 pt-4 border-top">
+            <button className="shopify-add-to-cart m-0" onClick={() => setShowOffersModal(false)}>
+              CLOSE
+            </button>
+          </div>
+        </div>
+      </div>
+      {showOffersModal && <div className="cart-overlay" style={{ zIndex: 1004 }} onClick={() => setShowOffersModal(false)}></div>}
+    </>
   );
 
   const ShopifyFooter = () => (
@@ -1748,6 +1847,7 @@ const CustomerQROrder = ({ isManual = false }) => {
       <div className="shopify-page">
         <AnnouncementBar />
         <ShopifyHeader />
+        <OffersModal />
         <ShopifyMenuDrawer />
         <FloatingQuestionButton />
         
