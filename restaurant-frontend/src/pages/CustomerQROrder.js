@@ -1436,7 +1436,7 @@ const CustomerQROrder = ({ isManual = false }) => {
           <p className="small text-muted mb-0">Need help? WhatsApp us.</p>
         </div>
       </div>
-      {showShopifyMenu && <div className="cart-overlay" style={{ z-index: 1004 }} onClick={() => setShowShopifyMenu(false)}></div>}
+      {showShopifyMenu && <div className="cart-overlay" style={{ zIndex: 1004 }} onClick={() => setShowShopifyMenu(false)}></div>}
     </>
   );
 
