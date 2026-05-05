@@ -314,7 +314,8 @@ const CustomerQROrder = ({ isManual = false }) => {
       const activeOffers = (response.data || []).filter(offer => {
         const start = new Date(offer.startDate);
         const end = new Date(offer.endDate);
-        return now >= start && now <= end;
+        // Show if currently active OR starting in the future
+        return now <= end;
       });
       setOffers(activeOffers);
     } catch (error) {
@@ -1401,30 +1402,39 @@ const CustomerQROrder = ({ isManual = false }) => {
               </div>
             ) : (
               <div className="d-flex flex-column gap-4">
-                {offers.map(offer => (
-                  <div key={offer.offerId} className="offer-card-item border rounded p-3">
-                    {offer.imageUrl && (
-                      <div className="offer-image-wrap mb-3" style={{ height: '150px', borderRadius: '8px', overflow: 'hidden' }}>
-                        <img 
-                          src={getImageUrl(offer.imageUrl)} 
-                          alt={offer.title} 
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        />
+                {offers.map(offer => {
+                  const now = new Date();
+                  const start = new Date(offer.startDate);
+                  const isUpcoming = now < start;
+                  
+                  return (
+                    <div key={offer.offerId} className="offer-card-item border rounded p-3">
+                      {offer.imageUrl && (
+                        <div className="offer-image-wrap mb-3" style={{ height: '150px', borderRadius: '8px', overflow: 'hidden' }}>
+                          <img 
+                            src={getImageUrl(offer.imageUrl)} 
+                            alt={offer.title} 
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                        </div>
+                      )}
+                      <div className="d-flex justify-content-between align-items-start mb-2">
+                        <h5 className="fw-bold mb-0 text-dark">{offer.title}</h5>
+                        <div className="d-flex flex-column align-items-end gap-1">
+                          <span className={`badge ${isUpcoming ? 'bg-info' : 'bg-danger'}`}>
+                            {offer.discountType === 'PERCENTAGE' ? `${offer.discountValue}% OFF` : `Rs. ${offer.discountValue} OFF`}
+                          </span>
+                          {isUpcoming && <span className="badge bg-warning text-dark" style={{ fontSize: '9px' }}>UPCOMING</span>}
+                        </div>
                       </div>
-                    )}
-                    <div className="d-flex justify-content-between align-items-start mb-2">
-                      <h5 className="fw-bold mb-0 text-dark">{offer.title}</h5>
-                      <span className="badge bg-danger">
-                        {offer.discountType === 'PERCENTAGE' ? `${offer.discountValue}% OFF` : `Rs. ${offer.discountValue} OFF`}
-                      </span>
+                      <p className="small text-muted mb-3">{offer.description}</p>
+                      <div className="d-flex align-items-center gap-2 small text-primary fw-bold">
+                        <i className="far fa-calendar-alt"></i>
+                        <span>{isUpcoming ? `Starts: ${new Date(offer.startDate).toLocaleDateString()}` : `Ends: ${new Date(offer.endDate).toLocaleDateString()}`}</span>
+                      </div>
                     </div>
-                    <p className="small text-muted mb-3">{offer.description}</p>
-                    <div className="d-flex align-items-center gap-2 small text-primary fw-bold">
-                      <i className="far fa-calendar-alt"></i>
-                      <span>Ends: {new Date(offer.endDate).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

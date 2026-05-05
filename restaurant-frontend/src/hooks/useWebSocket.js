@@ -126,13 +126,13 @@ export const WebSocketProvider = ({ children }) => {
       }, 10000);
     };
 
-    const logUnavailableOnce = () => {
+    const logUnavailableOnce = (url) => {
       if (hasLoggedUnavailableRef.current) {
         return;
       }
 
       console.warn(
-        'Backend is unavailable on port 3000. WebSocket connection will retry automatically once the API is reachable.',
+        `Backend is unavailable at ${url}. WebSocket connection will retry automatically once the API is reachable.`,
       );
       hasLoggedUnavailableRef.current = true;
     };
@@ -142,8 +142,9 @@ export const WebSocketProvider = ({ children }) => {
         return;
       }
 
+      const healthUrl = `${API_URL}/api/health`;
       try {
-        const response = await fetch(`${API_URL}/api/health`, {
+        const response = await fetch(healthUrl, {
           method: 'GET',
           headers: { Accept: 'application/json' },
         });
@@ -153,7 +154,7 @@ export const WebSocketProvider = ({ children }) => {
         }
       } catch (error) {
         setConnected(false);
-        logUnavailableOnce();
+        logUnavailableOnce(healthUrl);
         scheduleReconnect();
         return;
       }
