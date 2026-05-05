@@ -1296,32 +1296,34 @@ const CustomerQROrder = ({ isManual = false }) => {
   );
 
   const ShopifyHeader = () => (
-    <header className="shopify-header d-flex align-items-center justify-content-between px-3">
-      {/* COLUMN 1: LEFT SIDE HAMBURGER */}
-      <div className="header-col-left" style={{ width: '60px', display: 'flex', justifyContent: 'flex-start' }}>
-        <div className="hamburger-icon" style={{ fontSize: '20px', cursor: 'pointer' }} onClick={() => setShowShopifyMenu(true)}>
+    <header className="shopify-header d-flex align-items-center justify-content-between px-3" style={{ minHeight: '60px', position: 'sticky', top: 0, background: 'white', zIndex: 1000 }}>
+      {/* LEFT: HAMBURGER */}
+      <div className="anawuma-header-col-left" style={{ flex: '1', display: 'flex', justifyContent: 'flex-start', zIndex: 1001 }}>
+        <div onClick={() => setShowShopifyMenu(true)} style={{ fontSize: '22px', cursor: 'pointer', padding: '10px' }}>
           <i className="fas fa-bars"></i>
         </div>
       </div>
 
-      {/* Center: Brand Logo */}
-      <div className="brand-logo mb-0 flex-grow-1 text-center" style={{ fontSize: '22px' }}>
-        {tableInfo?.restaurantName || 'Serene1'}
+      {/* CENTER: LOGO */}
+      <div className="anawuma-header-col-center" style={{ flex: '2', display: 'flex', justifyContent: 'center', zIndex: 1001 }}>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '24px', fontWeight: '900', margin: 0, letterSpacing: '-0.5px' }}>
+          {tableInfo?.restaurantName || 'Serene1'}
+        </h1>
       </div>
 
-      {/* Right side: Search & Cart */}
-      <div className="d-flex align-items-center justify-content-end gap-3" style={{ width: '60px' }}>
-        <div className="search-icon" style={{ fontSize: '18px', cursor: 'pointer' }}>
+      {/* RIGHT: SEARCH & CART */}
+      <div className="anawuma-header-col-right" style={{ flex: '1', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '20px', zIndex: 1001 }}>
+        <div style={{ fontSize: '18px', cursor: 'pointer', padding: '5px' }}>
           <i className="fas fa-search"></i>
         </div>
-        <div className="cart-trigger" onClick={() => setShowCart(true)} style={{ position: 'relative', fontSize: '20px', cursor: 'pointer' }}>
+        <div onClick={() => setShowCart(true)} style={{ position: 'relative', fontSize: '22px', cursor: 'pointer', padding: '5px' }}>
           <i className="fas fa-shopping-cart"></i>
           {cart.length > 0 && (
             <span style={{
               position: 'absolute',
-              top: '-8px',
-              right: '-10px',
-              background: 'var(--shopify-orange)',
+              top: '-5px',
+              right: '-8px',
+              background: '#FF7F50',
               color: 'white',
               borderRadius: '50%',
               width: '18px',
@@ -1331,7 +1333,8 @@ const CustomerQROrder = ({ isManual = false }) => {
               alignItems: 'center',
               justifyContent: 'center',
               fontWeight: 'bold',
-              border: '2px solid white'
+              border: '2px solid white',
+              zIndex: 1002
             }}>
               {cart.length}
             </span>
