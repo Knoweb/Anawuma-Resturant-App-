@@ -143,8 +143,17 @@ export class FoodItemsService {
 
     // Add API URL prefix to image URLs and calculate discounted price
     return foodItems.map((item) => {
-      const resolvedItem = this.resolveImageUrls(item);
-      return this.addDiscountedPrice(resolvedItem);
+      try {
+        const resolvedItem = this.resolveImageUrls(item);
+        return this.addDiscountedPrice(resolvedItem);
+      } catch (err) {
+        console.error(`Error processing food item ${item.foodItemId}:`, err);
+        return {
+          ...item,
+          discountedPrice: Number(item.price),
+          activeOffer: null
+        };
+      }
     });
   }
 
