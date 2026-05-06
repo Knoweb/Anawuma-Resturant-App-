@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Order, OrderStatus, OrderType } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { FoodItem } from '../food-items/entities/food-item.entity';
@@ -50,7 +50,10 @@ export class OrdersService {
 
     // Fetch all food items in one query
     const foodItemIds = items.map((item) => item.foodItemId);
-    const foodItems = await this.foodItemsRepository.findByIds(foodItemIds);
+    const foodItems = await this.foodItemsRepository.find({
+      where: { foodItemId: In(foodItemIds) },
+      relations: ['offers'],
+    });
 
     if (foodItems.length !== foodItemIds.length) {
       throw new NotFoundException('One or more food items not found');
@@ -73,7 +76,36 @@ export class OrdersService {
         );
       }
 
-      const unitPrice = parseFloat(foodItem.price.toString());
+      // Calculate discounted price
+      const price = parseFloat(foodItem.price.toString());
+      let discountedPrice = price;
+
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+      const activeOffers = (foodItem.offers || []).filter(offer => {
+        if (!offer.isActive) return false;
+        const start = new Date(offer.startDate);
+        const end = new Date(offer.endDate);
+        const startDateOnly = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+        return startDateOnly <= today && end >= now;
+      });
+
+      if (activeOffers.length > 0) {
+        activeOffers.forEach(offer => {
+          let currentDiscounted = price;
+          if (offer.discountType === 'PERCENTAGE') {
+            currentDiscounted = price - (price * Number(offer.discountValue) / 100);
+          } else if (offer.discountType === 'FIXED') {
+            currentDiscounted = price - Number(offer.discountValue);
+          }
+          if (currentDiscounted < discountedPrice) {
+            discountedPrice = Math.max(0, currentDiscounted);
+          }
+        });
+      }
+
+      const unitPrice = parseFloat(discountedPrice.toFixed(2));
       const lineTotal = unitPrice * item.qty;
       subtotal += lineTotal;
 
@@ -293,7 +325,8 @@ export class OrdersService {
       meta: {
         limit,
         urgentThresholdMinutes,
-        generatedAt: new Date().toISOString(),
+
+        generatedAt: new Date().toISOString(),
       },
     };
   }
