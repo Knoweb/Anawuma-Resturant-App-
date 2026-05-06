@@ -109,7 +109,7 @@ export class FoodItemsService {
       .leftJoinAndSelect('foodItem.menu', 'menu')
       .leftJoinAndSelect('foodItem.category', 'category')
       .leftJoinAndSelect('foodItem.subcategory', 'subcategory')
-      .leftJoinAndSelect('foodItem.offers', 'offers', 'offers.isActive = :isActive AND offers.startDate <= :now AND offers.endDate >= :now', { isActive: true, now: new Date() });
+      .leftJoinAndSelect('foodItem.offers', 'offers');
 
     if (restaurantId) {
       query.andWhere('foodItem.restaurantId = :restaurantId', { restaurantId });
@@ -152,9 +152,16 @@ export class FoodItemsService {
     let discountedPrice = Number(item.price);
     let bestOffer: Offer | null = null;
 
-    if (item.offers && item.offers.length > 0) {
+    const now = new Date();
+    const activeOffers = (item.offers || []).filter(offer => 
+      offer.isActive && 
+      new Date(offer.startDate) <= now && 
+      new Date(offer.endDate) >= now
+    );
+
+    if (activeOffers.length > 0) {
       // Find the best discount
-      item.offers.forEach(offer => {
+      activeOffers.forEach(offer => {
         let currentDiscounted = Number(item.price);
         if (offer.discountType === 'PERCENTAGE') {
           currentDiscounted = item.price - (item.price * Number(offer.discountValue) / 100);

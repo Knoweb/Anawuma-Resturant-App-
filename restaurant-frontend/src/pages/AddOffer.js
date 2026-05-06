@@ -26,6 +26,7 @@ function AddOffer() {
   const [selectedFoodItems, setSelectedFoodItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showFoodDropdown, setShowFoodDropdown] = useState(false);
+  const [foodLoading, setFoodLoading] = useState(false);
 
   useEffect(() => {
     fetchFoodItems();
@@ -33,10 +34,13 @@ function AddOffer() {
 
   const fetchFoodItems = async () => {
     try {
+      setFoodLoading(true);
       const response = await apiClient.get('/food-items');
       setFoodItems(response.data || []);
     } catch (error) {
       console.error('Error fetching food items:', error);
+    } finally {
+      setFoodLoading(false);
     }
   };
 
@@ -453,12 +457,17 @@ function AddOffer() {
                         style={{ 
                           maxHeight: '300px', 
                           overflowY: 'auto',
-                          backgroundColor: '#fcfcfc'
+                          backgroundColor: '#fcfcfc',
+                          minHeight: '100px'
                         }}
                       >
-                        {foodItems.length === 0 ? (
+                        {foodLoading ? (
                           <div className="p-4 text-center text-muted">
                             <i className="fas fa-spinner fa-spin me-2"></i>Loading food items...
+                          </div>
+                        ) : foodItems.length === 0 ? (
+                          <div className="p-4 text-center text-muted">
+                            No food items found.
                           </div>
                         ) : (
                           foodItems.filter(item => 
