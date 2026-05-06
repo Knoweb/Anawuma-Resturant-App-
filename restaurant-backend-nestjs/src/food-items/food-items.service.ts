@@ -149,7 +149,8 @@ export class FoodItemsService {
   }
 
   private addDiscountedPrice(item: FoodItem): any {
-    let discountedPrice = Number(item.price);
+    const price = Number(item.price);
+    let discountedPrice = price;
     let bestOffer: Offer | null = null;
 
     const now = new Date();
@@ -162,11 +163,11 @@ export class FoodItemsService {
     if (activeOffers.length > 0) {
       // Find the best discount
       activeOffers.forEach(offer => {
-        let currentDiscounted = Number(item.price);
+        let currentDiscounted = price;
         if (offer.discountType === 'PERCENTAGE') {
-          currentDiscounted = item.price - (item.price * Number(offer.discountValue) / 100);
+          currentDiscounted = price - (price * Number(offer.discountValue) / 100);
         } else if (offer.discountType === 'FIXED') {
-          currentDiscounted = item.price - Number(offer.discountValue);
+          currentDiscounted = price - Number(offer.discountValue);
         }
 
         if (currentDiscounted < discountedPrice) {
