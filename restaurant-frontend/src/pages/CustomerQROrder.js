@@ -464,15 +464,25 @@ const CustomerQROrder = ({ isManual = false }) => {
         }}
       >
         <h2 className="category-title-red">{item.itemName}</h2>
+        <div className="item-price-display mb-2 fw-bold" style={{ fontSize: '1rem', color: '#266668' }}>
+          {parseFloat(item.discountedPrice) < parseFloat(item.price) ? (
+            <>
+              <span className="text-decoration-line-through text-muted me-2 small">Rs. {parseFloat(item.price).toFixed(0)}</span>
+              <span className="text-danger">Rs. {parseFloat(item.discountedPrice).toFixed(0)}</span>
+            </>
+          ) : (
+            `Rs. ${parseFloat(item.price).toFixed(0)}`
+          )}
+        </div>
         <div className="card-media-wrapper">
           <FoodItemImageCarousel item={item} getImageUrl={getImageUrl} className="menu-thumb" />
 
           <div className="media-overlay flex-column">
             <div className="mb-2 text-white fw-bold" style={{ fontSize: '1.2rem', textShadow: '1px 1px 4px rgba(0,0,0,0.8)' }}>
-              {item.discountedPrice < item.price ? (
+              {parseFloat(item.discountedPrice) < parseFloat(item.price) ? (
                 <>
                   <span className="text-decoration-line-through text-white-50 me-2 small">Rs. {parseFloat(item.price).toFixed(0)}</span>
-                  <span className="text-warning">Rs. {item.discountedPrice.toFixed(0)}</span>
+                  <span className="text-warning">Rs. {parseFloat(item.discountedPrice).toFixed(0)}</span>
                 </>
               ) : (
                 `Rs. ${parseFloat(item.price).toFixed(0)}`
@@ -1619,10 +1629,10 @@ const CustomerQROrder = ({ isManual = false }) => {
           </div>
 
           <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '20px' }}>
-            {item.discountedPrice < item.price ? (
+            {parseFloat(item.discountedPrice) < parseFloat(item.price) ? (
               <>
                 <span className="text-decoration-line-through text-muted me-2">Rs. {parseFloat(item.price).toFixed(0)}</span>
-                <span className="text-danger">Rs. {item.discountedPrice.toFixed(0)}</span>
+                <span className="text-danger">Rs. {parseFloat(item.discountedPrice).toFixed(0)}</span>
                 {item.activeOffer && (
                   <div className="badge bg-danger ms-2 p-2 px-3 rounded-pill" style={{ fontSize: '12px' }}>
                     {item.activeOffer.title}

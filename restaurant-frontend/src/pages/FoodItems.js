@@ -349,7 +349,21 @@ function FoodItems() {
                             </span>
                           </div>
                           <h5 className="food-item-title mb-2">{foodItem.itemName}</h5>
-                          <h6 className="food-item-price mb-3">LKR {formatPrice(foodItem.price)}</h6>
+                          <div className="food-item-price mb-3">
+                            {foodItem.discountedPrice < foodItem.price ? (
+                              <>
+                                <span className="text-decoration-line-through text-muted me-2 small">LKR {formatPrice(foodItem.price)}</span>
+                                <span className="text-success fw-bold">LKR {formatPrice(foodItem.discountedPrice)}</span>
+                                {foodItem.activeOffer && (
+                                  <div className="badge bg-danger ms-2" style={{ fontSize: '10px' }}>
+                                    {foodItem.activeOffer.discountType === 'PERCENTAGE' ? `${foodItem.activeOffer.discountValue}% OFF` : `LKR ${foodItem.activeOffer.discountValue} OFF`}
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <span className="fw-bold text-dark">LKR {formatPrice(foodItem.price)}</span>
+                            )}
+                          </div>
 
                           <div className="d-flex gap-2">
                             <button
