@@ -163,11 +163,20 @@ export class FoodItemsService {
     let bestOffer: Offer | null = null;
 
     const now = new Date();
-    const activeOffers = (item.offers || []).filter(offer => 
-      offer.isActive && 
-      new Date(offer.startDate) <= now && 
-      new Date(offer.endDate) >= now
-    );
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    const activeOffers = (item.offers || []).filter(offer => {
+      if (!offer.isActive) return false;
+      
+      const start = new Date(offer.startDate);
+      const end = new Date(offer.endDate);
+      
+      // Clear time for date-only comparison if needed, 
+      // but here we just want to be inclusive of the start day
+      const startDateOnly = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+      
+      return startDateOnly <= today && end >= now;
+    });
 
     if (activeOffers.length > 0) {
       // Find the best discount
