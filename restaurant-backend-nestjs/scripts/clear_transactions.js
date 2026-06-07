@@ -24,22 +24,47 @@ const TABLES = [
 ];
 
 async function clearTransactions() {
-  const passwords = ['', '7154$La1'];
+  // Try environment variables first
+  const dbHost = process.env.DB_HOST || 'localhost';
+  const dbPort = parseInt(process.env.DB_PORT || '3306', 10);
+  const dbUser = process.env.DB_USERNAME || 'root';
+  const dbName = process.env.DB_DATABASE || 'restaurant_db';
+  
   let conn;
 
-  for (const password of passwords) {
+  if (process.env.DB_PASSWORD !== undefined) {
     try {
-      console.log(`Connecting to MySQL database with password: "${password}"...`);
+      console.log(`Connecting to MySQL database at ${dbHost}:${dbPort} with environment password...`);
       conn = await mysql.createConnection({
-        host: 'localhost',
-        user: 'root',
-        password: password,
-        database: 'restaurant_db'
+        host: dbHost,
+        port: dbPort,
+        user: dbUser,
+        password: process.env.DB_PASSWORD,
+        database: dbName
       });
-      console.log('✅ Connected successfully to MySQL database!');
-      break;
+      console.log('✅ Connected successfully to MySQL database using environment variables!');
     } catch (err) {
-      console.error(`Failed with password "${password}":`, err.message);
+      console.error('Failed to connect using environment variables password:', err.message);
+    }
+  }
+
+  if (!conn) {
+    const passwords = ['', '7154$La1'];
+    for (const password of passwords) {
+      try {
+        console.log(`Connecting to MySQL database at ${dbHost}:${dbPort} with password: "${password}"...`);
+        conn = await mysql.createConnection({
+          host: dbHost,
+          port: dbPort,
+          user: dbUser,
+          password: password,
+          database: dbName
+        });
+        console.log('✅ Connected successfully to MySQL database!');
+        break;
+      } catch (err) {
+        console.error(`Failed with password "${password}":`, err.message);
+      }
     }
   }
 

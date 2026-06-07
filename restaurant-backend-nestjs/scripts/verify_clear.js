@@ -21,11 +21,18 @@ const TABLES = [
 ];
 
 async function verify() {
+  const dbHost = process.env.DB_HOST || 'localhost';
+  const dbPort = parseInt(process.env.DB_PORT || '3306', 10);
+  const dbUser = process.env.DB_USERNAME || 'root';
+  const dbPassword = process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : '';
+  const dbName = process.env.DB_DATABASE || 'restaurant_db';
+
   const conn = await mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'restaurant_db'
+    host: dbHost,
+    port: dbPort,
+    user: dbUser,
+    password: dbPassword,
+    database: dbName
   });
 
   console.log('\n--- VERIFYING TABLE ROW COUNTS ---');
