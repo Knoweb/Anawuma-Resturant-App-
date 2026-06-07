@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Admin } from '../../auth/entities/admin.entity';
 
@@ -27,6 +28,8 @@ export enum PaymentMethod {
 }
 
 @Entity('invoices')
+@Index(['restaurantId'])
+@Index(['createdAt'])
 export class Invoice {
   @PrimaryGeneratedColumn({ name: 'invoice_id' })
   invoiceId: number;

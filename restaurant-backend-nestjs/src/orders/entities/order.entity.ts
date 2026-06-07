@@ -7,6 +7,7 @@ import {
   OneToMany,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { OrderItem } from './order-item.entity';
 
@@ -29,6 +30,9 @@ export enum OrderType {
 import { Admin } from '../../auth/entities/admin.entity';
 
 @Entity('kitchen_orders_tbl')
+@Index(['restaurantId'])
+@Index(['status'])
+@Index(['createdAt'])
 export class Order {
   @PrimaryGeneratedColumn({ name: 'order_id' })
   orderId: number;

@@ -67,48 +67,53 @@ export class DashboardService {
       });
     }
 
-    // Total orders count
-    const totalOrders = await totalOrdersQuery.getCount();
+    // Execute all queries in parallel for better performance (Promise.all)
+    const [
+      totalOrders,
+      todayOrders,
+      revenueResult,
+      activeMenus,
+      pendingOrders,
+      completedOrders,
+      recentOrders,
+    ] = await Promise.all([
+      totalOrdersQuery.getCount(),
+      
+      todayOrdersQuery
+        .andWhere('order.createdAt >= :today', { today })
+        .getCount(),
+        
+      revenueQuery
+        .select('SUM(order.totalAmount)', 'total')
+        .andWhere('order.status = :status', { status: OrderStatus.SERVED })
+        .getRawOne() as Promise<{ total: string } | undefined>,
+        
+      menusQuery.getCount(),
+      
+      pendingQuery
+        .andWhere('order.status IN (:...statuses)', {
+          statuses: [
+            OrderStatus.NEW,
+            OrderStatus.ACCEPTED,
+            OrderStatus.COOKING,
+            OrderStatus.READY,
+          ],
+        })
+        .getCount(),
+        
+      completedQuery
+        .andWhere('order.status = :status', { status: OrderStatus.SERVED })
+        .andWhere('order.createdAt >= :today', { today })
+        .getCount(),
+        
+      recentOrdersQuery
+        .leftJoinAndSelect('order.orderItems', 'orderItems')
+        .orderBy('order.createdAt', 'DESC')
+        .take(10)
+        .getMany(),
+    ]);
 
-    // Today's orders
-    const todayOrders = await todayOrdersQuery
-      .andWhere('order.createdAt >= :today', { today })
-      .getCount();
-
-    // Total revenue (only completed orders)
-    const revenueResult: { total: string } | undefined = await revenueQuery
-      .select('SUM(order.totalAmount)', 'total')
-      .andWhere('order.status = :status', { status: OrderStatus.SERVED })
-      .getRawOne();
     const totalRevenue = parseFloat(revenueResult?.total || '0');
-
-    // Active menus count (all menus for the restaurant)
-    const activeMenus = await menusQuery.getCount();
-
-    // Pending orders (NEW, ACCEPTED, COOKING, READY)
-    const pendingOrders = await pendingQuery
-      .andWhere('order.status IN (:...statuses)', {
-        statuses: [
-          OrderStatus.NEW,
-          OrderStatus.ACCEPTED,
-          OrderStatus.COOKING,
-          OrderStatus.READY,
-        ],
-      })
-      .getCount();
-
-    // Completed orders (today)
-    const completedOrders = await completedQuery
-      .andWhere('order.status = :status', { status: OrderStatus.SERVED })
-      .andWhere('order.createdAt >= :today', { today })
-      .getCount();
-
-    // Recent orders (last 10)
-    const recentOrders = await recentOrdersQuery
-      .leftJoinAndSelect('order.orderItems', 'orderItems')
-      .orderBy('order.createdAt', 'DESC')
-      .take(10)
-      .getMany();
 
     return {
       totalOrders,
