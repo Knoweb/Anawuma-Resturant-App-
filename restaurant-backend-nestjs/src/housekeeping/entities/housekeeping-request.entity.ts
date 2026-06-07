@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
 
 export enum RequestType {
   CLEANING = 'CLEANING',
@@ -15,6 +15,9 @@ export enum RequestStatus {
 }
 
 @Entity('housekeeping_requests_tbl')
+@Index(['restaurantId'])
+@Index(['status'])
+@Index(['createdAt'])
 export class HousekeepingRequest {
   @PrimaryGeneratedColumn({ name: 'request_id' })
   requestId: number;
