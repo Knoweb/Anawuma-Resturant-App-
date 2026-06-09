@@ -7,6 +7,7 @@ import Sidebar from '../components/common/Sidebar';
 import { useAuthStore } from '../store/authStore';
 import { useWebSocket } from '../hooks/useWebSocket';
 import './RestaurantProfile.css';
+import './AdminHotelProfile.css';
 
 const PACKAGE_NAMES = {
   1: 'Basic',
@@ -47,6 +48,20 @@ function AdminHotelProfile() {
   const [loading, setLoading] = useState(true);
   const hasShownNetworkErrorRef = useRef(false);
   const { subscribe, connected } = useWebSocket();
+
+  // Edit state
+  const [editMode, setEditMode] = useState(false);
+  const [editForm, setEditForm] = useState({
+    restaurantName: '',
+    email: '',
+    contactNumber: '',
+    address: '',
+    logo: '',
+  });
+  const [logoPreview, setLogoPreview] = useState(null);
+  const [logoFile, setLogoFile] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const fileInputRef = useRef(null);
 
   const fetchData = useCallback(async () => {
     if (!id) return;
@@ -112,6 +127,101 @@ function AdminHotelProfile() {
     return () => unsub();
   }, [connected, subscribe, id]);
 
+  // ── Edit handlers ──────────────────────────────────────────────────────────
+  const openEdit = () => {
+    setEditForm({
+      restaurantName: restaurant.restaurantName || '',
+      email: restaurant.email || '',
+      contactNumber: restaurant.contactNumber || '',
+      address: restaurant.address || '',
+      logo: restaurant.logo || '',
+    });
+    setLogoPreview(null);
+    setLogoFile(null);
+    setEditMode(true);
+  };
+
+  const cancelEdit = () => {
+    setEditMode(false);
+    setLogoPreview(null);
+    setLogoFile(null);
+  };
+
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.match(/^image\//)) {
+      Swal.fire('Invalid File', 'Please select an image file (JPG, PNG, GIF, WebP)', 'warning');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      Swal.fire('File Too Large', 'Logo must be under 5 MB', 'warning');
+      return;
+    }
+
+    setLogoFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setLogoPreview(ev.target.result);
+    reader.readAsDataURL(file);
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+
+    try {
+      let logoUrl = editForm.logo;
+
+      // If a new logo was chosen, upload it first
+      if (logoFile) {
+        const formData = new FormData();
+        formData.append('logo', logoFile);
+        const uploadRes = await apiClient.post('/restaurant/upload-logo', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        if (uploadRes.data.success) {
+          logoUrl = uploadRes.data.logoUrl;
+        } else {
+          throw new Error('Logo upload failed');
+        }
+      }
+
+      const payload = {
+        restaurantName: editForm.restaurantName,
+        email: editForm.email,
+        contactNumber: editForm.contactNumber,
+        address: editForm.address,
+        logo: logoUrl,
+      };
+
+      const res = await apiClient.patch('/restaurant/profile', payload);
+      if (res.data.success) {
+        setRestaurant(res.data.data);
+        setEditMode(false);
+        setLogoPreview(null);
+        setLogoFile(null);
+        Swal.fire({
+          icon: 'success',
+          title: 'Profile Updated!',
+          text: 'Your hotel profile has been updated successfully.',
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      }
+    } catch (error) {
+      Swal.fire(
+        'Error!',
+        error.response?.data?.message || 'Failed to save profile. Please try again.',
+        'error'
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ── Role management ────────────────────────────────────────────────────────
   const handleDeleteAdmin = async (adminId) => {
     const result = await Swal.fire({
       title: 'Delete admin?',
@@ -252,6 +362,9 @@ function AdminHotelProfile() {
     'Special Offers',
   ].filter(Boolean);
 
+  // Displayed logo (preview if editing and file chosen, else current logo)
+  const displayLogoUrl = logoPreview || logoUrl;
+
   return (
     <div className="wrapper">
       <Navbar />
@@ -303,14 +416,41 @@ function AdminHotelProfile() {
             )}
 
             <div className="rp-layout">
+              {/* ── Left Card ──────────────────────────────────────────── */}
               <aside className="rp-left-card">
                 <div className="rp-avatar-wrap">
-                  {logoUrl ? (
-                    <img src={logoUrl} alt="logo" className="rp-avatar" />
-                  ) : (
-                    <div className="rp-avatar-placeholder">
-                      <i className="fas fa-hotel"></i>
-                    </div>
+                  {/* Logo with edit overlay */}
+                  <div className="ahp-logo-wrapper" onClick={editMode ? () => fileInputRef.current?.click() : undefined} style={editMode ? { cursor: 'pointer' } : {}}>
+                    {displayLogoUrl ? (
+                      <img src={displayLogoUrl} alt="logo" className="rp-avatar" />
+                    ) : (
+                      <div className="rp-avatar-placeholder">
+                        <i className="fas fa-hotel"></i>
+                      </div>
+                    )}
+                    {editMode && (
+                      <div className="ahp-logo-overlay">
+                        <i className="fas fa-camera"></i>
+                        <span>Change Logo</span>
+                      </div>
+                    )}
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={handleLogoChange}
+                  />
+                  {editMode && (
+                    <button
+                      type="button"
+                      className="ahp-change-logo-btn"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <i className="fas fa-upload me-1"></i>
+                      {logoFile ? 'Change Logo' : 'Upload Logo'}
+                    </button>
                   )}
                 </div>
                 <div className="rp-identity">
@@ -328,76 +468,189 @@ function AdminHotelProfile() {
                 </div>
               </aside>
 
+              {/* ── Right Card ─────────────────────────────────────────── */}
               <section className="rp-right-card">
-                <div className="rp-detail-list">
-                  <div className="rp-detail-row">
-                    <div className="rp-detail-label">Restaurant Name</div>
-                    <div className="rp-detail-value">{restaurant.restaurantName}</div>
-                  </div>
-                  <div className="rp-detail-row">
-                    <div className="rp-detail-label">Email</div>
-                    <div className="rp-detail-value">{restaurant.email}</div>
-                  </div>
-                  <div className="rp-detail-row">
-                    <div className="rp-detail-label">Contact Number</div>
-                    <div className="rp-detail-value">{restaurant.contactNumber}</div>
-                  </div>
-                  <div className="rp-detail-row">
-                    <div className="rp-detail-label">Country</div>
-                    <div className="rp-detail-value">{countryName}</div>
-                  </div>
-                  <div className="rp-detail-row">
-                    <div className="rp-detail-label">Currency</div>
-                    <div className="rp-detail-value">{currencyName}</div>
-                  </div>
-                  <div className="rp-detail-row">
-                    <div className="rp-detail-label">Address</div>
-                    <div className="rp-detail-value">{restaurant.address}</div>
-                  </div>
-                  <div className="rp-detail-row">
-                    <div className="rp-detail-label">Subscription Status</div>
-                    <div className="rp-detail-value">
-                      <span className={`rp-status-badge rp-status-${subscriptionVariant}`}>
-                        {subscriptionLabel}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="rp-detail-row">
-                    <div className="rp-detail-label">Subscription Expiry</div>
-                    <div className="rp-detail-value">
-                      {expiryDate ? expiryDate.toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      }) : 'Not set'}
-                    </div>
-                  </div>
-                  <div className="rp-detail-row">
-                    <div className="rp-detail-label">Package</div>
-                    <div className="rp-detail-value">{packageName}</div>
-                  </div>
-                  <div className="rp-detail-row rp-detail-row-action">
-                    <div className="rp-detail-label"></div>
-                    <div className="rp-detail-value">
-                      <button
-                        type="button"
-                        className="rp-primary-btn"
-                        style={{ background: '#ffc107', color: '#000' }}
-                        onClick={() => navigate('/pricing')}
-                      >
-                        Upgrade Package
+
+                {/* ── Edit Form (shown when editMode = true) ──────────── */}
+                {editMode ? (
+                  <form onSubmit={handleSave} className="ahp-edit-form">
+                    <div className="ahp-edit-header">
+                      <h5 className="rp-section-title">
+                        <i className="fas fa-edit me-2"></i>Edit Profile
+                      </h5>
+                      <button type="button" className="ahp-cancel-btn" onClick={cancelEdit}>
+                        <i className="fas fa-times me-1"></i>Cancel
                       </button>
                     </div>
-                  </div>
-                  <div className="rp-detail-row">
-                    <div className="rp-detail-label">Opening Time</div>
-                    <div className="rp-detail-value">{restaurant.openingTime}</div>
-                  </div>
-                  <div className="rp-detail-row">
-                    <div className="rp-detail-label">Closing Time</div>
-                    <div className="rp-detail-value">{restaurant.closingTime}</div>
-                  </div>
-                </div>
+
+                    <div className="ahp-form-grid">
+                      <div className="ahp-form-group">
+                        <label htmlFor="ahp-name">
+                          <i className="fas fa-store me-1"></i>Restaurant Name
+                        </label>
+                        <input
+                          id="ahp-name"
+                          type="text"
+                          className="ahp-input"
+                          value={editForm.restaurantName}
+                          onChange={(e) => setEditForm({ ...editForm, restaurantName: e.target.value })}
+                          placeholder="Enter restaurant name"
+                          required
+                          maxLength={255}
+                        />
+                      </div>
+
+                      <div className="ahp-form-group">
+                        <label htmlFor="ahp-email">
+                          <i className="fas fa-envelope me-1"></i>Email Address
+                        </label>
+                        <input
+                          id="ahp-email"
+                          type="email"
+                          className="ahp-input"
+                          value={editForm.email}
+                          onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                          placeholder="Enter email address"
+                          required
+                          maxLength={65}
+                        />
+                      </div>
+
+                      <div className="ahp-form-group">
+                        <label htmlFor="ahp-phone">
+                          <i className="fas fa-phone me-1"></i>Telephone Number
+                        </label>
+                        <input
+                          id="ahp-phone"
+                          type="tel"
+                          className="ahp-input"
+                          value={editForm.contactNumber}
+                          onChange={(e) => setEditForm({ ...editForm, contactNumber: e.target.value })}
+                          placeholder="Enter contact number (10-20 digits)"
+                          required
+                          pattern="[0-9]{10,20}"
+                          title="Contact number must be 10-20 digits"
+                        />
+                      </div>
+
+                      <div className="ahp-form-group">
+                        <label htmlFor="ahp-address">
+                          <i className="fas fa-map-marker-alt me-1"></i>Address
+                        </label>
+                        <textarea
+                          id="ahp-address"
+                          className="ahp-input ahp-textarea"
+                          value={editForm.address}
+                          onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                          placeholder="Enter full address"
+                          required
+                          rows={3}
+                          maxLength={255}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="ahp-form-actions">
+                      <button type="button" className="ahp-cancel-btn" onClick={cancelEdit}>
+                        Cancel
+                      </button>
+                      <button type="submit" className="ahp-save-btn" disabled={saving}>
+                        {saving ? (
+                          <>
+                            <span className="ahp-spinner"></span>
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <i className="fas fa-check me-1"></i>
+                            Save Changes
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <>
+                    {/* ── View Mode: header with Edit button ────────────── */}
+                    <div className="ahp-view-header">
+                      <span></span>
+                      <button type="button" className="ahp-edit-btn" onClick={openEdit}>
+                        <i className="fas fa-edit me-1"></i>
+                        Edit Profile
+                      </button>
+                    </div>
+
+                    <div className="rp-detail-list">
+                      <div className="rp-detail-row">
+                        <div className="rp-detail-label">Restaurant Name</div>
+                        <div className="rp-detail-value">{restaurant.restaurantName}</div>
+                      </div>
+                      <div className="rp-detail-row">
+                        <div className="rp-detail-label">Email</div>
+                        <div className="rp-detail-value">{restaurant.email}</div>
+                      </div>
+                      <div className="rp-detail-row">
+                        <div className="rp-detail-label">Contact Number</div>
+                        <div className="rp-detail-value">{restaurant.contactNumber}</div>
+                      </div>
+                      <div className="rp-detail-row">
+                        <div className="rp-detail-label">Country</div>
+                        <div className="rp-detail-value">{countryName}</div>
+                      </div>
+                      <div className="rp-detail-row">
+                        <div className="rp-detail-label">Currency</div>
+                        <div className="rp-detail-value">{currencyName}</div>
+                      </div>
+                      <div className="rp-detail-row">
+                        <div className="rp-detail-label">Address</div>
+                        <div className="rp-detail-value">{restaurant.address}</div>
+                      </div>
+                      <div className="rp-detail-row">
+                        <div className="rp-detail-label">Subscription Status</div>
+                        <div className="rp-detail-value">
+                          <span className={`rp-status-badge rp-status-${subscriptionVariant}`}>
+                            {subscriptionLabel}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="rp-detail-row">
+                        <div className="rp-detail-label">Subscription Expiry</div>
+                        <div className="rp-detail-value">
+                          {expiryDate ? expiryDate.toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                          }) : 'Not set'}
+                        </div>
+                      </div>
+                      <div className="rp-detail-row">
+                        <div className="rp-detail-label">Package</div>
+                        <div className="rp-detail-value">{packageName}</div>
+                      </div>
+                      <div className="rp-detail-row rp-detail-row-action">
+                        <div className="rp-detail-label"></div>
+                        <div className="rp-detail-value">
+                          <button
+                            type="button"
+                            className="rp-primary-btn"
+                            style={{ background: '#ffc107', color: '#000' }}
+                            onClick={() => navigate('/pricing')}
+                          >
+                            Upgrade Package
+                          </button>
+                        </div>
+                      </div>
+                      <div className="rp-detail-row">
+                        <div className="rp-detail-label">Opening Time</div>
+                        <div className="rp-detail-value">{restaurant.openingTime}</div>
+                      </div>
+                      <div className="rp-detail-row">
+                        <div className="rp-detail-label">Closing Time</div>
+                        <div className="rp-detail-value">{restaurant.closingTime}</div>
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 <div className="rp-admin-section">
                   <div className="rp-admins-header">

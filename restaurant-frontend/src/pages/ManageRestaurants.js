@@ -116,6 +116,10 @@ function ManageRestaurants() {
     e.preventDefault();
     const formData = new FormData(e.target);
     const updateData = {
+      restaurantName: formData.get('restaurant_name'),
+      email: formData.get('email'),
+      contactNumber: formData.get('contact_number'),
+      address: formData.get('address'),
       subscriptionStatus: formData.get('subscription_status'),
       subscriptionExpiryDate: formData.get('subscription_expiry_date'),
       enableHousekeeping: formData.get('enable_housekeeping') === 'on',
@@ -124,6 +128,11 @@ function ManageRestaurants() {
       enableAccountant: formData.get('enable_accountant') === 'on',
       enableCashier: formData.get('enable_cashier') === 'on',
     };
+
+    // Remove empty strings so backend ignores them
+    Object.keys(updateData).forEach((k) => {
+      if (updateData[k] === '' || updateData[k] === null) delete updateData[k];
+    });
 
     try {
       await apiClient.patch(
@@ -135,7 +144,7 @@ function ManageRestaurants() {
       closeEditModal();
       fetchRestaurants();
     } catch (error) {
-      Swal.fire('Error!', 'Failed to update restaurant', 'error');
+      Swal.fire('Error!', error.response?.data?.message || 'Failed to update restaurant', 'error');
     }
   };
 
@@ -253,6 +262,53 @@ function ManageRestaurants() {
               </div>
               <form onSubmit={handleUpdate}>
                 <div className="modal-body">
+                  {/* ── Basic Profile Fields ── */}
+                  <h6 className="mb-3 text-muted fw-bold" style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Basic Information</h6>
+                  <div className="mb-3">
+                    <label className="form-label">Restaurant Name</label>
+                    <input
+                      type="text"
+                      name="restaurant_name"
+                      className="form-control"
+                      defaultValue={editModal.restaurant.restaurantName}
+                      placeholder="Enter restaurant name"
+                      maxLength={255}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Email Address</label>
+                    <input
+                      type="email"
+                      name="email"
+                      className="form-control"
+                      defaultValue={editModal.restaurant.email}
+                      placeholder="Enter email"
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Telephone Number</label>
+                    <input
+                      type="tel"
+                      name="contact_number"
+                      className="form-control"
+                      defaultValue={editModal.restaurant.contactNumber}
+                      placeholder="Enter contact number (10-20 digits)"
+                      pattern="[0-9]{10,20}"
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Address</label>
+                    <textarea
+                      name="address"
+                      className="form-control"
+                      defaultValue={editModal.restaurant.address}
+                      placeholder="Enter address"
+                      rows={2}
+                    />
+                  </div>
+
+                  <hr className="my-3" />
+                  <h6 className="mb-3 text-muted fw-bold" style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Subscription</h6>
                   <div className="mb-3">
                     <label className="form-label">Subscription Status</label>
                     <select
@@ -279,8 +335,10 @@ function ManageRestaurants() {
                       }
                     />
                   </div>
+
+                  <hr className="my-3" />
+                  <h6 className="mb-3 text-muted fw-bold" style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Privileges</h6>
                   <div className="mb-3">
-                    <label className="form-label">Privileges</label>
                     <div>
                       <div className="form-check">
                         <input

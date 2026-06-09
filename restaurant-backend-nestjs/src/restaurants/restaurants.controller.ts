@@ -54,6 +54,60 @@ export class RestaurantsController {
     };
   }
 
+  // ── Admin Profile Self-Edit ─────────────────────────────────────────────────
+  // Allows admin (and super_admin) to update their own restaurant's basic info
+  @Patch('profile')
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @HttpCode(HttpStatus.OK)
+  async updateProfile(
+    @Request() req,
+    @Body() body: { restaurantName?: string; email?: string; contactNumber?: string; address?: string; logo?: string; country?: string },
+  ): Promise<{ success: boolean; data?: any; message: string }> {
+    const restaurantId = req.user.restaurantId;
+    const restaurant = await this.restaurantsService.updateProfile(restaurantId, body);
+
+    // Broadcast update so sidebar/navbar reflects new name/logo
+    this.websocketGateway.server.emit('restaurant:updated', {
+      restaurantId,
+      restaurant,
+    });
+
+    return {
+      success: true,
+      data: restaurant,
+      message: 'Profile updated successfully',
+    };
+  }
+
+  // ── Admin Logo Upload ───────────────────────────────────────────────────────
+  @Post('upload-logo')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
+  @UseInterceptors(
+    FileInterceptor('logo', {
+      storage: restaurantLogoStorage,
+      fileFilter: logoFileFilter,
+      limits: { fileSize: maxLogoFileSize },
+    }),
+  )
+  uploadLogo(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      return {
+        success: false,
+        message: 'No file uploaded',
+      };
+    }
+
+    const logoUrl = `/uploads/restaurants/${file.filename}`;
+
+    return {
+      success: true,
+      message: 'Restaurant logo uploaded successfully',
+      logoUrl,
+      filename: file.filename,
+      size: file.size,
+    };
+  }
+
   @Patch('settings')
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @HttpCode(HttpStatus.OK)
@@ -94,6 +148,7 @@ export class RestaurantsController {
     };
   }
 
+
   @Post('upgrade')
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @HttpCode(HttpStatus.OK)
@@ -108,36 +163,6 @@ export class RestaurantsController {
       success: true,
       data: restaurant,
       message: 'Package upgraded successfully',
-    };
-  }
-
-  // Super Admin Endpoints
-
-  @Post('upload-logo')
-  @Roles(UserRole.SUPER_ADMIN)
-  @UseInterceptors(
-    FileInterceptor('logo', {
-      storage: restaurantLogoStorage,
-      fileFilter: logoFileFilter,
-      limits: { fileSize: maxLogoFileSize },
-    }),
-  )
-  uploadLogo(@UploadedFile() file: Express.Multer.File) {
-    if (!file) {
-      return {
-        success: false,
-        message: 'No file uploaded',
-      };
-    }
-
-    const logoUrl = `/uploads/restaurants/${file.filename}`;
-
-    return {
-      success: true,
-      message: 'Restaurant logo uploaded successfully',
-      logoUrl,
-      filename: file.filename,
-      size: file.size,
     };
   }
 

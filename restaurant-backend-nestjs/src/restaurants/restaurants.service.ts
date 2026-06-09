@@ -81,6 +81,42 @@ export class RestaurantsService {
     };
   }
 
+  async updateProfile(
+    restaurantId: number,
+    profileDto: {
+      restaurantName?: string;
+      email?: string;
+      contactNumber?: string;
+      address?: string;
+      logo?: string;
+    },
+  ): Promise<Restaurant> {
+    const restaurant = await this.findById(restaurantId);
+    if (!restaurant) {
+      throw new NotFoundException('Restaurant not found');
+    }
+
+    if (profileDto.restaurantName) {
+      restaurant.restaurantName = profileDto.restaurantName;
+    }
+    if (profileDto.email) {
+      restaurant.email = profileDto.email;
+    }
+    if (profileDto.contactNumber) {
+      restaurant.contactNumber = profileDto.contactNumber;
+    }
+    if (profileDto.address) {
+      restaurant.address = profileDto.address;
+    }
+    if (profileDto.logo !== undefined) {
+      // Store just the path portion so resolveLogoUrl works correctly
+      restaurant.logo = profileDto.logo;
+    }
+
+    const saved = await this.restaurantRepository.save(restaurant);
+    return this.resolveLogoUrl(saved);
+  }
+
   // Super Admin Methods
 
   /**

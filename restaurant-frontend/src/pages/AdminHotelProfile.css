@@ -1,0 +1,230 @@
+/* ── AdminHotelProfile Edit UI ─────────────────────────────────── */
+
+/* Logo wrapper with camera overlay */
+.ahp-logo-wrapper {
+  position: relative;
+  display: inline-block;
+  border-radius: 50%;
+}
+
+.ahp-logo-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.48);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.ahp-logo-wrapper:hover .ahp-logo-overlay {
+  opacity: 1;
+}
+
+.ahp-logo-overlay i {
+  font-size: 1.4rem;
+}
+
+.ahp-change-logo-btn {
+  display: block;
+  margin: 10px auto 0;
+  padding: 7px 16px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.ahp-change-logo-btn:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+/* View mode header (contains Edit button) */
+.ahp-view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.ahp-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 20px;
+  background: linear-gradient(135deg, #266668 0%, #1d9b9d 100%);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(38, 102, 104, 0.28);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ahp-edit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(38, 102, 104, 0.36);
+}
+
+/* Edit form container */
+.ahp-edit-form {
+  padding-bottom: 8px;
+}
+
+.ahp-edit-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e8ecf0;
+}
+
+.ahp-cancel-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.ahp-cancel-btn:hover {
+  background: #e5e7eb;
+}
+
+/* Form grid: 2 columns */
+.ahp-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+/* Address textarea spans full width */
+.ahp-form-grid .ahp-form-group:nth-child(4) {
+  grid-column: 1 / -1;
+}
+
+.ahp-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.ahp-form-group label {
+  font-size: 0.87rem;
+  font-weight: 700;
+  color: #2f3640;
+}
+
+.ahp-form-group label i {
+  color: #266668;
+}
+
+.ahp-input {
+  padding: 10px 14px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 9px;
+  font-size: 0.92rem;
+  color: #1f2937;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ahp-input:focus {
+  border-color: #266668;
+  box-shadow: 0 0 0 3px rgba(38, 102, 104, 0.12);
+}
+
+.ahp-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Action buttons row */
+.ahp-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 6px;
+  border-top: 1px solid #e8ecf0;
+  margin-top: 4px;
+}
+
+.ahp-save-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 26px;
+  background: linear-gradient(135deg, #266668 0%, #1d9b9d 100%);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(38, 102, 104, 0.28);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s;
+}
+
+.ahp-save-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.ahp-save-btn:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(38, 102, 104, 0.36);
+}
+
+/* Spinner inside save button */
+.ahp-spinner {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: ahp-spin 0.7s linear infinite;
+}
+
+@keyframes ahp-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 680px) {
+  .ahp-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ahp-form-grid .ahp-form-group:nth-child(4) {
+    grid-column: 1;
+  }
+}
