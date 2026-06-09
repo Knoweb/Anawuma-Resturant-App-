@@ -13,7 +13,6 @@ function Sidebar() {
     kitchen: false,
     housekeeping: false,
     offers: false,
-    reports: false,
     settings: false,
     manualDashboard: false
   });
@@ -58,7 +57,6 @@ function Sidebar() {
       kitchen: false,
       housekeeping: false,
       offers: false,
-      reports: false,
       settings: false,
       manualDashboard: false
     });
@@ -126,7 +124,6 @@ function Sidebar() {
   const canAccessCashierDashboard = isCashier && isCashierEnabled;
   const canAccessAccountantDashboard = (isAccountant || isSuperAdmin || isAdmin) && isAccountantEnabled;
   const canAccessHousekeeping = (isSuperAdmin || isAdmin || isHousekeeper) && isHousekeepingEnabled;
-  const canAccessReports = (canAccessAdminFeatures || isAccountant) && isReportsEnabled;
   const dashboardPath = isKitchen
     ? '/kitchen/dashboard'
     : isCashier
@@ -206,6 +203,14 @@ function Sidebar() {
                     Transfer Room
                   </Link>
                 </li>
+                {isCashier && isReportsEnabled && (
+                  <li className={isActive('/reports/sales')}>
+                    <Link to="/reports/sales" onClick={closeSubmenus}>
+                      <i className="fas fa-chart-line me-2"></i>
+                      Reports
+                    </Link>
+                  </li>
+                )}
               </ul>
             </li>
           )}
@@ -234,66 +239,6 @@ function Sidebar() {
                 </Link>
               </li>
             </>
-          )}
-
-          {canAccessReports && (
-            <li className={`has-submenu ${menuStates.reports ? 'open' : ''}`}>
-              <a href="#" onClick={(e) => { e.preventDefault(); toggleMenu('reports'); }}>
-                <i className="fas fa-chart-line"></i>
-                <span>Reports</span>
-                <i className={`fas fa-chevron-${menuStates.reports ? 'down' : 'right'} submenu-arrow`}></i>
-              </a>
-              <ul className="submenu" style={{ display: menuStates.reports ? 'block' : 'none' }}>
-                <li className={isActive('/reports/sales')}>
-                  <Link to="/reports/sales" onClick={closeSubmenus}>
-                    <i className="fas fa-chart-line me-2"></i>
-                    Sales Reports
-                  </Link>
-                </li>
-                <li className={isActive('/reports/daily')}>
-                  <Link to="/reports/daily" onClick={closeSubmenus}>
-                    <i className="fas fa-calendar-day me-2"></i>
-                    Daily Report
-                  </Link>
-                </li>
-                <li className={isActive('/reports/monthly')}>
-                  <Link to="/reports/monthly" onClick={closeSubmenus}>
-                    <i className="fas fa-calendar-alt me-2"></i>
-                    Monthly Report
-                  </Link>
-                </li>
-              </ul>
-            </li>
-          )}
-
-
-
-
-
-
-          {/* Offers Section - Admin Only */}
-          {canAccessAdminFeatures && (
-            <li className={`has-submenu ${menuStates.offers ? 'open' : ''}`}>
-              <a href="#" onClick={(e) => { e.preventDefault(); toggleMenu('offers'); }}>
-                <i className="fas fa-tag"></i>
-                <span>Offers</span>
-                <i className={`fas fa-chevron-${menuStates.offers ? 'down' : 'right'} submenu-arrow`}></i>
-              </a>
-              <ul className="submenu" style={{ display: menuStates.offers ? 'block' : 'none' }}>
-                <li className={isActive('/offers/add')}>
-                  <Link to="/offers/add">
-                    <i className="fas fa-plus-circle"></i>
-                    Add New Offer
-                  </Link>
-                </li>
-                <li className={isActive('/menus/offers')}>
-                  <Link to="/menus/offers">
-                    <i className="fas fa-list"></i>
-                    Manage Offers
-                  </Link>
-                </li>
-              </ul>
-            </li>
           )}
 
           {/* QR Codes Section - Admin Only */}
@@ -400,37 +345,6 @@ function Sidebar() {
                 <i className="fas fa-calculator"></i>
                 <span>Accountant Dashboard</span>
               </Link>
-            </li>
-          )}
-
-          {/* Reports Section - Admin + Accountant */}
-          {canAccessReports && (
-            <li className={`has-submenu ${menuStates.reports ? 'open' : ''}`}>
-              <a href="#" onClick={(e) => { e.preventDefault(); toggleMenu('reports'); }}>
-                <i className="fas fa-chart-bar"></i>
-                <span>Reports</span>
-                <i className={`fas fa-chevron-${menuStates.reports ? 'down' : 'right'} submenu-arrow`}></i>
-              </a>
-              <ul className="submenu" style={{ display: menuStates.reports ? 'block' : 'none' }}>
-                <li className={isActive('/reports/daily')}>
-                  <Link to="/reports/daily">
-                    <i className="fas fa-calendar-day"></i>
-                    Daily Report
-                  </Link>
-                </li>
-                <li className={isActive('/reports/monthly')}>
-                  <Link to="/reports/monthly">
-                    <i className="fas fa-calendar-alt"></i>
-                    Monthly Report
-                  </Link>
-                </li>
-                <li className={isActive('/reports/sales')}>
-                  <Link to="/reports/sales">
-                    <i className="fas fa-dollar-sign"></i>
-                    Sales Report
-                  </Link>
-                </li>
-              </ul>
             </li>
           )}
 

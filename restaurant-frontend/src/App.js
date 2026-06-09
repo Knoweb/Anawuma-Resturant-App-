@@ -420,7 +420,7 @@ function App() {
               path="/reports/sales"
               element={
                 <PrivateRoute>
-                  <RoleRoute allowedRoles={['admin', 'super_admin', 'accountant']}>
+                  <RoleRoute allowedRoles={['admin', 'super_admin', 'accountant', 'cashier']}>
                     <FeatureRoute requiredFeature="REPORTS">
                       <SalesReports />
                     </FeatureRoute>
