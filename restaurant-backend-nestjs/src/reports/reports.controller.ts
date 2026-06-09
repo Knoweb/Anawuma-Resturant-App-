@@ -12,6 +12,35 @@ import { UserRole } from '../auth/enums/role.enum';
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
+  /**
+   * Cashier-specific summary: daily / weekly / monthly for the logged-in cashier.
+   * GET /reports/cashier-summary?date=YYYY-MM-DD
+   */
+  @Get('cashier-summary')
+  async getCashierSummary(@Request() req, @Query('date') date: string) {
+    if (!date) throw new Error('Date parameter is required (YYYY-MM-DD)');
+    const restaurantId = req.user.restaurantId;
+    const cashierId = req.user.userId;
+    return this.reportsService.getCashierSummary(restaurantId, cashierId, date);
+  }
+
+  /**
+   * Cashier-specific transaction rows for a date range (own invoices only).
+   * GET /reports/cashier-transactions?from=YYYY-MM-DD&to=YYYY-MM-DD
+   */
+  @Get('cashier-transactions')
+  async getCashierTransactions(
+    @Request() req,
+    @Query('from') fromDate: string,
+    @Query('to') toDate: string,
+  ) {
+    if (!fromDate || !toDate) throw new Error('Both from and to date parameters are required');
+    const restaurantId = req.user.restaurantId;
+    const cashierId = req.user.userId;
+    return this.reportsService.getCashierTransactions(restaurantId, cashierId, fromDate, toDate);
+  }
+
+
   @Get('summary')
   getSummary(@Request() req, @Query('date') date: string) {
     if (!date) {

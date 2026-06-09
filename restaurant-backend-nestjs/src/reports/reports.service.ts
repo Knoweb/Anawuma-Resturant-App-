@@ -439,6 +439,112 @@ export class ReportsService {
     return csv;
   }
 
+  // ─── Cashier-specific methods ─────────────────────────────────────────────
+
+  async getCashierSummary(restaurantId: number, cashierId: number, date: string) {
+    const dateObj = new Date(date);
+    if (Number.isNaN(dateObj.getTime())) throw new Error('Invalid date format');
+
+    // Daily
+    const dailyFrom = date;
+    const dailyTo = date;
+
+    // Weekly: Mon → date
+    const dayOfWeek = dateObj.getDay(); // 0=Sun
+    const diffToMon = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+    const weekStart = new Date(dateObj);
+    weekStart.setDate(dateObj.getDate() + diffToMon);
+    const weeklyFrom = weekStart.toISOString().split('T')[0];
+    const weeklyTo = date;
+
+    // Monthly
+    const year = dateObj.getFullYear();
+    const month = dateObj.getMonth() + 1;
+    const monthlyFrom = new Date(year, month - 1, 1).toISOString().split('T')[0];
+    const monthlyTo = new Date(year, month, 0).toISOString().split('T')[0];
+
+    const [daily, weekly, monthly] = await Promise.all([
+      this.getTotalsForDateRange(restaurantId, dailyFrom, dailyTo, cashierId),
+      this.getTotalsForDateRange(restaurantId, weeklyFrom, weeklyTo, cashierId),
+      this.getTotalsForDateRange(restaurantId, monthlyFrom, monthlyTo, cashierId),
+    ]);
+
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'];
+
+    return {
+      selectedDate: date,
+      daily: { ...daily, periodLabel: date },
+      weekly: { ...weekly, periodLabel: `${weeklyFrom} → ${weeklyTo}` },
+      monthly: { ...monthly, periodLabel: `${monthNames[month - 1]} ${year}` },
+    };
+  }
+
+  async getCashierTransactions(
+    restaurantId: number,
+    cashierId: number,
+    fromDate: string,
+    toDate: string,
+  ) {
+    const invoices = await this.invoicesRepository
+      .createQueryBuilder('invoice')
+      .leftJoinAndSelect('invoice.createdBy', 'createdBy')
+      .where('invoice.restaurantId = :restaurantId', { restaurantId })
+      .andWhere('invoice.invoiceStatus = :status', { status: 'PAID' })
+      .andWhere('invoice.createdByAdminId = :cashierId', { cashierId })
+      .andWhere('DATE(invoice.createdAt) BETWEEN :fromDate AND :toDate', { fromDate, toDate })
+      .orderBy('invoice.createdAt', 'DESC')
+      .getMany();
+
+    const rows: any[] = [];
+    let totalRevenue = 0;
+    let foodRevenue = 0;
+    let serviceCharge = 0;
+    let cashRevenue = 0;
+    let cardRevenue = 0;
+
+    invoices.forEach((inv) => {
+      const amount = parseFloat(inv.totalAmount.toString());
+      const sub = parseFloat(inv.subtotal.toString());
+      const sc = parseFloat(inv.serviceCharge.toString());
+
+      totalRevenue += amount;
+      foodRevenue += sub;
+      serviceCharge += sc;
+      if (inv.paymentMethod === 'CASH') cashRevenue += amount;
+      if (inv.paymentMethod === 'CARD') cardRevenue += amount;
+
+      const items = Array.isArray(inv.orderItemsJson) ? inv.orderItemsJson : [];
+      items.forEach((item: any) => {
+        rows.push({
+          invoiceId: inv.invoiceId,
+          invoiceNumber: inv.invoiceNumber,
+          orderNo: item.orderNo || inv.invoiceNumber,
+          tableNo: inv.tableNo,
+          createdAt: inv.createdAt,
+          itemName: item.itemName,
+          qty: item.qty,
+          unitPrice: item.unitPrice,
+          lineTotal: item.lineTotal,
+          paymentMethod: inv.paymentMethod,
+          invoiceServiceCharge: sc,
+          invoiceSubtotal: sub,
+        });
+      });
+    });
+
+    return {
+      periodLabel: fromDate === toDate ? fromDate : `${fromDate} → ${toDate}`,
+      totalInvoices: invoices.length,
+      totalRevenue: parseFloat(totalRevenue.toFixed(2)),
+      foodRevenue: parseFloat(foodRevenue.toFixed(2)),
+      serviceCharge: parseFloat(serviceCharge.toFixed(2)),
+      cashRevenue: parseFloat(cashRevenue.toFixed(2)),
+      cardRevenue: parseFloat(cardRevenue.toFixed(2)),
+      rows,
+    };
+  }
+
   private async saveToHistory(
     restaurantId: number,
     reportType: string,

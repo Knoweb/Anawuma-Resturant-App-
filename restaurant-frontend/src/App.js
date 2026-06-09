@@ -54,6 +54,7 @@ import ManualTableOrders from './pages/ManualTableOrders';
 import TransferRoom from './pages/TransferRoom';
 import ManageStaff from './pages/ManageStaff';
 import AddStaff from './pages/AddStaff';
+import CashierReport from './pages/CashierReport';
 
 import PrivateRoute from './components/auth/PrivateRoute';
 import RoleRoute from './components/auth/RoleRoute';
@@ -185,6 +186,17 @@ function App() {
                 <PrivateRoute>
                   <RoleRoute allowedRoles={['cashier', 'admin', 'super_admin']}>
                     <TransferRoom />
+                  </RoleRoute>
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/cashier/report"
+              element={
+                <PrivateRoute>
+                  <RoleRoute allowedRoles={['cashier', 'admin', 'super_admin']}>
+                    <CashierReport />
                   </RoleRoute>
                 </PrivateRoute>
               }

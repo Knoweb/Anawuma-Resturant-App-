@@ -1,0 +1,364 @@
+/* ─── CashierReport.css ─────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+.cashier-report-main {
+  font-family: 'Inter', sans-serif;
+  background: #f4f7fb;
+  min-height: 100vh;
+  padding: 24px 0 40px;
+}
+
+.cr-container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ── Header ── */
+.cr-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.cr-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.cr-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #4e73df, #6f42c1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 22px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 15px rgba(78,115,223,.35);
+}
+
+.cr-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.cr-sub {
+  color: #64748b;
+  font-size: 0.85rem;
+  margin: 2px 0 0;
+}
+
+.cr-header-right {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cr-date-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cr-date-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cr-date-input {
+  padding: 8px 12px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  color: #1e293b;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.cr-date-input:focus {
+  border-color: #4e73df;
+}
+
+.cr-btn {
+  padding: 9px 18px;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+.cr-btn-csv {
+  background: #1cc88a;
+  color: #fff;
+}
+.cr-btn-csv:hover { background: #17a673; transform: translateY(-1px); }
+.cr-btn-print {
+  background: #4e73df;
+  color: #fff;
+}
+.cr-btn-print:hover { background: #375ccc; transform: translateY(-1px); }
+
+/* ── Summary Cards ── */
+.cr-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+  .cr-summary-grid { grid-template-columns: 1fr; }
+}
+
+.cr-summary-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px 22px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  box-shadow: 0 2px 10px rgba(0,0,0,.06);
+  transition: all 0.22s;
+}
+.cr-summary-card:hover {
+  box-shadow: 0 6px 24px rgba(78,115,223,.18);
+  transform: translateY(-2px);
+}
+.cr-summary-card.active {
+  border-color: #4e73df;
+  background: linear-gradient(135deg, #f0f4ff, #fff);
+  box-shadow: 0 6px 24px rgba(78,115,223,.22);
+}
+
+.cr-sc-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #4e73df;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+.cr-sc-period {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  margin-bottom: 10px;
+}
+.cr-sc-revenue {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 10px;
+  line-height: 1.1;
+}
+.cr-sc-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+.cr-sc-meta span {
+  background: #f1f5f9;
+  border-radius: 6px;
+  padding: 2px 8px;
+}
+
+/* ── Tabs ── */
+.cr-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  width: fit-content;
+}
+
+.cr-tab-btn {
+  padding: 8px 22px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  color: #64748b;
+  transition: all 0.2s;
+}
+.cr-tab-btn:hover { background: #f1f5f9; color: #4e73df; }
+.cr-tab-btn.active {
+  background: #4e73df;
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(78,115,223,.35);
+}
+
+/* ── Table Section ── */
+.cr-table-section {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+  overflow: hidden;
+}
+
+.cr-totals-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 16px 20px;
+  background: #f8faff;
+  border-bottom: 1px solid #eef2ff;
+}
+
+.cr-total-pill {
+  background: #fff;
+  border: 1.5px solid #e8edf8;
+  border-radius: 10px;
+  padding: 8px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 100px;
+}
+.cr-total-pill.highlight {
+  background: linear-gradient(135deg, #4e73df, #6f42c1);
+  border-color: transparent;
+}
+.cr-total-pill.highlight .cr-tp-label,
+.cr-total-pill.highlight .cr-tp-val {
+  color: #fff;
+}
+.cr-total-pill.cash { border-color: #d1fae5; background: #f0fdf4; }
+.cr-total-pill.card { border-color: #bfdbfe; background: #eff6ff; }
+
+.cr-tp-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.cr-tp-val {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-top: 2px;
+}
+
+/* ── Table ── */
+.cr-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.cr-table thead {
+  background: linear-gradient(90deg, #4e73df, #6f42c1);
+  color: #fff;
+}
+.cr-table thead th {
+  padding: 13px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.77rem;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+.cr-table tbody tr {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.15s;
+}
+.cr-table tbody tr:hover {
+  background: #f8faff;
+}
+.cr-table tbody td {
+  padding: 11px 14px;
+  color: #374151;
+}
+
+.cr-inv-badge {
+  background: #eef2ff;
+  color: #4e73df;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.cr-pay-badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.cr-pay-badge.cash {
+  background: #d1fae5;
+  color: #065f46;
+}
+.cr-pay-badge.card {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.cr-foot-row td {
+  padding: 9px 14px;
+  background: #f8faff;
+  font-size: 0.85rem;
+  color: #4e73df;
+}
+.cr-foot-grand td {
+  padding: 11px 14px;
+  background: linear-gradient(90deg, #4e73df11, #6f42c111);
+  font-size: 0.95rem;
+  color: #1e293b;
+  border-top: 2px solid #c7d2fe;
+}
+
+/* ── Empty / Spinner ── */
+.cr-spinner-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+.cr-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #94a3b8;
+}
+
+/* ── Print ── */
+.print-only { display: none; }
+@media print {
+  .no-print { display: none !important; }
+  .print-only { display: block; }
+  .cr-table-section {
+    box-shadow: none;
+    border: 1px solid #ccc;
+    border-radius: 0;
+  }
+  .cashier-report-main { padding: 0; background: #fff; }
+  .cr-totals-bar { border: 1px solid #ccc; }
+}
+
+.cr-print-header { text-align: center; margin-bottom: 16px; }
+.cr-print-header h2 { font-size: 1.2rem; margin-bottom: 4px; }
+.cr-print-header p { font-size: 0.85rem; color: #666; }

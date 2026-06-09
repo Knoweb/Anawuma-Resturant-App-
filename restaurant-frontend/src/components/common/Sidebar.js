@@ -209,17 +209,35 @@ function Sidebar() {
                     Transfer Room
                   </Link>
                 </li>
+                {/* My Reports — always visible to cashiers */}
+                {isCashier && (
+                  <li className={isActive('/cashier/report')}>
+                    <Link to="/cashier/report" onClick={closeSubmenus}>
+                      <i className="fas fa-chart-bar me-2"></i>
+                      My Reports
+                    </Link>
+                  </li>
+                )}
+                {(isAdmin || isSuperAdmin) && isReportsEnabled && (
+                  <li className={isActive('/reports/sales')}>
+                    <Link to="/reports/sales" onClick={closeSubmenus}>
+                      <i className="fas fa-chart-line me-2"></i>
+                      Sales Reports
+                    </Link>
+                  </li>
+                )}
                 {isCashier && isReportsEnabled && (
                   <li className={isActive('/reports/sales')}>
                     <Link to="/reports/sales" onClick={closeSubmenus}>
                       <i className="fas fa-chart-line me-2"></i>
-                      Reports
+                      Full Reports
                     </Link>
                   </li>
                 )}
               </ul>
             </li>
           )}
+
 
           {!isCashier && !isAccountant && (
             <li className={isActive(dashboardPath)}>
