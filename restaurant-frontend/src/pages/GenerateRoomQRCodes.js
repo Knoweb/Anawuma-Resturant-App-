@@ -227,16 +227,20 @@ const GenerateRoomQRCodes = () => {
                 disabled={loading}
               >
                 <option value="">Select Room Number</option>
-                <optgroup label="SV Wing">
-                  {Array.from({ length: 16 }, (_, i) => `SV-${201 + i}`).map(room => (
-                    <option key={room} value={room}>{room}</option>
-                  ))}
-                </optgroup>
-                <optgroup label="HB Wing">
-                  {Array.from({ length: 8 }, (_, i) => `HB-${String(i + 1).padStart(2, '0')}`).map(room => (
-                    <option key={room} value={room}>{room}</option>
-                  ))}
-                </optgroup>
+                {(() => {
+                  const rows = [
+                    ['Room 101', 'Room 102', 'Room 103'],
+                    ['Room 204', 'Room 205'],
+                    ['Room 306'],
+                    ['Room 107', 'Room 108'],
+                    ['Room 209', 'Room 210', 'Room 211'],
+                    ['Room 312', 'Room 313', 'Room 314'],
+                    ['Room 415', 'Room 416', 'Room 417']
+                  ];
+                  const hb = Array.from({ length: 8 }, (_, i) => `HB - ${String(i + 1).padStart(2, '0')}`);
+                  const flat = rows.flat().concat(hb);
+                  return flat.map(r => <option key={r} value={r}>{r}</option>);
+                })()}
               </select>
             </div>
             <button
