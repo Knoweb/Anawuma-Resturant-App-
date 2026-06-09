@@ -1,306 +1,340 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
 import apiClient from '../api/apiClient';
 import Sidebar from '../components/common/Sidebar';
 import Navbar from '../components/common/Navbar';
-import { useAuthStore } from '../store/authStore';
-import Swal from 'sweetalert2';
-import './CashierReport.css';
+import './SalesReports.css';
 
 const CashierReport = () => {
-  const user = useAuthStore((s) => s.user);
-  const today = new Date().toISOString().split('T')[0];
+  const [activeTab, setActiveTab] = useState('single'); // 'single' | 'range'
+  const [singleDate, setSingleDate] = useState('');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+  const [reportData, setReportData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const [selectedDate, setSelectedDate] = useState(today);
-  const [activeTab, setActiveTab] = useState('daily'); // 'daily' | 'weekly' | 'monthly'
-  const [summary, setSummary] = useState(null);
-  const [transactions, setTransactions] = useState(null);
-  const [loadingSummary, setLoadingSummary] = useState(false);
-  const [loadingTx, setLoadingTx] = useState(false);
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    setSingleDate(today);
+    setFromDate(today);
+    setToDate(today);
+  }, []);
 
-  // ── helpers ──────────────────────────────────────────────────────────────
-  const getWeekRange = (date) => {
-    const d = new Date(date);
-    const day = d.getDay();
-    const diff = day === 0 ? -6 : 1 - day;
-    const mon = new Date(d);
-    mon.setDate(d.getDate() + diff);
-    return {
-      from: mon.toISOString().split('T')[0],
-      to: date,
-    };
-  };
-
-  const getMonthRange = (date) => {
-    const d = new Date(date);
-    const year = d.getFullYear();
-    const month = d.getMonth();
-    return {
-      from: new Date(year, month, 1).toISOString().split('T')[0],
-      to: new Date(year, month + 1, 0).toISOString().split('T')[0],
-    };
-  };
-
-  const getRangeForTab = useCallback((tab) => {
-    if (tab === 'daily') return { from: selectedDate, to: selectedDate };
-    if (tab === 'weekly') return getWeekRange(selectedDate);
-    return getMonthRange(selectedDate);
-  }, [selectedDate]);
-
-  // ── fetch summary (3 periods at once) ────────────────────────────────────
-  const fetchSummary = useCallback(async () => {
+  /* ── fetch helpers ──────────────────────────────────────────────────────── */
+  const fetchReport = async (from, to) => {
     try {
-      setLoadingSummary(true);
-      const res = await apiClient.get(`/reports/cashier-summary?date=${selectedDate}`);
-      setSummary(res.data);
-    } catch (err) {
-      console.error(err);
-      Swal.fire('Error', err?.response?.data?.message || 'Failed to load summary', 'error');
-    } finally {
-      setLoadingSummary(false);
-    }
-  }, [selectedDate]);
-
-  // ── fetch transactions for active tab ────────────────────────────────────
-  const fetchTransactions = useCallback(async (tab) => {
-    const { from, to } = getRangeForTab(tab);
-    try {
-      setLoadingTx(true);
+      setLoading(true);
       const res = await apiClient.get(`/reports/cashier-transactions?from=${from}&to=${to}`);
-      setTransactions(res.data);
+      setReportData(res.data);
     } catch (err) {
       console.error(err);
-      Swal.fire('Error', err?.response?.data?.message || 'Failed to load transactions', 'error');
+      Swal.fire('Error', err?.response?.data?.message || 'Failed to generate report', 'error');
+      setReportData(null);
     } finally {
-      setLoadingTx(false);
+      setLoading(false);
     }
-  }, [getRangeForTab]);
+  };
 
-  useEffect(() => {
-    fetchSummary();
-  }, [fetchSummary]);
+  const handleSingleDateFilter = () => {
+    if (!singleDate) { Swal.fire('Validation', 'Please select a date', 'warning'); return; }
+    fetchReport(singleDate, singleDate);
+  };
 
-  useEffect(() => {
-    fetchTransactions(activeTab);
-  }, [activeTab, fetchTransactions]);
-
-  // ── CSV download ──────────────────────────────────────────────────────────
-  const downloadCSV = () => {
-    if (!transactions || !transactions.rows?.length) {
-      Swal.fire('Info', 'No transactions to download', 'info');
-      return;
+  const handleRangeFilter = () => {
+    if (!fromDate || !toDate) { Swal.fire('Validation', 'Please select both dates', 'warning'); return; }
+    if (new Date(fromDate) > new Date(toDate)) {
+      Swal.fire('Validation', 'From date must be before To date', 'warning'); return;
     }
-    const { from, to } = getRangeForTab(activeTab);
-    let csv = 'Invoice No,Table/Room,Date & Time,Item,Qty,Unit Price,Line Total,Payment\n';
-    transactions.rows.forEach((r) => {
+    fetchReport(fromDate, toDate);
+  };
+
+  /* ── CSV download ──────────────────────────────────────────────────────── */
+  const handleDownloadCSV = () => {
+    if (!reportData || !reportData.rows?.length) {
+      Swal.fire('Info', 'Please generate a report first', 'info'); return;
+    }
+    const from = activeTab === 'single' ? singleDate : fromDate;
+    const to   = activeTab === 'single' ? singleDate : toDate;
+    const filename = activeTab === 'single'
+      ? `my-report-${singleDate}.csv`
+      : `my-report-${fromDate}-to-${toDate}.csv`;
+
+    let csv = 'Invoice No,Table/Room,Date & Time,Item Name,Qty,Unit Price,Line Total,Payment\n';
+    reportData.rows.forEach((r) => {
       const dt = new Date(r.createdAt).toLocaleString();
       csv += `${r.invoiceNumber},"${r.tableNo || '–'}","${dt}","${r.itemName}",${r.qty},${r.unitPrice},${r.lineTotal},${r.paymentMethod}\n`;
     });
-    csv += `\n,,,,,,Food Total,${transactions.foodRevenue}\n`;
-    csv += `,,,,,,Service Charge,${transactions.serviceCharge}\n`;
-    csv += `,,,,,,Grand Total,${transactions.totalRevenue}\n`;
+    csv += `\n,,,,,,Food Total,${reportData.foodRevenue}\n`;
+    csv += `,,,,,,Service Charge,${reportData.serviceCharge}\n`;
+    csv += `,,,,,,Grand Total,${reportData.totalRevenue}\n`;
+    csv += `,,,,,,Cash Revenue,${reportData.cashRevenue}\n`;
+    csv += `,,,,,,Card Revenue,${reportData.cardRevenue}\n`;
 
     const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `my-report-${from}${from !== to ? `-to-${to}` : ''}.csv`;
-    a.click();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = filename; a.click();
     URL.revokeObjectURL(url);
+    Swal.fire('Success', 'Report downloaded successfully', 'success');
   };
 
-  // ── print ─────────────────────────────────────────────────────────────────
-  const handlePrint = () => window.print();
+  const handlePrint = () => {
+    if (!reportData) { Swal.fire('Info', 'Please generate a report first', 'info'); return; }
+    window.print();
+  };
 
-  const fmt = (v) => `Rs. ${parseFloat(v || 0).toFixed(2)}`;
-  const fmtDT = (v) => new Date(v).toLocaleString();
+  const formatCurrency = (v) => `Rs. ${parseFloat(v || 0).toFixed(2)}`;
+  const formatDateTime = (v) => new Date(v).toLocaleString();
 
-  const TABS = ['daily', 'weekly', 'monthly'];
-  const TAB_LABELS = { daily: '📅 Today', weekly: '📆 This Week', monthly: '🗓️ This Month' };
-  const summaryForTab = summary ? summary[activeTab] : null;
+  /* ── derived display values ─────────────────────────────────────────────── */
+  const rows            = reportData?.rows || [];
+  const foodTotal       = reportData?.foodRevenue     || 0;
+  const serviceCharge   = reportData?.serviceCharge   || 0;
+  const grandTotal      = reportData?.totalRevenue    || 0;
+  const totalInvoices   = reportData?.totalInvoices   || 0;
+  const cashRevenue     = reportData?.cashRevenue     || 0;
+  const cardRevenue     = reportData?.cardRevenue     || 0;
 
   return (
-    <div className="sb-nav-fixed">
-      <Navbar />
-      <div id="layoutSidenav">
-        <div id="layoutSidenav_nav"><Sidebar /></div>
-        <div id="layoutSidenav_content">
-          <main className="cashier-report-main">
-            <div className="cr-container">
+    <div className="dashboard-container">
+      <Sidebar />
+      <div className="main-content">
+        <Navbar />
+        <div className="sales-reports-container">
 
-              {/* ── Header ── */}
-              <div className="cr-header no-print">
-                <div className="cr-header-left">
-                  <div className="cr-icon-wrap"><i className="fas fa-chart-bar"></i></div>
-                  <div>
-                    <h1 className="cr-title">My Sales Report</h1>
-                    <p className="cr-sub">Transactions processed by <strong>{user?.email || 'you'}</strong></p>
-                  </div>
+          {/* ── Header ── */}
+          <div className="reports-header no-print">
+            <h2>
+              <i className="fas fa-chart-bar me-2"></i>
+              My Sales Report
+            </h2>
+            <div className="header-actions">
+              <button className="btn btn-success me-2" onClick={handleDownloadCSV}>
+                <i className="fas fa-download me-2"></i>Download CSV
+              </button>
+              <button className="btn btn-primary" onClick={handlePrint}>
+                <i className="fas fa-print me-2"></i>Print
+              </button>
+            </div>
+          </div>
+
+          {/* ── Tabs ── */}
+          <div className="report-tabs no-print">
+            <button
+              className={`tab-btn ${activeTab === 'single' ? 'active' : ''}`}
+              onClick={() => { setActiveTab('single'); setReportData(null); }}
+            >
+              Single Date
+            </button>
+            <button
+              className={`tab-btn ${activeTab === 'range' ? 'active' : ''}`}
+              onClick={() => { setActiveTab('range'); setReportData(null); }}
+            >
+              Date Range
+            </button>
+          </div>
+
+          {/* ── Filter Section ── */}
+          <div className="filter-section no-print">
+            <div className="filter-row-flex">
+              {activeTab === 'single' ? (
+                <div className="filter-group">
+                  <label>Select Date</label>
+                  <input
+                    type="date"
+                    className="form-control"
+                    value={singleDate}
+                    max={new Date().toISOString().split('T')[0]}
+                    onChange={(e) => setSingleDate(e.target.value)}
+                  />
                 </div>
-                <div className="cr-header-right">
-                  <div className="cr-date-group">
-                    <label className="cr-date-label">Select Date</label>
+              ) : (
+                <>
+                  <div className="filter-group">
+                    <label>From</label>
                     <input
                       type="date"
-                      className="cr-date-input"
-                      value={selectedDate}
-                      max={today}
-                      onChange={(e) => setSelectedDate(e.target.value)}
+                      className="form-control"
+                      value={fromDate}
+                      max={new Date().toISOString().split('T')[0]}
+                      onChange={(e) => setFromDate(e.target.value)}
                     />
                   </div>
-                  <button className="cr-btn cr-btn-csv" onClick={downloadCSV}>
-                    <i className="fas fa-download me-1"></i> CSV
-                  </button>
-                  <button className="cr-btn cr-btn-print" onClick={handlePrint}>
-                    <i className="fas fa-print me-1"></i> Print
-                  </button>
+                  <div className="filter-group">
+                    <label>To</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={toDate}
+                      max={new Date().toISOString().split('T')[0]}
+                      onChange={(e) => setToDate(e.target.value)}
+                    />
+                  </div>
+                </>
+              )}
+              <div className="filter-btn-container">
+                <button
+                  className="btn btn-primary filter-btn-wide"
+                  onClick={activeTab === 'single' ? handleSingleDateFilter : handleRangeFilter}
+                  disabled={loading}
+                >
+                  <i className="fas fa-filter me-2"></i>
+                  {loading ? 'Loading...' : 'Filter'}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Loading ── */}
+          {loading && (
+            <div className="text-center py-5">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          )}
+
+          {/* ── Report Results ── */}
+          {!loading && reportData && (
+            <div className="report-results">
+              <div className="report-period">
+                <h5>Reports for: {reportData.periodLabel}</h5>
+              </div>
+
+              {/* Summary Cards */}
+              <div className="row g-3 mb-4">
+                <div className="col-md-3">
+                  <div className="summary-card">
+                    <div className="summary-icon"><i className="fas fa-file-invoice"></i></div>
+                    <div className="summary-content">
+                      <h6>Total Invoices</h6>
+                      <h3>{totalInvoices}</h3>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-3">
+                  <div className="summary-card revenue">
+                    <div className="summary-icon"><i className="fas fa-wallet"></i></div>
+                    <div className="summary-content">
+                      <h6>Grand Total</h6>
+                      <h3>{formatCurrency(grandTotal)}</h3>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-3">
+                  <div className="summary-card bg-light border">
+                    <div className="summary-icon text-primary"><i className="fas fa-utensils"></i></div>
+                    <div className="summary-content">
+                      <h6>Food Total</h6>
+                      <h3 className="text-primary">{formatCurrency(foodTotal)}</h3>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-3">
+                  <div className="summary-card bg-light border">
+                    <div className="summary-icon text-warning"><i className="fas fa-bell"></i></div>
+                    <div className="summary-content">
+                      <h6>Service Charge</h6>
+                      <h3 className="text-warning">{formatCurrency(serviceCharge)}</h3>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* ── Summary Cards ── */}
-              {loadingSummary ? (
-                <div className="cr-spinner-wrap"><div className="spinner-border text-primary" /></div>
-              ) : summary && (
-                <div className="cr-summary-grid no-print">
-                  {TABS.map((tab) => {
-                    const s = summary[tab];
-                    return (
-                      <div
-                        key={tab}
-                        className={`cr-summary-card ${activeTab === tab ? 'active' : ''}`}
-                        onClick={() => setActiveTab(tab)}
-                      >
-                        <div className="cr-sc-label">{TAB_LABELS[tab]}</div>
-                        <div className="cr-sc-period">{s?.periodLabel}</div>
-                        <div className="cr-sc-revenue">{fmt(s?.totalRevenue)}</div>
-                        <div className="cr-sc-meta">
-                          <span><i className="fas fa-file-invoice me-1"></i>{s?.totalOrders} Invoices</span>
-                          <span><i className="fas fa-money-bill me-1 text-success"></i>{fmt(s?.cashRevenue)}</span>
-                          <span><i className="fas fa-credit-card me-1 text-info"></i>{fmt(s?.cardRevenue)}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
+              {/* Payment breakdown */}
+              <div className="row g-3 mb-4">
+                <div className="col-md-6">
+                  <div className="summary-card cash">
+                    <div className="summary-icon"><i className="fas fa-money-bill-wave"></i></div>
+                    <div className="summary-content">
+                      <h6>Cash Revenue</h6>
+                      <h3>{formatCurrency(cashRevenue)}</h3>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <div className="summary-card card-type">
+                    <div className="summary-icon"><i className="fas fa-credit-card"></i></div>
+                    <div className="summary-content">
+                      <h6>Card Revenue</h6>
+                      <h3>{formatCurrency(cardRevenue)}</h3>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Report Table */}
+              {rows.length > 0 ? (
+                <div className="table-responsive">
+                  <table className="table table-striped report-table">
+                    <thead>
+                      <tr>
+                        <th>Invoice No</th>
+                        <th>Table / Room</th>
+                        <th>Date &amp; Time</th>
+                        <th>Item Name</th>
+                        <th>Qty</th>
+                        <th>Unit Price</th>
+                        <th>Total</th>
+                        <th>Payment</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rows.map((row, idx) => (
+                        <tr key={idx}>
+                          <td><span className="badge bg-light text-dark border">{row.invoiceNumber}</span></td>
+                          <td>{row.tableNo || '–'}</td>
+                          <td>{formatDateTime(row.createdAt)}</td>
+                          <td>{row.itemName}</td>
+                          <td>{row.qty}</td>
+                          <td>{formatCurrency(row.unitPrice)}</td>
+                          <td>{formatCurrency(row.lineTotal)}</td>
+                          <td>
+                            <span className={`badge ${row.paymentMethod === 'CARD' ? 'bg-info' : 'bg-secondary'}`}>
+                              {row.paymentMethod || 'CASH'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="table-light total-row">
+                        <td colSpan="6" className="text-end py-2 border-0">Food Total:</td>
+                        <td className="py-2 border-0">{formatCurrency(foodTotal)}</td>
+                        <td className="border-0"></td>
+                      </tr>
+                      <tr className="table-light total-row">
+                        <td colSpan="6" className="text-end py-2 border-0">Service Charge:</td>
+                        <td className="py-2 border-0">{formatCurrency(serviceCharge)}</td>
+                        <td className="border-0"></td>
+                      </tr>
+                      <tr className="table-secondary grand-total-row">
+                        <td colSpan="6" className="text-end"><strong>Grand Total:</strong></td>
+                        <td><strong>{formatCurrency(grandTotal)}</strong></td>
+                        <td></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              ) : (
+                <div className="empty-state">
+                  <i className="fas fa-search fa-4x text-muted mb-3"></i>
+                  <h5>No Transactions Found</h5>
+                  <p className="text-muted">No paid invoices found for this period</p>
                 </div>
               )}
-
-              {/* ── Tabs ── */}
-              <div className="cr-tabs no-print">
-                {TABS.map((tab) => (
-                  <button
-                    key={tab}
-                    className={`cr-tab-btn ${activeTab === tab ? 'active' : ''}`}
-                    onClick={() => setActiveTab(tab)}
-                  >
-                    {TAB_LABELS[tab]}
-                  </button>
-                ))}
-              </div>
-
-              {/* ── Transactions Table ── */}
-              <div className="cr-table-section">
-                {/* Print header */}
-                <div className="print-only cr-print-header">
-                  <h2>My Sales Report — {TAB_LABELS[activeTab]}</h2>
-                  <p>Cashier: {user?.email} | Period: {transactions?.periodLabel}</p>
-                </div>
-
-                {/* Totals bar */}
-                {transactions && (
-                  <div className="cr-totals-bar">
-                    <div className="cr-total-pill">
-                      <span className="cr-tp-label">Invoices</span>
-                      <span className="cr-tp-val">{transactions.totalInvoices}</span>
-                    </div>
-                    <div className="cr-total-pill">
-                      <span className="cr-tp-label">Food Total</span>
-                      <span className="cr-tp-val">{fmt(transactions.foodRevenue)}</span>
-                    </div>
-                    <div className="cr-total-pill">
-                      <span className="cr-tp-label">Service Charge</span>
-                      <span className="cr-tp-val">{fmt(transactions.serviceCharge)}</span>
-                    </div>
-                    <div className="cr-total-pill highlight">
-                      <span className="cr-tp-label">Grand Total</span>
-                      <span className="cr-tp-val">{fmt(transactions.totalRevenue)}</span>
-                    </div>
-                    <div className="cr-total-pill cash">
-                      <span className="cr-tp-label"><i className="fas fa-money-bill-wave me-1"></i>Cash</span>
-                      <span className="cr-tp-val">{fmt(transactions.cashRevenue)}</span>
-                    </div>
-                    <div className="cr-total-pill card">
-                      <span className="cr-tp-label"><i className="fas fa-credit-card me-1"></i>Card</span>
-                      <span className="cr-tp-val">{fmt(transactions.cardRevenue)}</span>
-                    </div>
-                  </div>
-                )}
-
-                {loadingTx ? (
-                  <div className="cr-spinner-wrap"><div className="spinner-border text-primary" /></div>
-                ) : !transactions || transactions.rows?.length === 0 ? (
-                  <div className="cr-empty">
-                    <i className="fas fa-receipt fa-3x mb-3 text-muted"></i>
-                    <h5>No Transactions Found</h5>
-                    <p className="text-muted">No paid invoices recorded for this period</p>
-                  </div>
-                ) : (
-                  <div className="table-responsive">
-                    <table className="cr-table">
-                      <thead>
-                        <tr>
-                          <th>#</th>
-                          <th>Invoice No</th>
-                          <th>Table / Room</th>
-                          <th>Date & Time</th>
-                          <th>Item</th>
-                          <th>Qty</th>
-                          <th>Unit Price</th>
-                          <th>Line Total</th>
-                          <th>Payment</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {transactions.rows.map((row, idx) => (
-                          <tr key={idx}>
-                            <td className="text-muted small">{idx + 1}</td>
-                            <td><span className="cr-inv-badge">{row.invoiceNumber}</span></td>
-                            <td>{row.tableNo || '–'}</td>
-                            <td className="small">{fmtDT(row.createdAt)}</td>
-                            <td>{row.itemName}</td>
-                            <td className="text-center">{row.qty}</td>
-                            <td>{fmt(row.unitPrice)}</td>
-                            <td className="fw-bold">{fmt(row.lineTotal)}</td>
-                            <td>
-                              <span className={`cr-pay-badge ${row.paymentMethod === 'CARD' ? 'card' : 'cash'}`}>
-                                {row.paymentMethod || 'CASH'}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                      <tfoot>
-                        <tr className="cr-foot-row">
-                          <td colSpan="7" className="text-end fw-bold">Food Total:</td>
-                          <td className="fw-bold">{fmt(transactions.foodRevenue)}</td>
-                          <td></td>
-                        </tr>
-                        <tr className="cr-foot-row">
-                          <td colSpan="7" className="text-end fw-bold">Service Charge:</td>
-                          <td className="fw-bold">{fmt(transactions.serviceCharge)}</td>
-                          <td></td>
-                        </tr>
-                        <tr className="cr-foot-grand">
-                          <td colSpan="7" className="text-end fw-bold">Grand Total:</td>
-                          <td className="fw-bold">{fmt(transactions.totalRevenue)}</td>
-                          <td></td>
-                        </tr>
-                      </tfoot>
-                    </table>
-                  </div>
-                )}
-              </div>
-
             </div>
-          </main>
+          )}
+
+          {/* ── Empty Prompt ── */}
+          {!loading && !reportData && (
+            <div className="empty-state">
+              <i className="fas fa-calendar-alt fa-4x text-muted mb-3"></i>
+              <h5>No Report Generated</h5>
+              <p className="text-muted">Select a date and click Filter to view your transactions</p>
+            </div>
+          )}
+
         </div>
       </div>
     </div>
