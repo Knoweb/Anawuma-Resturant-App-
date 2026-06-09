@@ -95,13 +95,14 @@ const ManualTableOrders = () => {
         `;
         printWindow.document.write(content);
         printWindow.document.close();
-    };
-
-    const printAccountBill = (account, id, currency = 'LKR', rate = 1, symbol = 'Rs.') => {
+    };    const printAccountBill = (account, id, currency = 'LKR', rate = 1, symbol = 'Rs.', invoiceNumber = null) => {
         const printWindow = window.open('', '_blank');
         const subtotal = account.orders.reduce((sum, o) => sum + parseFloat(o.subtotal), 0);
         const serviceCharge = account.orders.reduce((sum, o) => sum + parseFloat(o.serviceCharge), 0);
         const total = parseFloat(account.totalAmount);
+        const orderNos = account.orders.map(o => o.orderNo).join(', ');
+        // Use absolute URL for the QR so it works in the print popup window
+        const qrUrl = `${window.location.origin}/google-review-qr.jpeg`;
 
         const content = `
             <html>
@@ -110,11 +111,15 @@ const ManualTableOrders = () => {
                     <style>
                         body { font-family: 'Courier New', Courier, monospace; padding: 20px; width: 350px; }
                         .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
+                        .meta-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 3px; }
                         .order-block { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dotted #ccc; }
                         .item-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 3px; }
                         .total-section { border-top: 2px solid #000; margin-top: 15px; padding-top: 10px; }
                         .grand-total { display: flex; justify-content: space-between; font-size: 20px; font-weight: bold; margin-top: 5px; }
-                        .footer { text-align: center; margin-top: 30px; font-size: 12px; }
+                        .footer { text-align: center; margin-top: 20px; font-size: 12px; }
+                        .qr-section { text-align: center; margin-top: 18px; border-top: 1px dashed #000; padding-top: 14px; }
+                        .qr-section img { width: 120px; height: 120px; object-fit: contain; }
+                        .qr-section p { font-size: 11px; margin: 6px 0 0; }
                     </style>
                 </head>
                 <body>
@@ -123,6 +128,13 @@ const ManualTableOrders = () => {
                         <h3>BILL SUMMARY (TABLE ${id})</h3>
                         <p>Currency: ${currency}</p>
                         <p>Printed: ${new Date().toLocaleString()}</p>
+                    </div>
+
+                    <div style="border-bottom: 1px dashed #000; padding-bottom: 8px; margin-bottom: 12px;">
+                        ${invoiceNumber ? `<div class="meta-row"><span><b>Invoice No:</b></span><span>${invoiceNumber}</span></div>` : ''}
+                        <div class="meta-row"><span><b>Order No(s):</b></span><span>${orderNos}</span></div>
+                        <div class="meta-row"><span><b>Table:</b></span><span>TABLE-${id}</span></div>
+                        <div class="meta-row"><span><b>Payment:</b></span><span>${(account.selectedPaymentMethod || 'CASH').toUpperCase()}</span></div>
                     </div>
                     
                     ${account.orders.map(order => `
@@ -158,13 +170,22 @@ const ManualTableOrders = () => {
                     <div class="footer">
                         <p>Thank You For Dining With Us!</p>
                     </div>
-                    <script>window.print(); window.close();</script>
+
+                    <!-- Google Review QR Code -->
+                    <div class="qr-section">
+                        <p style="font-size:12px; font-weight:bold; margin-bottom:8px;">⭐ Rate Your Experience</p>
+                        <img src="${qrUrl}" alt="Google Review QR" />
+                        <p>Scan to leave us a Google Review!</p>
+                    </div>
+
+                    <script>window.print(); window.close();<\/script>
                 </body>
             </html>
         `;
         printWindow.document.write(content);
         printWindow.document.close();
     };
+
 
     const normalizeWhatsAppNumber = (raw) => {
         if (!raw) return null;
@@ -198,7 +219,7 @@ const ManualTableOrders = () => {
         window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`, '_blank');
     };
 
-    const finalizeCheckout = async (account, tableNo, paymentMethod = 'CASH', shouldPrint = false) => {
+    const finalizeCheckout = async (account, tableNo, paymentMethod = 'CASH', shouldPrint = false, printOptions = {}) => {
         if (isProcessingManual) return;
         setIsProcessingManual(true);
         try {
@@ -213,9 +234,11 @@ const ManualTableOrders = () => {
             if (response.data) {
                 // Set the final state to the account before printing
                 account.selectedPaymentMethod = paymentMethod;
+                const invoiceNumber = response.data.invoiceNumber || null;
                 
                 if (shouldPrint) {
-                    printAccountBill(account, tableNo);
+                    const { currency = 'LKR', rate = 1, symbol = 'Rs.' } = printOptions;
+                    printAccountBill(account, tableNo, currency, rate, symbol, invoiceNumber);
                 }
 
                 Swal.fire({
@@ -276,6 +299,14 @@ const ManualTableOrders = () => {
                     <div class="small d-flex justify-content-between px-2">
                         <span>Invoice #: ${tempInv}</span>
                         <span>Date: ${dateStr}, ${timeStr}</span>
+                    </div>
+                    <div class="small px-2 mt-1 text-start">
+                        <span class="text-muted">Order No(s): </span>
+                        <span class="fw-bold">${account.orders.map(o => o.orderNo).join(', ')}</span>
+                    </div>
+                    <div class="small px-2 text-start">
+                        <span class="text-muted">Table: </span>
+                        <span class="fw-bold">TABLE-${tableNo}</span>
                     </div>
                 </div>
 
@@ -410,8 +441,12 @@ const ManualTableOrders = () => {
         }).then((result) => {
             if (result.isConfirmed) {
                 const symbol = exchangeRates[selectedCurrency].symbol;
-                printAccountBill(account, tableNo, selectedCurrency, currentRate, symbol);
-                finalizeCheckout(account, tableNo, account.selectedPaymentMethod || 'CASH', false);
+                // Finalize first to get the real invoice number, then print
+                finalizeCheckout(account, tableNo, account.selectedPaymentMethod || 'CASH', true, {
+                    currency: selectedCurrency,
+                    rate: currentRate,
+                    symbol,
+                });
             } else if (result.isDenied) {
                 printAccountBill(account, tableNo, 'LKR', 1, 'Rs.');
             }
