@@ -5,59 +5,113 @@ import Sidebar from '../components/common/Sidebar';
 import Navbar from '../components/common/Navbar';
 import './SalesReports.css';
 
+/* ── date helpers ─────────────────────────────────────────────────────────── */
+const toISO = (d) => d.toISOString().split('T')[0];
+
+const getWeekRange = (baseDate) => {
+  const d = new Date(baseDate);
+  const day = d.getDay(); // 0=Sun
+  const diffToMon = day === 0 ? -6 : 1 - day;
+  const mon = new Date(d);
+  mon.setDate(d.getDate() + diffToMon);
+  return { from: toISO(mon), to: toISO(d) };
+};
+
+const getMonthRange = (baseDate) => {
+  const d = new Date(baseDate);
+  return {
+    from: toISO(new Date(d.getFullYear(), d.getMonth(), 1)),
+    to:   toISO(new Date(d.getFullYear(), d.getMonth() + 1, 0)),
+  };
+};
+
+const MONTH_NAMES = [
+  'January','February','March','April','May','June',
+  'July','August','September','October','November','December',
+];
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
 const CashierReport = () => {
-  const [activeTab, setActiveTab] = useState('single'); // 'single' | 'range'
-  const [singleDate, setSingleDate] = useState('');
-  const [fromDate, setFromDate] = useState('');
-  const [toDate, setToDate] = useState('');
+  const today = toISO(new Date());
+
+  // tab: 'single' | 'weekly' | 'monthly' | 'range'
+  const [activeTab, setActiveTab]   = useState('single');
+  const [singleDate, setSingleDate] = useState(today);
+  const [fromDate, setFromDate]     = useState(today);
+  const [toDate, setToDate]         = useState(today);
+
+  // week/month selectors
+  const [weekBase, setWeekBase]   = useState(today);   // any date in the desired week
+  const [monthYear, setMonthYear] = useState(today.slice(0, 7)); // YYYY-MM
+
   const [reportData, setReportData] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading]       = useState(false);
 
-  useEffect(() => {
-    const today = new Date().toISOString().split('T')[0];
-    setSingleDate(today);
-    setFromDate(today);
-    setToDate(today);
-  }, []);
-
-  /* ── fetch helpers ──────────────────────────────────────────────────────── */
+  /* ── fetch ──────────────────────────────────────────────────────────────── */
   const fetchReport = async (from, to) => {
     try {
       setLoading(true);
+      setReportData(null);
       const res = await apiClient.get(`/reports/cashier-transactions?from=${from}&to=${to}`);
-      setReportData(res.data);
+      setReportData({ ...res.data, fetchedFrom: from, fetchedTo: to });
     } catch (err) {
       console.error(err);
       Swal.fire('Error', err?.response?.data?.message || 'Failed to generate report', 'error');
-      setReportData(null);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSingleDateFilter = () => {
-    if (!singleDate) { Swal.fire('Validation', 'Please select a date', 'warning'); return; }
-    fetchReport(singleDate, singleDate);
-  };
-
-  const handleRangeFilter = () => {
-    if (!fromDate || !toDate) { Swal.fire('Validation', 'Please select both dates', 'warning'); return; }
-    if (new Date(fromDate) > new Date(toDate)) {
-      Swal.fire('Validation', 'From date must be before To date', 'warning'); return;
+  /* ── handle filter click per tab ─────────────────────────────────────────── */
+  const handleFilter = () => {
+    if (activeTab === 'single') {
+      if (!singleDate) { Swal.fire('Validation', 'Please select a date', 'warning'); return; }
+      fetchReport(singleDate, singleDate);
+    } else if (activeTab === 'weekly') {
+      const { from, to } = getWeekRange(weekBase);
+      fetchReport(from, to);
+    } else if (activeTab === 'monthly') {
+      const [y, m] = monthYear.split('-').map(Number);
+      const from = toISO(new Date(y, m - 1, 1));
+      const to   = toISO(new Date(y, m, 0));
+      fetchReport(from, to);
+    } else if (activeTab === 'range') {
+      if (!fromDate || !toDate) { Swal.fire('Validation', 'Please select both dates', 'warning'); return; }
+      if (new Date(fromDate) > new Date(toDate)) {
+        Swal.fire('Validation', 'From date must be before To date', 'warning'); return;
+      }
+      fetchReport(fromDate, toDate);
     }
-    fetchReport(fromDate, toDate);
   };
 
-  /* ── CSV download ──────────────────────────────────────────────────────── */
+  /* ── auto-filter when switching tabs (optional convenience) ─────────────── */
+  const switchTab = (tab) => {
+    setActiveTab(tab);
+    setReportData(null);
+  };
+
+  /* ── label for period ────────────────────────────────────────────────────── */
+  const getPeriodLabel = () => {
+    if (!reportData) return '';
+    const f = reportData.fetchedFrom;
+    const t = reportData.fetchedTo;
+    if (f === t) return f;
+    if (activeTab === 'weekly') return `Week: ${f} → ${t}`;
+    if (activeTab === 'monthly') {
+      const d = new Date(f);
+      return `${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
+    }
+    return `${f} → ${t}`;
+  };
+
+  /* ── CSV download ────────────────────────────────────────────────────────── */
   const handleDownloadCSV = () => {
-    if (!reportData || !reportData.rows?.length) {
-      Swal.fire('Info', 'Please generate a report first', 'info'); return;
+    if (!reportData?.rows?.length) {
+      Swal.fire('Info', 'No transactions to download', 'info'); return;
     }
-    const from = activeTab === 'single' ? singleDate : fromDate;
-    const to   = activeTab === 'single' ? singleDate : toDate;
-    const filename = activeTab === 'single'
-      ? `my-report-${singleDate}.csv`
-      : `my-report-${fromDate}-to-${toDate}.csv`;
+    const f = reportData.fetchedFrom;
+    const t = reportData.fetchedTo;
+    const suffix = f === t ? f : `${f}-to-${t}`;
 
     let csv = 'Invoice No,Table/Room,Date & Time,Item Name,Qty,Unit Price,Line Total,Payment\n';
     reportData.rows.forEach((r) => {
@@ -73,9 +127,9 @@ const CashierReport = () => {
     const blob = new Blob([csv], { type: 'text/csv' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
-    a.href = url; a.download = filename; a.click();
+    a.href = url; a.download = `my-report-${suffix}.csv`; a.click();
     URL.revokeObjectURL(url);
-    Swal.fire('Success', 'Report downloaded successfully', 'success');
+    Swal.fire('Downloaded!', 'CSV file saved successfully', 'success');
   };
 
   const handlePrint = () => {
@@ -83,17 +137,19 @@ const CashierReport = () => {
     window.print();
   };
 
-  const formatCurrency = (v) => `Rs. ${parseFloat(v || 0).toFixed(2)}`;
-  const formatDateTime = (v) => new Date(v).toLocaleString();
+  const fmt   = (v) => `Rs. ${parseFloat(v || 0).toFixed(2)}`;
+  const fmtDT = (v) => new Date(v).toLocaleString();
 
-  /* ── derived display values ─────────────────────────────────────────────── */
-  const rows            = reportData?.rows || [];
-  const foodTotal       = reportData?.foodRevenue     || 0;
-  const serviceCharge   = reportData?.serviceCharge   || 0;
-  const grandTotal      = reportData?.totalRevenue    || 0;
-  const totalInvoices   = reportData?.totalInvoices   || 0;
-  const cashRevenue     = reportData?.cashRevenue     || 0;
-  const cardRevenue     = reportData?.cardRevenue     || 0;
+  const rows          = reportData?.rows          || [];
+  const foodTotal     = reportData?.foodRevenue   || 0;
+  const svcCharge     = reportData?.serviceCharge || 0;
+  const grandTotal    = reportData?.totalRevenue  || 0;
+  const totalInvoices = reportData?.totalInvoices || 0;
+  const cashRev       = reportData?.cashRevenue   || 0;
+  const cardRev       = reportData?.cardRevenue   || 0;
+
+  /* ── week display helper ─────────────────────────────────────────────────── */
+  const weekRange = getWeekRange(weekBase);
 
   return (
     <div className="dashboard-container">
@@ -120,62 +176,91 @@ const CashierReport = () => {
 
           {/* ── Tabs ── */}
           <div className="report-tabs no-print">
-            <button
-              className={`tab-btn ${activeTab === 'single' ? 'active' : ''}`}
-              onClick={() => { setActiveTab('single'); setReportData(null); }}
-            >
-              Single Date
-            </button>
-            <button
-              className={`tab-btn ${activeTab === 'range' ? 'active' : ''}`}
-              onClick={() => { setActiveTab('range'); setReportData(null); }}
-            >
-              Date Range
-            </button>
+            {[
+              { key: 'single',  label: 'Single Date' },
+              { key: 'weekly',  label: 'Weekly' },
+              { key: 'monthly', label: 'Monthly' },
+              { key: 'range',   label: 'Date Range' },
+            ].map(({ key, label }) => (
+              <button
+                key={key}
+                className={`tab-btn ${activeTab === key ? 'active' : ''}`}
+                onClick={() => switchTab(key)}
+              >
+                {label}
+              </button>
+            ))}
           </div>
 
           {/* ── Filter Section ── */}
           <div className="filter-section no-print">
             <div className="filter-row-flex">
-              {activeTab === 'single' ? (
+
+              {/* Single Date */}
+              {activeTab === 'single' && (
                 <div className="filter-group">
                   <label>Select Date</label>
                   <input
-                    type="date"
-                    className="form-control"
-                    value={singleDate}
-                    max={new Date().toISOString().split('T')[0]}
+                    type="date" className="form-control"
+                    value={singleDate} max={today}
                     onChange={(e) => setSingleDate(e.target.value)}
                   />
                 </div>
-              ) : (
+              )}
+
+              {/* Weekly */}
+              {activeTab === 'weekly' && (
+                <div className="filter-group">
+                  <label>Pick any day in the week</label>
+                  <input
+                    type="date" className="form-control"
+                    value={weekBase} max={today}
+                    onChange={(e) => setWeekBase(e.target.value)}
+                  />
+                  <span className="text-muted small ms-2">
+                    ({weekRange.from} → {weekRange.to})
+                  </span>
+                </div>
+              )}
+
+              {/* Monthly */}
+              {activeTab === 'monthly' && (
+                <div className="filter-group">
+                  <label>Select Month</label>
+                  <input
+                    type="month" className="form-control"
+                    value={monthYear} max={today.slice(0, 7)}
+                    onChange={(e) => setMonthYear(e.target.value)}
+                  />
+                </div>
+              )}
+
+              {/* Date Range */}
+              {activeTab === 'range' && (
                 <>
                   <div className="filter-group">
                     <label>From</label>
                     <input
-                      type="date"
-                      className="form-control"
-                      value={fromDate}
-                      max={new Date().toISOString().split('T')[0]}
+                      type="date" className="form-control"
+                      value={fromDate} max={today}
                       onChange={(e) => setFromDate(e.target.value)}
                     />
                   </div>
                   <div className="filter-group">
                     <label>To</label>
                     <input
-                      type="date"
-                      className="form-control"
-                      value={toDate}
-                      max={new Date().toISOString().split('T')[0]}
+                      type="date" className="form-control"
+                      value={toDate} max={today}
                       onChange={(e) => setToDate(e.target.value)}
                     />
                   </div>
                 </>
               )}
+
               <div className="filter-btn-container">
                 <button
                   className="btn btn-primary filter-btn-wide"
-                  onClick={activeTab === 'single' ? handleSingleDateFilter : handleRangeFilter}
+                  onClick={handleFilter}
                   disabled={loading}
                 >
                   <i className="fas fa-filter me-2"></i>
@@ -194,11 +279,11 @@ const CashierReport = () => {
             </div>
           )}
 
-          {/* ── Report Results ── */}
+          {/* ── Results ── */}
           {!loading && reportData && (
             <div className="report-results">
               <div className="report-period">
-                <h5>Reports for: {reportData.periodLabel}</h5>
+                <h5>Reports for: {getPeriodLabel()}</h5>
               </div>
 
               {/* Summary Cards */}
@@ -217,7 +302,7 @@ const CashierReport = () => {
                     <div className="summary-icon"><i className="fas fa-wallet"></i></div>
                     <div className="summary-content">
                       <h6>Grand Total</h6>
-                      <h3>{formatCurrency(grandTotal)}</h3>
+                      <h3>{fmt(grandTotal)}</h3>
                     </div>
                   </div>
                 </div>
@@ -226,7 +311,7 @@ const CashierReport = () => {
                     <div className="summary-icon text-primary"><i className="fas fa-utensils"></i></div>
                     <div className="summary-content">
                       <h6>Food Total</h6>
-                      <h3 className="text-primary">{formatCurrency(foodTotal)}</h3>
+                      <h3 className="text-primary">{fmt(foodTotal)}</h3>
                     </div>
                   </div>
                 </div>
@@ -235,7 +320,7 @@ const CashierReport = () => {
                     <div className="summary-icon text-warning"><i className="fas fa-bell"></i></div>
                     <div className="summary-content">
                       <h6>Service Charge</h6>
-                      <h3 className="text-warning">{formatCurrency(serviceCharge)}</h3>
+                      <h3 className="text-warning">{fmt(svcCharge)}</h3>
                     </div>
                   </div>
                 </div>
@@ -248,7 +333,7 @@ const CashierReport = () => {
                     <div className="summary-icon"><i className="fas fa-money-bill-wave"></i></div>
                     <div className="summary-content">
                       <h6>Cash Revenue</h6>
-                      <h3>{formatCurrency(cashRevenue)}</h3>
+                      <h3>{fmt(cashRev)}</h3>
                     </div>
                   </div>
                 </div>
@@ -257,13 +342,13 @@ const CashierReport = () => {
                     <div className="summary-icon"><i className="fas fa-credit-card"></i></div>
                     <div className="summary-content">
                       <h6>Card Revenue</h6>
-                      <h3>{formatCurrency(cardRevenue)}</h3>
+                      <h3>{fmt(cardRev)}</h3>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Report Table */}
+              {/* Table */}
               {rows.length > 0 ? (
                 <div className="table-responsive">
                   <table className="table table-striped report-table">
@@ -284,11 +369,11 @@ const CashierReport = () => {
                         <tr key={idx}>
                           <td><span className="badge bg-light text-dark border">{row.invoiceNumber}</span></td>
                           <td>{row.tableNo || '–'}</td>
-                          <td>{formatDateTime(row.createdAt)}</td>
+                          <td>{fmtDT(row.createdAt)}</td>
                           <td>{row.itemName}</td>
                           <td>{row.qty}</td>
-                          <td>{formatCurrency(row.unitPrice)}</td>
-                          <td>{formatCurrency(row.lineTotal)}</td>
+                          <td>{fmt(row.unitPrice)}</td>
+                          <td className="fw-semibold">{fmt(row.lineTotal)}</td>
                           <td>
                             <span className={`badge ${row.paymentMethod === 'CARD' ? 'bg-info' : 'bg-secondary'}`}>
                               {row.paymentMethod || 'CASH'}
@@ -300,17 +385,17 @@ const CashierReport = () => {
                     <tfoot>
                       <tr className="table-light total-row">
                         <td colSpan="6" className="text-end py-2 border-0">Food Total:</td>
-                        <td className="py-2 border-0">{formatCurrency(foodTotal)}</td>
+                        <td className="py-2 border-0">{fmt(foodTotal)}</td>
                         <td className="border-0"></td>
                       </tr>
                       <tr className="table-light total-row">
                         <td colSpan="6" className="text-end py-2 border-0">Service Charge:</td>
-                        <td className="py-2 border-0">{formatCurrency(serviceCharge)}</td>
+                        <td className="py-2 border-0">{fmt(svcCharge)}</td>
                         <td className="border-0"></td>
                       </tr>
                       <tr className="table-secondary grand-total-row">
                         <td colSpan="6" className="text-end"><strong>Grand Total:</strong></td>
-                        <td><strong>{formatCurrency(grandTotal)}</strong></td>
+                        <td><strong>{fmt(grandTotal)}</strong></td>
                         <td></td>
                       </tr>
                     </tfoot>
@@ -320,18 +405,18 @@ const CashierReport = () => {
                 <div className="empty-state">
                   <i className="fas fa-search fa-4x text-muted mb-3"></i>
                   <h5>No Transactions Found</h5>
-                  <p className="text-muted">No paid invoices found for this period</p>
+                  <p className="text-muted">No paid invoices recorded for this period</p>
                 </div>
               )}
             </div>
           )}
 
-          {/* ── Empty Prompt ── */}
+          {/* ── Empty prompt ── */}
           {!loading && !reportData && (
             <div className="empty-state">
               <i className="fas fa-calendar-alt fa-4x text-muted mb-3"></i>
               <h5>No Report Generated</h5>
-              <p className="text-muted">Select a date and click Filter to view your transactions</p>
+              <p className="text-muted">Select a period and click Filter to view your transactions</p>
             </div>
           )}
 
