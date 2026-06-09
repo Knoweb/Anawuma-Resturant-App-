@@ -125,7 +125,7 @@ const ManualTableOrders = () => {
                 <body>
                     <div class="header">
                         <h1 style="margin:0">${restaurantName}</h1>
-                        <h3>BILL SUMMARY (TABLE ${id})</h3>
+                        <h3>BILL SUMMARY (${id.toString().toUpperCase().startsWith('TABLE') ? id : `TABLE-${id}`})</h3>
                         <p>Currency: ${currency}</p>
                         <p>Printed: ${new Date().toLocaleString()}</p>
                     </div>
@@ -133,7 +133,7 @@ const ManualTableOrders = () => {
                     <div style="border-bottom: 1px dashed #000; padding-bottom: 8px; margin-bottom: 12px;">
                         <div class="meta-row"><span><b>Invoice No:</b></span><span>${invoiceNumber || 'INV-DRAFT'}</span></div>
                         <div class="meta-row"><span><b>Order No(s):</b></span><span>${orderNos}</span></div>
-                        <div class="meta-row"><span><b>Table:</b></span><span>TABLE-${id}</span></div>
+                        <div class="meta-row"><span><b>Table:</b></span><span>${id.toString().toUpperCase().startsWith('TABLE') ? id : `TABLE-${id}`}</span></div>
                         <div class="meta-row"><span><b>Payment:</b></span><span>${(account.selectedPaymentMethod || 'CASH').toUpperCase()}</span></div>
                     </div>
                     
@@ -328,7 +328,7 @@ const ManualTableOrders = () => {
                     </div>
                     <div class="small px-2 text-start">
                         <span class="text-muted">Table: </span>
-                        <span class="fw-bold">TABLE-${tableNo}</span>
+                        <span class="fw-bold">${tableNo.toString().toUpperCase().startsWith('TABLE') ? tableNo : `TABLE-${tableNo}`}</span>
                     </div>
                 </div>
 
