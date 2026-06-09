@@ -13,22 +13,22 @@ const ManualRoomOrders = () => {
     const [isProcessingManual, setIsProcessingManual] = useState(false);
     const user = useAuthStore(state => state.user);
     const restaurantName = user?.restaurantName || user?.restaurant?.restaurantName || 'Restaurant';
-    const rooms = [
-        // Floor 1
-        'Room 101', 'Room 102', 'Room 103',
-        // Floor 1 (extra)
-        'Room 107', 'Room 108',
-        // Floor 2
-        'Room 204', 'Room 205',
-        'Room 209', 'Room 210', 'Room 211',
-        // Floor 3
-        'Room 306',
-        'Room 312', 'Room 313', 'Room 314',
-        // Floor 4
-        'Room 415', 'Room 416', 'Room 417',
-        // HB Rooms
-        ...Array.from({ length: 8 }, (_, i) => `HB - ${String(i + 1).padStart(2, '0')}`)
+    // Explicit rows in the user-requested order. HB rooms appended afterwards in groups.
+    const rows = [
+        ['Room 101', 'Room 102', 'Room 103'],
+        ['Room 204', 'Room 205'],
+        ['Room 306'],
+        ['Room 107', 'Room 108'],
+        ['Room 209', 'Room 210', 'Room 211'],
+        ['Room 312', 'Room 313', 'Room 314'],
+        ['Room 415', 'Room 416', 'Room 417']
     ];
+
+    // Append HB rooms (HB - 01 ... HB - 08) as additional rows of up to 3 per row
+    const hbRooms = Array.from({ length: 8 }, (_, i) => `HB - ${String(i + 1).padStart(2, '0')}`);
+    for (let i = 0; i < hbRooms.length; i += 3) {
+        rows.push(hbRooms.slice(i, i + 3));
+    }
 
     const fetchAccounts = async () => {
         try {
@@ -663,39 +663,43 @@ const ManualRoomOrders = () => {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="accounts-grid">
-                                    {rooms.map(roomNo => {
-                                        const account = getAccountForRoom(roomNo);
-                                        return (
-                                            <div
-                                                key={roomNo}
-                                                className={`account-card ${account ? 'has-orders' : 'empty'}`}
-                                                onClick={() => handleRoomClick(roomNo, account)}
-                                            >
-                                                <div className="account-card-body">
-                                                    <div className="account-icon-wrapper">
-                                                        <i className="fas fa-hotel fa-2x"></i>
+                                <div className="accounts-rows">
+                                    {rows.map((row, rIdx) => (
+                                        <div className="account-row" key={`row-${rIdx}`}>
+                                            {row.map(roomNo => {
+                                                const account = getAccountForRoom(roomNo);
+                                                return (
+                                                    <div
+                                                        key={roomNo}
+                                                        className={`account-card ${account ? 'has-orders' : 'empty'}`}
+                                                        onClick={() => handleRoomClick(roomNo, account)}
+                                                    >
+                                                        <div className="account-card-body">
+                                                            <div className="account-icon-wrapper">
+                                                                <i className="fas fa-hotel fa-2x"></i>
+                                                            </div>
+                                                            <div className="account-id">{roomNo}</div>
+                                                            {account ? (
+                                                                <>
+                                                                    <div className="badge bg-success-soft text-success order-count-badge">
+                                                                        {account.orders.length} Active Orders
+                                                                    </div>
+                                                                    <div className="account-total-amount">
+                                                                        Rs. {account.totalAmount.toLocaleString()}
+                                                                    </div>
+                                                                    <div className="last-order-time">
+                                                                        Last: {new Date(account.lastOrderAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                    </div>
+                                                                </>
+                                                            ) : (
+                                                                <div className="text-muted small opacity-50 mt-4">NO ACTIVE BILLS</div>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                    <div className="account-id">{roomNo}</div>
-                                                    {account ? (
-                                                        <>
-                                                            <div className="badge bg-success-soft text-success order-count-badge">
-                                                                {account.orders.length} Active Orders
-                                                            </div>
-                                                            <div className="account-total-amount">
-                                                                Rs. {account.totalAmount.toLocaleString()}
-                                                            </div>
-                                                            <div className="last-order-time">
-                                                                Last: {new Date(account.lastOrderAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                            </div>
-                                                        </>
-                                                    ) : (
-                                                        <div className="text-muted small opacity-50 mt-4">NO ACTIVE BILLS</div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
+                                                );
+                                            })}
+                                        </div>
+                                    ))}
                                 </div>
                             )}
                         </div>
@@ -746,6 +750,23 @@ const ManualRoomOrders = () => {
           border-color: #4e73df;
           box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3);
         }
+                /* Layout for explicit rows */
+                .accounts-rows {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 18px;
+                    margin-top: 18px;
+                }
+                .account-row {
+                    display: flex;
+                    gap: 18px;
+                    justify-content: flex-start;
+                    flex-wrap: wrap;
+                }
+                .account-card {
+                    flex: 0 0 260px;
+                    max-width: 340px;
+                }
       `}</style>
         </div>
     );
