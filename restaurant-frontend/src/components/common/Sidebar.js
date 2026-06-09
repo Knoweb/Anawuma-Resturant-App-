@@ -226,14 +226,6 @@ function Sidebar() {
                     </Link>
                   </li>
                 )}
-                {isCashier && isReportsEnabled && (
-                  <li className={isActive('/reports/sales')}>
-                    <Link to="/reports/sales" onClick={closeSubmenus}>
-                      <i className="fas fa-chart-line me-2"></i>
-                      Full Reports
-                    </Link>
-                  </li>
-                )}
               </ul>
             </li>
           )}
