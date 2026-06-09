@@ -89,20 +89,31 @@ const TransferRoom = () => {
                       Use this feature when a guest moves from one room to another. It will shift all their unpaid bills and active orders seamlessly.
                     </div>
 
-                    <div className="mb-4">
-                      <label className="form-label fw-bold text-muted small">OLD ROOM NUMBER</label>
-                      <select
-                        className="form-select form-select-lg border-0 bg-light"
-                        style={{ borderRadius: '10px' }}
-                        value={oldRoomNo}
-                        onChange={(e) => setOldRoomNo(e.target.value)}
-                      >
-                        <option value="">Select current guest room...</option>
-                        {Array.from({ length: 16 }, (_, i) => (i + 1).toString()).map(num => (
-                          <option key={num} value={num}>Room {num}</option>
-                        ))}
-                      </select>
-                    </div>
+                                    <div className="mb-4">
+                                      <label className="form-label fw-bold text-muted small">OLD ROOM NUMBER</label>
+                                      <select
+                                        className="form-select form-select-lg border-0 bg-light"
+                                        style={{ borderRadius: '10px' }}
+                                        value={oldRoomNo}
+                                        onChange={(e) => setOldRoomNo(e.target.value)}
+                                      >
+                                        <option value="">Select current guest room...</option>
+                                        {(() => {
+                                          const rows = [
+                                            ['Room 101', 'Room 102', 'Room 103'],
+                                            ['Room 204', 'Room 205'],
+                                            ['Room 306'],
+                                            ['Room 107', 'Room 108'],
+                                            ['Room 209', 'Room 210', 'Room 211'],
+                                            ['Room 312', 'Room 313', 'Room 314'],
+                                            ['Room 415', 'Room 416', 'Room 417']
+                                          ];
+                                          const hb = Array.from({ length: 8 }, (_, i) => `HB - ${String(i + 1).padStart(2, '0')}`);
+                                          const flat = rows.flat().concat(hb);
+                                          return flat.map(r => <option key={r} value={r}>{r}</option>);
+                                        })()}
+                                      </select>
+                                    </div>
 
                     <div className="text-center mb-4">
                       <div className="bg-light d-inline-block p-3 rounded-circle" style={{ width: '60px', height: '60px' }}>
@@ -119,9 +130,20 @@ const TransferRoom = () => {
                         onChange={(e) => setNewRoomNo(e.target.value)}
                       >
                         <option value="">Select destination room...</option>
-                        {Array.from({ length: 16 }, (_, i) => (i + 1).toString()).map(num => (
-                          <option key={num} value={num}>Room {num}</option>
-                        ))}
+                        {(() => {
+                          const rows = [
+                            ['Room 101', 'Room 102', 'Room 103'],
+                            ['Room 204', 'Room 205'],
+                            ['Room 306'],
+                            ['Room 107', 'Room 108'],
+                            ['Room 209', 'Room 210', 'Room 211'],
+                            ['Room 312', 'Room 313', 'Room 314'],
+                            ['Room 415', 'Room 416', 'Room 417']
+                          ];
+                          const hb = Array.from({ length: 8 }, (_, i) => `HB - ${String(i + 1).padStart(2, '0')}`);
+                          const flat = rows.flat().concat(hb);
+                          return flat.map(r => <option key={r} value={r}>{r}</option>);
+                        })()}
                       </select>
                     </div>
 
