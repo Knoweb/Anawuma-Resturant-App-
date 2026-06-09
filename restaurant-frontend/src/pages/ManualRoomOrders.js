@@ -111,32 +111,45 @@ const ManualRoomOrders = () => {
         printWindow.document.close();
     };
 
-    const printAccountBill = (account, id, currency = 'LKR', rate = 1, symbol = 'Rs.') => {
+    const printAccountBill = (account, id, currency = 'LKR', rate = 1, symbol = 'Rs.', invoiceNumber = null) => {
         const printWindow = window.open('', '_blank');
         const subtotal = account.orders.reduce((sum, o) => sum + parseFloat(o.subtotal), 0);
         const serviceCharge = account.orders.reduce((sum, o) => sum + parseFloat(o.serviceCharge), 0);
         const total = parseFloat(account.totalAmount);
+        const orderNos = account.orders.map(o => o.orderNo).join(', ');
+        const qrUrl = `${window.location.origin}/google-review-qr.jpeg`;
 
         const content = `
             <html>
                 <head>
-                    <title>Bill - ${id}</title>
+                    <title>Bill - Room ${id}</title>
                     <style>
                         body { font-family: 'Courier New', Courier, monospace; padding: 20px; width: 350px; }
                         .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
+                        .meta-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 3px; }
                         .order-block { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dotted #ccc; }
                         .item-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 3px; }
                         .total-section { border-top: 2px solid #000; margin-top: 15px; padding-top: 10px; }
                         .grand-total { display: flex; justify-content: space-between; font-size: 20px; font-weight: bold; margin-top: 5px; }
-                        .footer { text-align: center; margin-top: 30px; font-size: 12px; }
+                        .footer { text-align: center; margin-top: 20px; font-size: 12px; }
+                        .qr-section { text-align: center; margin-top: 18px; border-top: 1px dashed #000; padding-top: 14px; }
+                        .qr-section img { width: 120px; height: 120px; object-fit: contain; }
+                        .qr-section p { font-size: 11px; margin: 6px 0 0; }
                     </style>
                 </head>
                 <body>
                     <div class="header">
                         <h1 style="margin:0">${restaurantName}</h1>
-                        <h3>BILL SUMMARY (${id})</h3>
+                        <h3>BILL SUMMARY (ROOM ${id})</h3>
                         <p>Currency: ${currency}</p>
                         <p>Printed: ${new Date().toLocaleString()}</p>
+                    </div>
+
+                    <div style="border-bottom: 1px dashed #000; padding-bottom: 8px; margin-bottom: 12px;">
+                        <div class="meta-row"><span><b>Invoice No:</b></span><span>${invoiceNumber || 'INV-DRAFT'}</span></div>
+                        <div class="meta-row"><span><b>Order No(s):</b></span><span>${orderNos}</span></div>
+                        <div class="meta-row"><span><b>Room:</b></span><span>${id}</span></div>
+                        <div class="meta-row"><span><b>Payment:</b></span><span>${(account.selectedPaymentMethod || 'CASH').toUpperCase()}</span></div>
                     </div>
                     
                     ${account.orders.map(order => `
@@ -172,7 +185,37 @@ const ManualRoomOrders = () => {
                     <div class="footer">
                         <p>Thank You For Dining With Us!</p>
                     </div>
-                    <script>window.print(); window.close();</script>
+
+                    <!-- Google Review QR Code -->
+                    <div class="qr-section">
+                        <p style="font-size:12px; font-weight:bold; margin-bottom:8px;">⭐ Rate Your Experience</p>
+                        <img src="${qrUrl}" alt="Google Review QR" id="qr-image" />
+                        <p>Scan to leave us a Google Review!</p>
+                    </div>
+
+                    <script>
+                        let printed = false;
+                        function doPrint() {
+                            if (!printed) {
+                                printed = true;
+                                window.print();
+                                window.close();
+                            }
+                        }
+                        const img = document.getElementById('qr-image');
+                        if (img) {
+                            if (img.complete) {
+                                doPrint();
+                            } else {
+                                img.onload = doPrint;
+                                img.onerror = doPrint;
+                            }
+                        } else {
+                            doPrint();
+                        }
+                        // Fallback in case loading hangs
+                        setTimeout(doPrint, 2000);
+                    <\/script>
                 </body>
             </html>
         `;
@@ -213,7 +256,7 @@ const ManualRoomOrders = () => {
         window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`, '_blank');
     };
 
-    const finalizeCheckout = async (account, roomNo, paymentMethod = 'CASH', shouldPrint = false) => {
+    const finalizeCheckout = async (account, roomNo, paymentMethod = 'CASH', shouldPrint = false, printOptions = {}) => {
         if (isProcessingManual) return;
         setIsProcessingManual(true);
         try {
@@ -228,9 +271,11 @@ const ManualRoomOrders = () => {
             if (response.data) {
                 // Set final state before printing
                 account.selectedPaymentMethod = paymentMethod;
+                const invoiceNumber = response.data.invoiceNumber || null;
 
                 if (shouldPrint) {
-                    printAccountBill(account, roomNo);
+                    const { currency = 'LKR', rate = 1, symbol = 'Rs.' } = printOptions;
+                    printAccountBill(account, roomNo, currency, rate, symbol, invoiceNumber);
                 }
 
                 Swal.fire({
@@ -291,6 +336,14 @@ const ManualRoomOrders = () => {
                     <div class="small d-flex justify-content-between px-2">
                         <span>Invoice #: ${tempInv}</span>
                         <span>Date: ${dateStr}, ${timeStr}</span>
+                    </div>
+                    <div class="small px-2 mt-1 text-start">
+                        <span class="text-muted">Order No(s): </span>
+                        <span class="fw-bold">${account.orders.map(o => o.orderNo).join(', ')}</span>
+                    </div>
+                    <div class="small px-2 text-start">
+                        <span class="text-muted">Room: </span>
+                        <span class="fw-bold">${roomNo}</span>
                     </div>
                 </div>
 
@@ -402,7 +455,7 @@ const ManualRoomOrders = () => {
                     cardBtn.classList.add('active');
                     cashBtn.classList.remove('active');
                 });
-
+ 
                 currencySelect.addEventListener('change', (e) => {
                     selectedCurrency = e.target.value;
                     const config = exchangeRates[selectedCurrency];
@@ -416,7 +469,7 @@ const ManualRoomOrders = () => {
                     }
                     updateInvoiceDisplay(selectedCurrency, currentRate);
                 });
-
+ 
                 rateInput.addEventListener('input', (e) => {
                     currentRate = parseFloat(e.target.value) || 1;
                     updateInvoiceDisplay(selectedCurrency, currentRate);
@@ -425,8 +478,11 @@ const ManualRoomOrders = () => {
         }).then((result) => {
             if (result.isConfirmed) {
                 const symbol = exchangeRates[selectedCurrency].symbol;
-                printAccountBill(account, roomNo, selectedCurrency, currentRate, symbol);
-                finalizeCheckout(account, roomNo, account.selectedPaymentMethod || 'CASH', false);
+                finalizeCheckout(account, roomNo, account.selectedPaymentMethod || 'CASH', true, {
+                    currency: selectedCurrency,
+                    rate: currentRate,
+                    symbol,
+                });
             } else if (result.isDenied) {
                 printAccountBill(account, roomNo, 'LKR', 1, 'Rs.');
             }

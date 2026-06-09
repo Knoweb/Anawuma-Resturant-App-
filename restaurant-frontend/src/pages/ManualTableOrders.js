@@ -131,7 +131,7 @@ const ManualTableOrders = () => {
                     </div>
 
                     <div style="border-bottom: 1px dashed #000; padding-bottom: 8px; margin-bottom: 12px;">
-                        ${invoiceNumber ? `<div class="meta-row"><span><b>Invoice No:</b></span><span>${invoiceNumber}</span></div>` : ''}
+                        <div class="meta-row"><span><b>Invoice No:</b></span><span>${invoiceNumber || 'INV-DRAFT'}</span></div>
                         <div class="meta-row"><span><b>Order No(s):</b></span><span>${orderNos}</span></div>
                         <div class="meta-row"><span><b>Table:</b></span><span>TABLE-${id}</span></div>
                         <div class="meta-row"><span><b>Payment:</b></span><span>${(account.selectedPaymentMethod || 'CASH').toUpperCase()}</span></div>
@@ -174,11 +174,33 @@ const ManualTableOrders = () => {
                     <!-- Google Review QR Code -->
                     <div class="qr-section">
                         <p style="font-size:12px; font-weight:bold; margin-bottom:8px;">⭐ Rate Your Experience</p>
-                        <img src="${qrUrl}" alt="Google Review QR" />
+                        <img src="${qrUrl}" alt="Google Review QR" id="qr-image" />
                         <p>Scan to leave us a Google Review!</p>
                     </div>
 
-                    <script>window.print(); window.close();<\/script>
+                    <script>
+                        let printed = false;
+                        function doPrint() {
+                            if (!printed) {
+                                printed = true;
+                                window.print();
+                                window.close();
+                            }
+                        }
+                        const img = document.getElementById('qr-image');
+                        if (img) {
+                            if (img.complete) {
+                                doPrint();
+                            } else {
+                                img.onload = doPrint;
+                                img.onerror = doPrint;
+                            }
+                        } else {
+                            doPrint();
+                        }
+                        // Fallback in case loading hangs
+                        setTimeout(doPrint, 2000);
+                    <\/script>
                 </body>
             </html>
         `;
