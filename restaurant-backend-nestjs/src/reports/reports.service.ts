@@ -114,7 +114,7 @@ export class ReportsService {
     };
   }
 
-  async getDailyReport(restaurantId: number, date: string, adminId?: number) {
+  async getDailyReport(restaurantId: number, date: string) {
     const dateObj = new Date(date);
     const dayOfWeek = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
     const formattedDate = dateObj.toLocaleDateString('en-US', {
@@ -125,15 +125,12 @@ export class ReportsService {
     const periodLabel = `${formattedDate} (${dayOfWeek})`;
 
     // Query PAID invoices
-    const whereClause: any = {
-      restaurantId,
-      invoiceStatus: InvoiceStatus.PAID,
-      createdAt: Raw((alias) => `DATE(${alias}) = :date`, { date }),
-    };
-    if (adminId) whereClause.createdByAdminId = adminId;
-
     const invoices = await this.invoicesRepository.find({
-      where: whereClause,
+      where: {
+        restaurantId,
+        invoiceStatus: InvoiceStatus.PAID,
+        createdAt: Raw((alias) => `DATE(${alias}) = :date`, { date }),
+      },
       relations: ['createdBy'],
       order: { createdAt: 'DESC' },
     });
@@ -195,7 +192,7 @@ export class ReportsService {
     };
   }
 
-  async getRangeReport(restaurantId: number, fromDate: string, toDate: string, adminId?: number) {
+  async getRangeReport(restaurantId: number, fromDate: string, toDate: string) {
     const from = new Date(fromDate);
     const to = new Date(toDate);
     const formattedFrom = from.toLocaleDateString('en-US', {
@@ -211,18 +208,15 @@ export class ReportsService {
     const periodLabel = `${formattedFrom} - ${formattedTo}`;
 
     // Query PAID invoices
-    const whereClause: any = {
-      restaurantId,
-      invoiceStatus: InvoiceStatus.PAID,
-      createdAt: Raw((alias) => `DATE(${alias}) BETWEEN :fromDate AND :toDate`, {
-        fromDate,
-        toDate,
-      }),
-    };
-    if (adminId) whereClause.createdByAdminId = adminId;
-
     const invoices = await this.invoicesRepository.find({
-      where: whereClause,
+      where: {
+        restaurantId,
+        invoiceStatus: InvoiceStatus.PAID,
+        createdAt: Raw((alias) => `DATE(${alias}) BETWEEN :fromDate AND :toDate`, {
+          fromDate,
+          toDate,
+        }),
+      },
       relations: ['createdBy'],
       order: { createdAt: 'DESC' },
     });
@@ -284,7 +278,7 @@ export class ReportsService {
     };
   }
 
-  async getMonthlyReport(restaurantId: number, year: number, month: number, adminId?: number) {
+  async getMonthlyReport(restaurantId: number, year: number, month: number) {
     // Calculate first and last day of the month
     const firstDay = new Date(year, month - 1, 1);
     const lastDay = new Date(year, month, 0);
@@ -297,18 +291,15 @@ export class ReportsService {
     const periodLabel = `${monthNames[month - 1]} ${year}`;
 
     // Query PAID invoices
-    const whereClause: any = {
-      restaurantId,
-      invoiceStatus: InvoiceStatus.PAID,
-      createdAt: Raw((alias) => `DATE(${alias}) BETWEEN :fromDate AND :toDate`, {
-        fromDate,
-        toDate,
-      }),
-    };
-    if (adminId) whereClause.createdByAdminId = adminId;
-
     const invoices = await this.invoicesRepository.find({
-      where: whereClause,
+      where: {
+        restaurantId,
+        invoiceStatus: InvoiceStatus.PAID,
+        createdAt: Raw((alias) => `DATE(${alias}) BETWEEN :fromDate AND :toDate`, {
+          fromDate,
+          toDate,
+        }),
+      },
       relations: ['createdBy'],
       order: { createdAt: 'DESC' },
     });
@@ -388,8 +379,8 @@ export class ReportsService {
     }));
   }
 
-  async generateDailyCsv(restaurantId: number, date: string, adminId?: number): Promise<string> {
-    const report = await this.getDailyReport(restaurantId, date, adminId);
+  async generateDailyCsv(restaurantId: number, date: string): Promise<string> {
+    const report = await this.getDailyReport(restaurantId, date);
 
     let csv = 'Order No,Table No,Date/Time,Item Name,Qty,Unit Price,Line Total,Service Charge,Payment,Cashier\n';
     
@@ -408,8 +399,8 @@ export class ReportsService {
     return csv;
   }
 
-  async generateRangeCsv(restaurantId: number, fromDate: string, toDate: string, adminId?: number): Promise<string> {
-    const report = await this.getRangeReport(restaurantId, fromDate, toDate, adminId);
+  async generateRangeCsv(restaurantId: number, fromDate: string, toDate: string): Promise<string> {
+    const report = await this.getRangeReport(restaurantId, fromDate, toDate);
 
     let csv = 'Order No,Table No,Date/Time,Item Name,Qty,Unit Price,Line Total,Service Charge,Payment,Cashier\n';
     
@@ -428,8 +419,8 @@ export class ReportsService {
     return csv;
   }
 
-  async generateMonthlyCsv(restaurantId: number, year: number, month: number, adminId?: number): Promise<string> {
-    const report = await this.getMonthlyReport(restaurantId, year, month, adminId);
+  async generateMonthlyCsv(restaurantId: number, year: number, month: number): Promise<string> {
+    const report = await this.getMonthlyReport(restaurantId, year, month);
 
     let csv = 'Order No,Table No,Date/Time,Item Name,Qty,Unit Price,Line Total,Service Charge,Payment,Cashier\n';
     

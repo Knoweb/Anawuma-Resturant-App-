@@ -28,8 +28,7 @@ export class ReportsController {
       throw new Error('Date parameter is required (YYYY-MM-DD)');
     }
     const restaurantId = req.user.restaurantId;
-    const adminId = req.user.role === UserRole.CASHIER ? req.user.userId : undefined;
-    return this.reportsService.getDailyReport(restaurantId, date, adminId);
+    return this.reportsService.getDailyReport(restaurantId, date);
   }
 
   @Get('range')
@@ -42,8 +41,7 @@ export class ReportsController {
       throw new Error('Both from and to date parameters are required (YYYY-MM-DD)');
     }
     const restaurantId = req.user.restaurantId;
-    const adminId = req.user.role === UserRole.CASHIER ? req.user.userId : undefined;
-    return this.reportsService.getRangeReport(restaurantId, fromDate, toDate, adminId);
+    return this.reportsService.getRangeReport(restaurantId, fromDate, toDate);
   }
 
   @Get('monthly')
@@ -56,8 +54,7 @@ export class ReportsController {
       throw new Error('Both year and month parameters are required');
     }
     const restaurantId = req.user.restaurantId;
-    const adminId = req.user.role === UserRole.CASHIER ? req.user.userId : undefined;
-    return this.reportsService.getMonthlyReport(restaurantId, parseInt(year), parseInt(month), adminId);
+    return this.reportsService.getMonthlyReport(restaurantId, parseInt(year), parseInt(month));
   }
 
   @Get('history')
@@ -77,8 +74,7 @@ export class ReportsController {
       throw new Error('Date parameter is required (YYYY-MM-DD)');
     }
     const restaurantId = req.user.restaurantId;
-    const adminId = req.user.role === UserRole.CASHIER ? req.user.userId : undefined;
-    const csv = await this.reportsService.generateDailyCsv(restaurantId, date, adminId);
+    const csv = await this.reportsService.generateDailyCsv(restaurantId, date);
 
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader(
@@ -99,12 +95,10 @@ export class ReportsController {
       throw new Error('Both from and to date parameters are required (YYYY-MM-DD)');
     }
     const restaurantId = req.user.restaurantId;
-    const adminId = req.user.role === UserRole.CASHIER ? req.user.userId : undefined;
     const csv = await this.reportsService.generateRangeCsv(
       restaurantId,
       fromDate,
       toDate,
-      adminId,
     );
 
     res.setHeader('Content-Type', 'text/csv');
@@ -126,12 +120,10 @@ export class ReportsController {
       throw new Error('Both year and month parameters are required');
     }
     const restaurantId = req.user.restaurantId;
-    const adminId = req.user.role === UserRole.CASHIER ? req.user.userId : undefined;
     const csv = await this.reportsService.generateMonthlyCsv(
       restaurantId,
       parseInt(year),
       parseInt(month),
-      adminId,
     );
 
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
