@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/common/Navbar';
 import Sidebar from '../components/common/Sidebar';
 import { billingAPI, reportsAPI } from '../api/apiClient';
+import Swal from 'sweetalert2';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAuthStore } from '../store/authStore';
 import './ServiceBillingDashboard.css';
@@ -544,6 +545,45 @@ const ServiceBillingDashboard = ({
       setLoadingSummary(false);
     }
   }, [isCashierDashboard]);
+
+  // Download CSV for current invoice filters (cashier-scoped by backend)
+  const handleDownloadInvoiceCsv = async () => {
+    if (!filterFrom && !filterTo) {
+      Swal.fire('Info', 'Please select a date or a date range to download CSV', 'info');
+      return;
+    }
+
+    try {
+      let response;
+      let filename = 'invoices.csv';
+
+      if (filterFrom && filterTo) {
+        response = await reportsAPI.downloadRangeCsv(filterFrom, filterTo);
+        filename = `invoices-${filterFrom}-to-${filterTo}.csv`;
+      } else if (filterFrom) {
+        response = await reportsAPI.downloadDailyCsv(filterFrom);
+        filename = `invoices-${filterFrom}.csv`;
+      } else {
+        Swal.fire('Info', 'Please select at least a From date', 'info');
+        return;
+      }
+
+      const blob = new Blob([response.data], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      Swal.fire('Success', 'CSV downloaded', 'success');
+    } catch (err) {
+      console.error('CSV download error', err);
+      Swal.fire('Error', err?.response?.data?.message || 'Failed to download CSV', 'error');
+    }
+  };
 
   useEffect(() => {
     fetchCashierQueue();
@@ -1184,6 +1224,12 @@ const ServiceBillingDashboard = ({
                   onClick={() => { setFilterFrom(''); setFilterTo(''); setFilterTable(''); }}
                 >
                   <i className="fas fa-times me-1"></i>Clear
+                </button>
+                <button
+                  className="btn btn-sm btn-success ms-2"
+                  onClick={handleDownloadInvoiceCsv}
+                >
+                  <i className="fas fa-download me-1"></i>Download CSV
                 </button>
               </div>
 
