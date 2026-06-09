@@ -209,14 +209,6 @@ function Sidebar() {
                     Transfer Room
                   </Link>
                 </li>
-                {(isAdmin || isSuperAdmin) && isReportsEnabled && (
-                  <li className={isActive('/reports/sales')}>
-                    <Link to="/reports/sales" onClick={closeSubmenus}>
-                      <i className="fas fa-chart-line me-2"></i>
-                      Sales Reports
-                    </Link>
-                  </li>
-                )}
               </ul>
             </li>
           )}
@@ -361,6 +353,16 @@ function Sidebar() {
               <Link to="/accountant/dashboard" onClick={closeSubmenus}>
                 <i className="fas fa-calculator"></i>
                 <span>Accountant Dashboard</span>
+              </Link>
+            </li>
+          )}
+
+          {/* Reports — top-level for admin / super_admin */}
+          {canAccessAdminFeatures && isReportsEnabled && (
+            <li className={isActive('/reports/sales')}>
+              <Link to="/reports/sales" onClick={closeSubmenus}>
+                <i className="fas fa-chart-line"></i>
+                <span>Reports</span>
               </Link>
             </li>
           )}
