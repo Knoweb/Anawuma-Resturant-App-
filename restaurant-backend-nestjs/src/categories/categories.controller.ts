@@ -11,6 +11,7 @@ import {
   Query,
   UseInterceptors,
   UploadedFile,
+  Headers,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -25,6 +26,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../auth/enums/role.enum';
+import { RestaurantsService } from '../restaurants/restaurants.service';
 
 interface RequestWithUser extends Request {
   user: {
@@ -37,7 +39,10 @@ interface RequestWithUser extends Request {
 
 @Controller('categories')
 export class CategoriesController {
-  constructor(private readonly categoriesService: CategoriesService) {}
+  constructor(
+    private readonly categoriesService: CategoriesService,
+    private readonly restaurantsService: RestaurantsService,
+  ) {}
 
   @Post('upload-image')
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -83,16 +88,31 @@ export class CategoriesController {
   }
 
   @Get()
-  findAll(@Query('menuId') menuId?: string, @Request() req?: RequestWithUser) {
+  async findAll(
+    @Query('menuId') menuId?: string,
+    @Query('apiKey') apiKeyQuery?: string,
+    @Headers('x-api-key') apiKeyHeader?: string,
+    @Request() req?: RequestWithUser,
+  ) {
     // Public endpoint - no auth guard
+    // Resolve restaurantId: prefer authenticated user, then API key
+    let restaurantId: number | undefined = req?.user?.restaurantId;
+
+    if (!restaurantId) {
+      const apiKey = apiKeyHeader || apiKeyQuery;
+      if (apiKey) {
+        const restaurant = await this.restaurantsService.findByApiKey(apiKey);
+        if (restaurant) {
+          restaurantId = restaurant.restaurantId;
+        }
+      }
+    }
+
     // If menuId is provided, filter by menu
     if (menuId) {
-      const restaurantId = req?.user?.restaurantId || 0;
       return this.categoriesService.findByMenu(+menuId, restaurantId);
     }
-    
-    // Return all categories (optionally filtered by restaurant if authenticated)
-    const restaurantId = req?.user?.restaurantId;
+
     return this.categoriesService.findAll(restaurantId);
   }
 

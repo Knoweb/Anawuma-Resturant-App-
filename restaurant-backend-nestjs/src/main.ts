@@ -7,9 +7,19 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Enable CORS with explicit IP whitelist
+  // Enable CORS with dynamic whitelisting from environment
+  const corsOrigin = process.env.CORS_ORIGIN;
+  const allowedOrigins = corsOrigin
+    ? corsOrigin.split(',').map((o) => o.trim())
+    : ['http://localhost:3000', 'http://localhost:3001'];
+
+  // Ensure standard fallbacks are included
+  if (!allowedOrigins.includes('http://localhost:3000')) allowedOrigins.push('http://localhost:3000');
+  if (!allowedOrigins.includes('http://localhost:3001')) allowedOrigins.push('http://localhost:3001');
+  if (!allowedOrigins.includes('http://152.42.179.36')) allowedOrigins.push('http://152.42.179.36');
+
   app.enableCors({
-    origin: ['http://152.42.179.36', 'http://localhost:3000', 'http://localhost:3001'],
+    origin: allowedOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });

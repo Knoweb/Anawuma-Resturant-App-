@@ -12,6 +12,7 @@ import {
   ParseIntPipe,
   UseInterceptors,
   UploadedFile,
+  Headers,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -26,10 +27,21 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../auth/enums/role.enum';
+import { RestaurantsService } from '../restaurants/restaurants.service';
+
+interface RequestWithUser extends Request {
+  user: {
+    restaurantId: number;
+    role: string;
+  };
+}
 
 @Controller('food-items')
 export class FoodItemsController {
-  constructor(private readonly foodItemsService: FoodItemsService) {}
+  constructor(
+    private readonly foodItemsService: FoodItemsService,
+    private readonly restaurantsService: RestaurantsService,
+  ) {}
 
   @Post('upload-image')
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -92,11 +104,14 @@ export class FoodItemsController {
   }
 
   @Get()
-  findAll(
+  async findAll(
     @Query('menuId') menuId?: string,
     @Query('categoryId') categoryId?: string,
     @Query('subcategoryId') subcategoryId?: string,
     @Query('search') search?: string,
+    @Query('apiKey') apiKeyQuery?: string,
+    @Headers('x-api-key') apiKeyHeader?: string,
+    @Request() req?: RequestWithUser,
   ) {
     const filters: any = {};
 
@@ -116,9 +131,20 @@ export class FoodItemsController {
       filters.search = search;
     }
 
-    // Public endpoint - no restaurant filter for now
-    // In production, you might want to add restaurant context
-    return this.foodItemsService.findAll(undefined, filters);
+    // Resolve restaurantId: prefer authenticated user, then API key
+    let restaurantId: number | undefined = req?.user?.restaurantId;
+
+    if (!restaurantId) {
+      const apiKey = apiKeyHeader || apiKeyQuery;
+      if (apiKey) {
+        const restaurant = await this.restaurantsService.findByApiKey(apiKey);
+        if (restaurant) {
+          restaurantId = restaurant.restaurantId;
+        }
+      }
+    }
+
+    return this.foodItemsService.findAll(restaurantId, filters);
   }
 
   @Get(':id')

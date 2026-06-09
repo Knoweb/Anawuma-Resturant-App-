@@ -22,9 +22,10 @@ const CustomerOrder = () => {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
+      const headers = apiKey ? { 'x-api-key': apiKey } : {};
       const [categoriesRes, foodItemsRes] = await Promise.all([
-        axios.get(`${API_URL}/categories`),
-        axios.get(`${API_URL}/food-items`),
+        axios.get(`${API_URL}/categories`, { headers }),
+        axios.get(`${API_URL}/food-items`, { headers }),
       ]);
 
       setCategories(categoriesRes.data || []);
@@ -36,7 +37,7 @@ const CustomerOrder = () => {
     } finally {
       setLoading(false);
     }
-  }, [API_URL]);
+  }, [API_URL, apiKey]);
 
   useEffect(() => {
     if (!apiKey) {
