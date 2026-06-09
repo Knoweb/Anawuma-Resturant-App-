@@ -236,6 +236,36 @@ function Sidebar() {
             </>
           )}
 
+          {canAccessReports && (
+            <li className={`has-submenu ${menuStates.reports ? 'open' : ''}`}>
+              <a href="#" onClick={(e) => { e.preventDefault(); toggleMenu('reports'); }}>
+                <i className="fas fa-chart-line"></i>
+                <span>Reports</span>
+                <i className={`fas fa-chevron-${menuStates.reports ? 'down' : 'right'} submenu-arrow`}></i>
+              </a>
+              <ul className="submenu" style={{ display: menuStates.reports ? 'block' : 'none' }}>
+                <li className={isActive('/reports/sales')}>
+                  <Link to="/reports/sales" onClick={closeSubmenus}>
+                    <i className="fas fa-chart-line me-2"></i>
+                    Sales Reports
+                  </Link>
+                </li>
+                <li className={isActive('/reports/daily')}>
+                  <Link to="/reports/daily" onClick={closeSubmenus}>
+                    <i className="fas fa-calendar-day me-2"></i>
+                    Daily Report
+                  </Link>
+                </li>
+                <li className={isActive('/reports/monthly')}>
+                  <Link to="/reports/monthly" onClick={closeSubmenus}>
+                    <i className="fas fa-calendar-alt me-2"></i>
+                    Monthly Report
+                  </Link>
+                </li>
+              </ul>
+            </li>
+          )}
+
 
 
 
