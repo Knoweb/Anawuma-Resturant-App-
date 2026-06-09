@@ -167,6 +167,12 @@ function Sidebar() {
                     Add Food Items
                   </Link>
                 </li>
+                <li className={isActive('/menus/offers')}>
+                  <Link to="/menus/offers">
+                    <i className="fas fa-tags me-2"></i>
+                    Offers
+                  </Link>
+                </li>
               </ul>
             </li>
           )}
