@@ -242,6 +242,25 @@ const SalesReports = () => {
   const displayGrandTotal   = displayFoodTotal + displaySvcCharge;
   const displayTotalOrders  = uniqueInvoiceIds.size;
 
+  const uniqueInvoicesList = Array.from(uniqueInvoiceIds).map(id => {
+    const items = filteredRows.filter(r => r.invoiceId === id);
+    const foodTotal = items.reduce((s, r) => s + parseFloat(r.lineTotal || 0), 0);
+    const svc = parseFloat(items[0]?.invoiceServiceCharge || 0);
+    return {
+      invoiceId: id,
+      total: foodTotal + svc,
+      paymentMethod: items[0]?.paymentMethod || 'CASH'
+    };
+  });
+
+  const displayCashRevenue = selectedCashier === 'all'
+    ? (reportData?.cashRevenue || 0)
+    : uniqueInvoicesList.filter(inv => inv.paymentMethod === 'CASH').reduce((s, inv) => s + inv.total, 0);
+
+  const displayCardRevenue = selectedCashier === 'all'
+    ? (reportData?.cardRevenue || 0)
+    : uniqueInvoicesList.filter(inv => inv.paymentMethod === 'CARD').reduce((s, inv) => s + inv.total, 0);
+
   const weekRange = getWeekRange(weekBase);
 
   const TABS = [
@@ -515,6 +534,26 @@ const SalesReports = () => {
                       </div>
                     </div>
                   </div>
+
+                  {/* Row 2 */}
+                  <div className="col-md-6">
+                    <div className="summary-card cash">
+                      <div className="summary-icon"><i className="fas fa-money-bill-wave"></i></div>
+                      <div className="summary-content">
+                        <h6>Cash Revenue</h6>
+                        <h3>{fmt(displayCashRevenue)}</h3>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <div className="summary-card card-type">
+                      <div className="summary-icon"><i className="fas fa-credit-card"></i></div>
+                      <div className="summary-content">
+                        <h6>Card Revenue</h6>
+                        <h3>{fmt(displayCardRevenue)}</h3>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Report Table */}
@@ -555,9 +594,9 @@ const SalesReports = () => {
                           <td colSpan="3" className="border-0"></td>
                         </tr>
                         <tr className="table-light report-total-row">
-                          <td colSpan="7" className="text-end py-1 border-0">Service Charge:</td>
+                          <td colSpan="6" className="text-end py-1 border-0">Service Charge:</td>
                           <td className="py-1 border-0">{fmt(displaySvcCharge)}</td>
-                          <td colSpan="2" className="border-0"></td>
+                          <td colSpan="3" className="border-0"></td>
                         </tr>
                         <tr className="table-secondary report-grand-total-row">
                           <td colSpan="6" className="text-end"><strong>Grand Total:</strong></td>
