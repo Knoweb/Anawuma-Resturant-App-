@@ -11,6 +11,19 @@ import './KitchenKDS.css';
 const KitchenKDS = () => {
   const { user } = useAuthStore();
   const restaurantName = user?.restaurantName || 'ANAWUMA';
+  const [restaurantInfo, setRestaurantInfo] = useState(null);
+
+  useEffect(() => {
+    if (user?.restaurantId) {
+      apiClient.get(`/restaurant/${user.restaurantId}`)
+        .then(res => {
+          if (res.data.success) {
+            setRestaurantInfo(res.data.data);
+          }
+        })
+        .catch(err => console.error('Error fetching restaurant info:', err));
+    }
+  }, [user?.restaurantId]);
   const [orders, setOrders] = useState({
     NEW: [],
     COOKING: [],
@@ -633,7 +646,14 @@ const KitchenKDS = () => {
           <div id="billContent">
             <div class="receipt-header">
               <h1 class="restaurant-name">${escapeHtml(restaurantName)}</h1>
-              <div class="invoice-label">Tax Invoice</div>
+              ${(restaurantInfo?.address || restaurantInfo?.contactNumber) ? `
+                <div style="font-size: 14px; color: #555; margin-top: 5px; border-top: 1px dashed #666; border-bottom: 1px dashed #666; padding: 4px 0;">
+                  ${restaurantInfo.address ? `<div style="margin-bottom: 2px;">${escapeHtml(restaurantInfo.address)}</div>` : ''}
+                  ${restaurantInfo.contactNumber ? `<div>Tel: ${escapeHtml(restaurantInfo.contactNumber)}</div>` : ''}
+                </div>
+              ` : `
+                <div class="invoice-label">Invoice</div>
+              `}
             </div>
 
             <div class="info-grid">

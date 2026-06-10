@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/common/Navbar';
 import Sidebar from '../components/common/Sidebar';
-import { billingAPI, reportsAPI } from '../api/apiClient';
+import apiClient, { billingAPI, reportsAPI } from '../api/apiClient';
 import Swal from 'sweetalert2';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAuthStore } from '../store/authStore';
@@ -51,13 +51,20 @@ function getOrderAge(createdAt) {
 // Printable Invoice component (rendered off-screen, triggered by window.print)
 // ---------------------------------------------------------------------------
 
-function PrintableInvoice({ invoice, restaurantName }) {
+function PrintableInvoice({ invoice, restaurantName, address, contactNumber }) {
   const items = Array.isArray(invoice.orderItemsJson) ? invoice.orderItemsJson : [];
   return (
     <div id="printable-invoice" className="printable-invoice">
       <div className="pi-header">
         <div className="pi-restaurant">{restaurantName || 'Restaurant'}</div>
-        <div className="pi-title">TAX INVOICE</div>
+        {(address || contactNumber) ? (
+          <div className="pi-hotel-info" style={{ margin: '4px 0', fontSize: '0.8rem', borderTop: '1px dashed #666', borderBottom: '1px dashed #666', padding: '4px 0' }}>
+            {address && <div className="pi-address" style={{ marginBottom: '2px' }}>{address}</div>}
+            {contactNumber && <div className="pi-phone">Tel: {contactNumber}</div>}
+          </div>
+        ) : (
+          <div style={{ borderTop: '1px dashed #666', margin: '4px 0' }}></div>
+        )}
         <div className="pi-meta">
           <span><strong>Invoice #:</strong> {invoice.invoiceNumber}</span>
           <span>
@@ -127,7 +134,7 @@ function PrintableInvoice({ invoice, restaurantName }) {
 // Invoice Detail Modal
 // ---------------------------------------------------------------------------
 
-function InvoiceModal({ invoice, restaurantName, onClose, onMarkServed, onMarkPaid, isCashierDashboard }) {
+function InvoiceModal({ invoice, restaurantName, address, contactNumber, onClose, onMarkServed, onMarkPaid, isCashierDashboard }) {
   const printRef = useRef();
   const [printing, setPrinting] = useState(false);
   const [sendingWhatsapp, setSendingWhatsapp] = useState(false);
@@ -211,7 +218,7 @@ function InvoiceModal({ invoice, restaurantName, onClose, onMarkServed, onMarkPa
         </div>
 
         <div className="invoice-modal-body" ref={printRef}>
-          <PrintableInvoice invoice={invoice} restaurantName={restaurantName} />
+          <PrintableInvoice invoice={invoice} restaurantName={restaurantName} address={address} contactNumber={contactNumber} />
         </div>
 
         <div className="invoice-modal-footer">
@@ -396,21 +403,33 @@ const ServiceBillingDashboard = ({
   const showCashierQueueSection = false; // Temporarily removed as per user request
   const showInvoiceHistorySection =
     !isCashierDashboard || resolvedCashierTab === 'history' || resolvedCashierTab === 'queue';
+
   const autoTransferStorageKey = `cashier-auto-transfer:${user?.restaurantId || 'global'}`;
   const autoSendInFlightRef = useRef(false);
   const toastTimerRef = useRef(null);
 
-  // Ready orders state
   const [readyOrders, setReadyOrders] = useState([]);
   const [loadingReady, setLoadingReady] = useState(true);
   const [readyError, setReadyError] = useState('');
 
-  // Cashier queue state
   const [cashierQueue, setCashierQueue] = useState([]);
   const [loadingCashierQueue, setLoadingCashierQueue] = useState(true);
   const [cashierQueueError, setCashierQueueError] = useState('');
 
-  // Cashier -> Accountant transfer state
+  const [restaurantInfo, setRestaurantInfo] = useState(null);
+
+  useEffect(() => {
+    if (user?.restaurantId) {
+      apiClient.get(`/restaurant/${user.restaurantId}`)
+        .then(res => {
+          if (res.data.success) {
+            setRestaurantInfo(res.data.data);
+          }
+        })
+        .catch(err => console.error('Error fetching restaurant info:', err));
+    }
+  }, [user?.restaurantId]);
+
   const [transferDate, setTransferDate] = useState(getLocalDateString());
   const [cashierTransactions, setCashierTransactions] = useState([]);
   const [selectedTransferIds, setSelectedTransferIds] = useState(new Set());
@@ -1310,6 +1329,8 @@ const ServiceBillingDashboard = ({
             onBeforePrint: isCashierDashboard ? () => handleCashierPrint(viewInvoice) : undefined,
           }}
           restaurantName={restaurantName}
+          address={restaurantInfo?.address}
+          contactNumber={restaurantInfo?.contactNumber}
           isCashierDashboard={isCashierDashboard}
           onClose={() => setViewInvoice(null)}
           onMarkServed={

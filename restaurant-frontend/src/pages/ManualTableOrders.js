@@ -13,6 +13,19 @@ const ManualTableOrders = () => {
     const [isProcessingManual, setIsProcessingManual] = useState(false);
     const user = useAuthStore(state => state.user);
     const restaurantName = user?.restaurantName || user?.restaurant?.restaurantName || 'Restaurant';
+    const [restaurantInfo, setRestaurantInfo] = useState(null);
+
+    useEffect(() => {
+        if (user?.restaurantId) {
+            apiClient.get(`/restaurant/${user.restaurantId}`)
+                .then(res => {
+                    if (res.data.success) {
+                        setRestaurantInfo(res.data.data);
+                    }
+                })
+                .catch(err => console.error('Error fetching restaurant info:', err));
+        }
+    }, [user?.restaurantId]);
 
     const fetchAccounts = async () => {
         try {
@@ -317,7 +330,14 @@ const ManualTableOrders = () => {
             <div class="invoice-container modern-invoice">
                 <div class="invoice-header text-center mb-4">
                     <h2 class="mb-0">${restaurantName}</h2>
-                    <div class="border-top border-bottom my-2 py-1 font-weight-bold">TAX INVOICE</div>
+                    ${(restaurantInfo?.address || restaurantInfo?.contactNumber) ? `
+                        <div class="border-top border-bottom my-2 py-1 small">
+                            ${restaurantInfo.address ? `<div class="mb-1">${restaurantInfo.address}</div>` : ''}
+                            ${restaurantInfo.contactNumber ? `<div>Tel: ${restaurantInfo.contactNumber}</div>` : ''}
+                        </div>
+                    ` : `
+                        <div class="border-top border-bottom my-2 py-1 font-weight-bold">INVOICE</div>
+                    `}
                     <div class="small d-flex justify-content-between px-2">
                         <span>Invoice #: ${tempInv}</span>
                         <span>Date: ${dateStr}, ${timeStr}</span>
