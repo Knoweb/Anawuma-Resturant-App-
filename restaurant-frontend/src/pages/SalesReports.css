@@ -282,26 +282,32 @@
   max-height: 80px;
   width: auto;
   object-fit: contain;
+  margin-bottom: 8px;
 }
 
 .print-restaurant-name {
   font-size: 22px !important;
   font-weight: 700 !important;
+  margin: 4px 0 !important;
   color: #1e293b !important;
 }
 
-.print-restaurant-address,
-.print-restaurant-cashier,
-.print-restaurant-contact {
+.print-restaurant-address {
   font-size: 13px !important;
   color: #475569 !important;
-  margin: 3px 0 !important;
+  margin: 2px 0 !important;
+}
+
+.print-restaurant-contact {
+  font-size: 12px !important;
+  color: #64748b !important;
+  margin: 2px 0 !important;
 }
 
 .print-header-divider {
   border: 0;
-  border-top: 1px solid #cbd5e1;
-  margin: 12px 0;
+  border-top: 2px solid #cbd5e1;
+  margin: 15px 0;
   opacity: 1;
 }
 
@@ -323,12 +329,6 @@
 
   .print-only {
     display: block !important;
-  }
-
-  .report-print-header {
-    display: block !important;
-    text-align: left !important;
-    margin-bottom: 20px !important;
   }
 
   .dashboard-container {
