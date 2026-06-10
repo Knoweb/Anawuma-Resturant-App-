@@ -203,10 +203,10 @@
 }
 
 .report-table thead th {
-  background: #f8f9fa;
-  color: #2c3e50;
+  background-color: #266668 !important;
+  color: #ffffff !important;
   font-weight: 600;
-  border-bottom: 2px solid #dee2e6;
+  border-bottom: 2px solid #1a4648;
   padding: 15px;
 }
 
@@ -444,7 +444,13 @@
     display: table-footer-group;
   }
 
-  .report-table thead th,
+  .report-table thead th {
+    background-color: #f1f5f9 !important;
+    color: #000000 !important;
+    padding: 5px 6px !important;
+    border: 1px solid #ddd !important;
+  }
+
   .report-table tbody td {
     padding: 5px 6px !important;
     border: 1px solid #ddd !important;
