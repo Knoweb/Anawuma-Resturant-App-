@@ -366,7 +366,7 @@ const CashierReport = () => {
               </div>
 
               {/* Summary Cards */}
-              <div className="row g-3 mb-4">
+              <div className="row g-3 mb-4 no-print">
                 <div className="col-md-3">
                   <div className="summary-card">
                     <div className="summary-icon"><i className="fas fa-file-invoice"></i></div>
@@ -406,7 +406,7 @@ const CashierReport = () => {
               </div>
 
               {/* Payment breakdown */}
-              <div className="row g-3 mb-4">
+              <div className="row g-3 mb-4 no-print">
                 <div className="col-md-6">
                   <div className="summary-card cash">
                     <div className="summary-icon"><i className="fas fa-money-bill-wave"></i></div>

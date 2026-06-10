@@ -482,7 +482,7 @@ const SalesReports = () => {
                 </div>
 
                 {/* Summary Cards */}
-                <div className="row g-3 mb-4">
+                <div className="row g-3 mb-4 no-print">
                   <div className="col-md-3">
                     <div className="summary-card">
                       <div className="summary-icon"><i className="fas fa-file-invoice"></i></div>
