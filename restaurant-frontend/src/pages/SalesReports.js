@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Swal from 'sweetalert2';
-import apiClient from '../api/apiClient';
+import apiClient, { BASE_URL, sanitizeUrl } from '../api/apiClient';
 import Sidebar from '../components/common/Sidebar';
 import Navbar from '../components/common/Navbar';
 import './SalesReports.css';
+import { useAuthStore } from '../store/authStore';
 
 /* ── date helpers ──────────────────────────────────────────────────────────── */
 const toISO = (d) => d.toISOString().split('T')[0];
@@ -33,6 +34,20 @@ const MONTH_NAMES = ['January','February','March','April','May','June',
 /* ══════════════════════════════════════════════════════════════════════════ */
 const SalesReports = () => {
   const today = toISO(new Date());
+  const { user } = useAuthStore();
+  const [restaurantInfo, setRestaurantInfo] = useState(null);
+
+  useEffect(() => {
+    if (user?.restaurantId) {
+      apiClient.get(`/restaurant/${user.restaurantId}`)
+        .then(res => {
+          if (res.data.success) {
+            setRestaurantInfo(res.data.data);
+          }
+        })
+        .catch(err => console.error('Error fetching restaurant info for report:', err));
+    }
+  }, [user]);
 
   // tabs: 'single' | 'weekly' | 'monthly' | 'range' | 'history'
   const [activeTab, setActiveTab]   = useState('single');
@@ -237,6 +252,13 @@ const SalesReports = () => {
     { key: 'history', label: 'Report History'},
   ];
 
+  const logoPath = restaurantInfo?.logo || user?.restaurantLogo;
+  const restaurantLogoUrl = logoPath
+    ? sanitizeUrl(logoPath.startsWith('http')
+      ? logoPath
+      : `${BASE_URL}${logoPath.startsWith('/') ? '' : '/'}${logoPath}`)
+    : null;
+
   /* ═══════════════════════════════════ RENDER ═══════════════════════════════ */
   return (
     <div className="dashboard-container">
@@ -429,6 +451,20 @@ const SalesReports = () => {
           {!loading && reportData && activeTab !== 'history' && (() => {
             return (
               <div className="report-results">
+                {/* Print-only header */}
+                <div className="report-print-header text-center mb-4">
+                  {restaurantLogoUrl && (
+                    <img src={restaurantLogoUrl} alt="Logo" className="print-logo mb-2" />
+                  )}
+                  <h2 className="print-restaurant-name">{restaurantInfo?.restaurantName || user?.restaurantName || 'Restaurant'}</h2>
+                  <p className="print-restaurant-address mb-1">{restaurantInfo?.address || 'Hotel Address'}</p>
+                  <p className="print-restaurant-contact mb-1">
+                    {restaurantInfo?.contactNumber && <span>Tel: {restaurantInfo.contactNumber}</span>}
+                    {restaurantInfo?.email && <span className="ms-3">Email: {restaurantInfo.email}</span>}
+                  </p>
+                  <hr className="print-header-divider" />
+                </div>
+
                 <div className="report-period">
                   <h5>
                     Reports for: {getPeriodLabel()}
@@ -509,20 +545,20 @@ const SalesReports = () => {
                         ))}
                       </tbody>
                       <tfoot>
-                        <tr className="table-light">
-                          <td colSpan="8" className="text-end py-1 border-0">Food Total:</td>
+                        <tr className="table-light report-total-row">
+                          <td colSpan="6" className="text-end py-1 border-0">Food Total:</td>
                           <td className="py-1 border-0">{fmt(displayFoodTotal)}</td>
-                          <td className="border-0"></td>
+                          <td colSpan="3" className="border-0"></td>
                         </tr>
-                        <tr className="table-light">
-                          <td colSpan="8" className="text-end py-1 border-0">Service Charge:</td>
+                        <tr className="table-light report-total-row">
+                          <td colSpan="7" className="text-end py-1 border-0">Service Charge:</td>
                           <td className="py-1 border-0">{fmt(displaySvcCharge)}</td>
-                          <td className="border-0"></td>
+                          <td colSpan="2" className="border-0"></td>
                         </tr>
-                        <tr className="table-secondary">
-                          <td colSpan="8" className="text-end"><strong>Grand Total:</strong></td>
+                        <tr className="table-secondary report-grand-total-row">
+                          <td colSpan="6" className="text-end"><strong>Grand Total:</strong></td>
                           <td><strong>{fmt(displayGrandTotal)}</strong></td>
-                          <td></td>
+                          <td colSpan="3"></td>
                         </tr>
                       </tfoot>
                     </table>

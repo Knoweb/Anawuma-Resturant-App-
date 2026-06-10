@@ -219,12 +219,12 @@
   background: #f8f9fa;
 }
 
-.report-table tfoot .total-row {
+.report-table tfoot .report-total-row {
   background-color: #f8f9fa;
   font-weight: 600;
 }
 
-.report-table tfoot .grand-total-row {
+.report-table tfoot .report-grand-total-row {
   background-color: #e9ecef;
   font-size: 1.1rem;
 }
@@ -270,6 +270,47 @@
   margin-top: 10px;
 }
 
+.print-only {
+  display: none;
+}
+
+.report-print-header {
+  display: none;
+}
+
+.print-logo {
+  max-height: 80px;
+  width: auto;
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
+.print-restaurant-name {
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  margin: 4px 0 !important;
+  color: #1e293b !important;
+}
+
+.print-restaurant-address {
+  font-size: 13px !important;
+  color: #475569 !important;
+  margin: 2px 0 !important;
+}
+
+.print-restaurant-contact {
+  font-size: 12px !important;
+  color: #64748b !important;
+  margin: 2px 0 !important;
+}
+
+.print-header-divider {
+  border: 0;
+  border-top: 2px solid #cbd5e1;
+  margin: 15px 0;
+  opacity: 1;
+}
+
 /* Print Styles */
 @media print {
   @page {
@@ -284,6 +325,10 @@
 
   .no-print {
     display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
   }
 
   .dashboard-container {

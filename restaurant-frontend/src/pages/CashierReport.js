@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
-import apiClient from '../api/apiClient';
+import apiClient, { BASE_URL, sanitizeUrl } from '../api/apiClient';
 import Sidebar from '../components/common/Sidebar';
 import Navbar from '../components/common/Navbar';
 import './SalesReports.css';
+
+import { useAuthStore } from '../store/authStore';
 
 /* ── date helpers ─────────────────────────────────────────────────────────── */
 const toISO = (d) => d.toISOString().split('T')[0];
@@ -35,6 +37,20 @@ const MONTH_NAMES = [
 /* ═══════════════════════════════════════════════════════════════════════════ */
 const CashierReport = () => {
   const today = toISO(new Date());
+  const { user } = useAuthStore();
+  const [restaurantInfo, setRestaurantInfo] = useState(null);
+
+  useEffect(() => {
+    if (user?.restaurantId) {
+      apiClient.get(`/restaurant/${user.restaurantId}`)
+        .then(res => {
+          if (res.data.success) {
+            setRestaurantInfo(res.data.data);
+          }
+        })
+        .catch(err => console.error('Error fetching restaurant info for report:', err));
+    }
+  }, [user]);
 
   // tab: 'single' | 'weekly' | 'monthly' | 'range'
   const [activeTab, setActiveTab]   = useState('single');
@@ -169,6 +185,13 @@ const CashierReport = () => {
 
   /* ── week display helper ─────────────────────────────────────────────────── */
   const weekRange = getWeekRange(weekBase);
+
+  const logoPath = restaurantInfo?.logo || user?.restaurantLogo;
+  const restaurantLogoUrl = logoPath
+    ? sanitizeUrl(logoPath.startsWith('http')
+      ? logoPath
+      : `${BASE_URL}${logoPath.startsWith('/') ? '' : '/'}${logoPath}`)
+    : null;
 
   return (
     <div className="dashboard-container">
@@ -316,6 +339,20 @@ const CashierReport = () => {
           {/* ── Results ── */}
           {!loading && reportData && (
             <div className="report-results">
+              {/* Print-only header */}
+              <div className="report-print-header text-center mb-4">
+                {restaurantLogoUrl && (
+                  <img src={restaurantLogoUrl} alt="Logo" className="print-logo mb-2" />
+                )}
+                <h2 className="print-restaurant-name">{restaurantInfo?.restaurantName || user?.restaurantName || 'Restaurant'}</h2>
+                <p className="print-restaurant-address mb-1">{restaurantInfo?.address || 'Hotel Address'}</p>
+                <p className="print-restaurant-contact mb-1">
+                  {restaurantInfo?.contactNumber && <span>Tel: {restaurantInfo.contactNumber}</span>}
+                  {restaurantInfo?.email && <span className="ms-3">Email: {restaurantInfo.email}</span>}
+                </p>
+                <hr className="print-header-divider" />
+              </div>
+
               <div className="report-period">
                 <h5>Reports for: {getPeriodLabel()}</h5>
               </div>
@@ -417,17 +454,17 @@ const CashierReport = () => {
                       ))}
                     </tbody>
                     <tfoot>
-                      <tr className="table-light total-row">
+                      <tr className="table-light report-total-row">
                         <td colSpan="6" className="text-end py-2 border-0">Food Total:</td>
                         <td className="py-2 border-0">{fmt(foodTotal)}</td>
                         <td className="border-0"></td>
                       </tr>
-                      <tr className="table-light total-row">
+                      <tr className="table-light report-total-row">
                         <td colSpan="6" className="text-end py-2 border-0">Service Charge:</td>
                         <td className="py-2 border-0">{fmt(svcCharge)}</td>
                         <td className="border-0"></td>
                       </tr>
-                      <tr className="table-secondary grand-total-row">
+                      <tr className="table-secondary report-grand-total-row">
                         <td colSpan="6" className="text-end"><strong>Grand Total:</strong></td>
                         <td><strong>{fmt(grandTotal)}</strong></td>
                         <td></td>
