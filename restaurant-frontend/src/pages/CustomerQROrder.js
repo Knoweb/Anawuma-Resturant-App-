@@ -117,13 +117,11 @@ const CustomerQROrder = ({ isManual = false }) => {
   const [showStatusScreen, setShowStatusScreen] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
   const [currentOrderStatus, setCurrentOrderStatus] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [shownNotifications, setShownNotifications] = useState(new Set());
   const { subscribe, connected } = useWebSocket();
-  const { user, isAuthenticated } = useAuthStore();
   const [offers, setOffers] = useState([]);
   const [showOffersModal, setShowOffersModal] = useState(false);
-
-  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
   // Request notification permission on mount
   useEffect(() => {
@@ -312,7 +310,6 @@ const CustomerQROrder = ({ isManual = false }) => {
       // Filter for currently active offers
       const now = new Date();
       const activeOffers = (response.data || []).filter(offer => {
-        const start = new Date(offer.startDate);
         const end = new Date(offer.endDate);
         // Show if currently active OR starting in the future
         return now <= end;
@@ -622,6 +619,7 @@ const CustomerQROrder = ({ isManual = false }) => {
     setCart(cart.filter(item => item.foodItemId !== foodItemId));
   };
 
+  // eslint-disable-next-line no-unused-vars
   const updateCartItemNotes = (foodItemId, notes) => {
     setCart(cart.map(item =>
       item.foodItemId === foodItemId ? { ...item, notes } : item
@@ -877,6 +875,7 @@ const CustomerQROrder = ({ isManual = false }) => {
     printWindow.document.close();
   };
 
+  // eslint-disable-next-line no-unused-vars
   const placeQuickManualOrder = async () => {
     if (orderLocation === 'inside' && !manualTableNo.trim()) {
       Swal.fire('Validation Error', `Please enter a ${modalOrderType === 'room' ? 'Room' : 'Table'} number`, 'warning');

@@ -179,6 +179,7 @@ function Dashboard() {
     return new Date(date).toLocaleDateString();
   };
 
+  // eslint-disable-next-line no-unused-vars
   const isSuperAdmin = user?.role === 'super_admin';
 
   if (user?.role === 'kitchen') {

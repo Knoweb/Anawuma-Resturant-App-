@@ -90,13 +90,17 @@ export class CategoriesController {
   @Get()
   async findAll(
     @Query('menuId') menuId?: string,
+    @Query('restaurantId') restaurantIdQuery?: string,
     @Query('apiKey') apiKeyQuery?: string,
     @Headers('x-api-key') apiKeyHeader?: string,
     @Request() req?: RequestWithUser,
   ) {
-    // Public endpoint - no auth guard
-    // Resolve restaurantId: prefer authenticated user, then API key
+    // Resolve restaurantId: prefer authenticated user, then query param, then API key
     let restaurantId: number | undefined = req?.user?.restaurantId;
+
+    if (!restaurantId && restaurantIdQuery) {
+      restaurantId = parseInt(restaurantIdQuery, 10);
+    }
 
     if (!restaurantId) {
       const apiKey = apiKeyHeader || apiKeyQuery;

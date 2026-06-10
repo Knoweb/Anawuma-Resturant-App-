@@ -9,6 +9,7 @@ import {
   UseGuards,
   Request,
   Query,
+  Headers,
 } from '@nestjs/common';
 import { SubcategoriesService } from './subcategories.service';
 import { CreateSubcategoryDto } from './dto/create-subcategory.dto';
@@ -17,10 +18,14 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../auth/enums/role.enum';
+import { RestaurantsService } from '../restaurants/restaurants.service';
 
 @Controller('subcategories')
 export class SubcategoriesController {
-  constructor(private readonly subcategoriesService: SubcategoriesService) {}
+  constructor(
+    private readonly subcategoriesService: SubcategoriesService,
+    private readonly restaurantsService: RestaurantsService,
+  ) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
@@ -32,10 +37,32 @@ export class SubcategoriesController {
   }
 
   @Get()
-  findAll(@Query('categoryId') categoryId?: string) {
-    // Public endpoint - returns all subcategories or filtered by categoryId
+  async findAll(
+    @Query('categoryId') categoryId?: string,
+    @Query('restaurantId') restaurantIdQuery?: string,
+    @Query('apiKey') apiKeyQuery?: string,
+    @Headers('x-api-key') apiKeyHeader?: string,
+    @Request() req?: any,
+  ) {
+    // Resolve restaurantId: prefer authenticated user, then query param, then API key
+    let restaurantId: number | undefined = req?.user?.restaurantId;
+
+    if (!restaurantId && restaurantIdQuery) {
+      restaurantId = parseInt(restaurantIdQuery, 10);
+    }
+
+    if (!restaurantId) {
+      const apiKey = apiKeyHeader || apiKeyQuery;
+      if (apiKey) {
+        const restaurant = await this.restaurantsService.findByApiKey(apiKey);
+        if (restaurant) {
+          restaurantId = restaurant.restaurantId;
+        }
+      }
+    }
+
     const categoryIdNum = categoryId ? parseInt(categoryId, 10) : undefined;
-    return this.subcategoriesService.findAll(undefined, categoryIdNum);
+    return this.subcategoriesService.findAll(restaurantId, categoryIdNum);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
