@@ -531,3 +531,64 @@
   border-color: #0d6efd;
   color: white;
 }
+
+.print-summary-grid {
+  display: none;
+}
+
+@media print {
+  .print-summary-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    margin-top: 15px !important;
+    margin-bottom: 25px !important;
+    width: 100% !important;
+  }
+
+  .print-summary-row {
+    display: flex !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+
+  .print-summary-row-4 .print-summary-card {
+    flex: 1 1 25% !important;
+    max-width: calc(25% - 7.5px) !important;
+  }
+
+  .print-summary-row-2 .print-summary-card {
+    flex: 1 1 50% !important;
+    max-width: calc(50% - 5px) !important;
+  }
+
+  .print-summary-card {
+    box-sizing: border-box !important;
+    border: 1px solid #ddd !important;
+    border-radius: 8px !important;
+    padding: 10px 14px !important;
+    background: #fff !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    height: 60px !important;
+    page-break-inside: avoid !important;
+  }
+
+  .print-card-title {
+    font-size: 10px !important;
+    color: #666 !important;
+    font-weight: 500 !important;
+    margin-bottom: 2px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    text-align: left !important;
+  }
+
+  .print-card-value {
+    font-size: 15px !important;
+    font-weight: bold !important;
+    color: #000 !important;
+    text-align: left !important;
+  }
+}

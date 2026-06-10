@@ -469,6 +469,28 @@ const SalesReports = () => {
                 </div>
                 <hr className="print-header-divider print-only" />
 
+                {/* Print-only Summary Grid */}
+                <div className="print-only print-summary-grid">
+                  <div className="print-summary-row print-summary-row-4">
+                    <div className="print-summary-card">
+                      <span className="print-card-title">Total Invoices</span>
+                      <span className="print-card-value">{displayTotalOrders}</span>
+                    </div>
+                    <div className="print-summary-card">
+                      <span className="print-card-title">Grand Total</span>
+                      <span className="print-card-value">{fmt(displayGrandTotal)}</span>
+                    </div>
+                    <div className="print-summary-card">
+                      <span className="print-card-title">Food Total</span>
+                      <span className="print-card-value">{fmt(displayFoodTotal)}</span>
+                    </div>
+                    <div className="print-summary-card">
+                      <span className="print-card-title">Service Charge</span>
+                      <span className="print-card-value">{fmt(displaySvcCharge)}</span>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="report-period no-print">
                   <h5>
                     Reports for: {getPeriodLabel()}
