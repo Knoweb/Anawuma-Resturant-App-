@@ -123,7 +123,7 @@ export class QrResolveController {
   @SkipThrottle()
   async resolveTableKey(@Param('tableKey') tableKey: string) {
     try {
-      const tableInfo = await this.tableQrService.resolveTableInfo(tableKey);
+      const tableInfo = await this.tableQrService.resolveTableInfo(tableKey, true);
       return tableInfo;
     } catch (error) {
       throw new HttpException(

@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from '../api/apiClient';
 import { useWebSocket } from '../hooks/useWebSocket';
 import Swal from 'sweetalert2';
 import './GuestRequestForm.css';
-
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000/api';
 
 function GuestRequestForm() {
   const { roomKey } = useParams();
@@ -67,8 +65,8 @@ function GuestRequestForm() {
     if (!requestSuccess || !requestSuccess.requestId) return;
     
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/housekeeping/track/${requestSuccess.requestId}`,
+      const response = await apiClient.get(
+        `/housekeeping/track/${requestSuccess.requestId}`,
         {
           headers: {
             'x-room-key': roomKey
@@ -111,7 +109,7 @@ function GuestRequestForm() {
     } catch (error) {
       console.error('Error fetching request status:', error);
     }
-  }, [requestSuccess, roomKey, API_BASE_URL, showNotification]);
+  }, [requestSuccess, roomKey, showNotification]);
 
   // Real-time listener for housekeeping status updates
   useEffect(() => {
@@ -139,9 +137,11 @@ function GuestRequestForm() {
     return () => {
       if (pollInterval) clearInterval(pollInterval);
     };
-  }, [requestSuccess, refreshRequestStatus]);  const fetchRoomInfo = useCallback(async () => {
+  }, [requestSuccess, refreshRequestStatus]);
+
+  const fetchRoomInfo = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/qr/room/resolve/${roomKey}`);
+      const response = await apiClient.get(`/qr/room/resolve/${roomKey}`);
       setRoomInfo(response.data);
       setLoading(false);
     } catch (error) {
@@ -164,14 +164,13 @@ function GuestRequestForm() {
     e.preventDefault();
     setSubmitting(true);
 
-    const requestUrl = `${API_BASE_URL}/housekeeping/request`;
-    console.log('Submitting request to:', requestUrl);
+    console.log('Submitting request...');
     console.log('Room Key:', roomKey);
     console.log('Form Data:', formData);
 
     try {
-      const response = await axios.post(
-        requestUrl,
+      const response = await apiClient.post(
+        '/housekeeping/request',
         formData,
         {
           headers: {
@@ -194,7 +193,6 @@ function GuestRequestForm() {
       console.error('Error submitting request:', error);
       console.error('Error response:', error.response);
       console.error('Error message:', error.message);
-      console.error('API Base URL:', API_BASE_URL);
       
       let errorMessage = 'Failed to submit request. Please try again.';
       if (error.response?.status === 429) {

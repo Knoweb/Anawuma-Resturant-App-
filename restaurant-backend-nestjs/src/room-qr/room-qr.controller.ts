@@ -173,7 +173,7 @@ export class RoomQrResolveController {
   @SkipThrottle()
   async resolveRoomKey(@Param('roomKey') roomKey: string) {
     try {
-      const roomInfo = await this.roomQrService.resolveRoomInfo(roomKey);
+      const roomInfo = await this.roomQrService.resolveRoomInfo(roomKey, true);
       return {
         success: true,
         data: roomInfo,

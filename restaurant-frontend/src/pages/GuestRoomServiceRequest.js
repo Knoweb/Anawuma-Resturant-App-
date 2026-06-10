@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from '../api/apiClient';
 import Swal from 'sweetalert2';
 import './GuestRoomServiceRequest.css';
-
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000/api';
 
 function GuestRoomServiceRequest() {
   const { roomKey } = useParams();
@@ -25,8 +23,8 @@ function GuestRoomServiceRequest() {
   const fetchRoomInfo = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE_URL}/qr/room/resolve/${roomKey}`);
-      setRoomInfo(response.data);
+      const response = await apiClient.get(`/qr/room/resolve/${roomKey}`);
+      setRoomInfo(response.data.data || response.data);
       setError(null);
     } catch (err) {
       console.error('Error fetching room info:', err);
@@ -58,8 +56,8 @@ function GuestRoomServiceRequest() {
     try {
       setSubmitting(true);
 
-      await axios.post(
-        `${API_BASE_URL}/housekeeping/request`,
+      await apiClient.post(
+        '/housekeeping/request',
         {
           requestType: formData.requestType,
           message: formData.message || null

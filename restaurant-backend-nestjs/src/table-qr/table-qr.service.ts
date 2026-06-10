@@ -14,6 +14,9 @@ export class TableQrService {
     private readonly restaurantRepository: Repository<Restaurant>,
   ) {}
 
+  // Session store to track active resolved QR keys (sliding window)
+  private readonly sessionStore = new Map<string, number>();
+
   private normalizeFrontendUrl(frontendUrl?: string): string {
     const fallbackUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
     return (frontendUrl || fallbackUrl).replace(/\/$/, '');
@@ -24,42 +27,58 @@ export class TableQrService {
     return `${normalizedFrontendUrl}/qr/${tableKey}`;
   }
 
-  async findByTableKey(tableKey: string): Promise<TableQr | null> {
+  async findByTableKey(tableKey: string, isResolve: boolean = false): Promise<TableQr | null> {
     const existingQr = await this.tableQrRepository.findOne({
       where: { tableKey, isActive: 1 },
       relations: ['restaurant'],
     });
 
-    if (existingQr) {
-      return existingQr;
+    if (!existingQr) {
+      // Backward compatibility: older QR links used restaurant api_key directly.
+      const restaurant = await this.restaurantRepository.findOne({
+        where: { apiKey: tableKey },
+      });
+
+      if (!restaurant) {
+        return null;
+      }
+
+      const frontendUrl = this.normalizeFrontendUrl();
+
+      // Use deterministic table number for legacy key mappings.
+      const legacyTableNo = `LEGACY-${restaurant.restaurantId}`;
+
+      const legacyMapping = this.tableQrRepository.create({
+        restaurantId: restaurant.restaurantId,
+        tableNo: legacyTableNo,
+        tableKey,
+        qrUrl: this.buildTableQrUrl(frontendUrl, tableKey),
+        isActive: 1,
+      });
+
+      try {
+        await this.tableQrRepository.save(legacyMapping);
+      } catch {
+        // Ignore duplicate insert race; re-query below.
+      }
     }
 
-    // Backward compatibility: older QR links used restaurant api_key directly.
-    const restaurant = await this.restaurantRepository.findOne({
-      where: { apiKey: tableKey },
-    });
+    // Now validate the sliding session window
+    const now = Date.now();
+    const expiryMs = 2 * 60 * 60 * 1000; // 2 hours
+    const lastActive = this.sessionStore.get(tableKey);
 
-    if (!restaurant) {
-      return null;
-    }
-
-    const frontendUrl = this.normalizeFrontendUrl();
-
-    // Use deterministic table number for legacy key mappings.
-    const legacyTableNo = `LEGACY-${restaurant.restaurantId}`;
-
-    const legacyMapping = this.tableQrRepository.create({
-      restaurantId: restaurant.restaurantId,
-      tableNo: legacyTableNo,
-      tableKey,
-      qrUrl: this.buildTableQrUrl(frontendUrl, tableKey),
-      isActive: 1,
-    });
-
-    try {
-      await this.tableQrRepository.save(legacyMapping);
-    } catch {
-      // Ignore duplicate insert race; re-query below.
+    if (isResolve) {
+      // A resolve endpoint request (scan/refresh) starts or refreshes the session
+      this.sessionStore.set(tableKey, now);
+    } else {
+      // Other requests (like placing orders) require a valid non-expired session
+      if (!lastActive || (now - lastActive) > expiryMs) {
+        this.sessionStore.delete(tableKey);
+        return null; // This will trigger NotFoundException
+      }
+      // Slide the window
+      this.sessionStore.set(tableKey, now);
     }
 
     return this.tableQrRepository.findOne({
@@ -68,16 +87,19 @@ export class TableQrService {
     });
   }
 
-  async resolveTableInfo(tableKey: string): Promise<{
+  async resolveTableInfo(
+    tableKey: string,
+    isResolve: boolean = false,
+  ): Promise<{
     restaurantId: number;
     restaurantName: string;
     tableNo: string;
     logo?: string;
   }> {
-    const tableQr = await this.findByTableKey(tableKey);
+    const tableQr = await this.findByTableKey(tableKey, isResolve);
 
     if (!tableQr) {
-      throw new NotFoundException('Invalid or inactive QR code');
+      throw new NotFoundException('Invalid or expired QR code session. Please scan the QR code again.');
     }
 
     return {

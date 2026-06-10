@@ -15,7 +15,7 @@ import { Logger } from '@nestjs/common';
 
 @WebSocketGateway({
   cors: {
-    origin: ['http://152.42.179.36', 'http://localhost:3000', 'http://localhost:3001'],
+    origin: true,
     credentials: true,
     methods: ['GET', 'POST'],
   },
@@ -61,10 +61,21 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     return { success: true };
   }
 
-  // Emit dashboard stats update to all clients
+  private dashboardUpdateTimeout: NodeJS.Timeout | null = null;
+  private latestDashboardStats: any = null;
+
+  // Emit dashboard stats update to all clients with debouncing
   emitDashboardUpdate(stats: any) {
-    this.server.emit('dashboard:update', stats);
-    this.logger.log('Dashboard stats broadcasted');
+    this.latestDashboardStats = stats;
+    if (!this.dashboardUpdateTimeout) {
+      this.dashboardUpdateTimeout = setTimeout(() => {
+        if (this.latestDashboardStats) {
+          this.server.emit('dashboard:update', this.latestDashboardStats);
+          this.logger.log('Dashboard stats broadcasted (debounced)');
+        }
+        this.dashboardUpdateTimeout = null;
+      }, 500); // 500ms debounce
+    }
   }
 
   // Emit new order notification
@@ -73,9 +84,10 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     this.logger.log(`🔔 EMITTING NEW ORDER EVENT to ${clientCount} clients`);
     this.logger.log(`Order details: ${JSON.stringify(order)}`);
     
-    this.server.emit('order:new', order);
-    
-    this.logger.log(`✅ New order notification sent to all ${clientCount} connected clients`);
+    setImmediate(() => {
+      this.server.emit('order:new', order);
+      this.logger.log(`✅ New order notification sent to all ${clientCount} connected clients (async)`);
+    });
   }
 
   // Emit order status update
@@ -84,9 +96,10 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     this.logger.log(`📋 EMITTING ORDER STATUS UPDATE to ${clientCount} clients`);
     this.logger.log(`Order details: ${JSON.stringify(order)}`);
     
-    this.server.emit('order:status-update', order);
-    
-    this.logger.log(`✅ Order status update sent to all ${clientCount} connected clients`);
+    setImmediate(() => {
+      this.server.emit('order:status-update', order);
+      this.logger.log(`✅ Order status update sent to all ${clientCount} connected clients (async)`);
+    });
   }
 
   // Emit notification to specific user role

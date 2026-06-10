@@ -344,7 +344,9 @@ const CustomerQROrder = ({ isManual = false }) => {
       const restaurantMenus = (menusRes.data || []).filter(
         menu => menu.restaurantId === restaurantId
       );
-      const restaurantCategories = categoriesRes.data || [];
+      const restaurantCategories = (categoriesRes.data || []).filter(
+        cat => cat.restaurantId === restaurantId
+      );
       const restaurantFoodItems = (foodItemsRes.data || []).filter(
         item => item.restaurantId === restaurantId && item.isAvailable !== false
       );

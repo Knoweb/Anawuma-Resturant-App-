@@ -11,6 +11,9 @@ export class RoomQrService {
     private readonly roomQrRepository: Repository<RoomQr>,
   ) {}
 
+  // Session store to track active resolved Room QR keys (sliding window)
+  private readonly sessionStore = new Map<string, number>();
+
   private normalizeFrontendUrl(frontendUrl?: string): string {
     const fallbackUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
     return (frontendUrl || fallbackUrl).replace(/\/$/, '');
@@ -24,25 +27,52 @@ export class RoomQrService {
   /**
    * Find room QR by room key
    */
-  async findByRoomKey(roomKey: string): Promise<RoomQr | null> {
-    return this.roomQrRepository.findOne({
+  async findByRoomKey(roomKey: string, isResolve: boolean = false): Promise<RoomQr | null> {
+    const roomQr = await this.roomQrRepository.findOne({
       where: { roomKey, isActive: 1 },
       relations: ['restaurant'],
     });
+
+    if (!roomQr) {
+      return null;
+    }
+
+    // Validate sliding session window
+    const now = Date.now();
+    const expiryMs = 2 * 60 * 60 * 1000; // 2 hours
+    const lastActive = this.sessionStore.get(roomKey);
+
+    if (isResolve) {
+      // Resolve endpoint starts or refreshes the session
+      this.sessionStore.set(roomKey, now);
+    } else {
+      // Other requests (placing orders/requests) require a valid non-expired session
+      if (!lastActive || (now - lastActive) > expiryMs) {
+        this.sessionStore.delete(roomKey);
+        return null;
+      }
+      // Slide the window
+      this.sessionStore.set(roomKey, now);
+    }
+
+    return roomQr;
   }
 
   /**
    * Public: Resolve room info from QR key
    */
-  async resolveRoomInfo(roomKey: string): Promise<{
+  async resolveRoomInfo(
+    roomKey: string,
+    isResolve: boolean = false,
+  ): Promise<{
     restaurantId: number;
     restaurantName: string;
     roomNo: string;
   }> {
-    const roomQr = await this.findByRoomKey(roomKey);
+    const roomQr = await this.findByRoomKey(roomKey, isResolve);
 
     if (!roomQr) {
-      throw new NotFoundException('Invalid or inactive room QR code');
+      throw new NotFoundException('Invalid or expired room QR code session. Please scan the QR code again.');
     }
 
     return {
