@@ -357,38 +357,6 @@ const CashierReport = () => {
               </div>
               <hr className="print-header-divider print-only" />
 
-              {/* Print-only Summary Grid */}
-              <div className="print-only print-summary-grid">
-                <div className="print-summary-row print-summary-row-4">
-                  <div className="print-summary-card">
-                    <span className="print-card-title">Total Invoices</span>
-                    <span className="print-card-value">{totalInvoices}</span>
-                  </div>
-                  <div className="print-summary-card">
-                    <span className="print-card-title">Grand Total</span>
-                    <span className="print-card-value">{fmt(grandTotal)}</span>
-                  </div>
-                  <div className="print-summary-card">
-                    <span className="print-card-title">Food Total</span>
-                    <span className="print-card-value">{fmt(foodTotal)}</span>
-                  </div>
-                  <div className="print-summary-card">
-                    <span className="print-card-title">Service Charge</span>
-                    <span className="print-card-value">{fmt(svcCharge)}</span>
-                  </div>
-                </div>
-                <div className="print-summary-row print-summary-row-2">
-                  <div className="print-summary-card">
-                    <span className="print-card-title">Cash Revenue</span>
-                    <span className="print-card-value">{fmt(cashRev)}</span>
-                  </div>
-                  <div className="print-summary-card">
-                    <span className="print-card-title">Card Revenue</span>
-                    <span className="print-card-value">{fmt(cardRev)}</span>
-                  </div>
-                </div>
-              </div>
-
               <div className="report-period no-print">
                 <h5>Reports for: {getPeriodLabel()}</h5>
               </div>
@@ -515,6 +483,15 @@ const CashierReport = () => {
                   <p className="text-muted">No paid invoices recorded for this period</p>
                 </div>
               )}
+
+              {/* Print-only footer */}
+              <div className="report-print-footer">
+                <div>Date: {new Date().toLocaleDateString('en-GB')}</div>
+                <div className="print-footer-sig">
+                  <div className="print-footer-sig-line"></div>
+                  <div>Authorized Signature</div>
+                </div>
+              </div>
             </div>
           )}
 

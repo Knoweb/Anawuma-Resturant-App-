@@ -532,63 +532,38 @@
   color: white;
 }
 
-.print-summary-grid {
+.report-print-footer {
   display: none;
 }
 
 @media print {
-  .print-summary-grid {
+  body {
+    margin-bottom: 80px !important;
+  }
+
+  .report-print-footer {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-end !important;
+    position: fixed !important;
+    bottom: 30px !important;
+    left: 40px !important;
+    right: 40px !important;
+    font-size: 12px !important;
+    font-family: inherit !important;
+    background: transparent !important;
+    width: calc(100% - 80px) !important;
+  }
+
+  .print-footer-sig {
     display: flex !important;
     flex-direction: column !important;
-    gap: 10px !important;
-    margin-top: 15px !important;
-    margin-bottom: 25px !important;
-    width: 100% !important;
+    align-items: center !important;
   }
 
-  .print-summary-row {
-    display: flex !important;
-    gap: 10px !important;
-    width: 100% !important;
-  }
-
-  .print-summary-row-4 .print-summary-card {
-    flex: 1 1 25% !important;
-    max-width: calc(25% - 7.5px) !important;
-  }
-
-  .print-summary-row-2 .print-summary-card {
-    flex: 1 1 50% !important;
-    max-width: calc(50% - 5px) !important;
-  }
-
-  .print-summary-card {
-    box-sizing: border-box !important;
-    border: 1px solid #ddd !important;
-    border-radius: 8px !important;
-    padding: 10px 14px !important;
-    background: #fff !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: center !important;
-    height: 60px !important;
-    page-break-inside: avoid !important;
-  }
-
-  .print-card-title {
-    font-size: 10px !important;
-    color: #666 !important;
-    font-weight: 500 !important;
-    margin-bottom: 2px !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.5px !important;
-    text-align: left !important;
-  }
-
-  .print-card-value {
-    font-size: 15px !important;
-    font-weight: bold !important;
-    color: #000 !important;
-    text-align: left !important;
+  .print-footer-sig-line {
+    width: 180px !important;
+    border-bottom: 1.5px solid #000 !important;
+    margin-bottom: 4px !important;
   }
 }
