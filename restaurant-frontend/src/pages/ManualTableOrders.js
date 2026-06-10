@@ -137,10 +137,18 @@ const ManualTableOrders = () => {
                 </head>
                 <body>
                     <div class="header">
-                        <h1 style="margin:0">${restaurantName}</h1>
-                        <h3>BILL SUMMARY (${id.toString().toUpperCase().startsWith('TABLE') ? id : `TABLE-${id}`})</h3>
-                        <p>Currency: ${currency}</p>
-                        <p>Printed: ${new Date().toLocaleString()}</p>
+                        <h1 style="margin:0; font-size: 20px; font-weight: bold;">${restaurantName}</h1>
+                        ${(restaurantInfo?.address || restaurantInfo?.contactNumber) ? `
+                            <div style="font-size: 11px; color: #333; margin-top: 5px; border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 4px 0;">
+                                ${restaurantInfo.address ? `<div style="margin-bottom: 2px;">${restaurantInfo.address}</div>` : ''}
+                                ${restaurantInfo.contactNumber ? `<div>Tel: ${restaurantInfo.contactNumber}</div>` : ''}
+                            </div>
+                        ` : `
+                            <div style="border-top: 1px dashed #000; margin-top: 5px;"></div>
+                        `}
+                        <h3 style="margin-top: 10px; font-size: 14px; font-weight: bold;">BILL SUMMARY (${id.toString().toUpperCase().startsWith('TABLE') ? id : `TABLE-${id}`})</h3>
+                        <p style="margin: 3px 0; font-size: 11px;">Currency: ${currency}</p>
+                        <p style="margin: 3px 0; font-size: 11px;">Printed: ${new Date().toLocaleString()}</p>
                     </div>
 
                     <div style="border-bottom: 1px dashed #000; padding-bottom: 8px; margin-bottom: 12px;">
