@@ -2058,7 +2058,16 @@ const CustomerQROrder = ({ isManual = false }) => {
                       <select className="form-control sketch-input" value={manualTableNo} onChange={(e) => setManualTableNo(e.target.value)}>
                         <option value="">Select No</option>
                         {orderLocation === 'inside' ? (
-                          [...Array.from({ length: 16 }, (_, i) => `SV - ${201 + i}`), ...Array.from({ length: 8 }, (_, i) => `HB - ${String(i + 1).padStart(2, '0')}`)].map(no => <option key={no} value={no}>{no}</option>)
+                          [
+                            'Room 101', 'Room 102', 'Room 103',
+                            'Room 107', 'Room 108',
+                            'Room 204', 'Room 205',
+                            'Room 209', 'Room 210', 'Room 211',
+                            'Room 306',
+                            'Room 312', 'Room 313', 'Room 314',
+                            'Room 415', 'Room 416', 'Room 417',
+                            ...Array.from({ length: 8 }, (_, i) => `HB - ${String(i + 1).padStart(2, '0')}`)
+                          ].map(no => <option key={no} value={no}>{no}</option>)
                         ) : (
                           Array.from({ length: 25 }, (_, i) => (i + 1).toString()).map(no => <option key={no} value={no}>Table {no}</option>)
                         )}
