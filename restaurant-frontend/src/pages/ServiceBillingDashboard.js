@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/common/Navbar';
 import Sidebar from '../components/common/Sidebar';
-import { billingAPI, reportsAPI } from '../api/apiClient';
+import apiClient, { BASE_URL, sanitizeUrl, billingAPI, reportsAPI } from '../api/apiClient';
 import Swal from 'sweetalert2';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAuthStore } from '../store/authStore';
@@ -51,25 +51,53 @@ function getOrderAge(createdAt) {
 // Printable Invoice component (rendered off-screen, triggered by window.print)
 // ---------------------------------------------------------------------------
 
-function PrintableInvoice({ invoice, restaurantName }) {
+function PrintableInvoice({ invoice, restaurantName, restaurantInfo, cashierName }) {
   const items = Array.isArray(invoice.orderItemsJson) ? invoice.orderItemsJson : [];
+  
+  const logoPath = restaurantInfo?.logo;
+  const restaurantLogoUrl = logoPath
+    ? sanitizeUrl(logoPath.startsWith('http')
+      ? logoPath
+      : `${BASE_URL}${logoPath.startsWith('/') ? '' : '/'}${logoPath}`)
+    : null;
+
   return (
     <div id="printable-invoice" className="printable-invoice">
-      <div className="pi-header">
-        <div className="pi-restaurant">{restaurantName || 'Restaurant'}</div>
-        <div className="pi-title">TAX INVOICE</div>
-        <div className="pi-meta">
+      <div className="pi-header" style={{ textAlign: 'left', marginBottom: '15px' }}>
+        {restaurantLogoUrl && (
+          <div className="pi-logo-wrap" style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '10px' }}>
+            <img src={restaurantLogoUrl} alt="Logo" className="print-logo" style={{ maxHeight: '65px', width: 'auto', objectFit: 'contain' }} />
+          </div>
+        )}
+        <div className="pi-hotel-info" style={{ fontFamily: 'monospace', fontSize: '12px', lineHeight: '1.4', textAlign: 'left' }}>
+          <div className="pi-restaurant-name" style={{ fontSize: '15px', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '3px' }}>
+            {restaurantInfo?.restaurantName || restaurantName || 'Restaurant'}
+          </div>
+          <div className="pi-hotel-detail" style={{ marginBottom: '2px' }}>
+            {restaurantInfo?.address || 'Hotel Address'}
+          </div>
+          <div className="pi-hotel-detail" style={{ marginBottom: '2px' }}>
+            {restaurantInfo?.contactNumber ? `Tel: ${restaurantInfo.contactNumber}` : 'Contact: N/A'}
+          </div>
+          <div className="pi-hotel-detail" style={{ marginBottom: '5px' }}>
+            Cashier: {cashierName}
+          </div>
+        </div>
+
+        <hr style={{ border: '0', borderTop: '2px solid #333', margin: '12px 0 15px 0', opacity: '1' }} />
+
+        <div className="pi-meta" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', gap: '5px', flexWrap: 'wrap', fontFamily: 'monospace', marginBottom: '3px' }}>
           <span><strong>Invoice #:</strong> {invoice.invoiceNumber}</span>
           <span>
             <strong>Order #:</strong> {invoice.orderNo || (invoice.orderId ? `#${invoice.orderId}` : '–')}
           </span>
         </div>
-        <div className="pi-meta">
+        <div className="pi-meta" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', gap: '5px', flexWrap: 'wrap', fontFamily: 'monospace', marginBottom: '3px' }}>
           <span><strong>Date:</strong> {formatDateTime(invoice.createdAt)}</span>
         </div>
-        {invoice.tableNo && (
-          <div className="pi-meta">
-            <span><strong>Table:</strong> {invoice.tableNo}</span>
+        {(invoice.roomNo || invoice.tableNo) && (
+          <div className="pi-meta" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', gap: '5px', flexWrap: 'wrap', fontFamily: 'monospace' }}>
+            <span><strong>{invoice.roomNo ? `Room: ${invoice.roomNo}` : `Table: ${invoice.tableNo}`}</strong></span>
             {invoice.customerName && (
               <span><strong>Customer:</strong> {invoice.customerName}</span>
             )}
@@ -127,7 +155,7 @@ function PrintableInvoice({ invoice, restaurantName }) {
 // Invoice Detail Modal
 // ---------------------------------------------------------------------------
 
-function InvoiceModal({ invoice, restaurantName, onClose, onMarkServed, onMarkPaid, isCashierDashboard }) {
+function InvoiceModal({ invoice, restaurantName, restaurantInfo, cashierName, onClose, onMarkServed, onMarkPaid, isCashierDashboard }) {
   const printRef = useRef();
   const [printing, setPrinting] = useState(false);
   const [sendingWhatsapp, setSendingWhatsapp] = useState(false);
@@ -211,7 +239,12 @@ function InvoiceModal({ invoice, restaurantName, onClose, onMarkServed, onMarkPa
         </div>
 
         <div className="invoice-modal-body" ref={printRef}>
-          <PrintableInvoice invoice={invoice} restaurantName={restaurantName} />
+          <PrintableInvoice 
+            invoice={invoice} 
+            restaurantName={restaurantName} 
+            restaurantInfo={restaurantInfo} 
+            cashierName={cashierName} 
+          />
         </div>
 
         <div className="invoice-modal-footer">
@@ -387,6 +420,20 @@ const ServiceBillingDashboard = ({
   cashierTab = 'queue',
 }) => {
   const { user } = useAuthStore();
+  const [restaurantInfo, setRestaurantInfo] = useState(null);
+
+  useEffect(() => {
+    if (user?.restaurantId) {
+      apiClient.get(`/restaurant/${user.restaurantId}`)
+        .then(res => {
+          if (res.data.success) {
+            setRestaurantInfo(res.data.data);
+          }
+        })
+        .catch(err => console.error('Error fetching restaurant info for billing:', err));
+    }
+  }, [user]);
+
   const navigate = useNavigate();
   const { subscribe, connected } = useWebSocket();
   const isCashierDashboard = user?.role?.toLowerCase() === 'cashier';
@@ -1310,6 +1357,8 @@ const ServiceBillingDashboard = ({
             onBeforePrint: isCashierDashboard ? () => handleCashierPrint(viewInvoice) : undefined,
           }}
           restaurantName={restaurantName}
+          restaurantInfo={restaurantInfo}
+          cashierName={user?.name || user?.email?.split('@')[0] || 'User'}
           isCashierDashboard={isCashierDashboard}
           onClose={() => setViewInvoice(null)}
           onMarkServed={
