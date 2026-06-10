@@ -340,25 +340,29 @@ const CashierReport = () => {
           {!loading && reportData && (
             <div className="report-results">
               {/* Print-only header */}
-              <div className="report-print-header text-center mb-4">
+              <div className="report-print-header mb-4">
                 {restaurantLogoUrl && (
-                  <img src={restaurantLogoUrl} alt="Logo" className="print-logo mb-2" />
+                  <img src={restaurantLogoUrl} alt="Logo" className="print-logo" />
                 )}
-                <h2 className="print-restaurant-name">{restaurantInfo?.restaurantName || user?.restaurantName || 'Restaurant'}</h2>
-                <p className="print-restaurant-address mb-1">{restaurantInfo?.address || 'Hotel Address'}</p>
-                <p className="print-restaurant-contact mb-1">
-                  {restaurantInfo?.contactNumber && <span>Tel: {restaurantInfo.contactNumber}</span>}
-                  {restaurantInfo?.email && <span className="ms-3">Email: {restaurantInfo.email}</span>}
-                </p>
-                <hr className="print-header-divider" />
+                <div className="print-header-info">
+                  <h2 className="print-restaurant-name">{restaurantInfo?.restaurantName || user?.restaurantName || 'Restaurant'}</h2>
+                  <p className="print-restaurant-address">{restaurantInfo?.address || 'Hotel Address'}</p>
+                  {restaurantInfo?.contactNumber && (
+                    <p className="print-restaurant-contact">Tel: {restaurantInfo.contactNumber}</p>
+                  )}
+                  <p className="print-restaurant-cashier">
+                    Cashier: {user?.name || user?.email?.split('@')[0] || 'User'}
+                  </p>
+                </div>
               </div>
+              <hr className="print-header-divider print-only" />
 
-              <div className="report-period">
+              <div className="report-period no-print">
                 <h5>Reports for: {getPeriodLabel()}</h5>
               </div>
 
               {/* Summary Cards */}
-              <div className="row g-3 mb-4">
+              <div className="row g-3 mb-4 no-print">
                 <div className="col-md-3">
                   <div className="summary-card">
                     <div className="summary-icon"><i className="fas fa-file-invoice"></i></div>
@@ -398,7 +402,7 @@ const CashierReport = () => {
               </div>
 
               {/* Payment breakdown */}
-              <div className="row g-3 mb-4">
+              <div className="row g-3 mb-4 no-print">
                 <div className="col-md-6">
                   <div className="summary-card cash">
                     <div className="summary-icon"><i className="fas fa-money-bill-wave"></i></div>

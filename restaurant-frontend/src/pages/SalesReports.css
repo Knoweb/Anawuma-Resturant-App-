@@ -311,6 +311,16 @@
   opacity: 1;
 }
 
+.print-header-info {
+  text-align: left;
+}
+
+.print-restaurant-cashier {
+  font-size: 12px;
+  color: #64748b;
+  margin: 2px 0;
+}
+
 /* Print Styles */
 @media print {
   @page {
@@ -323,12 +333,29 @@
     font-size: 11px !important;
   }
 
+  .sidebar,
+  .navbar,
   .no-print {
     display: none !important;
   }
 
   .print-only {
     display: block !important;
+  }
+
+  .report-print-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 20px !important;
+    margin-bottom: 15px !important;
+    width: 100% !important;
+  }
+
+  .print-logo {
+    max-height: 75px !important;
+    width: auto !important;
+    object-fit: contain !important;
+    margin: 0 !important;
   }
 
   .dashboard-container {
