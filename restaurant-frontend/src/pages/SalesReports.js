@@ -14,7 +14,9 @@ const getWeekRange = (base) => {
   const diffToMon = day === 0 ? -6 : 1 - day;
   const mon = new Date(d);
   mon.setDate(d.getDate() + diffToMon);
-  return { from: toISO(mon), to: toISO(d) };
+  const sun = new Date(mon);
+  sun.setDate(mon.getDate() + 6);
+  return { from: toISO(mon), to: toISO(sun) };
 };
 
 const getMonthRange = (ym) => {
@@ -38,6 +40,8 @@ const SalesReports = () => {
   // filter states
   const [singleDate, setSingleDate] = useState(today);
   const [weekBase,   setWeekBase]   = useState(today);
+  const [weekFrom,   setWeekFrom]   = useState(getWeekRange(today).from);
+  const [weekTo,     setWeekTo]     = useState(getWeekRange(today).to);
   const [monthYear,  setMonthYear]  = useState(today.slice(0, 7));
   const [fromDate,   setFromDate]   = useState(today);
   const [toDate,     setToDate]     = useState(today);
@@ -93,14 +97,24 @@ const SalesReports = () => {
     }
   };
 
+  const handleWeekBaseChange = (val) => {
+    setWeekBase(val);
+    const range = getWeekRange(val);
+    setWeekFrom(range.from);
+    setWeekTo(range.to);
+  };
+
   /* ── filter handler ────────────────────────────────────────────────────── */
   const handleFilter = () => {
     if (activeTab === 'single') {
       if (!singleDate) { Swal.fire('Validation', 'Please select a date', 'warning'); return; }
       fetchRange(singleDate, singleDate, 'daily');
     } else if (activeTab === 'weekly') {
-      const { from, to } = getWeekRange(weekBase);
-      fetchRange(from, to);
+      if (!weekFrom || !weekTo) { Swal.fire('Validation', 'Please select both week dates', 'warning'); return; }
+      if (new Date(weekFrom) > new Date(weekTo)) {
+        Swal.fire('Validation', 'From date must be before To date', 'warning'); return;
+      }
+      fetchRange(weekFrom, weekTo);
     } else if (activeTab === 'monthly') {
       const { from, to } = getMonthRange(monthYear);
       fetchRange(from, to);
@@ -120,7 +134,7 @@ const SalesReports = () => {
       handleFilter();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, singleDate, weekBase, monthYear, fromDate, toDate, fetchHistory]);
+  }, [activeTab, singleDate, weekFrom, weekTo, monthYear, fromDate, toDate, fetchHistory]);
 
   /* ── period label ──────────────────────────────────────────────────────── */
   const getPeriodLabel = () => {
@@ -143,12 +157,22 @@ const SalesReports = () => {
     try {
       const f = reportData._from || singleDate;
       const t = reportData._to   || singleDate;
-      const endpoint = activeTab === 'single' ? 'daily' : 'range';
-      const params = endpoint === 'daily'
-        ? { date: f }
-        : { from: f, to: t };
+      let endpoint = 'range';
+      let params = {};
+      
+      if (activeTab === 'single') {
+        endpoint = 'daily';
+        params = { date: f };
+      } else if (activeTab === 'monthly') {
+        endpoint = 'monthly';
+        const [y, m] = monthYear.split('-').map(Number);
+        params = { year: y, month: m };
+      } else {
+        params = { from: f, to: t };
+      }
+      
       const res = await apiClient.get(`/reports/${endpoint}/csv`, { params, responseType: 'blob' });
-      const suffix = endpoint === 'daily' ? f : `${f}-to-${t}`;
+      const suffix = activeTab === 'single' ? f : (activeTab === 'monthly' ? monthYear : `${f}-to-${t}`);
       const blob = new Blob([res.data], { type: 'text/csv' });
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement('a');
@@ -264,15 +288,26 @@ const SalesReports = () => {
 
                 {/* Weekly */}
                 {activeTab === 'weekly' && (
-                  <div className="filter-group">
-                    <label>Pick any day in the week</label>
-                    <input type="date" className="form-control"
-                      value={weekBase} max={today}
-                      onChange={(e) => setWeekBase(e.target.value)} />
-                    <span className="text-muted small ms-2">
-                      ({weekRange.from} → {weekRange.to})
-                    </span>
-                  </div>
+                  <>
+                    <div className="filter-group">
+                      <label>Base Day (Auto Week)</label>
+                      <input type="date" className="form-control"
+                        value={weekBase} max={today}
+                        onChange={(e) => handleWeekBaseChange(e.target.value)} />
+                    </div>
+                    <div className="filter-group">
+                      <label>From</label>
+                      <input type="date" className="form-control"
+                        value={weekFrom} max={today}
+                        onChange={(e) => setWeekFrom(e.target.value)} />
+                    </div>
+                    <div className="filter-group">
+                      <label>To</label>
+                      <input type="date" className="form-control"
+                        value={weekTo} max={today}
+                        onChange={(e) => setWeekTo(e.target.value)} />
+                    </div>
+                  </>
                 )}
 
                 {/* Monthly */}

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Raw } from 'typeorm';
+import { Repository, Raw, Between } from 'typeorm';
 import { ReportsHistory } from './entities/reports-history.entity';
 import { Order } from '../orders/entities/order.entity';
 import { OrderItem } from '../orders/entities/order-item.entity';
@@ -8,6 +8,13 @@ import { Invoice, PaymentMethod, InvoiceStatus } from '../billing/entities/invoi
 
 @Injectable()
 export class ReportsService {
+  private getLocalStartOfDay(dateStr: string): Date {
+    return new Date(`${dateStr}T00:00:00+05:30`);
+  }
+
+  private getLocalEndOfDay(dateStr: string): Date {
+    return new Date(`${dateStr}T23:59:59.999+05:30`);
+  }
   constructor(
     @InjectRepository(ReportsHistory)
     private reportsHistoryRepository: Repository<ReportsHistory>,
@@ -76,14 +83,13 @@ export class ReportsService {
     toDate: string,
     adminId?: number,
   ) {
+    const start = this.getLocalStartOfDay(fromDate);
+    const end = this.getLocalEndOfDay(toDate);
     const query = this.invoicesRepository
       .createQueryBuilder('invoice')
       .where('invoice.restaurantId = :restaurantId', { restaurantId })
       .andWhere('invoice.invoiceStatus = :status', { status: 'PAID' })
-      .andWhere('DATE(invoice.createdAt) BETWEEN :fromDate AND :toDate', {
-        fromDate,
-        toDate,
-      });
+      .andWhere('invoice.createdAt BETWEEN :start AND :end', { start, end });
 
     if (adminId) {
       query.andWhere('invoice.createdByAdminId = :adminId', { adminId });
@@ -124,12 +130,13 @@ export class ReportsService {
     });
     const periodLabel = `${formattedDate} (${dayOfWeek})`;
 
-    // Query PAID invoices
+    const start = this.getLocalStartOfDay(date);
+    const end = this.getLocalEndOfDay(date);
     const invoices = await this.invoicesRepository.find({
       where: {
         restaurantId,
         invoiceStatus: InvoiceStatus.PAID,
-        createdAt: Raw((alias) => `DATE(${alias}) = :date`, { date }),
+        createdAt: Between(start, end),
       },
       relations: ['createdBy'],
       order: { createdAt: 'DESC' },
@@ -207,15 +214,13 @@ export class ReportsService {
     });
     const periodLabel = `${formattedFrom} - ${formattedTo}`;
 
-    // Query PAID invoices
+    const start = this.getLocalStartOfDay(fromDate);
+    const end = this.getLocalEndOfDay(toDate);
     const invoices = await this.invoicesRepository.find({
       where: {
         restaurantId,
         invoiceStatus: InvoiceStatus.PAID,
-        createdAt: Raw((alias) => `DATE(${alias}) BETWEEN :fromDate AND :toDate`, {
-          fromDate,
-          toDate,
-        }),
+        createdAt: Between(start, end),
       },
       relations: ['createdBy'],
       order: { createdAt: 'DESC' },
@@ -290,15 +295,13 @@ export class ReportsService {
       'July', 'August', 'September', 'October', 'November', 'December'];
     const periodLabel = `${monthNames[month - 1]} ${year}`;
 
-    // Query PAID invoices
+    const start = this.getLocalStartOfDay(fromDate);
+    const end = this.getLocalEndOfDay(toDate);
     const invoices = await this.invoicesRepository.find({
       where: {
         restaurantId,
         invoiceStatus: InvoiceStatus.PAID,
-        createdAt: Raw((alias) => `DATE(${alias}) BETWEEN :fromDate AND :toDate`, {
-          fromDate,
-          toDate,
-        }),
+        createdAt: Between(start, end),
       },
       relations: ['createdBy'],
       order: { createdAt: 'DESC' },
@@ -486,13 +489,15 @@ export class ReportsService {
     fromDate: string,
     toDate: string,
   ) {
+    const start = this.getLocalStartOfDay(fromDate);
+    const end = this.getLocalEndOfDay(toDate);
     const invoices = await this.invoicesRepository
       .createQueryBuilder('invoice')
       .leftJoinAndSelect('invoice.createdBy', 'createdBy')
       .where('invoice.restaurantId = :restaurantId', { restaurantId })
       .andWhere('invoice.invoiceStatus = :status', { status: 'PAID' })
       .andWhere('invoice.createdByAdminId = :cashierId', { cashierId })
-      .andWhere('DATE(invoice.createdAt) BETWEEN :fromDate AND :toDate', { fromDate, toDate })
+      .andWhere('invoice.createdAt BETWEEN :start AND :end', { start, end })
       .orderBy('invoice.createdAt', 'DESC')
       .getMany();
 

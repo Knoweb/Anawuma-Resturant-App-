@@ -14,7 +14,9 @@ const getWeekRange = (baseDate) => {
   const diffToMon = day === 0 ? -6 : 1 - day;
   const mon = new Date(d);
   mon.setDate(d.getDate() + diffToMon);
-  return { from: toISO(mon), to: toISO(d) };
+  const sun = new Date(mon);
+  sun.setDate(mon.getDate() + 6);
+  return { from: toISO(mon), to: toISO(sun) };
 };
 
 const getMonthRange = (baseDate) => {
@@ -42,6 +44,8 @@ const CashierReport = () => {
 
   // week/month selectors
   const [weekBase, setWeekBase]   = useState(today);   // any date in the desired week
+  const [weekFrom, setWeekFrom]   = useState(getWeekRange(today).from);
+  const [weekTo, setWeekTo]       = useState(getWeekRange(today).to);
   const [monthYear, setMonthYear] = useState(today.slice(0, 7)); // YYYY-MM
 
   const [reportData, setReportData] = useState(null);
@@ -62,14 +66,24 @@ const CashierReport = () => {
     }
   };
 
+  const handleWeekBaseChange = (val) => {
+    setWeekBase(val);
+    const range = getWeekRange(val);
+    setWeekFrom(range.from);
+    setWeekTo(range.to);
+  };
+
   /* ── handle filter click per tab ─────────────────────────────────────────── */
   const handleFilter = () => {
     if (activeTab === 'single') {
       if (!singleDate) { Swal.fire('Validation', 'Please select a date', 'warning'); return; }
       fetchReport(singleDate, singleDate);
     } else if (activeTab === 'weekly') {
-      const { from, to } = getWeekRange(weekBase);
-      fetchReport(from, to);
+      if (!weekFrom || !weekTo) { Swal.fire('Validation', 'Please select both week dates', 'warning'); return; }
+      if (new Date(weekFrom) > new Date(weekTo)) {
+        Swal.fire('Validation', 'From date must be before To date', 'warning'); return;
+      }
+      fetchReport(weekFrom, weekTo);
     } else if (activeTab === 'monthly') {
       const [y, m] = monthYear.split('-').map(Number);
       const from = toISO(new Date(y, m - 1, 1));
@@ -93,7 +107,7 @@ const CashierReport = () => {
   useEffect(() => {
     handleFilter();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, singleDate, weekBase, monthYear, fromDate, toDate]);
+  }, [activeTab, singleDate, weekFrom, weekTo, monthYear, fromDate, toDate]);
 
   /* ── label for period ────────────────────────────────────────────────────── */
   const getPeriodLabel = () => {
@@ -215,17 +229,32 @@ const CashierReport = () => {
 
               {/* Weekly */}
               {activeTab === 'weekly' && (
-                <div className="filter-group">
-                  <label>Pick any day in the week</label>
-                  <input
-                    type="date" className="form-control"
-                    value={weekBase} max={today}
-                    onChange={(e) => setWeekBase(e.target.value)}
-                  />
-                  <span className="text-muted small ms-2">
-                    ({weekRange.from} → {weekRange.to})
-                  </span>
-                </div>
+                <>
+                  <div className="filter-group">
+                    <label>Base Day (Auto Week)</label>
+                    <input
+                      type="date" className="form-control"
+                      value={weekBase} max={today}
+                      onChange={(e) => handleWeekBaseChange(e.target.value)}
+                    />
+                  </div>
+                  <div className="filter-group">
+                    <label>From</label>
+                    <input
+                      type="date" className="form-control"
+                      value={weekFrom} max={today}
+                      onChange={(e) => setWeekFrom(e.target.value)}
+                    />
+                  </div>
+                  <div className="filter-group">
+                    <label>To</label>
+                    <input
+                      type="date" className="form-control"
+                      value={weekTo} max={today}
+                      onChange={(e) => setWeekTo(e.target.value)}
+                    />
+                  </div>
+                </>
               )}
 
               {/* Monthly */}
