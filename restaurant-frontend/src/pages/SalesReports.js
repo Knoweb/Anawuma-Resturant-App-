@@ -452,17 +452,25 @@ const SalesReports = () => {
             return (
               <div className="report-results">
                 {/* Print-only header */}
-                <div className="report-print-header text-center mb-4">
-                  {restaurantLogoUrl && (
-                    <img src={restaurantLogoUrl} alt="Logo" className="print-logo mb-2" />
-                  )}
-                  <h2 className="print-restaurant-name">{restaurantInfo?.restaurantName || user?.restaurantName || 'Restaurant'}</h2>
-                  <p className="print-restaurant-address mb-1">{restaurantInfo?.address || 'Hotel Address'}</p>
-                  <p className="print-restaurant-contact mb-1">
-                    {restaurantInfo?.contactNumber && <span>Tel: {restaurantInfo.contactNumber}</span>}
-                    {restaurantInfo?.email && <span className="ms-3">Email: {restaurantInfo.email}</span>}
-                  </p>
+                <div className="report-print-header mb-4">
+                  <div className="d-flex align-items-center mb-3">
+                    {restaurantLogoUrl && (
+                      <img src={restaurantLogoUrl} alt="Logo" className="print-logo me-3" />
+                    )}
+                    <div>
+                      <h2 className="print-restaurant-name m-0">{restaurantInfo?.restaurantName || user?.restaurantName || 'Restaurant'}</h2>
+                    </div>
+                  </div>
                   <hr className="print-header-divider" />
+                  <div className="text-start">
+                    <p className="print-restaurant-address mb-1">{restaurantInfo?.address || 'Hotel Address'}</p>
+                    <p className="print-restaurant-cashier mb-1">
+                      <strong>Cashier:</strong> {selectedCashier === 'all' ? 'All Cashiers' : selectedCashier}
+                    </p>
+                    <p className="print-restaurant-contact mb-1">
+                      <strong>Contact Number:</strong> {restaurantInfo?.contactNumber || 'N/A'}
+                    </p>
+                  </div>
                 </div>
 
                 <div className="report-period">
