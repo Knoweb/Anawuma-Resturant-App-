@@ -272,35 +272,90 @@
 
 /* Print Styles */
 @media print {
+  @page {
+    margin: 0.5cm;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 11px !important;
+  }
+
   .no-print {
     display: none !important;
   }
 
   .dashboard-container {
-    display: block;
+    display: block !important;
   }
 
   .main-content {
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   .sales-reports-container {
-    padding: 20px;
+    padding: 0 !important;
+    margin-top: 0 !important;
   }
 
   .report-results {
-    box-shadow: none;
-    border: 1px solid #dee2e6;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  /* Force Bootstrap row columns to be a single horizontal flex line when printing */
+  .sales-reports-container .row {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    margin-bottom: 15px !important;
+  }
+
+  .sales-reports-container .row > div {
+    flex: 1 !important;
+    max-width: 100% !important;
+    padding: 0 !important;
   }
 
   .sales-reports-container .summary-card {
-    box-shadow: none;
-    border: 1px solid #dee2e6;
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+    background: #fff !important;
+    color: #000 !important;
+    padding: 10px !important;
+    height: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
     page-break-inside: avoid;
   }
 
+  .sales-reports-container .summary-card .summary-icon {
+    display: none !important;
+  }
+
+  .sales-reports-container .summary-content h6 {
+    font-size: 10px !important;
+    color: #444 !important;
+    margin: 0 !important;
+  }
+
+  .sales-reports-container .summary-content h3 {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: #000 !important;
+    margin: 2px 0 0 0 !important;
+    white-space: nowrap !important;
+  }
+
   .report-table {
+    width: 100% !important;
+    font-size: 11px !important;
+    border-collapse: collapse !important;
     page-break-inside: auto;
   }
 
@@ -315,6 +370,17 @@
 
   .report-table tfoot {
     display: table-footer-group;
+  }
+
+  .report-table thead th,
+  .report-table tbody td {
+    padding: 5px 6px !important;
+    border: 1px solid #ddd !important;
+  }
+
+  .report-table tfoot td {
+    padding: 5px 6px !important;
+    border: 1px solid #ddd !important;
   }
 }
 
