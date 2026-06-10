@@ -73,10 +73,6 @@ const SalesReports = () => {
     }
   }, []);
 
-  useEffect(() => {
-    if (activeTab === 'history') fetchHistory();
-    else setReportData(null);
-  }, [activeTab, fetchHistory]);
 
   /* ── unified fetch ─────────────────────────────────────────────────────── */
   const fetchRange = async (from, to, endpoint = 'range') => {
@@ -116,6 +112,15 @@ const SalesReports = () => {
       fetchRange(fromDate, toDate);
     }
   };
+
+  useEffect(() => {
+    if (activeTab === 'history') {
+      fetchHistory();
+    } else {
+      handleFilter();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, singleDate, weekBase, monthYear, fromDate, toDate, fetchHistory]);
 
   /* ── period label ──────────────────────────────────────────────────────── */
   const getPeriodLabel = () => {

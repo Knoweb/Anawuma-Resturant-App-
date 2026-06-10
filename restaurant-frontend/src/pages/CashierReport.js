@@ -90,6 +90,11 @@ const CashierReport = () => {
     setReportData(null);
   };
 
+  useEffect(() => {
+    handleFilter();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, singleDate, weekBase, monthYear, fromDate, toDate]);
+
   /* ── label for period ────────────────────────────────────────────────────── */
   const getPeriodLabel = () => {
     if (!reportData) return '';

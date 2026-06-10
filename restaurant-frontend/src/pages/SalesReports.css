@@ -127,7 +127,7 @@
 }
 
 /* Summary Cards */
-.summary-card {
+.sales-reports-container .summary-card {
   display: flex;
   align-items: center;
   gap: 20px;
@@ -139,17 +139,27 @@
   height: 100%;
 }
 
-.summary-card.cash {
+.sales-reports-container .summary-card.bg-light {
+  background: #f8f9fa !important;
+  color: #2c3e50 !important;
+  border: 1px solid #dee2e6 !important;
+}
+
+.sales-reports-container .summary-card.bg-light .summary-icon {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.sales-reports-container .summary-card.cash {
   background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
   box-shadow: 0 4px 15px rgba(0, 176, 155, 0.4);
 }
 
-.summary-card.card-type {
+.sales-reports-container .summary-card.card-type {
   background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
   box-shadow: 0 4px 15px rgba(33, 147, 176, 0.4);
 }
 
-.summary-card .summary-icon {
+.sales-reports-container .summary-card .summary-icon {
   width: 60px;
   height: 60px;
   display: flex;
@@ -160,26 +170,28 @@
   font-size: 24px;
 }
 
-.summary-card.revenue,
-.summary-card .summary-icon.revenue {
+.sales-reports-container .summary-card.revenue,
+.sales-reports-container .summary-card .summary-icon.revenue {
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
 }
 
-.summary-content h6 {
+.sales-reports-container .summary-content h6 {
   margin: 0;
   font-size: 14px;
   opacity: 0.9;
   font-weight: 500;
+  color: inherit;
 }
 
-.summary-content h3 {
+.sales-reports-container .summary-content h3 {
   margin: 5px 0 0 0;
   font-size: 28px;
   font-weight: 700;
+  color: inherit;
 }
 
-.summary-card:hover {
+.sales-reports-container .summary-card:hover {
   transform: translateY(-5px);
   transition: transform 0.3s ease;
 }
@@ -281,7 +293,7 @@
     border: 1px solid #dee2e6;
   }
 
-  .summary-card {
+  .sales-reports-container .summary-card {
     box-shadow: none;
     border: 1px solid #dee2e6;
     page-break-inside: avoid;
@@ -334,7 +346,7 @@
     padding: 10px 20px;
   }
 
-  .summary-card {
+  .sales-reports-container .summary-card {
     margin-bottom: 15px;
   }
 
