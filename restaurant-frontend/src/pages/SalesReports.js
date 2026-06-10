@@ -243,17 +243,20 @@ const SalesReports = () => {
       <Sidebar />
       <div className="main-content">
         <Navbar />
-        <div className="sales-reports-container">
+        <div className="sales-reports-container" style={{ marginTop: '85px', padding: '30px', minHeight: 'calc(100vh - 85px)' }}>
 
           {/* ── Header ── */}
-          <div className="reports-header no-print">
-            <h2><i className="fas fa-chart-line me-2"></i>Sales Reports</h2>
-            <div className="header-actions">
-              <button className="btn btn-success me-2" onClick={handleDownloadCSV}>
-                <i className="fas fa-download me-2"></i>Download CSV
+          <div className="no-print d-flex justify-content-between align-items-center mb-4 pb-2" style={{ borderBottom: '1px solid #e2e8f0' }}>
+            <h2 className="mb-0" style={{ color: '#1e293b', fontWeight: '700', fontSize: '1.75rem' }}>
+              <i className="fas fa-chart-line me-2 text-primary"></i>
+              Sales Reports
+            </h2>
+            <div className="d-flex gap-2">
+              <button className="btn btn-success d-flex align-items-center gap-2" onClick={handleDownloadCSV} style={{ padding: '9px 18px', borderRadius: '10px', fontWeight: '600' }}>
+                <i className="fas fa-download"></i>Download CSV
               </button>
-              <button className="btn btn-primary" onClick={handlePrint}>
-                <i className="fas fa-print me-2"></i>Print
+              <button className="btn btn-primary" onClick={handlePrint} style={{ padding: '9px 18px', borderRadius: '10px', fontWeight: '600' }}>
+                <i className="fas fa-print"></i>Print
               </button>
             </div>
           </div>
