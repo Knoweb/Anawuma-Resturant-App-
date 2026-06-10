@@ -567,3 +567,7 @@
     margin-bottom: 4px !important;
   }
 }
+
+.admin-report-table tfoot td {
+  white-space: nowrap !important;
+}

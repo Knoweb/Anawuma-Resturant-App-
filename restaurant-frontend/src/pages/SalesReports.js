@@ -520,7 +520,7 @@ const SalesReports = () => {
                 {/* Report Table */}
                 {filteredRows.length > 0 ? (
                   <div className="table-responsive">
-                    <table className="table table-striped report-table">
+                    <table className="table table-striped report-table admin-report-table">
                       <thead>
                         <tr>
                           <th>Order No</th><th>Table No</th><th>Date/Time</th>
