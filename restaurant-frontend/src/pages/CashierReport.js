@@ -179,6 +179,7 @@ const CashierReport = () => {
       };
     });
 
+    let csv = 'Invoice No,Table/Room,Date & Time,Item Name,Qty,Unit Price,Total,Service Charge,Payment\n';
     displayRows.forEach((r) => {
       const dt = new Date(r.createdAt).toLocaleString();
       const tableRoomVal = r.roomNo ? `Room ${r.roomNo}` : (r.tableNo ? `Table - ${r.tableNo}` : '–');
