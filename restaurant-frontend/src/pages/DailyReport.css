@@ -124,76 +124,124 @@
 /* Summary Cards */
 .summary-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
 
 .summary-card {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
   display: flex;
   align-items: center;
-  gap: 1.25rem;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  gap: 20px;
+  padding: 22px 24px !important;
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  color: #1e293b !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative;
+}
+
+.summary-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  border-radius: 12px 0 0 12px;
+}
+
+/* Accent border colors */
+/* Total Orders */
+.summary-card.orders-card::before {
+  background: #266668;
+}
+/* Total Revenue */
+.summary-card.revenue-card::before {
+  background: #6f42c1;
+}
+/* Food Total */
+.summary-card.bg-primary::before {
+  background: #198754;
+}
+/* Service Charge */
+.summary-card.bg-warning::before {
+  background: #ffc107;
 }
 
 .summary-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px) !important;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06) !important;
 }
 
+/* Icon backgrounds and colors */
 .summary-card .card-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
+  width: 50px !important;
+  height: 50px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 10px !important;
+  font-size: 20px !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Total Orders Icon */
+.summary-card.orders-card .card-icon {
+  background: rgba(38, 102, 104, 0.1) !important;
+  color: #266668 !important;
+}
+/* Total Revenue Icon */
+.summary-card.revenue-card .card-icon {
+  background: rgba(111, 66, 193, 0.1) !important;
+  color: #6f42c1 !important;
+}
+/* Food Total Icon */
+.summary-card.bg-primary .card-icon {
+  background: rgba(25, 135, 84, 0.1) !important;
+  color: #198754 !important;
+}
+/* Service Charge Icon */
+.summary-card.bg-warning .card-icon {
+  background: rgba(255, 193, 7, 0.15) !important;
+  color: #b28000 !important;
+}
+
+.summary-card .card-content {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.75rem;
+  flex-direction: column;
 }
 
-.orders-card .card-icon {
-  background: linear-gradient(135deg, #266668 0%, #1a4648 100%);
-  color: white;
-}
-
-.revenue-card .card-icon {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  color: white;
-}
-
-.cash-card .card-icon {
-  background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
-  color: white;
-}
-
-.card-card .card-icon {
-  background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
-  color: white;
-}
-
-.bg-primary {
-  background: linear-gradient(135deg, #266668 0%, #1a4648 100%) !important;
-}
-
-.bg-warning {
-  background: linear-gradient(135deg, #f5d142 0%, #f5a442 100%) !important;
+/* Text styles overrides */
+.summary-card .card-content p {
+  margin: 0 !important;
+  font-size: 0.78rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  color: #64748b !important;
+  font-weight: 600 !important;
+  opacity: 1 !important;
+  order: 1 !important;
 }
 
 .summary-card .card-content h3 {
-  margin: 0;
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #2c3e50;
+  margin: 4px 0 0 0 !important;
+  font-size: 1.6rem !important;
+  font-weight: 700 !important;
+  color: #1e293b !important;
+  order: 2 !important;
 }
 
-.summary-card .card-content p {
-  margin: 0.25rem 0 0 0;
-  color: #6c757d;
-  font-size: 0.9rem;
+.summary-card .card-content h3.text-white,
+.summary-card .card-content h3.text-dark {
+  color: #1e293b !important;
+}
+
+.summary-card.bg-primary .card-content p,
+.summary-card.bg-warning .card-content p {
+  color: #64748b !important;
 }
 
 /* Report Table */

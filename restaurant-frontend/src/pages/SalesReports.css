@@ -131,70 +131,124 @@
   display: flex;
   align-items: center;
   gap: 20px;
-  padding: 25px;
-  background: linear-gradient(135deg, #266668 0%, #1a4648 100%);
-  border-radius: 10px;
-  color: white;
-  box-shadow: 0 4px 15px rgba(38, 102, 104, 0.4);
+  padding: 22px 24px !important;
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  color: #1e293b !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
   height: 100%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative;
 }
 
-.sales-reports-container .summary-card.bg-light {
-  background: #f8f9fa !important;
-  color: #2c3e50 !important;
-  border: 1px solid #dee2e6 !important;
+.sales-reports-container .summary-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  border-radius: 12px 0 0 12px;
 }
 
-.sales-reports-container .summary-card.bg-light .summary-icon {
-  background: rgba(0, 0, 0, 0.05);
+/* Accent border colors */
+/* Total Invoices */
+.sales-reports-container .summary-card:not(.revenue):not(.cash):not(.card-type):not(.bg-light)::before {
+  background: #266668;
 }
-
-.sales-reports-container .summary-card.cash {
-  background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
-  box-shadow: 0 4px 15px rgba(0, 176, 155, 0.4);
+/* Grand Total */
+.sales-reports-container .summary-card.revenue::before {
+  background: #6f42c1;
 }
-
-.sales-reports-container .summary-card.card-type {
-  background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
-  box-shadow: 0 4px 15px rgba(33, 147, 176, 0.4);
+/* Food Total */
+.sales-reports-container .summary-card:has(.fa-utensils)::before {
+  background: #198754;
 }
-
-.sales-reports-container .summary-card .summary-icon {
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
-  font-size: 24px;
+/* Service Charge */
+.sales-reports-container .summary-card:has(.fa-bell)::before {
+  background: #ffc107;
 }
-
-.sales-reports-container .summary-card.revenue,
-.sales-reports-container .summary-card .summary-icon.revenue {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+/* Cash Revenue */
+.sales-reports-container .summary-card.cash::before {
+  background: #0dcaf0;
 }
-
-.sales-reports-container .summary-content h6 {
-  margin: 0;
-  font-size: 14px;
-  opacity: 0.9;
-  font-weight: 500;
-  color: inherit;
-}
-
-.sales-reports-container .summary-content h3 {
-  margin: 5px 0 0 0;
-  font-size: 28px;
-  font-weight: 700;
-  color: inherit;
-  white-space: nowrap;
+/* Card Revenue */
+.sales-reports-container .summary-card.card-type::before {
+  background: #0d6efd;
 }
 
 .sales-reports-container .summary-card:hover {
-  transform: translateY(-5px);
-  transition: transform 0.3s ease;
+  transform: translateY(-4px) !important;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Icon backgrounds and colors */
+.sales-reports-container .summary-card .summary-icon {
+  width: 50px !important;
+  height: 50px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 10px !important;
+  font-size: 20px !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Total Invoices Icon */
+.sales-reports-container .summary-card:not(.revenue):not(.cash):not(.card-type):not(.bg-light) .summary-icon {
+  background: rgba(38, 102, 104, 0.1) !important;
+  color: #266668 !important;
+}
+/* Grand Total Icon */
+.sales-reports-container .summary-card.revenue .summary-icon {
+  background: rgba(111, 66, 193, 0.1) !important;
+  color: #6f42c1 !important;
+}
+/* Food Total Icon */
+.sales-reports-container .summary-card:has(.fa-utensils) .summary-icon {
+  background: rgba(25, 135, 84, 0.1) !important;
+  color: #198754 !important;
+}
+/* Service Charge Icon */
+.sales-reports-container .summary-card:has(.fa-bell) .summary-icon {
+  background: rgba(255, 193, 7, 0.15) !important;
+  color: #b28000 !important;
+}
+/* Cash Revenue Icon */
+.sales-reports-container .summary-card.cash .summary-icon {
+  background: rgba(13, 202, 240, 0.15) !important;
+  color: #0aa2c0 !important;
+}
+/* Card Revenue Icon */
+.sales-reports-container .summary-card.card-type .summary-icon {
+  background: rgba(13, 110, 253, 0.1) !important;
+  color: #0d6efd !important;
+}
+
+/* Text styles overrides */
+.sales-reports-container .summary-content h6 {
+  margin: 0 !important;
+  font-size: 0.78rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  color: #64748b !important;
+  font-weight: 600 !important;
+  opacity: 1 !important;
+}
+
+.sales-reports-container .summary-content h3 {
+  margin: 4px 0 0 0 !important;
+  font-size: 1.6rem !important;
+  font-weight: 700 !important;
+  color: #1e293b !important;
+}
+
+.sales-reports-container .summary-card h3.text-primary {
+  color: #198754 !important;
+}
+.sales-reports-container .summary-card h3.text-warning {
+  color: #b28000 !important;
 }
 
 /* Report Table */
