@@ -1264,14 +1264,14 @@ const KitchenKDS = () => {
   };
 
   return (
-    <div className="dashboard-layout">
+    <div className="dashboard-layout kds-layout-active">
       <Sidebar />
       <div className="main-content">
         <Navbar />
         <div className="dashboard-content">
-          <div className="container-fluid">
+          <div className="container-fluid h-100 d-flex flex-column">
             {/* Page Header */}
-            <div className="row mb-4">
+            <div className="row mb-4 flex-shrink-0">
               <div className="col-12">
                 <div className="kds-header">
                   <h2>
@@ -1309,7 +1309,7 @@ const KitchenKDS = () => {
                 <p className="mt-2">Loading orders...</p>
               </div>
             ) : (
-              <div className="row g-3">
+              <div className="row g-3 flex-grow-1 overflow-hidden" style={{ minHeight: 0 }}>
                 <StatusColumn
                   title="New Orders"
                   status="NEW"
