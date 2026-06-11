@@ -26,8 +26,8 @@
   background: #f8f9fa;
   border-radius: 12px;
   padding: 1rem;
-  height: calc(100vh - 220px);
-  min-height: 500px;
+  height: calc(100vh - 330px);
+  min-height: 400px;
   display: flex;
   flex-direction: column;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -290,11 +290,8 @@
 /* Responsive Design */
 @media (max-width: 1400px) {
   .status-column {
-    min-height: 70vh;
-  }
-  
-  .orders-container {
-    max-height: calc(70vh - 60px);
+    height: calc(100vh - 330px);
+    min-height: 400px;
   }
 }
 
