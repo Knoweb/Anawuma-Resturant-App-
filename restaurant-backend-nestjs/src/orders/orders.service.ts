@@ -141,7 +141,7 @@ export class OrdersService {
       serviceCharge,
       totalAmount,
       restaurantId,
-      status: orderType === OrderType.MANUAL_CASHIER ? OrderStatus.SERVED : OrderStatus.NEW,
+      status: OrderStatus.NEW,
       createdByAdminId: adminId || null,
       orderItems: orderItems as OrderItem[],
     });
