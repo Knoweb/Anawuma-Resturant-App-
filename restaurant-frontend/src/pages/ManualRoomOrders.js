@@ -97,7 +97,7 @@ const ManualRoomOrders = () => {
                 </head>
                 <body>
                     <div class="header">
-                        <h2 style="margin:0">${restaurantName}</h2>
+                        <h2 style="margin:0; font-size:18px; font-weight:bold;">${restaurantName}</h2>
                         <p style="margin:5px 0">Order Receipt</p>
                         <p style="margin:2px 0">Order No: ${order.orderNo}</p>
                         <p style="margin:2px 0">${new Date(order.createdAt).toLocaleString()}</p>

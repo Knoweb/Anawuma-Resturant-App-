@@ -26,7 +26,10 @@
   background: #f8f9fa;
   border-radius: 12px;
   padding: 1rem;
-  min-height: 75vh;
+  height: calc(100vh - 220px);
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
@@ -66,7 +69,7 @@
 }
 
 .orders-container {
-  max-height: calc(75vh - 60px);
+  flex: 1;
   overflow-y: auto;
   padding-right: 0.5rem;
 }
