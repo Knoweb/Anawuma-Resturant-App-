@@ -140,6 +140,7 @@ const CashierReport = () => {
   };
 
   /* ── CSV download ────────────────────────────────────────────────────────── */
+  /* ── CSV download ────────────────────────────────────────────────────────── */
   const handleDownloadCSV = () => {
     if (!reportData?.rows?.length) {
       Swal.fire('Info', 'No transactions to download', 'info'); return;
@@ -148,49 +149,40 @@ const CashierReport = () => {
     const t = reportData.fetchedTo;
     const suffix = f === t ? f : `${f}-to-${t}`;
 
-    const groupedMap = new Map();
-    rows.forEach((row) => {
-      const key = row.invoiceId || row.invoiceNumber;
-      if (!groupedMap.has(key)) {
-        groupedMap.set(key, {
-          ...row,
-          itemsList: [{ name: row.itemName, qty: row.qty }],
-          lineTotalSum: parseFloat(row.lineTotal || 0),
-          serviceChargeSum: parseFloat(row.serviceCharge || 0),
-        });
-      } else {
-        const existing = groupedMap.get(key);
-        existing.itemsList.push({ name: row.itemName, qty: row.qty });
-        existing.lineTotalSum += parseFloat(row.lineTotal || 0);
-        existing.serviceChargeSum += parseFloat(row.serviceCharge || 0);
-      }
-    });
+    const formatSLTime = (dateInput) => {
+      const date = new Date(dateInput);
+      const slDate = new Date(date.getTime() + 5.5 * 60 * 60 * 1000);
+      const yyyy = slDate.getUTCFullYear();
+      const mm = String(slDate.getUTCMonth() + 1).padStart(2, '0');
+      const dd = String(slDate.getUTCDate()).padStart(2, '0');
+      
+      let hours = slDate.getUTCHours();
+      const minutes = String(slDate.getUTCMinutes()).padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      const hh = String(hours).padStart(2, '0');
+      
+      return `${yyyy}-${mm}-${dd} ${hh}:${minutes} ${ampm}`;
+    };
 
-    const displayRows = Array.from(groupedMap.values()).map((g) => {
-      const combinedItemNames = g.itemsList.map(it => `${it.name} x ${it.qty}`).join(', ');
-      const totalQty = g.itemsList.reduce((s, it) => s + (parseInt(it.qty) || 0), 0);
-      return {
-        ...g,
-        itemName: combinedItemNames,
-        qty: totalQty,
-        unitPrice: '–',
-        lineTotal: g.lineTotalSum,
-        serviceCharge: g.serviceChargeSum,
-      };
+    let csv = 'Order No,Room No,Table No,Date/Time,Item Name,Qty,Unit Price,Line Total,Service Charge,Payment Method,Cashier\n';
+    reportData.rows.forEach((r) => {
+      const dt = formatSLTime(r.createdAt);
+      const roomNoVal = r.roomNo ? `Room ${r.roomNo}` : '-';
+      const tableNoVal = r.tableNo ? `Table - ${r.tableNo}` : '-';
+      const itemNameEscaped = `"${(r.itemName || '').replace(/"/g, '""')}"`;
+      const cashierEmail = user?.email || 'N/A';
+      csv += `${r.orderNo || r.invoiceNumber},"${roomNoVal}","${tableNoVal}","${dt}",${itemNameEscaped},${r.qty},${r.unitPrice},${r.lineTotal},${r.serviceCharge || 0},"${r.paymentMethod || 'CASH'}","${cashierEmail}"\n`;
     });
-
-    let csv = 'Invoice No,Table/Room,Date & Time,Item Name,Qty,Unit Price,Total,Service Charge,Payment\n';
-    displayRows.forEach((r) => {
-      const dt = new Date(r.createdAt).toLocaleString();
-      const tableRoomVal = r.roomNo ? `Room ${r.roomNo}` : (r.tableNo ? `Table - ${r.tableNo}` : '–');
-      const rowTotal = parseFloat(r.lineTotal || 0) + parseFloat(r.serviceCharge || 0);
-      csv += `${r.invoiceNumber},"${tableRoomVal}","${dt}","${r.itemName}",${r.qty},${r.unitPrice},${rowTotal},${r.serviceCharge || 0},${r.paymentMethod}\n`;
-    });
-    csv += `\n,,,,,,Food Total,${reportData.foodRevenue}\n`;
-    csv += `,,,,,,Service Charge,${reportData.serviceCharge}\n`;
-    csv += `,,,,,,Grand Total,${reportData.totalRevenue}\n`;
-    csv += `,,,,,,Cash Revenue,${reportData.cashRevenue}\n`;
-    csv += `,,,,,,Card Revenue,${reportData.cardRevenue}\n`;
+    
+    csv += `\n`;
+    csv += `,,,,,,Total Orders:,${reportData.totalInvoices || 0}\n`;
+    csv += `,,,,,,Food Total:,${reportData.foodRevenue || 0}\n`;
+    csv += `,,,,,,Service Charge:,${reportData.serviceCharge || 0}\n`;
+    csv += `,,,,,,Total Revenue:,${reportData.totalRevenue || 0}\n`;
+    csv += `,,,,,,Cash Revenue:,${reportData.cashRevenue || 0}\n`;
+    csv += `,,,,,,Card Revenue:,${reportData.cardRevenue || 0}\n`;
 
     const blob = new Blob([csv], { type: 'text/csv' });
     const url  = URL.createObjectURL(blob);

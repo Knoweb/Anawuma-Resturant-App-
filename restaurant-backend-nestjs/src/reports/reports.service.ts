@@ -385,22 +385,46 @@ export class ReportsService {
     }));
   }
 
+  private formatSLTime(dateInput: Date | string): string {
+    const date = new Date(dateInput);
+    // Convert UTC/server time to Sri Lanka local time (UTC+5:30)
+    const slDate = new Date(date.getTime() + 5.5 * 60 * 60 * 1000);
+    const yyyy = slDate.getUTCFullYear();
+    const mm = String(slDate.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(slDate.getUTCDate()).padStart(2, '0');
+    
+    let hours = slDate.getUTCHours();
+    const minutes = String(slDate.getUTCMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    const hh = String(hours).padStart(2, '0');
+    
+    return `${yyyy}-${mm}-${dd} ${hh}:${minutes} ${ampm}`;
+  }
+
   async generateDailyCsv(restaurantId: number, date: string): Promise<string> {
     const report = await this.getDailyReport(restaurantId, date);
 
-    let csv = 'Order No,Table No,Date/Time,Item Name,Qty,Unit Price,Line Total,Service Charge,Payment,Cashier\n';
+    let csv = 'Order No,Room No,Table No,Date/Time,Item Name,Qty,Unit Price,Line Total,Service Charge,Payment Method,Cashier\n';
     
     for (const row of report.rows) {
-      const dateTime = new Date(row.createdAt).toLocaleString();
-      csv += `${row.orderNo},"${row.tableNo}","${dateTime}","${row.itemName}",${row.qty},${row.unitPrice},${row.lineTotal},${row.serviceCharge},${row.paymentMethod},"${row.cashier}"\n`;
+      const dateTime = this.formatSLTime(row.createdAt);
+      const roomNoStr = row.roomNo ? `Room ${row.roomNo}` : '-';
+      const tableNoStr = row.tableNo ? `Table - ${row.tableNo}` : '-';
+      const itemNameEscaped = `"${(row.itemName || '').replace(/"/g, '""')}"`;
+      const cashierEscaped = `"${(row.cashier || 'N/A').replace(/"/g, '""')}"`;
+      
+      csv += `${row.orderNo},"${roomNoStr}","${tableNoStr}","${dateTime}",${itemNameEscaped},${row.qty},${row.unitPrice},${row.lineTotal},${row.serviceCharge},"${row.paymentMethod || 'CASH'}",${cashierEscaped}\n`;
     }
 
-    csv += `\n,,,,Total Orders:,${report.totalOrders},,,\n`;
-    csv += `,,,,Food Total:,,,${report.foodRevenue || 0},\n`;
-    csv += `,,,,Service Charge:,,,${report.serviceCharge || 0},\n`;
-    csv += `,,,,Total Revenue:,,,${report.totalRevenue},\n`;
-    csv += `,,,,Cash Revenue:,,,${report.cashRevenue || 0},\n`;
-    csv += `,,,,Card Revenue:,,,${report.cardRevenue || 0},\n`;
+    csv += `\n`;
+    csv += `,,,,,,Total Orders:,${report.totalOrders}\n`;
+    csv += `,,,,,,Food Total:,${report.foodRevenue || 0}\n`;
+    csv += `,,,,,,Service Charge:,${report.serviceCharge || 0}\n`;
+    csv += `,,,,,,Total Revenue:,${report.totalRevenue || 0}\n`;
+    csv += `,,,,,,Cash Revenue:,${report.cashRevenue || 0}\n`;
+    csv += `,,,,,,Card Revenue:,${report.cardRevenue || 0}\n`;
 
     return csv;
   }
@@ -408,19 +432,25 @@ export class ReportsService {
   async generateRangeCsv(restaurantId: number, fromDate: string, toDate: string): Promise<string> {
     const report = await this.getRangeReport(restaurantId, fromDate, toDate);
 
-    let csv = 'Order No,Table No,Date/Time,Item Name,Qty,Unit Price,Line Total,Service Charge,Payment,Cashier\n';
+    let csv = 'Order No,Room No,Table No,Date/Time,Item Name,Qty,Unit Price,Line Total,Service Charge,Payment Method,Cashier\n';
     
     for (const row of report.rows) {
-      const dateTime = new Date(row.createdAt).toLocaleString();
-      csv += `${row.orderNo},"${row.tableNo}","${dateTime}","${row.itemName}",${row.qty},${row.unitPrice},${row.lineTotal},${row.serviceCharge},${row.paymentMethod},"${row.cashier}"\n`;
+      const dateTime = this.formatSLTime(row.createdAt);
+      const roomNoStr = row.roomNo ? `Room ${row.roomNo}` : '-';
+      const tableNoStr = row.tableNo ? `Table - ${row.tableNo}` : '-';
+      const itemNameEscaped = `"${(row.itemName || '').replace(/"/g, '""')}"`;
+      const cashierEscaped = `"${(row.cashier || 'N/A').replace(/"/g, '""')}"`;
+      
+      csv += `${row.orderNo},"${roomNoStr}","${tableNoStr}","${dateTime}",${itemNameEscaped},${row.qty},${row.unitPrice},${row.lineTotal},${row.serviceCharge},"${row.paymentMethod || 'CASH'}",${cashierEscaped}\n`;
     }
 
-    csv += `\n,,,,Total Orders:,${report.totalOrders},,,\n`;
-    csv += `,,,,Food Total:,,,${report.foodRevenue || 0},\n`;
-    csv += `,,,,Service Charge:,,,${report.serviceCharge || 0},\n`;
-    csv += `,,,,Total Revenue:,,,${report.totalRevenue},\n`;
-    csv += `,,,,Cash Revenue:,,,${report.cashRevenue || 0},\n`;
-    csv += `,,,,Card Revenue:,,,${report.cardRevenue || 0},\n`;
+    csv += `\n`;
+    csv += `,,,,,,Total Orders:,${report.totalOrders}\n`;
+    csv += `,,,,,,Food Total:,${report.foodRevenue || 0}\n`;
+    csv += `,,,,,,Service Charge:,${report.serviceCharge || 0}\n`;
+    csv += `,,,,,,Total Revenue:,${report.totalRevenue || 0}\n`;
+    csv += `,,,,,,Cash Revenue:,${report.cashRevenue || 0}\n`;
+    csv += `,,,,,,Card Revenue:,${report.cardRevenue || 0}\n`;
 
     return csv;
   }
@@ -428,19 +458,25 @@ export class ReportsService {
   async generateMonthlyCsv(restaurantId: number, year: number, month: number): Promise<string> {
     const report = await this.getMonthlyReport(restaurantId, year, month);
 
-    let csv = 'Order No,Table No,Date/Time,Item Name,Qty,Unit Price,Line Total,Service Charge,Payment,Cashier\n';
+    let csv = 'Order No,Room No,Table No,Date/Time,Item Name,Qty,Unit Price,Line Total,Service Charge,Payment Method,Cashier\n';
     
     for (const row of report.rows) {
-      const dateTime = new Date(row.createdAt).toLocaleString();
-      csv += `${row.orderNo},"${row.tableNo}","${dateTime}","${row.itemName}",${row.qty},${row.unitPrice},${row.lineTotal},${row.serviceCharge},${row.paymentMethod},"${row.cashier}"\n`;
+      const dateTime = this.formatSLTime(row.createdAt);
+      const roomNoStr = row.roomNo ? `Room ${row.roomNo}` : '-';
+      const tableNoStr = row.tableNo ? `Table - ${row.tableNo}` : '-';
+      const itemNameEscaped = `"${(row.itemName || '').replace(/"/g, '""')}"`;
+      const cashierEscaped = `"${(row.cashier || 'N/A').replace(/"/g, '""')}"`;
+      
+      csv += `${row.orderNo},"${roomNoStr}","${tableNoStr}","${dateTime}",${itemNameEscaped},${row.qty},${row.unitPrice},${row.lineTotal},${row.serviceCharge},"${row.paymentMethod || 'CASH'}",${cashierEscaped}\n`;
     }
 
-    csv += `\n,,,,Total Orders:,${report.totalOrders},,,\n`;
-    csv += `,,,,Food Total:,,,${report.foodRevenue || 0},\n`;
-    csv += `,,,,Service Charge:,,,${report.serviceCharge || 0},\n`;
-    csv += `,,,,Total Revenue:,,,${report.totalRevenue},\n`;
-    csv += `,,,,Cash Revenue:,,,${report.cashRevenue || 0},\n`;
-    csv += `,,,,Card Revenue:,,,${report.cardRevenue || 0},\n`;
+    csv += `\n`;
+    csv += `,,,,,,Total Orders:,${report.totalOrders}\n`;
+    csv += `,,,,,,Food Total:,${report.foodRevenue || 0}\n`;
+    csv += `,,,,,,Service Charge:,${report.serviceCharge || 0}\n`;
+    csv += `,,,,,,Total Revenue:,${report.totalRevenue || 0}\n`;
+    csv += `,,,,,,Cash Revenue:,${report.cashRevenue || 0}\n`;
+    csv += `,,,,,,Card Revenue:,${report.cardRevenue || 0}\n`;
 
     return csv;
   }
