@@ -571,12 +571,12 @@ const SalesReports = () => {
                         {filteredRows.map((row, i) => (
                           <tr key={i}>
                             <td>{row.orderNo}</td>
-                            <td>{row.tableNo}</td>
+                            <td>{row.roomNo ? `Room ${row.roomNo}` : (row.tableNo ? `Table - ${row.tableNo}` : '–')}</td>
                             <td>{fmtDT(row.createdAt)}</td>
                             <td>{row.itemName}</td>
                             <td>{row.qty}</td>
                             <td>{fmt(row.unitPrice)}</td>
-                            <td>{fmt(row.lineTotal)}</td>
+                            <td>{fmt(parseFloat(row.lineTotal || 0) + parseFloat(row.serviceCharge || 0))}</td>
                             <td>{fmt(row.serviceCharge)}</td>
                             <td>
                               <span className={`badge ${row.paymentMethod === 'CARD' ? 'bg-info' : 'bg-secondary'}`}>
