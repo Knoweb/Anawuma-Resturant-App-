@@ -305,7 +305,6 @@ function DailyReport() {
                           <th>Date & Time</th>
                           <th>Item Name</th>
                           <th>Qty</th>
-                          <th>Unit Price</th>
                           <th>Total</th>
                           <th>Service Charge</th>
                           <th>Payment</th>
@@ -321,7 +320,6 @@ function DailyReport() {
                               <td>{new Date(row.createdAt).toLocaleString()}</td>
                               <td>{row.itemName}</td>
                               <td>{row.qty}</td>
-                              <td>{formatCurrency(row.unitPrice)}</td>
                               <td>{formatCurrency(parseFloat(row.lineTotal || 0) + parseFloat(row.serviceCharge || 0))}</td>
                               <td>{formatCurrency(row.serviceCharge)}</td>
                               <td>
@@ -334,7 +332,7 @@ function DailyReport() {
                           ))
                         ) : (
                           <tr>
-                            <td colSpan="9" className="text-center text-muted py-4">
+                            <td colSpan="8" className="text-center text-muted py-4">
                               No orders found for this selection
                             </td>
                           </tr>
@@ -343,15 +341,15 @@ function DailyReport() {
                       {filteredRows.length > 0 && (
                         <tfoot>
                           <tr className="total-row bg-light">
-                            <td colSpan="8" className="text-end border-0 pb-1">Food Total:</td>
+                            <td colSpan="7" className="text-end border-0 pb-1">Food Total:</td>
                             <td className="border-0 pb-1">{formatCurrency(displayFoodTotal)}</td>
                           </tr>
                           <tr className="total-row bg-light">
-                            <td colSpan="8" className="text-end border-0 py-1">Service Charge:</td>
+                            <td colSpan="7" className="text-end border-0 py-1">Service Charge:</td>
                             <td className="border-0 py-1">{formatCurrency(displayServiceCharge)}</td>
                           </tr>
                           <tr className="total-row">
-                            <td colSpan="8" className="text-end"><strong>Grand Total:</strong></td>
+                            <td colSpan="7" className="text-end"><strong>Grand Total:</strong></td>
                             <td><strong>{formatCurrency(displayGrandTotal)}</strong></td>
                           </tr>
                         </tfoot>

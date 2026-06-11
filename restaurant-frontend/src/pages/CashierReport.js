@@ -500,7 +500,6 @@ const CashierReport = () => {
                         <th>Date &amp; Time</th>
                         <th>Item Name</th>
                         <th>Qty</th>
-                        <th>Unit Price</th>
                         <th>Total</th>
                         <th>Service Charge</th>
                         <th>Payment</th>
@@ -514,7 +513,6 @@ const CashierReport = () => {
                           <td>{fmtDT(row.createdAt)}</td>
                           <td>{row.itemName}</td>
                           <td>{row.qty}</td>
-                          <td>{fmt(row.unitPrice)}</td>
                           <td className="fw-semibold">{fmt(parseFloat(row.lineTotal || 0) + parseFloat(row.serviceCharge || 0))}</td>
                           <td>{fmt(row.serviceCharge || 0)}</td>
                           <td>
@@ -527,17 +525,17 @@ const CashierReport = () => {
                     </tbody>
                     <tfoot>
                       <tr className="table-light report-total-row">
-                        <td colSpan="7" className="text-end py-2 border-0">Food Total:</td>
+                        <td colSpan="6" className="text-end py-2 border-0">Food Total:</td>
                         <td className="py-2 border-0">{fmt(foodTotal)}</td>
                         <td className="border-0"></td>
                       </tr>
                       <tr className="table-light report-total-row">
-                        <td colSpan="7" className="text-end py-2 border-0">Service Charge:</td>
+                        <td colSpan="6" className="text-end py-2 border-0">Service Charge:</td>
                         <td className="py-2 border-0">{fmt(svcCharge)}</td>
                         <td className="border-0"></td>
                       </tr>
                       <tr className="table-secondary report-grand-total-row">
-                        <td colSpan="7" className="text-end"><strong>Grand Total:</strong></td>
+                        <td colSpan="6" className="text-end"><strong>Grand Total:</strong></td>
                         <td><strong>{fmt(grandTotal)}</strong></td>
                         <td></td>
                       </tr>

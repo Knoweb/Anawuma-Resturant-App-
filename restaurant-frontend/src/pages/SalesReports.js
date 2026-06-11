@@ -598,7 +598,7 @@ const SalesReports = () => {
                       <thead>
                         <tr>
                           <th>Order No</th><th>Table No</th><th>Date/Time</th>
-                          <th>Item Name</th><th>Qty</th><th>Unit Price</th>
+                          <th>Item Name</th><th>Qty</th>
                           <th>Total</th><th>Service Charge</th><th>Payment</th><th>Cashier</th>
                         </tr>
                       </thead>
@@ -610,7 +610,6 @@ const SalesReports = () => {
                             <td>{fmtDT(row.createdAt)}</td>
                             <td>{row.itemName}</td>
                             <td>{row.qty}</td>
-                            <td>{fmt(row.unitPrice)}</td>
                             <td>{fmt(parseFloat(row.lineTotal || 0) + parseFloat(row.serviceCharge || 0))}</td>
                             <td>{fmt(row.serviceCharge)}</td>
                             <td>
@@ -624,17 +623,17 @@ const SalesReports = () => {
                       </tbody>
                       <tfoot>
                         <tr className="table-light report-total-row">
-                          <td colSpan="6" className="text-end py-1 border-0">Food Total:</td>
+                          <td colSpan="5" className="text-end py-1 border-0">Food Total:</td>
                           <td className="py-1 border-0">{fmt(displayFoodTotal)}</td>
                           <td colSpan="3" className="border-0"></td>
                         </tr>
                         <tr className="table-light report-total-row">
-                          <td colSpan="6" className="text-end py-1 border-0">Service Charge:</td>
+                          <td colSpan="5" className="text-end py-1 border-0">Service Charge:</td>
                           <td className="py-1 border-0">{fmt(displaySvcCharge)}</td>
                           <td colSpan="3" className="border-0"></td>
                         </tr>
                         <tr className="table-secondary report-grand-total-row">
-                          <td colSpan="6" className="text-end"><strong>Grand Total:</strong></td>
+                          <td colSpan="5" className="text-end"><strong>Grand Total:</strong></td>
                           <td><strong>{fmt(displayGrandTotal)}</strong></td>
                           <td colSpan="3"></td>
                         </tr>
