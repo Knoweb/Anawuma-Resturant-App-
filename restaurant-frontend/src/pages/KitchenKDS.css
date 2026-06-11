@@ -14,15 +14,11 @@
   }
 
   .kds-layout-active .status-column {
-    height: 100% !important;
+    height: calc(100vh - 235px) !important;
     min-height: 0 !important;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-  }
-
-  .kds-layout-active .row.flex-grow-1 > div {
-    height: 100%;
   }
 }
 
