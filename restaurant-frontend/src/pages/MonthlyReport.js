@@ -122,7 +122,8 @@ function MonthlyReport() {
   };
 
   const formatCurrency = (amount) => {
-    return `Rs. ${parseFloat(amount).toFixed(2)}`;
+    if (amount === '–') return '–';
+    return `Rs. ${parseFloat(amount || 0).toFixed(2)}`;
   };
 
   return (
@@ -232,6 +233,41 @@ function MonthlyReport() {
 
                 {(() => {
                   const filteredRows = reportData.rows.filter(row => selectedCashier === 'all' || row.cashier === selectedCashier);
+                  
+                  const groupRowsByInvoice = (rowsList) => {
+                    const groupedMap = new Map();
+                    rowsList.forEach((row) => {
+                      const key = row.invoiceId || row.invoiceNumber;
+                      if (!groupedMap.has(key)) {
+                        groupedMap.set(key, {
+                          ...row,
+                          itemsList: [{ name: row.itemName, qty: row.qty }],
+                          lineTotalSum: parseFloat(row.lineTotal || 0),
+                          serviceChargeSum: parseFloat(row.serviceCharge || 0),
+                        });
+                      } else {
+                        const existing = groupedMap.get(key);
+                        existing.itemsList.push({ name: row.itemName, qty: row.qty });
+                        existing.lineTotalSum += parseFloat(row.lineTotal || 0);
+                        existing.serviceChargeSum += parseFloat(row.serviceCharge || 0);
+                      }
+                    });
+
+                    return Array.from(groupedMap.values()).map((g) => {
+                      const combinedItemNames = g.itemsList.map(it => `${it.name} x ${it.qty}`).join(', ');
+                      const totalQty = g.itemsList.reduce((s, it) => s + (parseInt(it.qty) || 0), 0);
+                      return {
+                        ...g,
+                        itemName: combinedItemNames,
+                        qty: totalQty,
+                        unitPrice: '–',
+                        lineTotal: g.lineTotalSum,
+                        serviceCharge: g.serviceChargeSum,
+                      };
+                    });
+                  };
+
+                  const groupedFilteredRows = groupRowsByInvoice(filteredRows);
                   const uniqueInvoiceIds = new Set(filteredRows.map(r => r.invoiceId));
                   
                   const displayServiceCharge = selectedCashier === 'all' 
@@ -309,8 +345,8 @@ function MonthlyReport() {
                               </tr>
                             </thead>
                             <tbody>
-                              {filteredRows.length > 0 ? (
-                                filteredRows.map((row, index) => (
+                              {groupedFilteredRows.length > 0 ? (
+                                groupedFilteredRows.map((row, index) => (
                                   <tr key={index}>
                                     <td>{row.orderNo}</td>
                                     <td>{row.roomNo ? `Room ${row.roomNo}` : (row.tableNo ? `Table - ${row.tableNo}` : '–')}</td>

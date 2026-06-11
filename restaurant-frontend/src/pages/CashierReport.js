@@ -148,8 +148,38 @@ const CashierReport = () => {
     const t = reportData.fetchedTo;
     const suffix = f === t ? f : `${f}-to-${t}`;
 
-    let csv = 'Invoice No,Table/Room,Date & Time,Item Name,Qty,Unit Price,Total,Service Charge,Payment\n';
-    reportData.rows.forEach((r) => {
+    const groupedMap = new Map();
+    rows.forEach((row) => {
+      const key = row.invoiceId || row.invoiceNumber;
+      if (!groupedMap.has(key)) {
+        groupedMap.set(key, {
+          ...row,
+          itemsList: [{ name: row.itemName, qty: row.qty }],
+          lineTotalSum: parseFloat(row.lineTotal || 0),
+          serviceChargeSum: parseFloat(row.serviceCharge || 0),
+        });
+      } else {
+        const existing = groupedMap.get(key);
+        existing.itemsList.push({ name: row.itemName, qty: row.qty });
+        existing.lineTotalSum += parseFloat(row.lineTotal || 0);
+        existing.serviceChargeSum += parseFloat(row.serviceCharge || 0);
+      }
+    });
+
+    const displayRows = Array.from(groupedMap.values()).map((g) => {
+      const combinedItemNames = g.itemsList.map(it => `${it.name} x ${it.qty}`).join(', ');
+      const totalQty = g.itemsList.reduce((s, it) => s + (parseInt(it.qty) || 0), 0);
+      return {
+        ...g,
+        itemName: combinedItemNames,
+        qty: totalQty,
+        unitPrice: '–',
+        lineTotal: g.lineTotalSum,
+        serviceCharge: g.serviceChargeSum,
+      };
+    });
+
+    displayRows.forEach((r) => {
       const dt = new Date(r.createdAt).toLocaleString();
       const tableRoomVal = r.roomNo ? `Room ${r.roomNo}` : (r.tableNo ? `Table - ${r.tableNo}` : '–');
       const rowTotal = parseFloat(r.lineTotal || 0) + parseFloat(r.serviceCharge || 0);
@@ -174,10 +204,43 @@ const CashierReport = () => {
     window.print();
   };
 
-  const fmt   = (v) => `Rs. ${parseFloat(v || 0).toFixed(2)}`;
+  const fmt   = (v) => v === '–' ? '–' : `Rs. ${parseFloat(v || 0).toFixed(2)}`;
   const fmtDT = (v) => new Date(v).toLocaleString();
 
-  const rows          = reportData?.rows          || [];
+  const groupRowsByInvoice = (rowsList) => {
+    const groupedMap = new Map();
+    rowsList.forEach((row) => {
+      const key = row.invoiceId || row.invoiceNumber;
+      if (!groupedMap.has(key)) {
+        groupedMap.set(key, {
+          ...row,
+          itemsList: [{ name: row.itemName, qty: row.qty }],
+          lineTotalSum: parseFloat(row.lineTotal || 0),
+          serviceChargeSum: parseFloat(row.serviceCharge || 0),
+        });
+      } else {
+        const existing = groupedMap.get(key);
+        existing.itemsList.push({ name: row.itemName, qty: row.qty });
+        existing.lineTotalSum += parseFloat(row.lineTotal || 0);
+        existing.serviceChargeSum += parseFloat(row.serviceCharge || 0);
+      }
+    });
+
+    return Array.from(groupedMap.values()).map((g) => {
+      const combinedItemNames = g.itemsList.map(it => `${it.name} x ${it.qty}`).join(', ');
+      const totalQty = g.itemsList.reduce((s, it) => s + (parseInt(it.qty) || 0), 0);
+      return {
+        ...g,
+        itemName: combinedItemNames,
+        qty: totalQty,
+        unitPrice: '–',
+        lineTotal: g.lineTotalSum,
+        serviceCharge: g.serviceChargeSum,
+      };
+    });
+  };
+
+  const rows          = groupRowsByInvoice(reportData?.rows || []);
   const foodTotal     = reportData?.foodRevenue   || 0;
   const svcCharge     = reportData?.serviceCharge || 0;
   const grandTotal    = reportData?.totalRevenue  || 0;
