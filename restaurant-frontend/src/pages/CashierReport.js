@@ -151,7 +151,7 @@ const CashierReport = () => {
     let csv = 'Invoice No,Table/Room,Date & Time,Item Name,Qty,Unit Price,Line Total,Payment\n';
     reportData.rows.forEach((r) => {
       const dt = new Date(r.createdAt).toLocaleString();
-      const tableRoomVal = r.roomNo ? `Room ${r.roomNo}` : (r.tableNo || '–');
+      const tableRoomVal = r.roomNo ? `Room ${r.roomNo}` : (r.tableNo ? `Table - ${r.tableNo}` : '–');
       csv += `${r.invoiceNumber},"${tableRoomVal}","${dt}","${r.itemName}",${r.qty},${r.unitPrice},${r.lineTotal},${r.paymentMethod}\n`;
     });
     csv += `\n,,,,,,Food Total,${reportData.foodRevenue}\n`;
@@ -444,7 +444,7 @@ const CashierReport = () => {
                       {rows.map((row, idx) => (
                         <tr key={idx}>
                           <td><span className="badge bg-light text-dark border">{row.invoiceNumber}</span></td>
-                          <td>{row.roomNo ? `Room ${row.roomNo}` : (row.tableNo || '–')}</td>
+                          <td>{row.roomNo ? `Room ${row.roomNo}` : (row.tableNo ? `Table - ${row.tableNo}` : '–')}</td>
                           <td>{fmtDT(row.createdAt)}</td>
                           <td>{row.itemName}</td>
                           <td>{row.qty}</td>

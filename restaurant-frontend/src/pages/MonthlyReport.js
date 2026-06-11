@@ -313,7 +313,7 @@ function MonthlyReport() {
                                 filteredRows.map((row, index) => (
                                   <tr key={index}>
                                     <td>{row.orderNo}</td>
-                                    <td>{row.roomNo ? `Room ${row.roomNo}` : (row.tableNo || '–')}</td>
+                                    <td>{row.roomNo ? `Room ${row.roomNo}` : (row.tableNo ? `Table - ${row.tableNo}` : '–')}</td>
                                     <td>{new Date(row.createdAt).toLocaleString()}</td>
                                     <td>{row.itemName}</td>
                                     <td>{row.qty}</td>
