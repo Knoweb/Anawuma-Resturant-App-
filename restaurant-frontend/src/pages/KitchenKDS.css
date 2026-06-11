@@ -1,23 +1,29 @@
 /* KDS Viewport Layout Rules */
-.kds-layout-active .main-content {
-  height: 100vh;
-  overflow: hidden;
-}
+@media (min-width: 769px) {
+  .kds-layout-active .main-content {
+    height: 100vh;
+    overflow: hidden;
+  }
 
-.kds-layout-active .dashboard-content {
-  height: calc(100vh - 75px);
-  display: flex;
-  flex-direction: column;
-  padding: 1.5rem !important;
-  overflow: hidden;
-}
+  .kds-layout-active .dashboard-content {
+    height: calc(100vh - 75px);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem !important;
+    overflow: hidden;
+  }
 
-.kds-layout-active .status-column {
-  height: 100% !important;
-  min-height: 0 !important;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  .kds-layout-active .status-column {
+    height: 100% !important;
+    min-height: 0 !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .kds-layout-active .row.flex-grow-1 > div {
+    height: 100%;
+  }
 }
 
 .kds-header {
