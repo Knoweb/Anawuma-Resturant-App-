@@ -74,9 +74,9 @@ function PrintableInvoice({ invoice, restaurantName, address, contactNumber }) {
         <div className="pi-meta">
           <span><strong>Date:</strong> {formatDateTime(invoice.createdAt)}</span>
         </div>
-        {invoice.tableNo && (
+        {(invoice.tableNo || invoice.roomNo) && (
           <div className="pi-meta">
-            <span><strong>Table:</strong> {invoice.tableNo}</span>
+            <span><strong>{invoice.roomNo ? 'Room' : 'Table'}:</strong> {invoice.roomNo || invoice.tableNo}</span>
             {invoice.customerName && (
               <span><strong>Customer:</strong> {invoice.customerName}</span>
             )}
@@ -1112,7 +1112,7 @@ const ServiceBillingDashboard = ({
                               </td>
                               <td><code>{inv.invoiceNumber}</code></td>
                               <td>{inv.orderNo || inv.orderId}</td>
-                              <td>{inv.roomNo ? `Room ${inv.roomNo}` : (inv.tableNo ? `Table ${inv.tableNo}` : '–')}</td>
+                              <td>{inv.roomNo ? `Room ${inv.roomNo}` : (inv.tableNo ? `Table - ${inv.tableNo}` : '–')}</td>
                               <td>{formatCurrency(inv.totalAmount)}</td>
                               <td>{formatDateTime(inv.updatedAt)}</td>
                               <td>
@@ -1281,7 +1281,7 @@ const ServiceBillingDashboard = ({
                       {invoices.map((inv) => (
                         <tr key={inv.invoiceId}>
                           <td><code>{inv.invoiceNumber}</code></td>
-                          <td>{inv.roomNo ? `Room ${inv.roomNo}` : (inv.tableNo ? `Table ${inv.tableNo}` : '–')}</td>
+                          <td>{inv.roomNo ? `Room ${inv.roomNo}` : (inv.tableNo ? `Table - ${inv.tableNo}` : '–')}</td>
                           <td>{inv.customerName || '–'}</td>
                           <td>{formatCurrency(inv.totalAmount)}</td>
                           <td>
@@ -1370,7 +1370,7 @@ function ReadyOrderCard({ order, onBill, onWhatsApp }) {
       </div>
       <div className="roc-meta">
         {order.roomNo && <span><i className="fas fa-concierge-bell me-1"></i>Room {order.roomNo}</span>}
-        {order.tableNo && <span><i className="fas fa-chair me-1"></i>Table {order.tableNo}</span>}
+        {order.tableNo && <span><i className="fas fa-chair me-1"></i>Table - {order.tableNo}</span>}
         {order.customerName && <span><i className="fas fa-user me-1"></i>{order.customerName}</span>}
       </div>
       <ul className="roc-items">
@@ -1406,7 +1406,7 @@ function CashierQueueCard({ invoice, onOpen }) {
       </div>
       <div className="roc-meta">
         {invoice.roomNo && <span><i className="fas fa-concierge-bell me-1"></i>Room {invoice.roomNo}</span>}
-        {invoice.tableNo && <span><i className="fas fa-chair me-1"></i>Table {invoice.tableNo}</span>}
+        {invoice.tableNo && <span><i className="fas fa-chair me-1"></i>Table - {invoice.tableNo}</span>}
         {invoice.customerName && <span><i className="fas fa-user me-1"></i>{invoice.customerName}</span>}
       </div>
       <ul className="roc-items">
