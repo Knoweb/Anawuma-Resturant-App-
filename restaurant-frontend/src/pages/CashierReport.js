@@ -166,23 +166,36 @@ const CashierReport = () => {
       return `${yyyy}-${mm}-${dd} ${hh}:${minutes} ${ampm}`;
     };
 
-    let csv = 'Order No,Room No,Table No,Date/Time,Item Name,Qty,Unit Price,Line Total,Service Charge,Payment Method,Cashier\n';
+    const formatTableRoom = (roomNo, tableNo) => {
+      if (roomNo) {
+        const r = roomNo.trim();
+        if (r.toLowerCase().startsWith('room')) return r;
+        return `Room ${r}`;
+      }
+      if (tableNo) {
+        const t = tableNo.trim();
+        if (t.toLowerCase().startsWith('table')) return t;
+        return `Table - ${t}`;
+      }
+      return '-';
+    };
+
+    let csv = 'Order No,Table/Room,Date/Time,Item Name,Qty,Line Total,Service Charge,Payment Method,Cashier\n';
     reportData.rows.forEach((r) => {
       const dt = formatSLTime(r.createdAt);
-      const roomNoVal = r.roomNo ? `Room ${r.roomNo}` : '-';
-      const tableNoVal = r.tableNo ? `Table - ${r.tableNo}` : '-';
+      const tableRoomVal = formatTableRoom(r.roomNo, r.tableNo);
       const itemNameEscaped = `"${(r.itemName || '').replace(/"/g, '""')}"`;
       const cashierEmail = user?.email || 'N/A';
-      csv += `${r.orderNo || r.invoiceNumber},"${roomNoVal}","${tableNoVal}","${dt}",${itemNameEscaped},${r.qty},${r.unitPrice},${r.lineTotal},${r.serviceCharge || 0},"${r.paymentMethod || 'CASH'}","${cashierEmail}"\n`;
+      csv += `${r.orderNo || r.invoiceNumber},"${tableRoomVal}","${dt}",${itemNameEscaped},${r.qty},${r.lineTotal},${r.serviceCharge || 0},"${r.paymentMethod || 'CASH'}","${cashierEmail}"\n`;
     });
     
     csv += `\n`;
-    csv += `,,,,,,Total Orders:,${reportData.totalInvoices || 0}\n`;
-    csv += `,,,,,,Food Total:,${reportData.foodRevenue || 0}\n`;
-    csv += `,,,,,,Service Charge:,${reportData.serviceCharge || 0}\n`;
-    csv += `,,,,,,Total Revenue:,${reportData.totalRevenue || 0}\n`;
-    csv += `,,,,,,Cash Revenue:,${reportData.cashRevenue || 0}\n`;
-    csv += `,,,,,,Card Revenue:,${reportData.cardRevenue || 0}\n`;
+    csv += `,,,,,Total Orders:,${reportData.totalInvoices || 0}\n`;
+    csv += `,,,,,Food Total:,${reportData.foodRevenue || 0}\n`;
+    csv += `,,,,,Service Charge:,${reportData.serviceCharge || 0}\n`;
+    csv += `,,,,,Total Revenue:,${reportData.totalRevenue || 0}\n`;
+    csv += `,,,,,Cash Revenue:,${reportData.cashRevenue || 0}\n`;
+    csv += `,,,,,Card Revenue:,${reportData.cardRevenue || 0}\n`;
 
     const blob = new Blob([csv], { type: 'text/csv' });
     const url  = URL.createObjectURL(blob);
