@@ -535,6 +535,7 @@ export class ReportsService {
           qty: item.qty,
           unitPrice: item.unitPrice,
           lineTotal: item.lineTotal,
+          serviceCharge: sub > 0 ? parseFloat(((item.lineTotal / sub) * sc).toFixed(2)) : 0,
           paymentMethod: inv.paymentMethod,
           invoiceServiceCharge: sc,
           invoiceSubtotal: sub,

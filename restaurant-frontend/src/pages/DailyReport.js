@@ -286,7 +286,7 @@ function DailyReport() {
                               <td>{row.itemName}</td>
                               <td>{row.qty}</td>
                               <td>{formatCurrency(row.unitPrice)}</td>
-                              <td>{formatCurrency(row.lineTotal)}</td>
+                              <td>{formatCurrency(parseFloat(row.lineTotal || 0) + parseFloat(row.serviceCharge || 0))}</td>
                               <td>{formatCurrency(row.serviceCharge)}</td>
                               <td>
                                 <span className={`badge ${row.paymentMethod === 'CARD' ? 'bg-info' : 'bg-secondary'}`}>

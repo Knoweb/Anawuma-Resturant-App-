@@ -148,11 +148,12 @@ const CashierReport = () => {
     const t = reportData.fetchedTo;
     const suffix = f === t ? f : `${f}-to-${t}`;
 
-    let csv = 'Invoice No,Table/Room,Date & Time,Item Name,Qty,Unit Price,Line Total,Payment\n';
+    let csv = 'Invoice No,Table/Room,Date & Time,Item Name,Qty,Unit Price,Total,Service Charge,Payment\n';
     reportData.rows.forEach((r) => {
       const dt = new Date(r.createdAt).toLocaleString();
       const tableRoomVal = r.roomNo ? `Room ${r.roomNo}` : (r.tableNo ? `Table - ${r.tableNo}` : '–');
-      csv += `${r.invoiceNumber},"${tableRoomVal}","${dt}","${r.itemName}",${r.qty},${r.unitPrice},${r.lineTotal},${r.paymentMethod}\n`;
+      const rowTotal = parseFloat(r.lineTotal || 0) + parseFloat(r.serviceCharge || 0);
+      csv += `${r.invoiceNumber},"${tableRoomVal}","${dt}","${r.itemName}",${r.qty},${r.unitPrice},${rowTotal},${r.serviceCharge || 0},${r.paymentMethod}\n`;
     });
     csv += `\n,,,,,,Food Total,${reportData.foodRevenue}\n`;
     csv += `,,,,,,Service Charge,${reportData.serviceCharge}\n`;
@@ -437,6 +438,7 @@ const CashierReport = () => {
                         <th>Qty</th>
                         <th>Unit Price</th>
                         <th>Total</th>
+                        <th>Service Charge</th>
                         <th>Payment</th>
                       </tr>
                     </thead>
@@ -449,7 +451,8 @@ const CashierReport = () => {
                           <td>{row.itemName}</td>
                           <td>{row.qty}</td>
                           <td>{fmt(row.unitPrice)}</td>
-                          <td className="fw-semibold">{fmt(row.lineTotal)}</td>
+                          <td className="fw-semibold">{fmt(parseFloat(row.lineTotal || 0) + parseFloat(row.serviceCharge || 0))}</td>
+                          <td>{fmt(row.serviceCharge || 0)}</td>
                           <td>
                             <span className={`badge ${row.paymentMethod === 'CARD' ? 'bg-info' : 'bg-secondary'}`}>
                               {row.paymentMethod || 'CASH'}
@@ -460,17 +463,17 @@ const CashierReport = () => {
                     </tbody>
                     <tfoot>
                       <tr className="table-light report-total-row">
-                        <td colSpan="6" className="text-end py-2 border-0">Food Total:</td>
+                        <td colSpan="7" className="text-end py-2 border-0">Food Total:</td>
                         <td className="py-2 border-0">{fmt(foodTotal)}</td>
                         <td className="border-0"></td>
                       </tr>
                       <tr className="table-light report-total-row">
-                        <td colSpan="6" className="text-end py-2 border-0">Service Charge:</td>
+                        <td colSpan="7" className="text-end py-2 border-0">Service Charge:</td>
                         <td className="py-2 border-0">{fmt(svcCharge)}</td>
                         <td className="border-0"></td>
                       </tr>
                       <tr className="table-secondary report-grand-total-row">
-                        <td colSpan="6" className="text-end"><strong>Grand Total:</strong></td>
+                        <td colSpan="7" className="text-end"><strong>Grand Total:</strong></td>
                         <td><strong>{fmt(grandTotal)}</strong></td>
                         <td></td>
                       </tr>
