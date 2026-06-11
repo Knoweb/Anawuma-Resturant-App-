@@ -2,7 +2,6 @@
 @media (min-width: 769px) {
   .kds-layout-active .main-content {
     height: 100vh;
-    overflow: hidden;
   }
 
   .kds-layout-active .dashboard-content {
@@ -10,15 +9,27 @@
     display: flex;
     flex-direction: column;
     padding: 1.5rem !important;
-    overflow: hidden;
   }
 
   .kds-layout-active .status-column {
-    height: calc(100vh - 235px) !important;
-    min-height: 0 !important;
     display: flex;
     flex-direction: column;
+    max-height: calc(100vh - 260px) !important;
+    height: calc(100vh - 260px) !important;
+    min-height: 0 !important;
     overflow: hidden;
+  }
+
+  .kds-layout-active .status-header {
+    flex-shrink: 0;
+  }
+
+  .kds-layout-active .orders-container {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 6px;
   }
 }
 
