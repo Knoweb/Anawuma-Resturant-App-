@@ -34,7 +34,7 @@ jobs:
           push: true
           tags: "${{ secrets.DOCKER_USERNAME }}/anawuma-backend:latest"
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: type=gha,mode=min
           provenance: false
           sbom: false
 
@@ -45,7 +45,7 @@ jobs:
           push: true
           tags: "${{ secrets.DOCKER_USERNAME }}/anawuma-frontend:latest"
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: type=gha,mode=min
           provenance: false
           sbom: false
           build-args: |
