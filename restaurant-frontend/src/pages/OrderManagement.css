@@ -243,8 +243,75 @@
   height: 3rem;
 }
 
-.text-muted {
-  color: #6c757d !important;
+/* Filter Form Grid Layout */
+.filter-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)) auto;
+  gap: 16px;
+  align-items: end;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 10px;
+  align-items: end;
+  flex-shrink: 0;
+}
+
+.filter-actions button {
+  height: 38px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px !important;
+  min-width: unset !important;
+  margin: 0 !important;
+}
+
+@media (max-width: 1200px) {
+  .filter-form {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .filter-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 768px) {
+  .filter-form {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .filter-actions {
+    grid-column: 1 / -1;
+    justify-content: stretch;
+  }
+
+  .filter-actions button {
+    flex: 1;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .filter-form {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-actions {
+    grid-column: 1 / -1;
+  }
 }
 
 /* Responsive Design */

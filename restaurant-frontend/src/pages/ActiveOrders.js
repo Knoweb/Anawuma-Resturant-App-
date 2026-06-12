@@ -279,8 +279,8 @@ const ActiveOrders = () => {
             {/* Filter Bar */}
             <div className="filter-bar card mb-4">
               <div className="card-body">
-                <div className="row g-3">
-                  <div className="col-md-2">
+                <div className="filter-form">
+                  <div className="filter-field">
                     <label className="form-label">Status</label>
                     <select
                       className="form-select"
@@ -294,7 +294,7 @@ const ActiveOrders = () => {
                     </select>
                   </div>
 
-                  <div className="col-md-2">
+                  <div className="filter-field">
                     <label className="form-label">From Date</label>
                     <input
                       type="date"
@@ -304,7 +304,7 @@ const ActiveOrders = () => {
                     />
                   </div>
 
-                  <div className="col-md-2">
+                  <div className="filter-field">
                     <label className="form-label">To Date</label>
                     <input
                       type="date"
@@ -314,7 +314,7 @@ const ActiveOrders = () => {
                     />
                   </div>
 
-                  <div className="col-md-2">
+                  <div className="filter-field">
                     <label className="form-label">Table No</label>
                     <input
                       type="text"
@@ -325,7 +325,7 @@ const ActiveOrders = () => {
                     />
                   </div>
 
-                  <div className="col-md-2">
+                  <div className="filter-field">
                     <label className="form-label">Order No</label>
                     <input
                       type="text"
@@ -336,9 +336,9 @@ const ActiveOrders = () => {
                     />
                   </div>
 
-                  <div className="col-md-2 d-flex align-items-end">
+                  <div className="filter-actions">
                     <button
-                      className="btn btn-primary me-2"
+                      className="btn btn-primary"
                       onClick={handleFilter}
                     >
                       <i className="fas fa-filter me-1"></i>
