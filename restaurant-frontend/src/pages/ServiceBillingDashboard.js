@@ -886,6 +886,36 @@ const ServiceBillingDashboard = ({
     }
   };
 
+  const handleRequestVoid = async (invoiceId) => {
+    const { value: reason } = await Swal.fire({
+      title: 'Request Invoice Void',
+      input: 'textarea',
+      inputLabel: 'Reason for voiding/deleting this invoice',
+      inputPlaceholder: 'Type your reason here...',
+      inputAttributes: {
+        'aria-label': 'Type your reason here'
+      },
+      showCancelButton: true,
+      confirmButtonText: 'Submit Request',
+      cancelButtonText: 'Cancel',
+      inputValidator: (value) => {
+        if (!value) {
+          return 'You need to write a reason!';
+        }
+      }
+    });
+
+    if (reason) {
+      try {
+        await billingAPI.requestInvoiceDeletion(invoiceId, { reason });
+        showToast('Void request submitted successfully!');
+        fetchInvoices();
+      } catch (err) {
+        showToast(err?.response?.data?.message || 'Failed to submit void request.', 'error');
+      }
+    }
+  };
+
   const handleCashierPrint = async (invoice) => {
     try {
       if (!invoice.isPrinted) {
@@ -1284,8 +1314,8 @@ const ServiceBillingDashboard = ({
                           <td>{inv.roomNo ? `Room ${inv.roomNo}` : (inv.tableNo ? `Table - ${inv.tableNo}` : '–')}</td>
                           <td>{inv.customerName || '–'}</td>
                           <td>{formatCurrency(inv.totalAmount)}</td>
-                          <td>
-                            <span className={`badge ${inv.invoiceStatus === 'PAID' ? 'bg-success' : 'bg-secondary'}`}>
+                           <td>
+                            <span className={`badge ${inv.invoiceStatus === 'PAID' ? 'bg-success' : (inv.invoiceStatus === 'VOIDED' ? 'bg-danger' : 'bg-secondary')}`}>
                               {inv.invoiceStatus}
                             </span>
                           </td>
@@ -1298,6 +1328,19 @@ const ServiceBillingDashboard = ({
                             >
                               <i className={`fas ${inv.invoiceStatus === 'PAID' ? 'fa-print' : 'fa-eye'}`}></i>
                             </button>
+                            {isCashierDashboard && inv.invoiceStatus === 'PAID' && (
+                              inv.isVoidPending ? (
+                                <span className="badge bg-warning text-dark ms-2" style={{ padding: '6px 8px', fontSize: '0.75rem' }} title="Pending Admin Approval">Void Pending</span>
+                              ) : (
+                                <button
+                                  className="btn btn-sm btn-outline-danger ms-2"
+                                  onClick={() => handleRequestVoid(inv.invoiceId)}
+                                  title="Request Void"
+                                >
+                                  <i className="fas fa-trash-alt"></i>
+                                </button>
+                              )
+                            )}
                           </td>
                         </tr>
                       ))}

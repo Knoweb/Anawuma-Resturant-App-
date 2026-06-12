@@ -13,6 +13,7 @@ import { Admin } from '../../auth/entities/admin.entity';
 export enum InvoiceStatus {
   PENDING = 'PENDING',
   PAID = 'PAID',
+  VOIDED = 'VOIDED',
 }
 
 export enum AccountantTransferStatus {

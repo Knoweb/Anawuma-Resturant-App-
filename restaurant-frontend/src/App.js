@@ -55,6 +55,7 @@ import TransferRoom from './pages/TransferRoom';
 import ManageStaff from './pages/ManageStaff';
 import AddStaff from './pages/AddStaff';
 import CashierReport from './pages/CashierReport';
+import VoidRequests from './pages/VoidRequests';
 
 import PrivateRoute from './components/auth/PrivateRoute';
 import RoleRoute from './components/auth/RoleRoute';
@@ -526,6 +527,17 @@ function App() {
                 <PrivateRoute>
                   <RoleRoute allowedRoles={['admin']}>
                     <AdminHotelProfile />
+                  </RoleRoute>
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/admin/void-requests"
+              element={
+                <PrivateRoute>
+                  <RoleRoute allowedRoles={['admin', 'super_admin']}>
+                    <VoidRequests />
                   </RoleRoute>
                 </PrivateRoute>
               }

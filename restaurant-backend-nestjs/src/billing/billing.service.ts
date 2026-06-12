@@ -12,6 +12,7 @@ import {
   PaymentMethod,
 } from './entities/invoice.entity';
 import { BillAction, BillActionType } from './entities/bill-action.entity';
+import { InvoiceDeleteRequest, DeleteRequestStatus } from './entities/invoice-delete-request.entity';
 import { Order, OrderStatus } from '../orders/entities/order.entity';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { QueryInvoicesDto } from './dto/query-invoices.dto';
@@ -30,6 +31,8 @@ export class BillingService {
     private billActionsRepository: Repository<BillAction>,
     @InjectRepository(Order)
     private ordersRepository: Repository<Order>,
+    @InjectRepository(InvoiceDeleteRequest)
+    private deleteRequestsRepository: Repository<InvoiceDeleteRequest>,
     private websocketGateway: WebsocketGateway,
   ) { }
 
@@ -848,6 +851,19 @@ export class BillingService {
     }
 
     const invoices = await query.getMany();
+
+    // Fetch pending void requests to annotate the list
+    const invoiceIds = invoices.map(i => i.invoiceId);
+    if (invoiceIds.length > 0) {
+      const pendingRequests = await this.deleteRequestsRepository.find({
+        where: { invoiceId: In(invoiceIds), status: DeleteRequestStatus.PENDING }
+      });
+      const pendingInvoiceIds = new Set(pendingRequests.map(r => r.invoiceId));
+      invoices.forEach(inv => {
+        (inv as any).isVoidPending = pendingInvoiceIds.has(inv.invoiceId);
+      });
+    }
+
     return this.hydrateOrderNos(invoices);
   }
 
@@ -1045,5 +1061,97 @@ export class BillingService {
       success: true,
       message: `Successfully transferred all bills from Room ${normalizedOld} to Room ${normalizedNew}`,
     };
+  }
+
+  async createDeleteRequest(
+    invoiceId: number,
+    restaurantId: number,
+    requestedByAdminId: number,
+    reason: string,
+  ): Promise<InvoiceDeleteRequest> {
+    const invoice = await this.findOneInvoice(invoiceId, restaurantId);
+
+    if (invoice.invoiceStatus === InvoiceStatus.VOIDED) {
+      throw new BadRequestException('Invoice is already voided.');
+    }
+
+    const existing = await this.deleteRequestsRepository.findOne({
+      where: { invoiceId, status: DeleteRequestStatus.PENDING },
+    });
+
+    if (existing) {
+      throw new BadRequestException('A delete request for this invoice is already pending.');
+    }
+
+    const req = this.deleteRequestsRepository.create({
+      invoiceId,
+      restaurantId,
+      requestedByAdminId,
+      reason,
+      status: DeleteRequestStatus.PENDING,
+    });
+
+    const saved = await this.deleteRequestsRepository.save(req);
+    this.websocketGateway.server.emit('dashboard:refresh');
+    return saved;
+  }
+
+  async getPendingDeleteRequests(restaurantId: number): Promise<InvoiceDeleteRequest[]> {
+    return this.deleteRequestsRepository.find({
+      where: { restaurantId, status: DeleteRequestStatus.PENDING },
+      relations: ['invoice', 'requestedBy'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async approveDeleteRequest(
+    requestId: number,
+    restaurantId: number,
+    actionedByAdminId: number,
+    adminNotes?: string,
+  ) {
+    const request = await this.deleteRequestsRepository.findOne({
+      where: { requestId, restaurantId, status: DeleteRequestStatus.PENDING },
+      relations: ['invoice'],
+    });
+
+    if (!request) {
+      throw new NotFoundException('Pending delete request not found.');
+    }
+
+    request.status = DeleteRequestStatus.APPROVED;
+    request.actionedByAdminId = actionedByAdminId;
+    request.adminNotes = adminNotes || null;
+    await this.deleteRequestsRepository.save(request);
+
+    const invoice = request.invoice;
+    invoice.invoiceStatus = InvoiceStatus.VOIDED;
+    await this.invoicesRepository.save(invoice);
+
+    this.websocketGateway.server.emit('dashboard:refresh');
+    return { success: true, message: 'Invoice delete request approved and invoice voided.' };
+  }
+
+  async rejectDeleteRequest(
+    requestId: number,
+    restaurantId: number,
+    actionedByAdminId: number,
+    adminNotes?: string,
+  ) {
+    const request = await this.deleteRequestsRepository.findOne({
+      where: { requestId, restaurantId, status: DeleteRequestStatus.PENDING },
+    });
+
+    if (!request) {
+      throw new NotFoundException('Pending delete request not found.');
+    }
+
+    request.status = DeleteRequestStatus.REJECTED;
+    request.actionedByAdminId = actionedByAdminId;
+    request.adminNotes = adminNotes || null;
+    await this.deleteRequestsRepository.save(request);
+
+    this.websocketGateway.server.emit('dashboard:refresh');
+    return { success: true, message: 'Invoice delete request rejected.' };
   }
 }

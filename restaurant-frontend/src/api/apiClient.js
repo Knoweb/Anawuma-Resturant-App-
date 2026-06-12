@@ -324,6 +324,18 @@ export const billingAPI = {
 
   rejectTransactionsByAccountant: (data) =>
     apiClient.post('/billing/accountant/reject', data),
+
+  requestInvoiceDeletion: (invoiceId, data) =>
+    apiClient.post(`/billing/invoices/${invoiceId}/delete-request`, data),
+
+  getPendingDeleteRequests: () =>
+    apiClient.get('/billing/delete-requests/pending'),
+
+  approveDeleteRequest: (requestId, data) =>
+    apiClient.post(`/billing/delete-requests/${requestId}/approve`, data),
+
+  rejectDeleteRequest: (requestId, data) =>
+    apiClient.post(`/billing/delete-requests/${requestId}/reject`, data),
 };
 
 apiClient.sanitizeUrl = sanitizeUrl;

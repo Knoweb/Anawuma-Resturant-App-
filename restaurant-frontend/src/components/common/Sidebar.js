@@ -368,6 +368,15 @@ function Sidebar() {
           )}
 
           {canAccessAdminFeatures && (
+            <li className={isActive('/admin/void-requests')}>
+              <Link to="/admin/void-requests" onClick={closeSubmenus}>
+                <i className="fas fa-trash-alt"></i>
+                <span>Void Requests</span>
+              </Link>
+            </li>
+          )}
+
+          {canAccessAdminFeatures && (
             <li className={isActive('/settings/restaurant')}>
               <Link to="/settings/restaurant" onClick={closeSubmenus}>
                 <i className="fas fa-cog"></i>

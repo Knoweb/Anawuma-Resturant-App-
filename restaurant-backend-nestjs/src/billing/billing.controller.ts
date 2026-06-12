@@ -401,4 +401,71 @@ export class BillingController {
       payload.newRoomNo,
     );
   }
+
+  /**
+   * POST /billing/invoices/:id/delete-request
+   * Cashier requests voiding/deletion of an invoice.
+   */
+  @Post('invoices/:id/delete-request')
+  @Roles(UserRole.CASHIER, UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  createDeleteRequest(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() payload: { reason: string },
+    @Request() req: RequestWithUser,
+  ) {
+    return this.billingService.createDeleteRequest(
+      id,
+      req.user.restaurantId,
+      req.user.userId,
+      payload.reason,
+    );
+  }
+
+  /**
+   * GET /billing/delete-requests/pending
+   * Admin retrieves all pending invoice deletion requests.
+   */
+  @Get('delete-requests/pending')
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  getPendingDeleteRequests(@Request() req: RequestWithUser) {
+    return this.billingService.getPendingDeleteRequests(req.user.restaurantId);
+  }
+
+  /**
+   * POST /billing/delete-requests/:id/approve
+   * Admin approves a pending deletion request.
+   */
+  @Post('delete-requests/:id/approve')
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  approveDeleteRequest(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() payload: { notes?: string },
+    @Request() req: RequestWithUser,
+  ) {
+    return this.billingService.approveDeleteRequest(
+      id,
+      req.user.restaurantId,
+      req.user.userId,
+      payload.notes,
+    );
+  }
+
+  /**
+   * POST /billing/delete-requests/:id/reject
+   * Admin rejects a pending deletion request.
+   */
+  @Post('delete-requests/:id/reject')
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  rejectDeleteRequest(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() payload: { notes?: string },
+    @Request() req: RequestWithUser,
+  ) {
+    return this.billingService.rejectDeleteRequest(
+      id,
+      req.user.restaurantId,
+      req.user.userId,
+      payload.notes,
+    );
+  }
 }
