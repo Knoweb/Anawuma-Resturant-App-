@@ -66,9 +66,9 @@ function PrintableInvoice({ invoice, restaurantName, address, contactNumber }) {
           <div style={{ borderTop: '1px dashed #666', margin: '4px 0' }}></div>
         )}
         <div className="pi-meta">
-          <span><strong>Invoice #:</strong> {invoice.invoiceNumber}</span>
+          <span><strong>Invoice No:</strong> {invoice.invoiceNumber}</span>
           <span>
-            <strong>Order #:</strong> {invoice.orderNo || (invoice.orderId ? `#${invoice.orderId}` : '–')}
+            <strong>Order No:</strong> {invoice.orderNo || (invoice.orderId ? `${invoice.orderId}` : '–')}
           </span>
         </div>
         <div className="pi-meta">
@@ -191,7 +191,7 @@ function InvoiceModal({ invoice, restaurantName, address, contactNumber, onClose
         .map((i) => `  • ${i.itemName} x${i.qty} - ${formatCurrency(i.lineTotal)}`)
         .join('\n');
       
-      const msg = `Hello ${invoice.customerName || ''} 👋\nHere is your bill for order #${invoice.orderNo || invoice.orderId}.\n\nOrder ID: ${invoice.orderNo || invoice.orderId}\nInvoice No: ${invoice.invoiceNumber}\n${invoice.roomNo ? `Room: ${invoice.roomNo}` : `Table: ${invoice.tableNo || '–'}`}\n\nItems:\n${itemLines}\n\nSubtotal: ${formatCurrency(invoice.subtotal)}\nService Charge (10%): ${formatCurrency(invoice.serviceCharge)}\n*Total: ${formatCurrency(invoice.totalAmount)}*\n\nThank you for ordering with us 🍔`;
+      const msg = `Hello ${invoice.customerName || ''} 👋\nHere is your bill for order ${invoice.orderNo || invoice.orderId}.\n\nOrder ID: ${invoice.orderNo || invoice.orderId}\nInvoice No: ${invoice.invoiceNumber}\n${invoice.roomNo ? `Room: ${invoice.roomNo}` : `Table: ${invoice.tableNo || '–'}`}\n\nItems:\n${itemLines}\n\nSubtotal: ${formatCurrency(invoice.subtotal)}\nService Charge (10%): ${formatCurrency(invoice.serviceCharge)}\n*Total: ${formatCurrency(invoice.totalAmount)}*\n\nThank you for ordering with us 🍔`;
       
       window.open(`https://api.whatsapp.com/send?phone=${phone.replace('+', '')}&text=${encodeURIComponent(msg)}`, '_blank');
     } catch (err) {
@@ -208,7 +208,7 @@ function InvoiceModal({ invoice, restaurantName, address, contactNumber, onClose
       <div className="invoice-modal" onClick={(e) => e.stopPropagation()}>
         <div className="invoice-modal-header">
           <div className="d-flex align-items-center gap-2">
-             <h5>Invoice #{invoice.invoiceNumber}</h5>
+             <h5>Invoice {invoice.invoiceNumber}</h5>
              {isPrinted && <span className="badge bg-success small"><i className="fas fa-print me-1"></i>Printed</span>}
              {isSentWhatsapp && <span className="badge bg-success small"><i className="fab fa-whatsapp me-1"></i>WhatsApp Sent</span>}
           </div>
@@ -1117,8 +1117,8 @@ const ServiceBillingDashboard = ({
                               onChange={toggleAllTransferSelection}
                             />
                           </th>
-                          <th>Invoice #</th>
-                          <th>Order #</th>
+                          <th>Invoice No</th>
+                          <th>Order No</th>
                           <th>TABLE / ROOM</th>
                           <th>Total</th>
                           <th>Paid At</th>
@@ -1298,7 +1298,7 @@ const ServiceBillingDashboard = ({
                   <table className="table table-hover invoice-table">
                     <thead>
                       <tr>
-                        <th>Invoice #</th>
+                        <th>Invoice No</th>
                         <th>TABLE / ROOM</th>
                         <th>Customer</th>
                         <th>Total</th>

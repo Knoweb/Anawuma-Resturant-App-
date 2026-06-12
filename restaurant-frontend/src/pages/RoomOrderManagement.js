@@ -385,7 +385,7 @@ const RoomOrderManagement = () => {
                     {orders.map((order, index) => (
                       <tr key={order.orderId} className="order-row" style={{ animationDelay: `${index * 0.05}s` }}>
                         <td>
-                          <span className="order-no">#{order.orderNo || order.orderId}</span>
+                          <span className="order-no">{order.orderNo || order.orderId}</span>
                         </td>
                         <td>
                           <div className="room-badge">

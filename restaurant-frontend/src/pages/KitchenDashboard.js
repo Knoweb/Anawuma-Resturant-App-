@@ -242,7 +242,7 @@ const KitchenDashboard = () => {
                           const itemCount = Array.isArray(order.orderItems) ? order.orderItems.length : 0;
                           return (
                             <tr key={order.orderId}>
-                              <td>#{order.orderNo}</td>
+                              <td>{order.orderNo}</td>
                               <td>{order.tableNo || '-'}</td>
                               <td>{itemCount}</td>
                               <td>

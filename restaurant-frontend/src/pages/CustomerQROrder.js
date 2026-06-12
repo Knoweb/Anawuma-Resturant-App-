@@ -1572,7 +1572,7 @@ const CustomerQROrder = ({ isManual = false }) => {
                       }}
                     >
                       <div className="d-flex justify-content-between">
-                        <span className="fw-bold small">#{order.orderNo}</span>
+                        <span className="fw-bold small">{order.orderNo}</span>
                         <span className="small text-muted">{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                       </div>
                       <div className="small">Rs. {order.totalAmount} • {order.status}</div>
@@ -1721,7 +1721,7 @@ const CustomerQROrder = ({ isManual = false }) => {
                 <i className={`fas ${isCancelled ? 'fa-times-circle' : 'fa-check-circle'}`}></i>
               </div>
               <h1 className="fw-bold">{isCancelled ? 'Order Cancelled' : 'Order Placed!'}</h1>
-              <div className="mt-2 text-muted uppercase small tracking-widest">Order Number: #{orderSuccess.orderNo}</div>
+              <div className="mt-2 text-muted uppercase small tracking-widest">Order Number: {orderSuccess.orderNo}</div>
            </div>
 
            <div className="p-4 border rounded bg-light mb-4">
@@ -1769,7 +1769,7 @@ const CustomerQROrder = ({ isManual = false }) => {
 
            <div className="mb-5">
               <h1 className="fw-bold mb-1">Order Details</h1>
-              <div className="text-muted uppercase small">Order Number: #{order.orderNo}</div>
+              <div className="text-muted uppercase small">Order Number: {order.orderNo}</div>
               <div className="text-muted small">Placed on: {new Date(order.createdAt).toLocaleString()}</div>
            </div>
 

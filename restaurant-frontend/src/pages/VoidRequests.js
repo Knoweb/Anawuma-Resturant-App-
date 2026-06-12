@@ -184,7 +184,7 @@ function VoidRequests() {
           <div className="modal-backdrop" onClick={() => setSelectedRequest(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1050, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div className="invoice-modal bg-white rounded p-4" onClick={(e) => e.stopPropagation()} style={{ width: '90%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto' }}>
               <div className="d-flex justify-content-between align-items-center mb-3 pb-2" style={{ borderBottom: '1px solid #dee2e6' }}>
-                <h5 className="modal-title mb-0">Invoice #{inv?.invoiceNumber} Detail</h5>
+                <h5 className="modal-title mb-0">Invoice {inv?.invoiceNumber} Detail</h5>
                 <button className="btn-close" onClick={() => setSelectedRequest(null)} style={{ border: 'none', background: 'transparent', fontSize: '1.25rem' }}>&times;</button>
               </div>
 
@@ -192,6 +192,10 @@ function VoidRequests() {
                 <strong>Requested By:</strong> {selectedRequest.requestedBy?.email} <br />
                 <strong>Reason:</strong> <span className="text-danger">{selectedRequest.reason}</span> <br />
                 <strong>Requested At:</strong> {formatDateTime(selectedRequest.createdAt)}
+                <hr className="my-2" />
+                <strong>Customer Name:</strong> {inv?.customerName || 'Walk-in'} <br />
+                <strong>Table/Room:</strong> {inv?.roomNo ? `Room ${inv.roomNo}` : inv?.tableNo ? `Table - ${inv.tableNo}` : '–'} <br />
+                <strong>Payment Method:</strong> {inv?.paymentMethod || '–'}
               </div>
 
               <table className="table table-sm table-bordered">
@@ -212,6 +216,22 @@ function VoidRequests() {
                   ))}
                 </tbody>
               </table>
+
+              <div className="mt-3 p-3 bg-light rounded text-end" style={{ fontSize: '0.95rem' }}>
+                <div className="mb-1"><strong>Subtotal:</strong> {formatCurrency(inv?.subtotal)}</div>
+                {parseFloat(inv?.taxAmount || 0) > 0 && (
+                  <div className="mb-1"><strong>Tax:</strong> {formatCurrency(inv?.taxAmount)}</div>
+                )}
+                {parseFloat(inv?.serviceCharge || 0) > 0 && (
+                  <div className="mb-1"><strong>Service Charge:</strong> {formatCurrency(inv?.serviceCharge)}</div>
+                )}
+                {parseFloat(inv?.discountAmount || 0) > 0 && (
+                  <div className="mb-1 text-danger"><strong>Discount:</strong> -{formatCurrency(inv?.discountAmount)}</div>
+                )}
+                <div style={{ borderTop: '1px solid #ccc', marginTop: '8px', paddingTop: '8px' }}>
+                  <strong>Grand Total:</strong> <span className="text-success font-weight-bold" style={{ fontSize: '1.15rem', fontWeight: 'bold' }}>{formatCurrency(inv?.totalAmount)}</span>
+                </div>
+              </div>
 
               <div className="d-flex justify-content-end gap-2 mt-4 pt-2" style={{ borderTop: '1px solid #dee2e6' }}>
                 <button className="btn btn-secondary btn-sm" onClick={() => setSelectedRequest(null)}>Close</button>
