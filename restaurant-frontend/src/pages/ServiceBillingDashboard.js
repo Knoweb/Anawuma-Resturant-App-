@@ -1328,7 +1328,7 @@ const ServiceBillingDashboard = ({
                             >
                               <i className={`fas ${inv.invoiceStatus === 'PAID' ? 'fa-print' : 'fa-eye'}`}></i>
                             </button>
-                            {isCashierDashboard && inv.invoiceStatus === 'PAID' && (
+                            {isCashierDashboard && (inv.invoiceStatus === 'PAID' || inv.invoiceStatus === 'PENDING') && (
                               inv.isVoidPending ? (
                                 <span className="badge bg-warning text-dark ms-2" style={{ padding: '6px 8px', fontSize: '0.75rem' }} title="Pending Admin Approval">Void Pending</span>
                               ) : (
