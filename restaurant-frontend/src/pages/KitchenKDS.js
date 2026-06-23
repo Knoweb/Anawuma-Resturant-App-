@@ -953,7 +953,7 @@ const KitchenKDS = () => {
           </div>
 
           <div className="order-total mt-2 pt-2 border-top">
-            <strong>Total: ${parseFloat(order.totalAmount).toFixed(2)}</strong>
+            <strong>Total: Rs. {parseFloat(order.totalAmount).toFixed(2)}</strong>
           </div>
         </div>
         <div className="card-footer kds-card-footer">
