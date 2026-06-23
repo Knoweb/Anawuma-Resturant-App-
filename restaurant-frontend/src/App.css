@@ -150,8 +150,10 @@ code {
   }
   
   /* Reduce padding on main containers for mobile to maximize space */
-  .daily-report-container, .monthly-report-container, .cashier-report-container, .dashboard-container, .billing-section, .kds-container {
+  .daily-report-container, .monthly-report-container, .cashier-report-container, .dashboard-container, .sales-reports-container, .billing-section, .kds-container {
     padding: 1rem 0.5rem !important;
+    width: 100% !important;
+    overflow-x: hidden;
   }
 
   .report-tabs {
@@ -166,4 +168,9 @@ code {
     padding: 10px 15px !important;
     font-size: 0.9rem;
   }
+}
+
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
 }

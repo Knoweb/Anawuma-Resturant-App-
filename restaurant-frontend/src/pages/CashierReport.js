@@ -269,7 +269,7 @@ const CashierReport = () => {
       <Sidebar />
       <div className="main-content">
         <Navbar />
-        <div className="sales-reports-container" style={{ marginTop: '85px', padding: '30px', minHeight: 'calc(100vh - 85px)' }}>
+        <div className="sales-reports-container" style={{ minHeight: 'calc(100vh - 85px)' }}>
 
           {/* ── Header ── */}
           <div className="no-print d-flex justify-content-between align-items-center mb-4 pb-2" style={{ borderBottom: '1px solid #e2e8f0' }}>
