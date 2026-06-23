@@ -571,7 +571,6 @@ const KitchenKDS = () => {
 
           return `
           <tr>
-            <td style="padding:8px;border-bottom:1px solid #eee;">${index + 1}</td>
             <td style="padding:8px;border-bottom:1px solid #eee;">${itemName}${notes}</td>
             <td style="padding:8px;border-bottom:1px solid #eee;text-align:center;">${qty}</td>
             <td style="padding:8px;border-bottom:1px solid #eee;text-align:right;">${formatBillCurrency(unitPrice)}</td>
@@ -623,15 +622,14 @@ const KitchenKDS = () => {
           .info-value { font-weight: bold; color: #000; }
 
           @media print {
+            @page { margin: 0; }
             .bill-actions,
             .bill-hint,
             .bill-status {
               display: none !important;
             }
-
-            body {
-              padding: 8px;
-            }
+            body { padding: 5px; width: 280px; margin: 0 auto; box-sizing: border-box; }
+            .bill-wrap { max-width: 100%; margin: 0; }
           }
         </style>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -659,7 +657,7 @@ const KitchenKDS = () => {
             <div class="info-grid">
               <div class="info-item">
                 <span class="info-label">Order No</span>
-                <span class="info-value">#${escapeHtml(order.orderNo || '-')}</span>
+                <span class="info-value">${escapeHtml(order.orderNo || '-')}</span>
               </div>
               <div class="info-item" style="text-align: right;">
                 <span class="info-label">Date & Time</span>
@@ -677,7 +675,6 @@ const KitchenKDS = () => {
           <table style="width:100%;border-collapse:collapse;font-size:14px;">
             <thead>
               <tr>
-                <th style="padding:8px;border-bottom:2px solid #222;text-align:left;">#</th>
                 <th style="padding:8px;border-bottom:2px solid #222;text-align:left;">Item</th>
                 <th style="padding:8px;border-bottom:2px solid #222;text-align:center;">Qty</th>
                 <th style="padding:8px;border-bottom:2px solid #222;text-align:right;">Unit Price</th>
