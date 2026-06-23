@@ -146,6 +146,7 @@ code {
   .content-wrapper, .main-content {
     padding-top: calc(var(--header-height-mobile) + var(--safe-top)) !important;
   }
+}
 
 @media (max-width: 768px) {
   .table {
