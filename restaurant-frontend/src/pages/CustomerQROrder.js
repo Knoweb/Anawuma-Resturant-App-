@@ -110,6 +110,7 @@ const CustomerQROrder = ({ isManual = false }) => {
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [orderNotes, setOrderNotes] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCart, setShowCart] = useState(false);
   const [manualTableNo, setManualTableNo] = useState('');
   const [manualOrderType, setManualOrderType] = useState('ROOM');
@@ -680,6 +681,8 @@ const CustomerQROrder = ({ isManual = false }) => {
   };
 
   const placeOrder = async () => {
+    if (isSubmitting) return;
+    
     if (cart.length === 0) {
       Swal.fire('Validation Error', 'Please add at least one item to your order', 'warning');
       return;
@@ -699,6 +702,7 @@ const CustomerQROrder = ({ isManual = false }) => {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       const orderPayload = {
         customerName: customerName.trim() || (isManual ? 'Manual Order' : 'Guest'),
@@ -807,6 +811,8 @@ const CustomerQROrder = ({ isManual = false }) => {
         icon: 'error',
         confirmButtonColor: '#266668'
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -878,11 +884,14 @@ const CustomerQROrder = ({ isManual = false }) => {
 
   // eslint-disable-next-line no-unused-vars
   const placeQuickManualOrder = async () => {
+    if (isSubmitting) return;
+
     if (orderLocation === 'inside' && !manualTableNo.trim()) {
       Swal.fire('Validation Error', `Please enter a ${modalOrderType === 'room' ? 'Room' : 'Table'} number`, 'warning');
       return;
     }
 
+    setIsSubmitting(true);
     try {
       // 0. Prepare Payload
       const orderPayload = {
@@ -945,6 +954,8 @@ const CustomerQROrder = ({ isManual = false }) => {
         errorMsg = errorMsg.join(', ');
       }
       Swal.fire('Order Failed', String(errorMsg), 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -2124,7 +2135,9 @@ const CustomerQROrder = ({ isManual = false }) => {
           {cart.length > 0 && (
             <div className="cart-footer p-3 border-top bg-light">
                <div className="d-flex justify-content-between fw-bold h5 mb-3"><span>Total:</span><span style={{ color: '#266668' }}>Rs. {calculateTotal()}</span></div>
-               <button className="btn btn-primary w-100 p-3 fw-bold" style={{ backgroundColor: '#266668', border: 'none' }} onClick={placeOrder}>PLACE MANUAL ORDER</button>
+               <button className="btn btn-primary w-100 p-3 fw-bold" style={{ backgroundColor: '#266668', border: 'none' }} onClick={placeOrder} disabled={isSubmitting}>
+                 {isSubmitting ? 'PLACING ORDER...' : 'PLACE MANUAL ORDER'}
+               </button>
             </div>
           )}
         </div>
