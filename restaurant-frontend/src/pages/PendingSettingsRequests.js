@@ -158,7 +158,7 @@ const PendingSettingsRequests = () => {
 
                 return (
                   <tr key={request.requestId}>
-                    <td>#{request.requestId}</td>
+                    <td>{request.requestId}</td>
                     <td>
                       <strong>{request.restaurant?.restaurantName || 'N/A'}</strong>
                       <br />

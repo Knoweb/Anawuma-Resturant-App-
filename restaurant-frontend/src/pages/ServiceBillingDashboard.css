@@ -279,9 +279,9 @@
 }
 
 .pi-restaurant {
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: normal;
 }
 
 .pi-title {
@@ -395,7 +395,7 @@
 /* ── Print-only styles ── */
 @media print {
   @page {
-    margin: 10mm;
+    margin: 0;
   }
 
   body.billing-invoice-print-mode {
@@ -420,7 +420,7 @@
     width: 100%;
     background: #fff;
     max-width: 100%;
-    padding: 1rem;
+    padding: 0.2rem;
     margin: 0;
   }
 }

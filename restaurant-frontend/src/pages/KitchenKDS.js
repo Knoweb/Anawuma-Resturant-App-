@@ -893,8 +893,9 @@ const KitchenKDS = () => {
             {(order.tableNo || order.roomNo) && (
               <span className={`badge ${order.orderType === 'ROOM' ? 'bg-info' : 'bg-primary'} ms-2`}>
                 <i className={`fas ${order.orderType === 'ROOM' ? 'fa-concierge-bell' : 'fa-table'} me-1`}></i>
-                {order.orderType === 'ROOM' ? 'Room ' : 'Table '}
-                {order.roomNo || order.tableNo}
+                {String(order.roomNo || order.tableNo).toUpperCase().match(/^(ROOM|TABLE)/) 
+                  ? (order.roomNo || order.tableNo) 
+                  : (order.orderType === 'ROOM' ? `Room ${order.roomNo || order.tableNo}` : `Table ${order.tableNo || order.roomNo}`)}
               </span>
             )}
           </div>

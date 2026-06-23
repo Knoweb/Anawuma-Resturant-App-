@@ -346,6 +346,8 @@ export class OrdersService {
       orderId: updatedOrder.orderId,
       orderNo: updatedOrder.orderNo,
       tableNo: updatedOrder.tableNo,
+      roomNo: updatedOrder.roomNo,
+      orderType: updatedOrder.orderType,
       status: updatedOrder.status,
       restaurantId: updatedOrder.restaurantId,
     });

@@ -149,7 +149,8 @@ const ManualRoomOrders = () => {
                 <head>
                     <title>Bill - Room ${id}</title>
                     <style>
-                        body { font-family: 'Courier New', Courier, monospace; padding: 20px; width: 350px; }
+                        @page { margin: 0; }
+                        body { font-family: 'Courier New', Courier, monospace; padding: 5px; width: 280px; margin: 0 auto; box-sizing: border-box; }
                         .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
                         .meta-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 3px; }
                         .order-block { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dotted #ccc; }
