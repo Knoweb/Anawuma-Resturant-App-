@@ -719,7 +719,7 @@ const CustomerQROrder = ({ isManual = false }) => {
 
       if (isManual) {
         endpoint = '/orders/manual';
-        orderPayload.orderType = 'MANUAL_CASHIER';
+        orderPayload.orderType = manualOrderType === 'ROOM' ? 'ROOM' : 'TABLE';
 
         // Normalize: remove leading zeros if numeric (e.g., "03" -> "3")
         const normalizedManualNo = manualTableNo.trim().replace(/^0+/, '') || manualTableNo.trim();
@@ -821,7 +821,8 @@ const CustomerQROrder = ({ isManual = false }) => {
             <head>
                 <title>Print Order - ${order.orderNo}</title>
                 <style>
-                    body { font-family: 'Courier New', Courier, monospace; padding: 20px; width: 300px; }
+                    @page { margin: 0; }
+                    body { font-family: 'Courier New', Courier, monospace; padding: 5px; width: 280px; margin: 0 auto; box-sizing: border-box; }
                     .header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
                     .item-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 5px; }
                     .total-section { border-top: 1px dashed #000; margin-top: 10px; padding-top: 10px; }
@@ -893,7 +894,7 @@ const CustomerQROrder = ({ isManual = false }) => {
           qty: modalQty,
           notes: modalOrderNotes.trim() || null
         }],
-        orderType: 'MANUAL_CASHIER'
+        orderType: orderLocation === 'inside' ? (modalOrderType === 'room' ? 'ROOM' : 'TABLE') : 'MANUAL_CASHIER'
       };
 
       let identifier = '';

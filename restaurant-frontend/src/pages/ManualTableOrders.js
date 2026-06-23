@@ -132,7 +132,7 @@ const ManualTableOrders = () => {
                         .grand-total { display: flex; justify-content: space-between; font-size: 20px; font-weight: bold; margin-top: 5px; }
                         .footer { text-align: center; margin-top: 20px; font-size: 12px; }
                         .qr-section { text-align: center; margin-top: 18px; border-top: 1px dashed #000; padding-top: 14px; }
-                        .qr-section img { width: 120px; height: 120px; object-fit: contain; }
+                        .qr-section img { width: 140px; height: 140px; object-fit: contain; image-rendering: pixelated; image-rendering: crisp-edges; }
                         .qr-section p { font-size: 11px; margin: 6px 0 0; }
                     </style>
                 </head>
