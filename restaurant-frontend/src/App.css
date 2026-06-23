@@ -118,3 +118,52 @@ code {
   /* Offset for fixed navbar (70px) */
   min-height: calc(100vh - 70px);
 }
+
+/* Global Mobile Overrides */
+@media (max-width: 992px) {
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+  .content-wrapper {
+    margin-left: 0 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+  
+  .filter-row-flex, .filter-group, .report-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  
+  .filter-card .btn-primary, .filter-group input, .filter-group select {
+    width: 100% !important;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Reduce padding on main containers for mobile to maximize space */
+  .daily-report-container, .monthly-report-container, .cashier-report-container, .dashboard-container, .billing-section, .kds-container {
+    padding: 1rem 0.5rem !important;
+  }
+
+  .report-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 5px;
+  }
+
+  .tab-btn {
+    padding: 10px 15px !important;
+    font-size: 0.9rem;
+  }
+}
