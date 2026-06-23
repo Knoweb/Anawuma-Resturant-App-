@@ -167,33 +167,37 @@ function Navbar({ cartCount, onCartClick }) {
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-gradient-primary">
-      <div className="container-fluid">
-        <div className="hotel-brand" title={restaurantName}>
-          {restaurantLogoUrl ? (
-            <img src={restaurantLogoUrl} alt={restaurantName} className="hotel-brand-logo" />
-          ) : (
-            <i className="fas fa-hotel hotel-brand-fallback"></i>
+      <div className="container-fluid flex-nowrap">
+        {/* Left Side Group */}
+        <div className="d-flex align-items-center" style={{ minWidth: 0, flex: 1 }}>
+          <button className="btn btn-link text-white sidebar-toggle-btn p-0 me-2" onClick={toggleSidebar} type="button">
+            <i className="fas fa-bars"></i>
+          </button>
+
+          <div className="hotel-brand" title={restaurantName}>
+            {restaurantLogoUrl ? (
+              <img src={restaurantLogoUrl} alt={restaurantName} className="hotel-brand-logo" />
+            ) : (
+              <i className="fas fa-hotel hotel-brand-fallback"></i>
+            )}
+            <span className="hotel-brand-name">{restaurantName}</span>
+          </div>
+
+          {!hideBackBtn && (
+            <button
+              className="btn btn-link text-white back-nav-btn d-flex align-items-center"
+              onClick={() => navigate(-1)}
+              type="button"
+              style={{ textDecoration: 'none', background: 'rgba(255,255,255,0.1)', borderRadius: '8px', padding: '5px 10px', fontSize: '0.85rem', whiteSpace: 'nowrap' }}
+            >
+              <i className="fas fa-chevron-left me-1"></i>
+              <span>Back</span>
+            </button>
           )}
-          <span className="hotel-brand-name">{restaurantName}</span>
         </div>
 
-        <button className="btn btn-link text-white sidebar-toggle-btn" onClick={toggleSidebar} type="button">
-          <i className="fas fa-bars"></i>
-        </button>
-
-        {!hideBackBtn && (
-          <button
-            className="btn btn-link text-white back-nav-btn ms-2 d-flex align-items-center"
-            onClick={() => navigate(-1)}
-            type="button"
-            style={{ textDecoration: 'none', background: 'rgba(255,255,255,0.1)', borderRadius: '8px', padding: '5px 12px', fontSize: '0.9rem' }}
-          >
-            <i className="fas fa-chevron-left me-2"></i>
-            <span>Back</span>
-          </button>
-        )}
-
-        <div className="ms-auto d-flex align-items-center">
+        {/* Right Side Group */}
+        <div className="d-flex align-items-center flex-shrink-0">
           {/* Cart Icon for Manuel Orders */}
           {onCartClick && (
             <div className="me-3 position-relative">
