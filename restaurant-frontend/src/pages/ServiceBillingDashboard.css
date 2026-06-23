@@ -185,7 +185,7 @@
   border-radius: 12px;
   width: 100%;
   max-width: 560px;
-  max-height: 90vh;
+  max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 20px);
   display: flex;
   flex-direction: column;
   overflow: hidden;

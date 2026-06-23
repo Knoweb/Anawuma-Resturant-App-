@@ -174,26 +174,7 @@
 }
 
 /* Mobile Responsive */
-@media (max-width: 768px) {
-  .navbar {
-    left: 0;
-  }
-
-  .hotel-brand {
-    max-width: 210px;
-  }
-
-  .hotel-brand-name {
-    font-size: 1.95rem;
-  }
-  
-  .dropdown-menu {
-    width: 300px !important;
-    max-width: 90vw !important;
-  }
-}
-
-@media (max-width: 992px) {
+@media (max-width: 1024px) {
   .navbar {
     left: 0;
   }
@@ -203,6 +184,36 @@
   }
 
   .hotel-brand-name {
-    font-size: 2rem;
+    font-size: 1.15rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .navbar {
+    min-height: calc(var(--header-height-mobile) + var(--safe-top));
+    padding-top: var(--safe-top);
+  }
+
+  .hotel-brand {
+    max-width: 180px;
+  }
+
+  .hotel-brand-name {
+    font-size: 1rem;
+  }
+  
+  .hotel-brand-logo {
+    width: 32px;
+    height: 32px;
+    margin-right: 0.5rem;
+  }
+
+  .dropdown-menu {
+    width: 300px !important;
+    max-width: 90vw !important;
+  }
+  
+  .user-name, .user-role {
+    display: none;
   }
 }

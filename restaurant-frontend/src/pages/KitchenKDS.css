@@ -345,10 +345,30 @@
   .status-column {
     margin-bottom: 1rem;
     min-height: auto;
+    height: auto !important;
+    max-height: none !important;
   }
 
   .orders-container {
-    max-height: 60vh;
+    max-height: 50vh;
+  }
+}
+
+@media (max-width: 640px) {
+  .kds-card-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .kds-action-btn {
+    width: 100%;
+    flex: none;
+    margin-bottom: 0.5rem;
+  }
+  
+  .kds-icon-btn {
+    width: 100%;
+    margin-top: 0.25rem;
   }
 }
 
