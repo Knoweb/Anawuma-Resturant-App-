@@ -97,9 +97,9 @@ function VoidRequests() {
       <Sidebar />
       <div className="main-content">
         <Navbar />
-        <div className="dashboard-content" style={{ marginTop: '85px', padding: '30px', minHeight: 'calc(100vh - 85px)' }}>
+        <div className="dashboard-content" style={{ minHeight: 'calc(100vh - 85px)' }}>
           
-          <div className="d-flex justify-content-between align-items-center mb-4 pb-2" style={{ borderBottom: '1px solid #e2e8f0' }}>
+          <div className="d-flex justify-content-between align-items-center mb-4" style={{ borderBottom: '1px solid #e2e8f0' }}>
             <h2 className="mb-0" style={{ color: '#1e293b', fontWeight: '700', fontSize: '1.75rem' }}>
               <i className="fas fa-trash-alt me-2 text-danger"></i>
               Void Invoice Requests
