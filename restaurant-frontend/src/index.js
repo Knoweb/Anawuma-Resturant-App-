@@ -7,6 +7,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 import './index.css';
+import 'sweetalert2/dist/sweetalert2.min.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { WebSocketProvider } from './hooks/useWebSocket';
