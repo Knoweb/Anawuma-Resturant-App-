@@ -964,34 +964,37 @@ const KitchenKDS = () => {
                 e.stopPropagation();
                 handleStatusChange(order, status);
               }}
+              aria-label={statusButton.text}
             >
-              <i className={`fas ${statusButton.icon} me-1`}></i>
+              <i className={`fas ${statusButton.icon} me-1`} aria-hidden="true"></i>
               {statusButton.text}
             </button>
           )}
 
           {(status === 'NEW' || status === 'COOKING') && (
             <button
-              className="btn btn-outline-primary btn-sm kds-action-btn"
+              className="btn btn-outline-primary btn-sm kds-action-btn kds-print-btn"
               onClick={(e) => {
                 e.stopPropagation();
                 printOrderBill(order);
               }}
               title="Print Customer Bill"
+              aria-label="Print"
             >
-              <i className="fas fa-print"></i>
+              <i className="fas fa-print" aria-hidden="true"></i>
             </button>
           )}
 
           <button
-            className="btn btn-outline-danger btn-sm kds-icon-btn"
+            className="btn btn-outline-danger btn-sm kds-icon-btn kds-cancel-btn"
             onClick={(e) => {
               e.stopPropagation();
               handleCancelOrder(order.orderId, order.orderNo);
             }}
             title="Cancel Order"
+            aria-label="Cancel"
           >
-            <i className="fas fa-times"></i>
+            <i className="fas fa-times" aria-hidden="true"></i>
           </button>
         </div>
       </div>

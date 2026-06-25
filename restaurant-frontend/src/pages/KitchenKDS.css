@@ -288,9 +288,19 @@
   flex: 1 1 130px;
 }
 
-.kds-icon-btn {
+.kds-icon-btn, .kds-print-btn, .kds-cancel-btn {
   flex: 0 0 auto;
   min-width: 42px;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kds-icon-btn i, .kds-print-btn i, .kds-cancel-btn i {
+  font-size: 16px;
+  line-height: 1;
+  display: inline-block;
 }
 
 .btn-whatsapp-send {
