@@ -56,6 +56,19 @@
   gap: 0.5rem;
 }
 
+/* Fluid KDS Grid Layout */
+.kds-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-md);
+}
+
+.kds-column-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
 /* Status Columns */
 .status-column {
   background: #f8f9fa;

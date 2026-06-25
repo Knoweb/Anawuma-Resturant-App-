@@ -3,7 +3,7 @@
   top: var(--header-height-desktop);
   left: 0;
   height: calc(100vh - var(--header-height-desktop));
-  width: 250px;
+  width: var(--sidebar-width);
   background: #1E1E2E;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
@@ -32,7 +32,7 @@ body.sb-sidenav-toggled .content-wrapper {
 }
 
 body.sb-sidenav-toggled .sidebar {
-  transform: translateX(-250px);
+  transform: translateX(calc(-1 * var(--sidebar-width)));
 }
 
 .sidebar::-webkit-scrollbar {

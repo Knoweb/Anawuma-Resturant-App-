@@ -1011,7 +1011,7 @@ const KitchenKDS = () => {
     const safeOrders = Array.isArray(orders) ? orders : [];
 
     return (
-      <div className="col-md-4">
+      <div className="kds-column-wrapper">
         <div className={`status-column ${bgClass}`}>
           <h5 className="status-header">
             <i className={`fas ${getStatusIcon(status)} me-2`}></i>
@@ -1307,7 +1307,7 @@ const KitchenKDS = () => {
                 <p className="mt-2">Loading orders...</p>
               </div>
             ) : (
-              <div className="row g-3 flex-grow-1 overflow-hidden" style={{ minHeight: 0 }}>
+              <div className="kds-grid flex-grow-1 overflow-hidden" style={{ minHeight: 0 }}>
                 <StatusColumn
                   title="New Orders"
                   status="NEW"

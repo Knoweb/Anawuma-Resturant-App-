@@ -270,56 +270,48 @@ function Dashboard() {
 
             {/* Stats Cards */}
             <motion.div 
-              className="row g-4 mb-4"
+              className="dashboard-stats-grid mb-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
             >
-              <div className="col-xl-3 col-md-6">
-                <div className="stats-card gradient-blue">
-                  <div className="stats-icon">
-                    <i className="fas fa-receipt"></i>
-                  </div>
-                  <div className="stats-content">
-                    <h3>{stats.todayOrders}</h3>
-                    <p>Today's Orders</p>
-                  </div>
+              <div className="stats-card gradient-blue">
+                <div className="stats-icon">
+                  <i className="fas fa-receipt"></i>
+                </div>
+                <div className="stats-content">
+                  <h3>{stats.todayOrders}</h3>
+                  <p>Today's Orders</p>
                 </div>
               </div>
 
-              <div className="col-xl-3 col-md-6">
-                <div className="stats-card gradient-green">
-                  <div className="stats-icon">
-                    <i className="fas fa-wallet"></i>
-                  </div>
-                  <div className="stats-content">
-                    <h3>${stats.totalRevenue.toLocaleString()}</h3>
-                    <p>Total Revenue</p>
-                  </div>
+              <div className="stats-card gradient-green">
+                <div className="stats-icon">
+                  <i className="fas fa-wallet"></i>
+                </div>
+                <div className="stats-content">
+                  <h3>${stats.totalRevenue.toLocaleString()}</h3>
+                  <p>Total Revenue</p>
                 </div>
               </div>
 
-              <div className="col-xl-3 col-md-6">
-                <div className="stats-card gradient-orange">
-                  <div className="stats-icon">
-                    <i className="fas fa-hourglass-half"></i>
-                  </div>
-                  <div className="stats-content">
-                    <h3>{stats.pendingOrders}</h3>
-                    <p>Pending Orders</p>
-                  </div>
+              <div className="stats-card gradient-orange">
+                <div className="stats-icon">
+                  <i className="fas fa-hourglass-half"></i>
+                </div>
+                <div className="stats-content">
+                  <h3>{stats.pendingOrders}</h3>
+                  <p>Pending Orders</p>
                 </div>
               </div>
 
-              <div className="col-xl-3 col-md-6">
-                <div className="stats-card gradient-purple">
-                  <div className="stats-icon">
-                    <i className="fas fa-clipboard-list"></i>
-                  </div>
-                  <div className="stats-content">
-                    <h3>{stats.activeMenus}</h3>
-                    <p>Active Menus</p>
-                  </div>
+              <div className="stats-card gradient-purple">
+                <div className="stats-icon">
+                  <i className="fas fa-clipboard-list"></i>
+                </div>
+                <div className="stats-content">
+                  <h3>{stats.activeMenus}</h3>
+                  <p>Active Menus</p>
                 </div>
               </div>
             </motion.div>
