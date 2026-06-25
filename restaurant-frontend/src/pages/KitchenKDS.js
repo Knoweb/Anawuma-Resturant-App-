@@ -448,6 +448,118 @@ const KitchenKDS = () => {
 
   const printOrderBill = (order) => {
     return new Promise((resolve) => {
+      const printWindow = window.open('', '_blank', 'width=900,height=700');
+
+      if (!printWindow) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Popup blocked',
+          text: 'Allow popups for this site and try again.',
+        });
+        resolve({
+          continueToWhatsApp: false,
+          sendToCashier: false,
+          requiredActionsCompleted: false,
+          hasPrinted: false,
+          hasSentToCashier: false,
+        });
+        return;
+      }
+
+      let completed = false;
+      let closedCheckTimer = null;
+      let cashierRequestInFlight = false;
+      const messageType = `KDS_BILL_ACTION_DONE_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+
+      const notifyBillWindow = (targetWindow, payload) => {
+        if (!targetWindow || targetWindow.closed) return;
+
+        try {
+          targetWindow.postMessage(
+            {
+              type: messageType,
+              action: 'cashierResult',
+              success: !!payload?.success,
+              message: payload?.message || '',
+            },
+            window.location.origin,
+          );
+        } catch (_error) {
+          // Ignore postMessage errors while syncing cashier status back to bill window.
+        }
+      };
+
+      const onBillActionComplete = (event) => {
+        if (event.origin !== window.location.origin) return;
+        if (event.data?.type !== messageType) return;
+
+        if (event.data?.action === 'sendToCashier') {
+          if (cashierRequestInFlight) return;
+
+          cashierRequestInFlight = true;
+
+          sendPaymentDetailsToCashier(order, { showFeedback: false })
+            .then((result) => {
+              notifyBillWindow(event.source, result);
+            })
+            .catch(() => {
+              notifyBillWindow(event.source, {
+                success: false,
+                message: 'Failed to send payment details to cashier.',
+              });
+            })
+            .finally(() => {
+              cashierRequestInFlight = false;
+            });
+
+          return;
+        }
+
+        completePrintFlow({
+          continueToWhatsApp: !!event.data?.continueToWhatsApp,
+          sendToCashier: !!event.data?.sendToCashier,
+          requiredActionsCompleted: !!event.data?.requiredActionsCompleted,
+          hasPrinted: !!event.data?.hasPrinted,
+          hasSentToCashier: !!event.data?.hasSentToCashier,
+        });
+      };
+
+      const completePrintFlow = (result) => {
+        if (completed) return;
+        completed = true;
+
+        if (closedCheckTimer) {
+          window.clearInterval(closedCheckTimer);
+          closedCheckTimer = null;
+        }
+
+        window.removeEventListener('message', onBillActionComplete);
+
+        try {
+          printWindow.close();
+        } catch (_error) {
+          // Ignore errors while closing a window controlled by browser print flow.
+        }
+
+        window.focus();
+        resolve(result);
+      };
+
+      window.addEventListener('message', onBillActionComplete);
+
+      // If the bill window is closed without clicking Print/Download, treat as incomplete.
+      closedCheckTimer = window.setInterval(() => {
+        if (printWindow.closed) {
+          completePrintFlow({
+            continueToWhatsApp: false,
+            sendToCashier: false,
+            requiredActionsCompleted: false,
+            hasPrinted: false,
+            hasSentToCashier: false,
+          });
+        }
+      }, 400);
+
       const items = Array.isArray(order.orderItems) ? order.orderItems : [];
       const itemsMarkup = items
         .map((item, index) => {
@@ -459,140 +571,216 @@ const KitchenKDS = () => {
 
           return `
           <tr>
-            <td style="padding:4px 0;border-bottom:1px solid #eee;">${itemName}${notes}</td>
-            <td style="padding:4px 0;border-bottom:1px solid #eee;text-align:center;">${qty}</td>
-            <td style="padding:4px 0;border-bottom:1px solid #eee;text-align:right;">${formatBillCurrency(lineTotal)}</td>
+            <td style="padding:8px;border-bottom:1px solid #eee;">${itemName}${notes}</td>
+            <td style="padding:8px;border-bottom:1px solid #eee;text-align:center;">${qty}</td>
+            <td style="padding:8px;border-bottom:1px solid #eee;text-align:right;">${formatBillCurrency(unitPrice)}</td>
+            <td style="padding:8px;border-bottom:1px solid #eee;text-align:right;">${formatBillCurrency(lineTotal)}</td>
           </tr>
         `;
         })
         .join('');
 
       const printableHtml = `
-        <div style="font-family: Arial, sans-serif; padding: 5px; width: 280px; margin: 0 auto; color: #000; box-sizing: border-box;">
-          <div style="text-align: center; border-bottom: 2px dashed #444; padding-bottom: 10px; margin-bottom: 10px;">
-            <h1 style="font-size: 24px; font-weight: 900; margin: 0; color: #000; text-transform: uppercase;">${escapeHtml(restaurantName)}</h1>
-            ${(restaurantInfo?.address || restaurantInfo?.contactNumber) ? `
-              <div style="font-size: 12px; color: #333; margin-top: 5px; border-top: 1px dashed #666; border-bottom: 1px dashed #666; padding: 4px 0;">
-                ${restaurantInfo.address ? `<div style="margin-bottom: 2px;">${escapeHtml(restaurantInfo.address)}</div>` : ''}
-                ${restaurantInfo.contactNumber ? `<div>Tel: ${escapeHtml(restaurantInfo.contactNumber)}</div>` : ''}
+      <!doctype html>
+      <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>Bill - ${escapeHtml(order.orderNo || '')}</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 24px; color: #222; }
+          .bill-wrap { max-width: 760px; margin: 0 auto; }
+          .bill-actions { display: flex; gap: 12px; justify-content: flex-end; margin-bottom: 14px; }
+          .bill-btn { border: 0; border-radius: 6px; padding: 14px 16px; cursor: pointer; font-size: 20px; transition: all 0.2s; }
+          .bill-btn:hover { transform: scale(1.1); }
+          .bill-btn:active { transform: scale(0.95); }
+          .bill-btn-download { display: none; }
+          .bill-btn-print { background: #198754; color: #fff; flex-grow: 1; }
+          .bill-btn-cashier { background: #fd7e14; color: #fff; flex-grow: 1; }
+          .bill-btn-whatsapp { display: none; }
+          .bill-btn-back { background: #6c757d; color: #fff; width: 60px; }
+          .bill-btn:disabled { opacity: 0.6; cursor: wait; }
+          .bill-hint { color: #555; font-size: 13px; margin: 10px 0; text-align: center; font-weight: bold; }
+          .bill-status {
+            display: none;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 13px;
+            padding: 10px;
+            border-radius: 6px;
+          }
+          .bill-status-info { background: #e7f1ff; color: #0a58ca; }
+          .bill-status-success { background: #e8f7ed; color: #146c43; }
+          .bill-status-error { background: #fce8ea; color: #b02a37; }
+
+          .receipt-header { text-align: center; border-bottom: 2px dashed #444; padding-bottom: 15px; margin-bottom: 20px; }
+          .receipt-footer { border-top: 2px dashed #444; padding-top: 15px; margin-top: 20px; text-align: center; }
+          .invoice-label { font-size: 18px; font-weight: bold; margin-top: 5px; color: #555; text-transform: uppercase; letter-spacing: 2px; }
+          .restaurant-name { font-size: 32px; font-weight: 900; margin: 0; color: #000; text-transform: uppercase; }
+          .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; font-size: 14px; }
+          .info-item { display: flex; flex-direction: column; }
+          .info-label { font-weight: bold; color: #666; font-size: 11px; text-transform: uppercase; }
+          .info-value { font-weight: bold; color: #000; }
+
+          @media print {
+            @page { margin: 0; }
+            .bill-actions,
+            .bill-hint,
+            .bill-status {
+              display: none !important;
+            }
+            body { padding: 5px; width: 280px; margin: 0 auto; box-sizing: border-box; }
+            .bill-wrap { max-width: 100%; margin: 0; }
+          }
+        </style>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+      </head>
+      <body>
+        <div class="bill-wrap">
+          <div class="bill-actions" style="display: none;">
+            <button id="printBillBtn" class="bill-btn bill-btn-print" type="button" title="Print Bill"><i class="fas fa-print me-2"></i>Print Bill</button>
+            <button id="backToKdsBtn" class="bill-btn bill-btn-back" type="button" title="Return to KDS"><i class="fas fa-times"></i></button>
+          </div>
+          <div id="billStatus" class="bill-status" role="status" aria-live="polite"></div>
+          <div id="billContent">
+            <div class="receipt-header">
+              <h1 class="restaurant-name">${escapeHtml(restaurantName)}</h1>
+              ${(restaurantInfo?.address || restaurantInfo?.contactNumber) ? `
+                <div style="font-size: 14px; color: #555; margin-top: 5px; border-top: 1px dashed #666; border-bottom: 1px dashed #666; padding: 4px 0;">
+                  ${restaurantInfo.address ? `<div style="margin-bottom: 2px;">${escapeHtml(restaurantInfo.address)}</div>` : ''}
+                  ${restaurantInfo.contactNumber ? `<div>Tel: ${escapeHtml(restaurantInfo.contactNumber)}</div>` : ''}
+                </div>
+              ` : `
+                <div class="invoice-label">Invoice</div>
+              `}
+            </div>
+
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">Order No</span>
+                <span class="info-value">${escapeHtml(order.orderNo || '-')}</span>
               </div>
-            ` : `
-              <div style="font-size: 16px; font-weight: bold; margin-top: 5px; color: #555; text-transform: uppercase; letter-spacing: 1px;">Invoice</div>
-            `}
-          </div>
-
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 10px; font-size: 12px;">
-            <div style="display: flex; flex-direction: column;">
-              <span style="font-weight: bold; color: #666; font-size: 10px; text-transform: uppercase;">Order No</span>
-              <span style="font-weight: bold; color: #000;">${escapeHtml(order.orderNo || '-')}</span>
+              <div class="info-item" style="text-align: right;">
+                <span class="info-label">Date & Time</span>
+                <span class="info-value">${new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">${order.orderType === 'ROOM' ? 'Room' : 'Table'}</span>
+                <span class="info-value">${escapeHtml(order.roomNo || order.tableNo || '-')}</span>
+              </div>
+              <div class="info-item" style="text-align: right;">
+                <span class="info-label">Customer</span>
+                <span class="info-value">${escapeHtml(order.customerName || 'Guest')}</span>
+              </div>
             </div>
-            <div style="display: flex; flex-direction: column; text-align: right;">
-              <span style="font-weight: bold; color: #666; font-size: 10px; text-transform: uppercase;">Date</span>
-              <span style="font-weight: bold; color: #000;">${new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
-            </div>
-            <div style="display: flex; flex-direction: column;">
-              <span style="font-weight: bold; color: #666; font-size: 10px; text-transform: uppercase;">${order.orderType === 'ROOM' ? 'Room' : 'Table'}</span>
-              <span style="font-weight: bold; color: #000;">${escapeHtml(order.roomNo || order.tableNo || '-')}</span>
-            </div>
-            <div style="display: flex; flex-direction: column; text-align: right;">
-              <span style="font-weight: bold; color: #666; font-size: 10px; text-transform: uppercase;">Customer</span>
-              <span style="font-weight: bold; color: #000;">${escapeHtml(order.customerName || 'Guest')}</span>
-            </div>
-          </div>
-
-          <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <table style="width:100%;border-collapse:collapse;font-size:14px;">
             <thead>
               <tr>
-                <th style="padding:4px 0;border-bottom:2px solid #222;text-align:left;">Item</th>
-                <th style="padding:4px 0;border-bottom:2px solid #222;text-align:center;">Qty</th>
-                <th style="padding:4px 0;border-bottom:2px solid #222;text-align:right;">Total</th>
+                <th style="padding:8px;border-bottom:2px solid #222;text-align:left;">Item</th>
+                <th style="padding:8px;border-bottom:2px solid #222;text-align:center;">Qty</th>
+                <th style="padding:8px;border-bottom:2px solid #222;text-align:right;">Unit Price</th>
+                <th style="padding:8px;border-bottom:2px solid #222;text-align:right;">Total</th>
               </tr>
             </thead>
             <tbody>
               ${itemsMarkup}
             </tbody>
           </table>
-
-          <div style="margin-top:10px;text-align:right;font-size:12px;border-top:1px solid #ddd;padding-top:8px;">
+          <div style="margin-top:16px;text-align:right;font-size:14px;border-top:1px solid #ddd;padding-top:10px;">
             <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
               <span style="color:#555;">Subtotal:</span>
               <span>${formatBillCurrency(order.subtotal || (order.totalAmount / 1.1))}</span>
             </div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
               <span style="color:#555;">Service Charge (10%):</span>
               <span>${formatBillCurrency(order.serviceCharge || (order.totalAmount - order.totalAmount / 1.1))}</span>
             </div>
-            <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:700;border-top:2px solid #222;padding-top:6px;">
-              <span>TOTAL:</span>
+            <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:700;border-top:2px solid #222;padding-top:8px;">
+              <span>Grand Total:</span>
               <span>${formatBillCurrency(order.totalAmount)}</span>
             </div>
           </div>
-
-          <div style="border-top: 2px dashed #444; padding-top: 10px; margin-top: 15px; text-align: center;">
-            <div style="font-size: 13px; font-weight: bold; margin-bottom: 3px;">THANK YOU!</div>
-            <div style="font-size: 11px; color: #666;">Please come again.</div>
+          <div class="receipt-footer">
+            <div style="font-size: 14px; font-weight: bold; margin-bottom: 5px;">THANK YOU FOR VISITING!</div>
+            <div style="font-size: 12px; color: #666;">Please come again.</div>
+          </div>
           </div>
         </div>
-      `;
 
-      const isAndroid = /Android/i.test(navigator.userAgent);
+        <script>
+          (function () {
+            const runtimeMessageType = ${JSON.stringify(messageType)};
+            const printBtn = document.getElementById('printBillBtn');
+            const cashierBtn = document.getElementById('sendToCashierBtn');
+            const backBtn = document.getElementById('backToKdsBtn');
+            const billContent = document.getElementById('billContent');
+            const billStatus = document.getElementById('billStatus');
+            const fileName = ${JSON.stringify(`Bill-${String(order.orderNo || 'order')}.pdf`)};
 
-      if (isAndroid) {
-        // Use RawBT Intent for 1-click seamless thermal printing on Android
-        try {
-          const base64Html = btoa(unescape(encodeURIComponent(printableHtml)));
-          const rawbtIntentUrl = "intent:base64," + base64Html + "#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;S.browser_fallback_url=" + encodeURIComponent(window.location.href) + ";end;";
-          window.location.href = rawbtIntentUrl;
-          
-          setTimeout(() => {
-            resolve({
-              hasPrinted: true,
-              continueToWhatsApp: false,
-              sendToCashier: false
+            const setStatus = (message, tone) => {
+              if (!billStatus) return;
+              billStatus.textContent = message;
+              billStatus.className = 'bill-status bill-status-' + tone;
+              billStatus.style.display = 'block';
+            };
+
+            const refreshBackButtonState = () => {
+              if (backBtn) backBtn.disabled = false;
+            };
+
+            const notifyAndClose = () => {
+              window.close();
+            };
+
+            if (backBtn) {
+              backBtn.addEventListener('click', function () {
+                notifyAndClose();
+              });
+            }
+
+            // Immediate auto-trigger print for better reliability
+            setTimeout(function () {
+              window.focus();
+              window.print();
+              window.close();
+            }, 400);
+
+            window.addEventListener('afterprint', function () {
+              window.close();
             });
-          }, 1000);
-          return;
-        } catch (e) {
-          console.error("RawBT Intent error:", e);
-        }
+
+            // Extra safety fallback
+            setTimeout(function() {
+               if (!window.closed) window.close();
+            }, 5000);
+
+            printBtn.addEventListener('click', function () {
+              setStatus('Opening print dialog...', 'info');
+              printBtn.disabled = true;
+              window.print();
+            });
+
+
+          })();
+        </script>
+      </body>
+      </html>
+    `;
+
+      try {
+        printWindow.document.open();
+        printWindow.document.write(printableHtml);
+        printWindow.document.close();
+      } catch (error) {
+        console.error('Error preparing printable bill:', error);
+        completePrintFlow({
+          continueToWhatsApp: false,
+          sendToCashier: false,
+          requiredActionsCompleted: false,
+          hasPrinted: false,
+          hasSentToCashier: false,
+        });
+        return;
       }
-
-      // Fallback for non-Android devices (Windows, iOS, etc.)
-      const printContainer = document.createElement('div');
-      printContainer.id = 'mobile-print-container';
-      
-      printContainer.innerHTML = `
-        <style>
-          @media print {
-            body > *:not(#mobile-print-container) {
-              display: none !important;
-            }
-            #mobile-print-container { 
-              display: block !important;
-              position: static !important;
-              margin: 0; 
-              padding: 0; 
-              background: white; 
-            }
-            @page { margin: 0; }
-          }
-        </style>
-        ${printableHtml}
-      `;
-
-      document.body.appendChild(printContainer);
-
-      setTimeout(() => {
-        window.print();
-        setTimeout(() => {
-          document.body.removeChild(printContainer);
-          resolve({
-            hasPrinted: true,
-            continueToWhatsApp: false,
-            sendToCashier: false
-          });
-        }, 1000);
-      }, 500);
 
     });
   };
