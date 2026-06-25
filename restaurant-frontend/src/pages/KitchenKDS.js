@@ -467,44 +467,10 @@ const KitchenKDS = () => {
         })
         .join('');
 
-      // Use an in-DOM container for reliable mobile printing
-      const printContainer = document.createElement('div');
-      printContainer.id = 'mobile-print-container';
-      
-      printContainer.innerHTML = `
-        <style>
-          @media print {
-            body > *:not(#mobile-print-container) {
-              display: none !important;
-            }
-            #mobile-print-container { 
-              display: block !important;
-              position: static !important;
-              margin: 0; 
-              padding: 0; 
-              background: white; 
-            }
-            @page { margin: 0; }
-          }
-          .bill-print-wrap {
-            font-family: Arial, sans-serif;
-            padding: 5px;
-            width: 280px;
-            margin: 0 auto;
-            color: #000;
-            box-sizing: border-box;
-          }
-          .receipt-header { text-align: center; border-bottom: 2px dashed #444; padding-bottom: 10px; margin-bottom: 10px; }
-          .receipt-footer { border-top: 2px dashed #444; padding-top: 10px; margin-top: 15px; text-align: center; }
-          .restaurant-name { font-size: 24px; font-weight: 900; margin: 0; color: #000; text-transform: uppercase; }
-          .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 10px; font-size: 12px; }
-          .info-item { display: flex; flex-direction: column; }
-          .info-label { font-weight: bold; color: #666; font-size: 10px; text-transform: uppercase; }
-          .info-value { font-weight: bold; color: #000; }
-        </style>
-        <div class="bill-print-wrap">
-          <div class="receipt-header">
-            <h1 class="restaurant-name">${escapeHtml(restaurantName)}</h1>
+      const printableHtml = `
+        <div style="font-family: Arial, sans-serif; padding: 5px; width: 280px; margin: 0 auto; color: #000; box-sizing: border-box;">
+          <div style="text-align: center; border-bottom: 2px dashed #444; padding-bottom: 10px; margin-bottom: 10px;">
+            <h1 style="font-size: 24px; font-weight: 900; margin: 0; color: #000; text-transform: uppercase;">${escapeHtml(restaurantName)}</h1>
             ${(restaurantInfo?.address || restaurantInfo?.contactNumber) ? `
               <div style="font-size: 12px; color: #333; margin-top: 5px; border-top: 1px dashed #666; border-bottom: 1px dashed #666; padding: 4px 0;">
                 ${restaurantInfo.address ? `<div style="margin-bottom: 2px;">${escapeHtml(restaurantInfo.address)}</div>` : ''}
@@ -515,22 +481,22 @@ const KitchenKDS = () => {
             `}
           </div>
 
-          <div class="info-grid">
-            <div class="info-item">
-              <span class="info-label">Order No</span>
-              <span class="info-value">${escapeHtml(order.orderNo || '-')}</span>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 10px; font-size: 12px;">
+            <div style="display: flex; flex-direction: column;">
+              <span style="font-weight: bold; color: #666; font-size: 10px; text-transform: uppercase;">Order No</span>
+              <span style="font-weight: bold; color: #000;">${escapeHtml(order.orderNo || '-')}</span>
             </div>
-            <div class="info-item" style="text-align: right;">
-              <span class="info-label">Date</span>
-              <span class="info-value">${new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+            <div style="display: flex; flex-direction: column; text-align: right;">
+              <span style="font-weight: bold; color: #666; font-size: 10px; text-transform: uppercase;">Date</span>
+              <span style="font-weight: bold; color: #000;">${new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
             </div>
-            <div class="info-item">
-              <span class="info-label">${order.orderType === 'ROOM' ? 'Room' : 'Table'}</span>
-              <span class="info-value">${escapeHtml(order.roomNo || order.tableNo || '-')}</span>
+            <div style="display: flex; flex-direction: column;">
+              <span style="font-weight: bold; color: #666; font-size: 10px; text-transform: uppercase;">${order.orderType === 'ROOM' ? 'Room' : 'Table'}</span>
+              <span style="font-weight: bold; color: #000;">${escapeHtml(order.roomNo || order.tableNo || '-')}</span>
             </div>
-            <div class="info-item" style="text-align: right;">
-              <span class="info-label">Customer</span>
-              <span class="info-value">${escapeHtml(order.customerName || 'Guest')}</span>
+            <div style="display: flex; flex-direction: column; text-align: right;">
+              <span style="font-weight: bold; color: #666; font-size: 10px; text-transform: uppercase;">Customer</span>
+              <span style="font-weight: bold; color: #000;">${escapeHtml(order.customerName || 'Guest')}</span>
             </div>
           </div>
 
@@ -562,11 +528,56 @@ const KitchenKDS = () => {
             </div>
           </div>
 
-          <div class="receipt-footer">
+          <div style="border-top: 2px dashed #444; padding-top: 10px; margin-top: 15px; text-align: center;">
             <div style="font-size: 13px; font-weight: bold; margin-bottom: 3px;">THANK YOU!</div>
             <div style="font-size: 11px; color: #666;">Please come again.</div>
           </div>
         </div>
+      `;
+
+      const isAndroid = /Android/i.test(navigator.userAgent);
+
+      if (isAndroid) {
+        // Use RawBT Intent for 1-click seamless thermal printing on Android
+        try {
+          const base64Html = btoa(unescape(encodeURIComponent(printableHtml)));
+          const rawbtIntentUrl = "intent:base64," + base64Html + "#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;S.browser_fallback_url=" + encodeURIComponent(window.location.href) + ";end;";
+          window.location.href = rawbtIntentUrl;
+          
+          setTimeout(() => {
+            resolve({
+              hasPrinted: true,
+              continueToWhatsApp: false,
+              sendToCashier: false
+            });
+          }, 1000);
+          return;
+        } catch (e) {
+          console.error("RawBT Intent error:", e);
+        }
+      }
+
+      // Fallback for non-Android devices (Windows, iOS, etc.)
+      const printContainer = document.createElement('div');
+      printContainer.id = 'mobile-print-container';
+      
+      printContainer.innerHTML = `
+        <style>
+          @media print {
+            body > *:not(#mobile-print-container) {
+              display: none !important;
+            }
+            #mobile-print-container { 
+              display: block !important;
+              position: static !important;
+              margin: 0; 
+              padding: 0; 
+              background: white; 
+            }
+            @page { margin: 0; }
+          }
+        </style>
+        ${printableHtml}
       `;
 
       document.body.appendChild(printContainer);
