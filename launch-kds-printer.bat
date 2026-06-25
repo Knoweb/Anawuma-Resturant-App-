@@ -9,7 +9,7 @@ echo Launching Google Chrome in Silent Kiosk Printing mode...
 echo.
 
 :: Specify the URL to your KDS Dashboard here
-set KDS_URL=http://localhost:3000/kitchen/dashboard
+set KDS_URL=http://152.42.179.36/kitchen/kds
 
 :: Look for Chrome in common installation paths
 set CHROME_PATH="C:\Program Files\Google\Chrome\Application\chrome.exe"
