@@ -18,11 +18,11 @@
 }
 
 .customer-qr-order-container {
-  min-height: 100vh;
+  min-height: 100dvh;
   background-color: var(--bg-light);
   font-family: var(--font-body);
   color: var(--text-dark);
-  padding-bottom: 100px;
+  padding-bottom: calc(100px + env(safe-area-inset-bottom));
   -webkit-font-smoothing: antialiased;
 }
 
@@ -172,20 +172,21 @@ h1, h2, h3, h4, h5, h6 {
 /* --- Bottom Navigation --- */
 .mobile-bottom-nav {
   position: fixed;
-  bottom: 15px;
-  left: 15px;
-  right: 15px;
+  bottom: 0;
+  left: 0;
+  right: 0;
   background: rgba(26, 70, 72, 0.95);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
-  height: 65px;
+  height: calc(65px + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
   display: flex;
   justify-content: space-around;
   align-items: center;
   z-index: 1001;
   border-radius: 0;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.15);
 }
 
 .nav-item {

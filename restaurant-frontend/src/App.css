@@ -39,6 +39,12 @@
   box-sizing: border-box;
 }
 
+html, body, #root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -154,9 +160,10 @@ code {
 /* Global Content Wrapper (Dashboard pages) */
 .content-wrapper, .main-content {
   padding-top: calc(var(--header-height-desktop) + var(--safe-top)) !important;
+  padding-bottom: var(--safe-bottom) !important;
   padding-left: var(--space-md);
   padding-right: var(--space-md);
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* Global Mobile Overrides */
@@ -216,14 +223,15 @@ code {
     padding: 10px 15px !important;
     font-size: 0.9rem;
   }
-
-  .modal-dialog {
-    max-width: 95vw !important;
-    margin: 10px auto;
-  }
 }
 
-html, body {
-  overflow-x: hidden;
-  max-width: 100vw;
+/* Global Modal Responsiveness */
+.modal-dialog {
+  max-width: min(95vw, 600px) !important;
+  margin: 1.75rem auto;
+}
+
+.modal-content {
+  max-height: 90dvh;
+  overflow-y: auto;
 }

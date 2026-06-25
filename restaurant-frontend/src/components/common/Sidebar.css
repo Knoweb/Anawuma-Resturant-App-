@@ -2,7 +2,7 @@
   position: fixed;
   top: var(--header-height-desktop);
   left: 0;
-  height: calc(100vh - var(--header-height-desktop));
+  height: calc(100dvh - var(--header-height-desktop));
   width: var(--sidebar-width);
   background: #1E1E2E;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
@@ -145,7 +145,7 @@ body.sb-sidenav-toggled .sidebar {
 /* Mobile Responsive */
 @media (max-width: 1024px) {
   .sidebar {
-    transform: translateX(-250px);
+    transform: translateX(calc(-1 * var(--sidebar-width)));
   }
 
   body.sb-sidenav-toggled .sidebar {
@@ -161,6 +161,6 @@ body.sb-sidenav-toggled .sidebar {
 @media (max-width: 640px) {
   .sidebar {
     top: var(--header-height-mobile);
-    height: calc(100vh - var(--header-height-mobile));
+    height: calc(100dvh - var(--header-height-mobile));
   }
 }
