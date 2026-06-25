@@ -21,11 +21,19 @@ if exist %CHROME_PATH% goto :launch
 set CHROME_PATH="%LocalAppData%\Google\Chrome\Application\chrome.exe"
 if exist %CHROME_PATH% goto :launch
 
-echo Error: Google Chrome was not found on your system!
-echo Please make sure Chrome is installed.
+:: Look for Microsoft Edge (since you are using Edge)
+set EDGE_PATH="C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+if exist %EDGE_PATH% goto :launch_edge
+
+echo Error: Neither Google Chrome nor Microsoft Edge was found!
+echo Please make sure one of them is installed.
 pause
 exit
 
 :launch
 start "" %CHROME_PATH% --kiosk-printing "%KDS_URL%"
+exit
+
+:launch_edge
+start "" %EDGE_PATH% --kiosk-printing "%KDS_URL%"
 exit
