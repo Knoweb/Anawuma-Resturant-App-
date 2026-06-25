@@ -978,47 +978,59 @@ const ServiceBillingDashboard = ({
             
             {/* ── Summary Stats (Cashier Only) ── */}
             {isCashierDashboard && summaryData && (
-              <div className="billing-summary-grid mb-4 no-print">
-                <div className="billing-summary-card cashier-total">
-                  <div className="bsc-icon"><i className="fas fa-chart-line"></i></div>
-                  <div className="bsc-info">
-                    <span className="bsc-label">Total Revenue</span>
-                    <span className="bsc-value">{formatCurrency(summaryData.totalRevenue)}</span>
+              <div className="row g-3 mb-4 no-print">
+                <div className="col-md-2 col-sm-6">
+                  <div className="billing-summary-card cashier-total">
+                    <div className="bsc-icon"><i className="fas fa-chart-line"></i></div>
+                    <div className="bsc-info">
+                      <span className="bsc-label">Total Revenue</span>
+                      <span className="bsc-value">{formatCurrency(summaryData.totalRevenue)}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="billing-summary-card">
-                  <div className="bsc-icon"><i className="fas fa-money-bill-wave"></i></div>
-                  <div className="bsc-info">
-                    <span className="bsc-label">Cash Revenue</span>
-                    <span className="bsc-value">{formatCurrency(summaryData.cashRevenue)}</span>
+                <div className="col-md-2 col-sm-6">
+                  <div className="billing-summary-card cashier-cash">
+                    <div className="bsc-icon"><i className="fas fa-money-bill-wave"></i></div>
+                    <div className="bsc-info">
+                      <span className="bsc-label">Cash Revenue</span>
+                      <span className="bsc-value">{formatCurrency(summaryData.cashRevenue)}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="billing-summary-card cashier-card">
-                  <div className="bsc-icon"><i className="fas fa-credit-card"></i></div>
-                  <div className="bsc-info">
-                    <span className="bsc-label">Card Revenue</span>
-                    <span className="bsc-value">{formatCurrency(summaryData.cardRevenue)}</span>
+                <div className="col-md-2 col-sm-6">
+                  <div className="billing-summary-card cashier-card">
+                    <div className="bsc-icon"><i className="fas fa-credit-card"></i></div>
+                    <div className="bsc-info">
+                      <span className="bsc-label">Card Revenue</span>
+                      <span className="bsc-value">{formatCurrency(summaryData.cardRevenue)}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="billing-summary-card" style={{ background: 'linear-gradient(135deg, #f39c12, #e67e22)', color: 'white' }}>
-                  <div className="bsc-icon"><i className="fas fa-concierge-bell"></i></div>
-                  <div className="bsc-info">
-                    <span className="bsc-label">Service Charge</span>
-                    <span className="bsc-value">{formatCurrency(summaryData.serviceCharge)}</span>
+                <div className="col-md-2 col-sm-6">
+                  <div className="billing-summary-card" style={{ background: 'linear-gradient(135deg, #f39c12, #e67e22)', color: 'white' }}>
+                    <div className="bsc-icon"><i className="fas fa-concierge-bell"></i></div>
+                    <div className="bsc-info">
+                      <span className="bsc-label">Service Charge</span>
+                      <span className="bsc-value">{formatCurrency(summaryData.serviceCharge)}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="billing-summary-card" style={{ background: 'linear-gradient(135deg, #3498db, #2980b9)', color: 'white' }}>
-                  <div className="bsc-icon"><i className="fas fa-utensils"></i></div>
-                  <div className="bsc-info">
-                    <span className="bsc-label">Food Total</span>
-                    <span className="bsc-value">{formatCurrency(summaryData.foodRevenue)}</span>
+                <div className="col-md-2 col-sm-6">
+                  <div className="billing-summary-card" style={{ background: 'linear-gradient(135deg, #3498db, #2980b9)', color: 'white' }}>
+                    <div className="bsc-icon"><i className="fas fa-utensils"></i></div>
+                    <div className="bsc-info">
+                      <span className="bsc-label">Food Total</span>
+                      <span className="bsc-value">{formatCurrency(summaryData.foodRevenue)}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="billing-summary-card cashier-orders">
-                  <div className="bsc-icon"><i className="fas fa-shopping-basket"></i></div>
-                  <div className="bsc-info">
-                    <span className="bsc-label">Paid Orders</span>
-                    <span className="bsc-value">{summaryData.totalOrders}</span>
+                <div className="col-md-2 col-sm-6">
+                  <div className="billing-summary-card cashier-orders">
+                    <div className="bsc-icon"><i className="fas fa-shopping-basket"></i></div>
+                    <div className="bsc-info">
+                      <span className="bsc-label">Paid Orders</span>
+                      <span className="bsc-value">{summaryData.totalOrders}</span>
+                    </div>
                   </div>
                 </div>
               </div>
