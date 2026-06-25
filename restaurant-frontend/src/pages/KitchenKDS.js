@@ -474,16 +474,15 @@ const KitchenKDS = () => {
       printContainer.innerHTML = `
         <style>
           @media print {
-            body * { visibility: hidden !important; }
-            #mobile-print-container, #mobile-print-container * { visibility: visible !important; }
+            body > *:not(#mobile-print-container) {
+              display: none !important;
+            }
             #mobile-print-container { 
-              position: absolute; 
-              left: 0; top: 0; 
-              width: 100%; 
+              display: block !important;
+              position: static !important;
               margin: 0; 
               padding: 0; 
               background: white; 
-              z-index: 999999; 
             }
             @page { margin: 0; }
           }
