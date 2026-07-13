@@ -610,8 +610,8 @@ const KitchenKDS = () => {
 
           .receipt-header { text-align: center; border-bottom: 2px dashed #444; padding-bottom: 15px; margin-bottom: 20px; }
           .receipt-footer { border-top: 2px dashed #444; padding-top: 15px; margin-top: 20px; text-align: center; }
-          .invoice-label { font-size: 18px; font-weight: bold; margin-top: 5px; color: #555; text-transform: uppercase; letter-spacing: 2px; }
-          .restaurant-name { font-size: 32px; font-weight: 900; margin: 0; color: #000; text-transform: uppercase; }
+          .invoice-label { font-size: 14px; font-weight: bold; margin-top: 5px; color: #555; text-transform: uppercase; letter-spacing: 1px; }
+          .restaurant-name { font-size: 22px; font-weight: 800; margin: 0; color: #000; text-transform: uppercase; }
           .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; font-size: 14px; }
           .info-item { display: flex; flex-direction: column; }
           .info-label { font-weight: bold; color: #666; font-size: 11px; text-transform: uppercase; }
@@ -646,7 +646,7 @@ const KitchenKDS = () => {
                   ${restaurantInfo.contactNumber ? `<div>Tel: ${escapeHtml(restaurantInfo.contactNumber)}</div>` : ''}
                 </div>
               ` : `
-                <div class="invoice-label">KITCHEN ORDER TICKET (KOT)</div>
+                <div class="invoice-label">ORDER TICKET</div>
               `}
             </div>
 
