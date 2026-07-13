@@ -384,6 +384,15 @@ function CreateInvoiceModal({ order, onConfirm, onClose, loading }) {
   );
 }
 
+// Create a single AudioContext for the module to avoid autoplay policy issues
+let sharedAudioCtx = null;
+const getAudioContext = () => {
+  if (!sharedAudioCtx) {
+    sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return sharedAudioCtx;
+};
+
 // ---------------------------------------------------------------------------
 // Main Dashboard Component
 // ---------------------------------------------------------------------------
@@ -412,16 +421,21 @@ const ServiceBillingDashboard = ({
   // Custom pleasant double-chime for Cashier
   const playCashierNotificationSound = useCallback(() => {
     try {
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      if (audioCtx.state === 'suspended') return;
+      const ctx = getAudioContext();
+      if (ctx.state === 'suspended') {
+        ctx.resume(); // attempt to resume, might fail if no gesture, but worth trying
+      }
+      
+      // If still suspended after attempt, exit silently
+      if (ctx.state === 'suspended') return;
 
-      const osc1 = audioCtx.createOscillator();
-      const osc2 = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const gainNode = ctx.createGain();
 
       osc1.connect(gainNode);
       osc2.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
+      gainNode.connect(ctx.destination);
 
       osc1.frequency.value = 523.25; // C5
       osc2.frequency.value = 659.25; // E5
@@ -429,31 +443,37 @@ const ServiceBillingDashboard = ({
       osc1.type = 'triangle';
       osc2.type = 'triangle';
 
-      gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.1);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+      gainNode.gain.setValueAtTime(0, ctx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.1);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
 
-      osc1.start(audioCtx.currentTime);
-      osc2.start(audioCtx.currentTime);
+      osc1.start(ctx.currentTime);
+      osc2.start(ctx.currentTime);
       
-      osc1.stop(audioCtx.currentTime + 0.8);
-      osc2.stop(audioCtx.currentTime + 0.8);
-    } catch (error) {}
+      osc1.stop(ctx.currentTime + 0.8);
+      osc2.stop(ctx.currentTime + 0.8);
+    } catch (error) {
+      console.warn("Audio playback failed", error);
+    }
   }, []);
 
-  // Unlock audio
+  // Unlock audio globally
   useEffect(() => {
-    const resumeAudio = () => {
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      window.removeEventListener('click', resumeAudio);
-      window.removeEventListener('keydown', resumeAudio);
+    const unlockAudio = () => {
+      const ctx = getAudioContext();
+      if (ctx.state === 'suspended') ctx.resume();
     };
-    window.addEventListener('click', resumeAudio);
-    window.addEventListener('keydown', resumeAudio);
+    window.addEventListener('click', unlockAudio);
+    window.addEventListener('keydown', unlockAudio);
+    window.addEventListener('touchstart', unlockAudio);
+    
+    // Initial attempt to unlock
+    unlockAudio();
+    
     return () => {
-      window.removeEventListener('click', resumeAudio);
-      window.removeEventListener('keydown', resumeAudio);
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+      window.removeEventListener('touchstart', unlockAudio);
     };
   }, []);
 
