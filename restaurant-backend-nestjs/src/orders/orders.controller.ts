@@ -152,7 +152,7 @@ export class OrdersController {
   @Patch(':id/status')
   @SkipThrottle() // Skip rate limiting for authenticated requests
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.KITCHEN, UserRole.HOUSEKEEPER)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.KITCHEN, UserRole.HOUSEKEEPER, UserRole.CASHIER)
   updateStatus(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateOrderStatusDto: UpdateOrderStatusDto,
