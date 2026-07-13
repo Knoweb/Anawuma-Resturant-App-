@@ -1323,12 +1323,6 @@ const KitchenKDS = () => {
                   orders={orders.COOKING}
                   bgClass="bg-cooking"
                 />
-                <StatusColumn
-                  title="Ready"
-                  status="READY"
-                  orders={orders.READY}
-                  bgClass="bg-ready"
-                />
               </div>
             )}
           </div>
