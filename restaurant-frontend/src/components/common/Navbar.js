@@ -170,9 +170,21 @@ function Navbar({ cartCount, onCartClick }) {
       <div className="container-fluid flex-nowrap">
         {/* Left Side Group */}
         <div className="d-flex align-items-center" style={{ minWidth: 0, flex: 1 }}>
-          <button className="btn btn-link text-white sidebar-toggle-btn p-0 me-2" onClick={toggleSidebar} type="button">
+          <button className="btn btn-link text-white sidebar-toggle-btn p-0 me-3" onClick={toggleSidebar} type="button">
             <i className="fas fa-bars"></i>
           </button>
+
+          {!hideBackBtn && (
+            <button
+              className="btn btn-link text-white back-nav-btn d-flex align-items-center me-3"
+              onClick={() => navigate(-1)}
+              type="button"
+              style={{ textDecoration: 'none', background: 'rgba(255,255,255,0.1)', borderRadius: '8px', padding: '5px 10px', fontSize: '0.85rem', whiteSpace: 'nowrap' }}
+            >
+              <i className="fas fa-chevron-left me-1"></i>
+              <span>Back</span>
+            </button>
+          )}
 
           <div className="hotel-brand" title={restaurantName}>
             {restaurantLogoUrl ? (
@@ -182,18 +194,6 @@ function Navbar({ cartCount, onCartClick }) {
             )}
             <span className="hotel-brand-name">{restaurantName}</span>
           </div>
-
-          {!hideBackBtn && (
-            <button
-              className="btn btn-link text-white back-nav-btn d-flex align-items-center"
-              onClick={() => navigate(-1)}
-              type="button"
-              style={{ textDecoration: 'none', background: 'rgba(255,255,255,0.1)', borderRadius: '8px', padding: '5px 10px', fontSize: '0.85rem', whiteSpace: 'nowrap' }}
-            >
-              <i className="fas fa-chevron-left me-1"></i>
-              <span>Back</span>
-            </button>
-          )}
         </div>
 
         {/* Right Side Group */}
