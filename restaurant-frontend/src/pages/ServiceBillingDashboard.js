@@ -407,6 +407,55 @@ const ServiceBillingDashboard = ({
   const autoTransferStorageKey = `cashier-auto-transfer:${user?.restaurantId || 'global'}`;
   const autoSendInFlightRef = useRef(false);
   const toastTimerRef = useRef(null);
+  const previousReadyOrderIdsRef = useRef(new Set());
+
+  // Custom pleasant double-chime for Cashier
+  const playCashierNotificationSound = useCallback(() => {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') return;
+
+      const osc1 = audioCtx.createOscillator();
+      const osc2 = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+
+      osc1.connect(gainNode);
+      osc2.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      osc1.frequency.value = 523.25; // C5
+      osc2.frequency.value = 659.25; // E5
+      
+      osc1.type = 'triangle';
+      osc2.type = 'triangle';
+
+      gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.1);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+
+      osc1.start(audioCtx.currentTime);
+      osc2.start(audioCtx.currentTime);
+      
+      osc1.stop(audioCtx.currentTime + 0.8);
+      osc2.stop(audioCtx.currentTime + 0.8);
+    } catch (error) {}
+  }, []);
+
+  // Unlock audio
+  useEffect(() => {
+    const resumeAudio = () => {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      window.removeEventListener('click', resumeAudio);
+      window.removeEventListener('keydown', resumeAudio);
+    };
+    window.addEventListener('click', resumeAudio);
+    window.addEventListener('keydown', resumeAudio);
+    return () => {
+      window.removeEventListener('click', resumeAudio);
+      window.removeEventListener('keydown', resumeAudio);
+    };
+  }, []);
 
   const [readyOrders, setReadyOrders] = useState([]);
   const [loadingReady, setLoadingReady] = useState(true);
@@ -489,13 +538,29 @@ const ServiceBillingDashboard = ({
     try {
       setReadyError('');
       const res = await billingAPI.getReadyOrders();
-      setReadyOrders(Array.isArray(res.data) ? res.data : []);
+      const orders = Array.isArray(res.data) ? res.data : [];
+      
+      const currentReadyIds = new Set(orders.map(o => o.orderId));
+      let hasNewArrival = false;
+      
+      currentReadyIds.forEach(id => {
+        if (!previousReadyOrderIdsRef.current.has(id)) {
+          hasNewArrival = true;
+        }
+      });
+
+      if (hasNewArrival && previousReadyOrderIdsRef.current.size > 0) {
+        playCashierNotificationSound();
+      }
+
+      previousReadyOrderIdsRef.current = currentReadyIds;
+      setReadyOrders(orders);
     } catch (err) {
       setReadyError(err?.response?.data?.message || 'Failed to load ready orders.');
     } finally {
       setLoadingReady(false);
     }
-  }, []);
+  }, [playCashierNotificationSound]);
 
   const fetchCashierQueue = useCallback(async () => {
     try {
