@@ -564,17 +564,13 @@ const KitchenKDS = () => {
       const itemsMarkup = items
         .map((item, index) => {
           const qty = Number(item.qty || 1);
-          const unitPrice = Number(item.unitPrice || 0);
-          const lineTotal = Number(item.lineTotal || qty * unitPrice);
           const itemName = escapeHtml(item.itemName || item.foodItem?.itemName || 'Item');
           const notes = item.notes ? `<div style="font-size:12px;color:#666;">Note: ${escapeHtml(item.notes)}</div>` : '';
 
           return `
           <tr>
             <td style="padding:8px;border-bottom:1px solid #eee;">${itemName}${notes}</td>
-            <td style="padding:8px;border-bottom:1px solid #eee;text-align:center;">${qty}</td>
-            <td style="padding:8px;border-bottom:1px solid #eee;text-align:right;">${formatBillCurrency(unitPrice)}</td>
-            <td style="padding:8px;border-bottom:1px solid #eee;text-align:right;">${formatBillCurrency(lineTotal)}</td>
+            <td style="padding:8px;border-bottom:1px solid #eee;text-align:right;font-weight:bold;font-size:16px;">x${qty}</td>
           </tr>
         `;
         })
@@ -650,7 +646,7 @@ const KitchenKDS = () => {
                   ${restaurantInfo.contactNumber ? `<div>Tel: ${escapeHtml(restaurantInfo.contactNumber)}</div>` : ''}
                 </div>
               ` : `
-                <div class="invoice-label">Invoice</div>
+                <div class="invoice-label">KITCHEN ORDER TICKET (KOT)</div>
               `}
             </div>
 
@@ -672,32 +668,19 @@ const KitchenKDS = () => {
                 <span class="info-value">${escapeHtml(order.customerName || 'Guest')}</span>
               </div>
             </div>
-          <table style="width:100%;border-collapse:collapse;font-size:14px;">
+          <table style="width:100%;border-collapse:collapse;font-size:16px;">
             <thead>
               <tr>
                 <th style="padding:8px;border-bottom:2px solid #222;text-align:left;">Item</th>
-                <th style="padding:8px;border-bottom:2px solid #222;text-align:center;">Qty</th>
-                <th style="padding:8px;border-bottom:2px solid #222;text-align:right;">Unit Price</th>
-                <th style="padding:8px;border-bottom:2px solid #222;text-align:right;">Total</th>
+                <th style="padding:8px;border-bottom:2px solid #222;text-align:right;">Qty</th>
               </tr>
             </thead>
             <tbody>
               ${itemsMarkup}
             </tbody>
           </table>
-          <div style="margin-top:16px;text-align:right;font-size:14px;border-top:1px solid #ddd;padding-top:10px;">
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-              <span style="color:#555;">Subtotal:</span>
-              <span>${formatBillCurrency(order.subtotal || (order.totalAmount / 1.1))}</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-              <span style="color:#555;">Service Charge (10%):</span>
-              <span>${formatBillCurrency(order.serviceCharge || (order.totalAmount - order.totalAmount / 1.1))}</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:700;border-top:2px solid #222;padding-top:8px;">
-              <span>Grand Total:</span>
-              <span>${formatBillCurrency(order.totalAmount)}</span>
-            </div>
+          <div style="margin-top:16px;text-align:center;font-size:14px;border-top:2px dashed #444;padding-top:10px;">
+            <p style="margin:0;font-weight:bold;font-size:16px;">PLEASE PREPARE THE ABOVE ITEMS</p>
           </div>
           <div class="receipt-footer">
             <div style="font-size: 14px; font-weight: bold; margin-bottom: 5px;">THANK YOU FOR VISITING!</div>
