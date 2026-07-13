@@ -235,6 +235,12 @@ function Sidebar() {
 
           {canAccessCashierDashboard && (
             <>
+              <li className={isCashierTabActive('queue')}>
+                <Link to="/cashier/dashboard/queue" onClick={closeSubmenus}>
+                  <i className="fas fa-bell"></i>
+                  <span>Ready Orders</span>
+                </Link>
+              </li>
               <li className={isCashierTabActive('transfers')}>
                 <Link to="/cashier/dashboard/transfers" onClick={closeSubmenus}>
                   <i className="fas fa-share-square"></i>

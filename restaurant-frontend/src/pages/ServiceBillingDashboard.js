@@ -400,7 +400,7 @@ const ServiceBillingDashboard = ({
   const resolvedCashierTab = isCashierDashboard ? cashierTab : 'queue';
   const showCashierTransfersSection =
     isCashierDashboard && resolvedCashierTab === 'transfers';
-  const showCashierQueueSection = false; // Temporarily removed as per user request
+  const showCashierQueueSection = !isCashierDashboard || resolvedCashierTab === 'queue';
   const showInvoiceHistorySection =
     !isCashierDashboard || resolvedCashierTab === 'history' || resolvedCashierTab === 'queue';
 
