@@ -417,6 +417,7 @@ const ServiceBillingDashboard = ({
   const autoSendInFlightRef = useRef(false);
   const toastTimerRef = useRef(null);
   const previousReadyOrderIdsRef = useRef(new Set());
+  const isInitialLoadRef = useRef(true);
 
   // Custom pleasant double-chime for Cashier
   const playCashierNotificationSound = useCallback(() => {
@@ -569,10 +570,11 @@ const ServiceBillingDashboard = ({
         }
       });
 
-      if (hasNewArrival && previousReadyOrderIdsRef.current.size > 0) {
+      if (!isInitialLoadRef.current && hasNewArrival) {
         playCashierNotificationSound();
       }
 
+      isInitialLoadRef.current = false;
       previousReadyOrderIdsRef.current = currentReadyIds;
       setReadyOrders(orders);
     } catch (err) {
