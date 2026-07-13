@@ -352,6 +352,9 @@ export class OrdersService {
       restaurantId: updatedOrder.restaurantId,
     });
 
+    // Emit dashboard update
+    this.websocketGateway.server.emit('dashboard:refresh');
+
     return updatedOrder;
   }
 
@@ -373,6 +376,9 @@ export class OrdersService {
       status: updatedOrder.status,
       restaurantId: updatedOrder.restaurantId,
     });
+
+    // Emit dashboard update
+    this.websocketGateway.server.emit('dashboard:refresh');
 
     return updatedOrder;
   }
@@ -420,8 +426,11 @@ export class OrdersService {
 
   async getManualActiveAccounts(restaurantId: number, type: 'ROOM' | 'TABLE') {
     const activeStatuses: OrderStatus[] = [
-      OrderStatus.SERVED,
+      OrderStatus.NEW,
+      OrderStatus.ACCEPTED,
+      OrderStatus.COOKING,
       OrderStatus.READY,
+      OrderStatus.SERVED,
     ];
 
     const query = this.ordersRepository
