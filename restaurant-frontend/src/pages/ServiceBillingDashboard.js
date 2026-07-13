@@ -1470,13 +1470,12 @@ function ReadyOrderCard({ order, onMarkServed }) {
         {order.customerName && <span><i className="fas fa-user me-1"></i>{order.customerName}</span>}
       </div>
       <ul className="roc-items">
-        {items.slice(0, 4).map((item, i) => (
+        {items.map((item, i) => (
           <li key={i}>
             <span>{item.itemName}</span>
             <span className="text-muted">&times;{item.qty}</span>
           </li>
         ))}
-        {items.length > 4 && <li className="text-muted small">+{items.length - 4} more…</li>}
       </ul>
       <div className="roc-total">{formatCurrency(order.totalAmount)}</div>
       <div className="roc-actions">
