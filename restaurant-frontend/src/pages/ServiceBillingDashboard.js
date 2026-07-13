@@ -1160,12 +1160,12 @@ const ServiceBillingDashboard = ({
               </section>
             )}
 
-            {/* ── SECTION 1: Ready to Bill ── */}
-            {showCashierQueueSection && !isCashierDashboard && (
+            {/* ── SECTION 1: Ready Orders ── */}
+            {showCashierQueueSection && (
               <section className="billing-section mb-4">
                 <div className="section-heading">
                   <i className="fas fa-bell text-warning me-2"></i>
-                  Ready to Bill
+                  Ready Orders
                   <span className="badge bg-warning text-dark ms-2">{readyOrders.length}</span>
                 </div>
 
@@ -1178,7 +1178,7 @@ const ServiceBillingDashboard = ({
                 ) : readyOrders.length === 0 ? (
                   <div className="empty-state">
                     <i className="fas fa-check-circle text-success fa-2x mb-2"></i>
-                    <p className="mb-0">No orders waiting to be billed.</p>
+                    <p className="mb-0">No orders waiting.</p>
                   </div>
                 ) : (
                   <div className="ready-orders-grid">
@@ -1186,48 +1186,14 @@ const ServiceBillingDashboard = ({
                       <ReadyOrderCard
                         key={order.orderId}
                         order={order}
-                        onBill={() => handleOpenCreateModal(order)}
-                        onWhatsApp={() => {
-                          const phone = normalizeWhatsAppNumber(order.whatsappNumber);
-                          if (!phone) { showToast('No WhatsApp number.', 'error'); return; }
-                          const itemLines = (order.orderItems || []).map((i) => `  • ${i.itemName} x${i.qty}`).join('\n');
-                          const msg = `🍽️ *Order Ready!*\nOrder: ${order.orderNo}\nTable: ${order.tableNo || '–'}\n\n${itemLines}\n\n*Total: ${formatCurrency(order.totalAmount)}*`;
-                          window.open(`https://api.whatsapp.com/send?phone=${phone.replace('+', '')}&text=${encodeURIComponent(msg)}`, '_blank');
+                        onMarkServed={async () => {
+                          try {
+                            await apiClient.patch(`/orders/${order.orderId}/status`, { status: 'SERVED' });
+                            fetchReadyOrders();
+                          } catch (err) {
+                            showToast(err?.response?.data?.message || 'Failed to mark as served', 'error');
+                          }
                         }}
-                      />
-                    ))}
-                  </div>
-                )}
-              </section>
-            )}
-
-            {/* ── SECTION 1.5: Cashier Queue ── */}
-            {showCashierQueueSection && (
-              <section className="billing-section">
-                <div className="section-heading">
-                  <i className="fas fa-cash-register text-primary me-2"></i>
-                  Cashier Queue
-                  <span className="badge bg-primary ms-2">{cashierQueue.length}</span>
-                </div>
-
-                {loadingCashierQueue ? (
-                  <div className="text-center py-4">
-                    <div className="spinner-border text-primary"></div>
-                  </div>
-                ) : cashierQueueError ? (
-                  <div className="alert alert-danger">{cashierQueueError}</div>
-                ) : cashierQueue.length === 0 ? (
-                  <div className="empty-state">
-                    <i className="fas fa-inbox text-primary fa-2x mb-2"></i>
-                    <p className="mb-0">No payment details waiting for cashier.</p>
-                  </div>
-                ) : (
-                  <div className="ready-orders-grid">
-                    {cashierQueue.map((invoice) => (
-                      <CashierQueueCard
-                        key={invoice.invoiceId}
-                        invoice={invoice}
-                        onOpen={() => setViewInvoice(invoice)}
                       />
                     ))}
                   </div>
@@ -1400,7 +1366,7 @@ const ServiceBillingDashboard = ({
 // Ready Order Card sub-component
 // ---------------------------------------------------------------------------
 
-function ReadyOrderCard({ order, onBill, onWhatsApp }) {
+function ReadyOrderCard({ order, onMarkServed }) {
   const items = order.orderItems || [];
   const age = getOrderAge(order.createdAt);
 
@@ -1427,46 +1393,8 @@ function ReadyOrderCard({ order, onBill, onWhatsApp }) {
       </ul>
       <div className="roc-total">{formatCurrency(order.totalAmount)}</div>
       <div className="roc-actions">
-        <button className="btn btn-primary btn-sm flex-grow-1" onClick={onBill}>
-          <i className="fas fa-print me-1"></i>Print Invoice
-        </button>
-        {order.whatsappNumber && (
-          <button className="btn btn-whatsapp btn-sm" onClick={onWhatsApp} title="Send via WhatsApp">
-            <i className="fab fa-whatsapp"></i>
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function CashierQueueCard({ invoice, onOpen }) {
-  return (
-    <div className="ready-order-card">
-      <div className="roc-header">
-        <span className="roc-order-no">{invoice.invoiceNumber}</span>
-        <span className="badge bg-primary ms-auto">CASHIER</span>
-      </div>
-      <div className="roc-meta">
-        {invoice.roomNo && <span><i className="fas fa-concierge-bell me-1"></i>Room {invoice.roomNo}</span>}
-        {invoice.tableNo && <span><i className="fas fa-chair me-1"></i>Table - {invoice.tableNo}</span>}
-        {invoice.customerName && <span><i className="fas fa-user me-1"></i>{invoice.customerName}</span>}
-      </div>
-      <ul className="roc-items">
-        {(Array.isArray(invoice.orderItemsJson) ? invoice.orderItemsJson : []).slice(0, 4).map((item, i) => (
-          <li key={i}>
-            <span>{item.itemName}</span>
-            <span className="text-muted">&times;{item.qty}</span>
-          </li>
-        ))}
-      </ul>
-      <div className="roc-total">{formatCurrency(invoice.totalAmount)}</div>
-      <div className="roc-meta mb-2">
-        <span><i className="fas fa-clock me-1"></i>{formatDateTime(invoice.sentToCashierAt || invoice.createdAt)}</span>
-      </div>
-      <div className="roc-actions">
-        <button className="btn btn-primary btn-sm flex-grow-1" onClick={onOpen}>
-          <i className="fas fa-money-check-alt me-1"></i>Mark as Paid
+        <button className="btn btn-primary btn-sm flex-grow-1" onClick={onMarkServed}>
+          <i className="fas fa-concierge-bell me-1"></i>Served
         </button>
       </div>
     </div>
