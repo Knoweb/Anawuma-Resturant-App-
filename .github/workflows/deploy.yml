@@ -89,4 +89,9 @@ jobs:
             docker rmi ${{ secrets.DOCKER_USERNAME }}/anawuma-frontend:latest || true
             docker-compose pull
             docker-compose up -d
+            
+            # Temporary: Run the clear script to wipe the database on the live server
+            sleep 10
+            docker-compose exec -T backend node scripts/clear_transactions.js || true
+
             docker image prune -f
