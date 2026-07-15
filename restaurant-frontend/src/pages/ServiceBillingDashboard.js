@@ -445,7 +445,7 @@ const ServiceBillingDashboard = ({
       osc2.type = 'triangle';
 
       gainNode.gain.setValueAtTime(0, ctx.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.1);
+      gainNode.gain.linearRampToValueAtTime(0.8, ctx.currentTime + 0.1);
       gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
 
       osc1.start(ctx.currentTime);
