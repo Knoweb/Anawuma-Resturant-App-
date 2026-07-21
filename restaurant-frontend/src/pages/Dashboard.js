@@ -69,7 +69,7 @@ function Dashboard() {
     // Listen for new orders
     const unsubscribeNewOrder = subscribe('order:new', (order) => {
       console.log('🆕 NEW ORDER EVENT RECEIVED:', order);
-      
+
       // Show toast notification
       addNotification({
         type: 'success',
@@ -77,7 +77,7 @@ function Dashboard() {
         message: `Order ${order.orderNo} from Table ${order.tableNo || 'Customer'} - Rs. ${parseFloat(order.totalAmount).toFixed(2)}`,
         duration: 8000,
       });
-      
+
       // Browser notification (if permission granted)
       if (window.Notification && Notification.permission === 'granted') {
         new Notification('New Order Received!', {
@@ -88,7 +88,7 @@ function Dashboard() {
           requireInteraction: true,
         });
       }
-      
+
       // Play notification sound
       try {
         const audio = new Audio('/notification.mp3');
@@ -97,7 +97,7 @@ function Dashboard() {
       } catch (err) {
         console.log('Sound not available');
       }
-      
+
       // Refresh stats
       fetchStats();
     });
@@ -107,7 +107,7 @@ function Dashboard() {
     // Listen for order status updates
     const unsubscribeStatusUpdate = subscribe('order:status-update', (order) => {
       console.log('Order status updated:', order);
-      
+
       // Determine notification type based on status
       let notifType = 'info';
       let emoji = 'ℹ️';
@@ -121,7 +121,7 @@ function Dashboard() {
         notifType = 'warning';
         emoji = '🔔';
       }
-      
+
       // Show toast notification
       addNotification({
         type: notifType,
@@ -129,7 +129,7 @@ function Dashboard() {
         message: `Order ${order.orderNo} - Table ${order.tableNo}`,
         duration: 5000,
       });
-      
+
       // Browser notification for important status
       if (window.Notification && Notification.permission === 'granted' && order.status === 'READY') {
         new Notification('Order Ready!', {
@@ -138,7 +138,7 @@ function Dashboard() {
           tag: 'order-ready',
         });
       }
-      
+
       // Refresh stats
       fetchStats();
     });
@@ -223,8 +223,8 @@ function Dashboard() {
                           </motion.span>
                         ))}
                       </motion.h2>
-                      <motion.p 
-                        className="text-white mb-0" 
+                      <motion.p
+                        className="text-white mb-0"
                         style={{ opacity: 0.9 }}
                         initial="hidden"
                         animate="visible"
@@ -269,49 +269,57 @@ function Dashboard() {
             </div>
 
             {/* Stats Cards */}
-            <motion.div 
-              className="dashboard-stats-grid mb-4"
+            <motion.div
+              className="row g-4 mb-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
             >
-              <div className="stats-card gradient-blue">
-                <div className="stats-icon">
-                  <i className="fas fa-receipt"></i>
-                </div>
-                <div className="stats-content">
-                  <h3>{stats.todayOrders}</h3>
-                  <p>Today's Orders</p>
-                </div>
-              </div>
-
-              <div className="stats-card gradient-green">
-                <div className="stats-icon">
-                  <i className="fas fa-wallet"></i>
-                </div>
-                <div className="stats-content">
-                  <h3>${stats.totalRevenue.toLocaleString()}</h3>
-                  <p>Total Revenue</p>
+              <div className="col-xl-3 col-md-6">
+                <div className="stats-card gradient-blue">
+                  <div className="stats-icon">
+                    <i className="fas fa-receipt"></i>
+                  </div>
+                  <div className="stats-content">
+                    <h3>{stats.todayOrders}</h3>
+                    <p>Today's Orders</p>
+                  </div>
                 </div>
               </div>
 
-              <div className="stats-card gradient-orange">
-                <div className="stats-icon">
-                  <i className="fas fa-hourglass-half"></i>
-                </div>
-                <div className="stats-content">
-                  <h3>{stats.pendingOrders}</h3>
-                  <p>Pending Orders</p>
+              <div className="col-xl-3 col-md-6">
+                <div className="stats-card gradient-green">
+                  <div className="stats-icon">
+                    <i className="fas fa-wallet"></i>
+                  </div>
+                  <div className="stats-content">
+                    <h3>${stats.totalRevenue.toLocaleString()}</h3>
+                    <p>Total Revenue</p>
+                  </div>
                 </div>
               </div>
 
-              <div className="stats-card gradient-purple">
-                <div className="stats-icon">
-                  <i className="fas fa-clipboard-list"></i>
+              <div className="col-xl-3 col-md-6">
+                <div className="stats-card gradient-orange">
+                  <div className="stats-icon">
+                    <i className="fas fa-hourglass-half"></i>
+                  </div>
+                  <div className="stats-content">
+                    <h3>{stats.pendingOrders}</h3>
+                    <p>Pending Orders</p>
+                  </div>
                 </div>
-                <div className="stats-content">
-                  <h3>{stats.activeMenus}</h3>
-                  <p>Active Menus</p>
+              </div>
+
+              <div className="col-xl-3 col-md-6">
+                <div className="stats-card gradient-purple">
+                  <div className="stats-icon">
+                    <i className="fas fa-clipboard-list"></i>
+                  </div>
+                  <div className="stats-content">
+                    <h3>{stats.activeMenus}</h3>
+                    <p>Active Menus</p>
+                  </div>
                 </div>
               </div>
             </motion.div>

@@ -723,7 +723,7 @@ const CustomerQROrder = ({ isManual = false }) => {
 
       if (isManual) {
         endpoint = '/orders/manual';
-        orderPayload.orderType = manualOrderType === 'ROOM' ? 'ROOM' : 'TABLE';
+        orderPayload.orderType = 'MANUAL_CASHIER';
 
         // Normalize: remove leading zeros if numeric (e.g., "03" -> "3")
         const normalizedManualNo = manualTableNo.trim().replace(/^0+/, '') || manualTableNo.trim();
@@ -903,7 +903,7 @@ const CustomerQROrder = ({ isManual = false }) => {
           qty: modalQty,
           notes: modalOrderNotes.trim() || null
         }],
-        orderType: orderLocation === 'inside' ? (modalOrderType === 'room' ? 'ROOM' : 'TABLE') : 'MANUAL_CASHIER'
+        orderType: 'MANUAL_CASHIER'
       };
 
       let identifier = '';

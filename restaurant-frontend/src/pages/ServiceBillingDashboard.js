@@ -148,7 +148,7 @@ function InvoiceModal({ invoice, restaurantName, address, contactNumber, onClose
     setIsPrinted(!!invoice.isPrinted);
     setIsSentWhatsapp(!!invoice.isSentWhatsapp);
     if (invoice.paymentMethod && invoice.paymentMethod !== 'NONE') {
-        setPaymentMethod(invoice.paymentMethod);
+      setPaymentMethod(invoice.paymentMethod);
     }
   }, [invoice]);
 
@@ -190,9 +190,9 @@ function InvoiceModal({ invoice, restaurantName, address, contactNumber, onClose
       const itemLines = (Array.isArray(invoice.orderItemsJson) ? invoice.orderItemsJson : [])
         .map((i) => `  • ${i.itemName} x${i.qty} - ${formatCurrency(i.lineTotal)}`)
         .join('\n');
-      
+
       const msg = `Hello ${invoice.customerName || ''} 👋\nHere is your bill for order ${invoice.orderNo || invoice.orderId}.\n\nOrder ID: ${invoice.orderNo || invoice.orderId}\nInvoice No: ${invoice.invoiceNumber}\n${invoice.roomNo ? `Room: ${invoice.roomNo}` : `Table: ${invoice.tableNo || '–'}`}\n\nItems:\n${itemLines}\n\nSubtotal: ${formatCurrency(invoice.subtotal)}\nService Charge (10%): ${formatCurrency(invoice.serviceCharge)}\n*Total: ${formatCurrency(invoice.totalAmount)}*\n\nThank you for ordering with us 🍔`;
-      
+
       window.open(`https://api.whatsapp.com/send?phone=${phone.replace('+', '')}&text=${encodeURIComponent(msg)}`, '_blank');
     } catch (err) {
       console.error('WhatsApp recording failed:', err);
@@ -208,9 +208,9 @@ function InvoiceModal({ invoice, restaurantName, address, contactNumber, onClose
       <div className="invoice-modal" onClick={(e) => e.stopPropagation()}>
         <div className="invoice-modal-header">
           <div className="d-flex align-items-center gap-2">
-             <h5>Invoice {invoice.invoiceNumber}</h5>
-             {isPrinted && <span className="badge bg-success small"><i className="fas fa-print me-1"></i>Printed</span>}
-             {isSentWhatsapp && <span className="badge bg-success small"><i className="fab fa-whatsapp me-1"></i>WhatsApp Sent</span>}
+            <h5>Invoice {invoice.invoiceNumber}</h5>
+            {isPrinted && <span className="badge bg-success small"><i className="fas fa-print me-1"></i>Printed</span>}
+            {isSentWhatsapp && <span className="badge bg-success small"><i className="fab fa-whatsapp me-1"></i>WhatsApp Sent</span>}
           </div>
           <button className="btn-icon" onClick={onClose}>
             <i className="fas fa-times"></i>
@@ -226,7 +226,7 @@ function InvoiceModal({ invoice, restaurantName, address, contactNumber, onClose
             {!isPrinted && <div><i className="fas fa-info-circle me-1"></i>Print hard copy first.</div>}
             {invoice.whatsappNumber && !isSentWhatsapp && <div><i className="fas fa-info-circle me-1"></i>Send via WhatsApp first.</div>}
           </div>
-          
+
           <button className="btn btn-outline-secondary btn-sm" onClick={onClose}>
             Close
           </button>
@@ -234,15 +234,15 @@ function InvoiceModal({ invoice, restaurantName, address, contactNumber, onClose
           {invoice.invoiceStatus === 'PENDING' && (
             <div className="d-flex align-items-center gap-2">
               <div className="btn-group btn-group-sm">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className={`btn ${paymentMethod === 'CASH' ? 'btn-primary' : 'btn-outline-primary'}`}
                   onClick={() => setPaymentMethod('CASH')}
                 >
                   <i className="fas fa-money-bill-wave me-1"></i>Cash
                 </button>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className={`btn ${paymentMethod === 'CARD' ? 'btn-primary' : 'btn-outline-primary'}`}
                   onClick={() => setPaymentMethod('CARD')}
                 >
@@ -250,17 +250,17 @@ function InvoiceModal({ invoice, restaurantName, address, contactNumber, onClose
                 </button>
               </div>
 
-              <button 
-                className="btn btn-success btn-sm" 
+              <button
+                className="btn btn-success btn-sm"
                 onClick={async () => {
                   setIsPaying(true);
                   try {
-                      const success = await onMarkPaid(invoice.invoiceId, paymentMethod);
-                      if (success) {
-                        handlePrint();
-                      }
+                    const success = await onMarkPaid(invoice.invoiceId, paymentMethod);
+                    if (success) {
+                      handlePrint();
+                    }
                   } finally {
-                      setIsPaying(false);
+                    setIsPaying(false);
                   }
                 }}
                 disabled={!canMarkPaid || isPaying}
@@ -276,8 +276,8 @@ function InvoiceModal({ invoice, restaurantName, address, contactNumber, onClose
           )}
 
           {isCashierDashboard && invoice.whatsappNumber && (
-            <button 
-              className="btn btn-success btn-sm" 
+            <button
+              className="btn btn-success btn-sm"
               onClick={handleWhatsApp}
               disabled={sendingWhatsapp}
             >
@@ -426,7 +426,7 @@ const ServiceBillingDashboard = ({
       if (ctx.state === 'suspended') {
         ctx.resume(); // attempt to resume, might fail if no gesture, but worth trying
       }
-      
+
       // If still suspended after attempt, exit silently
       if (ctx.state === 'suspended') return;
 
@@ -440,17 +440,17 @@ const ServiceBillingDashboard = ({
 
       osc1.frequency.value = 523.25; // C5
       osc2.frequency.value = 659.25; // E5
-      
+
       osc1.type = 'triangle';
       osc2.type = 'triangle';
 
       gainNode.gain.setValueAtTime(0, ctx.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.8, ctx.currentTime + 0.1);
+      gainNode.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.1);
       gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
 
       osc1.start(ctx.currentTime);
       osc2.start(ctx.currentTime);
-      
+
       osc1.stop(ctx.currentTime + 0.8);
       osc2.stop(ctx.currentTime + 0.8);
     } catch (error) {
@@ -467,10 +467,10 @@ const ServiceBillingDashboard = ({
     window.addEventListener('click', unlockAudio);
     window.addEventListener('keydown', unlockAudio);
     window.addEventListener('touchstart', unlockAudio);
-    
+
     // Initial attempt to unlock
     unlockAudio();
-    
+
     return () => {
       window.removeEventListener('click', unlockAudio);
       window.removeEventListener('keydown', unlockAudio);
@@ -520,7 +520,7 @@ const ServiceBillingDashboard = ({
   const [filterFrom, setFilterFrom] = useState('');
   const [filterTo, setFilterTo] = useState('');
   const [filterTable, setFilterTable] = useState('');
-  
+
   // Summary state
   const [summaryData, setSummaryData] = useState(null);
   const [loadingSummary, setLoadingSummary] = useState(false);
@@ -560,10 +560,10 @@ const ServiceBillingDashboard = ({
       setReadyError('');
       const res = await billingAPI.getReadyOrders();
       const orders = Array.isArray(res.data) ? res.data : [];
-      
+
       const currentReadyIds = new Set(orders.map(o => o.orderId));
       let hasNewArrival = false;
-      
+
       currentReadyIds.forEach(id => {
         if (!previousReadyOrderIdsRef.current.has(id)) {
           hasNewArrival = true;
@@ -1062,7 +1062,7 @@ const ServiceBillingDashboard = ({
 
         <div className="content">
           <div className="container-fluid">
-            
+
             {/* ── Summary Stats (Cashier Only) ── */}
             {isCashierDashboard && summaryData && (
               <div className="row g-3 mb-4 no-print">
@@ -1291,116 +1291,116 @@ const ServiceBillingDashboard = ({
             {/* ── SECTION 2: Invoice History ── */}
             {showInvoiceHistorySection && (
               <section className={`billing-section ${showCashierQueueSection ? 'mt-4' : ''}`.trim()}>
-              <div className="section-heading">
-                <i className="fas fa-history text-primary me-2"></i>
-                Invoice History
-              </div>
-
-              {/* Filters */}
-              <div className="invoice-filters mb-3">
-                <input
-                  type="date"
-                  className="form-control form-control-sm filter-field"
-                  value={filterFrom}
-                  onChange={(e) => setFilterFrom(e.target.value)}
-                  placeholder="From"
-                  title="From date"
-                />
-                <input
-                  type="date"
-                  className="form-control form-control-sm filter-field"
-                  value={filterTo}
-                  onChange={(e) => setFilterTo(e.target.value)}
-                  placeholder="To"
-                  title="To date"
-                />
-                <input
-                  type="text"
-                  className="form-control form-control-sm filter-field"
-                  value={filterTable}
-                  onChange={(e) => setFilterTable(e.target.value)}
-                  placeholder="Table #"
-                />
-                <button
-                  className="btn btn-sm btn-outline-secondary"
-                  onClick={() => { setFilterFrom(''); setFilterTo(''); setFilterTable(''); }}
-                >
-                  <i className="fas fa-times me-1"></i>Clear
-                </button>
-                <button
-                  className="btn btn-sm btn-success ms-2"
-                  onClick={handleDownloadInvoiceCsv}
-                >
-                  <i className="fas fa-download me-1"></i>Download CSV
-                </button>
-              </div>
-
-              {loadingInvoices ? (
-                <div className="text-center py-4">
-                  <div className="spinner-border text-primary"></div>
+                <div className="section-heading">
+                  <i className="fas fa-history text-primary me-2"></i>
+                  Invoice History
                 </div>
-              ) : invError ? (
-                <div className="alert alert-danger">{invError}</div>
-              ) : invoices.length === 0 ? (
-                <div className="empty-state">
-                  <i className="fas fa-file-alt text-muted fa-2x mb-2"></i>
-                  <p className="mb-0">No invoices found.</p>
+
+                {/* Filters */}
+                <div className="invoice-filters mb-3">
+                  <input
+                    type="date"
+                    className="form-control form-control-sm filter-field"
+                    value={filterFrom}
+                    onChange={(e) => setFilterFrom(e.target.value)}
+                    placeholder="From"
+                    title="From date"
+                  />
+                  <input
+                    type="date"
+                    className="form-control form-control-sm filter-field"
+                    value={filterTo}
+                    onChange={(e) => setFilterTo(e.target.value)}
+                    placeholder="To"
+                    title="To date"
+                  />
+                  <input
+                    type="text"
+                    className="form-control form-control-sm filter-field"
+                    value={filterTable}
+                    onChange={(e) => setFilterTable(e.target.value)}
+                    placeholder="Table #"
+                  />
+                  <button
+                    className="btn btn-sm btn-outline-secondary"
+                    onClick={() => { setFilterFrom(''); setFilterTo(''); setFilterTable(''); }}
+                  >
+                    <i className="fas fa-times me-1"></i>Clear
+                  </button>
+                  <button
+                    className="btn btn-sm btn-success ms-2"
+                    onClick={handleDownloadInvoiceCsv}
+                  >
+                    <i className="fas fa-download me-1"></i>Download CSV
+                  </button>
                 </div>
-              ) : (
-                <div className="table-responsive">
-                  <table className="table table-hover invoice-table">
-                    <thead>
-                      <tr>
-                        <th>Invoice No</th>
-                        <th>TABLE / ROOM</th>
-                        <th>Customer</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {invoices.map((inv) => (
-                        <tr key={inv.invoiceId}>
-                          <td><code>{inv.invoiceNumber}</code></td>
-                          <td>{inv.roomNo ? `Room ${inv.roomNo}` : (inv.tableNo ? `Table - ${inv.tableNo}` : '–')}</td>
-                          <td>{inv.customerName || '–'}</td>
-                          <td>{formatCurrency(inv.totalAmount)}</td>
-                           <td>
-                            <span className={`badge ${inv.invoiceStatus === 'PAID' ? 'bg-success' : (inv.invoiceStatus === 'VOIDED' ? 'bg-danger' : 'bg-secondary')}`}>
-                              {inv.invoiceStatus}
-                            </span>
-                          </td>
-                          <td className="text-muted small">{formatDateTime(inv.createdAt)}</td>
-                          <td>
-                            <button
-                              className="btn btn-sm btn-outline-primary"
-                              onClick={() => setViewInvoice(inv)}
-                              title={inv.invoiceStatus === 'PAID' ? 'View/Reprint' : 'View'}
-                            >
-                              <i className={`fas ${inv.invoiceStatus === 'PAID' ? 'fa-print' : 'fa-eye'}`}></i>
-                            </button>
-                            {isCashierDashboard && (inv.invoiceStatus === 'PAID' || inv.invoiceStatus === 'PENDING') && (
-                              inv.isVoidPending ? (
-                                <span className="badge bg-warning text-dark ms-2" style={{ padding: '6px 8px', fontSize: '0.75rem' }} title="Pending Admin Approval">Void Pending</span>
-                              ) : (
-                                <button
-                                  className="btn btn-sm btn-outline-danger ms-2"
-                                  onClick={() => handleRequestVoid(inv.invoiceId)}
-                                  title="Request Void"
-                                >
-                                  <i className="fas fa-trash-alt"></i>
-                                </button>
-                              )
-                            )}
-                          </td>
+
+                {loadingInvoices ? (
+                  <div className="text-center py-4">
+                    <div className="spinner-border text-primary"></div>
+                  </div>
+                ) : invError ? (
+                  <div className="alert alert-danger">{invError}</div>
+                ) : invoices.length === 0 ? (
+                  <div className="empty-state">
+                    <i className="fas fa-file-alt text-muted fa-2x mb-2"></i>
+                    <p className="mb-0">No invoices found.</p>
+                  </div>
+                ) : (
+                  <div className="table-responsive">
+                    <table className="table table-hover invoice-table">
+                      <thead>
+                        <tr>
+                          <th>Invoice No</th>
+                          <th>TABLE / ROOM</th>
+                          <th>Customer</th>
+                          <th>Total</th>
+                          <th>Status</th>
+                          <th>Date</th>
+                          <th></th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+                      </thead>
+                      <tbody>
+                        {invoices.map((inv) => (
+                          <tr key={inv.invoiceId}>
+                            <td><code>{inv.invoiceNumber}</code></td>
+                            <td>{inv.roomNo ? `Room ${inv.roomNo}` : (inv.tableNo ? `Table - ${inv.tableNo}` : '–')}</td>
+                            <td>{inv.customerName || '–'}</td>
+                            <td>{formatCurrency(inv.totalAmount)}</td>
+                            <td>
+                              <span className={`badge ${inv.invoiceStatus === 'PAID' ? 'bg-success' : (inv.invoiceStatus === 'VOIDED' ? 'bg-danger' : 'bg-secondary')}`}>
+                                {inv.invoiceStatus}
+                              </span>
+                            </td>
+                            <td className="text-muted small">{formatDateTime(inv.createdAt)}</td>
+                            <td>
+                              <button
+                                className="btn btn-sm btn-outline-primary"
+                                onClick={() => setViewInvoice(inv)}
+                                title={inv.invoiceStatus === 'PAID' ? 'View/Reprint' : 'View'}
+                              >
+                                <i className={`fas ${inv.invoiceStatus === 'PAID' ? 'fa-print' : 'fa-eye'}`}></i>
+                              </button>
+                              {isCashierDashboard && (inv.invoiceStatus === 'PAID' || inv.invoiceStatus === 'PENDING') && (
+                                inv.isVoidPending ? (
+                                  <span className="badge bg-warning text-dark ms-2" style={{ padding: '6px 8px', fontSize: '0.75rem' }} title="Pending Admin Approval">Void Pending</span>
+                                ) : (
+                                  <button
+                                    className="btn btn-sm btn-outline-danger ms-2"
+                                    onClick={() => handleRequestVoid(inv.invoiceId)}
+                                    title="Request Void"
+                                  >
+                                    <i className="fas fa-trash-alt"></i>
+                                  </button>
+                                )
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </section>
             )}
 
