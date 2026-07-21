@@ -870,6 +870,11 @@ const KitchenKDS = () => {
         <div className="card-header d-flex justify-content-between align-items-center">
           <div>
             <strong className="order-number">{order.orderNo}</strong>
+            {order.orderType === 'MANUAL_CASHIER' && (
+              <span className="badge bg-secondary ms-2" style={{ fontSize: '0.65em', verticalAlign: 'middle' }}>
+                <i className="fas fa-user-edit me-1"></i>Manual
+              </span>
+            )}
             {(order.tableNo || order.roomNo) && (
               <span className={`badge ${order.roomNo ? 'bg-info' : 'bg-primary'} ms-2`}>
                 <i className={`fas ${order.roomNo ? 'fa-concierge-bell' : 'fa-table'} me-1`}></i>
@@ -1065,7 +1070,14 @@ const KitchenKDS = () => {
             <div className="col-md-4">
               <div className="info-card">
                 <label className="text-muted small mb-1">Order Number</label>
-                <div className="h5 mb-0">{selectedOrder.orderNo}</div>
+                <div className="h5 mb-0">
+                  {selectedOrder.orderNo}
+                  {selectedOrder.orderType === 'MANUAL_CASHIER' && (
+                    <span className="badge bg-secondary ms-2" style={{ fontSize: '0.6em', verticalAlign: 'middle' }}>
+                      <i className="fas fa-user-edit me-1"></i>Manual
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
             <div className="col-md-4">
