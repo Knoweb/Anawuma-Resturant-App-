@@ -162,24 +162,19 @@ export class ReportsService {
       if (inv.paymentMethod === PaymentMethod.CARD) cardRevenue += amount;
 
       const items = Array.isArray(inv.orderItemsJson) ? inv.orderItemsJson : [];
-      items.forEach((item: any) => {
-        rows.push({
-          invoiceId: inv.invoiceId,
-          invoiceNumber: inv.invoiceNumber,
-          orderNo: item.orderNo || inv.invoiceNumber,
-          tableNo: inv.tableNo,
-          roomNo: inv.roomNo,
-          createdAt: inv.createdAt,
-          itemName: item.itemName,
-          qty: item.qty,
-          unitPrice: item.unitPrice,
-          lineTotal: item.lineTotal,
-          serviceCharge: sub > 0 ? parseFloat(((item.lineTotal / sub) * sc).toFixed(2)) : 0,
-          paymentMethod: inv.paymentMethod,
-          cashier: inv.createdBy?.email || 'N/A',
-          invoiceServiceCharge: sc,
-          invoiceSubtotal: sub,
-        });
+      const orderNo = items.length > 0 ? (items[0].orderNo || inv.invoiceNumber) : inv.invoiceNumber;
+      
+      rows.push({
+        invoiceId: inv.invoiceId,
+        invoiceNumber: inv.invoiceNumber,
+        orderNo: orderNo,
+        tableNo: inv.tableNo,
+        roomNo: inv.roomNo,
+        createdAt: inv.createdAt,
+        serviceCharge: sc,
+        totalAmount: amount,
+        paymentMethod: inv.paymentMethod,
+        cashier: inv.createdBy?.email || 'N/A',
       });
     });
 
@@ -247,24 +242,19 @@ export class ReportsService {
       if (inv.paymentMethod === PaymentMethod.CARD) cardRevenue += amount;
 
       const items = Array.isArray(inv.orderItemsJson) ? inv.orderItemsJson : [];
-      items.forEach((item: any) => {
-        rows.push({
-          invoiceId: inv.invoiceId,
-          invoiceNumber: inv.invoiceNumber,
-          orderNo: item.orderNo || inv.invoiceNumber,
-          tableNo: inv.tableNo,
-          roomNo: inv.roomNo,
-          createdAt: inv.createdAt,
-          itemName: item.itemName,
-          qty: item.qty,
-          unitPrice: item.unitPrice,
-          lineTotal: item.lineTotal,
-          serviceCharge: sub > 0 ? parseFloat(((item.lineTotal / sub) * sc).toFixed(2)) : 0,
-          paymentMethod: inv.paymentMethod,
-          cashier: inv.createdBy?.email || 'N/A',
-          invoiceServiceCharge: sc,
-          invoiceSubtotal: sub,
-        });
+      const orderNo = items.length > 0 ? (items[0].orderNo || inv.invoiceNumber) : inv.invoiceNumber;
+      
+      rows.push({
+        invoiceId: inv.invoiceId,
+        invoiceNumber: inv.invoiceNumber,
+        orderNo: orderNo,
+        tableNo: inv.tableNo,
+        roomNo: inv.roomNo,
+        createdAt: inv.createdAt,
+        serviceCharge: sc,
+        totalAmount: amount,
+        paymentMethod: inv.paymentMethod,
+        cashier: inv.createdBy?.email || 'N/A',
       });
     });
 
@@ -329,24 +319,19 @@ export class ReportsService {
       if (inv.paymentMethod === PaymentMethod.CARD) cardRevenue += amount;
 
       const items = Array.isArray(inv.orderItemsJson) ? inv.orderItemsJson : [];
-      items.forEach((item: any) => {
-        rows.push({
-          invoiceId: inv.invoiceId,
-          invoiceNumber: inv.invoiceNumber,
-          orderNo: item.orderNo || inv.invoiceNumber,
-          tableNo: inv.tableNo,
-          roomNo: inv.roomNo,
-          createdAt: inv.createdAt,
-          itemName: item.itemName,
-          qty: item.qty,
-          unitPrice: item.unitPrice,
-          lineTotal: item.lineTotal,
-          serviceCharge: sub > 0 ? parseFloat(((item.lineTotal / sub) * sc).toFixed(2)) : 0,
-          paymentMethod: inv.paymentMethod,
-          cashier: inv.createdBy?.email || 'N/A',
-          invoiceServiceCharge: sc,
-          invoiceSubtotal: sub,
-        });
+      const orderNo = items.length > 0 ? (items[0].orderNo || inv.invoiceNumber) : inv.invoiceNumber;
+      
+      rows.push({
+        invoiceId: inv.invoiceId,
+        invoiceNumber: inv.invoiceNumber,
+        orderNo: orderNo,
+        tableNo: inv.tableNo,
+        roomNo: inv.roomNo,
+        createdAt: inv.createdAt,
+        serviceCharge: sc,
+        totalAmount: amount,
+        paymentMethod: inv.paymentMethod,
+        cashier: inv.createdBy?.email || 'N/A',
       });
     });
 
@@ -420,24 +405,23 @@ export class ReportsService {
   async generateDailyCsv(restaurantId: number, date: string): Promise<string> {
     const report = await this.getDailyReport(restaurantId, date);
 
-    let csv = 'Order No,Table/Room,Date/Time,Item Name,Qty,Line Total,Service Charge,Payment Method,Cashier\n';
+    let csv = 'Order No,Table/Room,Date/Time,Total Revenue,Service Charge,Payment Method,Cashier\n';
     
     for (const row of report.rows) {
       const dateTime = this.formatSLTime(row.createdAt);
       const tableRoomVal = this.formatTableRoom(row.roomNo, row.tableNo);
-      const itemNameEscaped = `"${(row.itemName || '').replace(/"/g, '""')}"`;
       const cashierEscaped = `"${(row.cashier || 'N/A').replace(/"/g, '""')}"`;
       
-      csv += `${row.orderNo},"${tableRoomVal}","${dateTime}",${itemNameEscaped},${row.qty},${row.lineTotal},${row.serviceCharge},"${row.paymentMethod || 'CASH'}",${cashierEscaped}\n`;
+      csv += `${row.orderNo},"${tableRoomVal}","${dateTime}",${row.totalAmount},${row.serviceCharge},"${row.paymentMethod || 'CASH'}",${cashierEscaped}\n`;
     }
 
     csv += `\n`;
-    csv += `,,,,,Total Orders:,${report.totalOrders}\n`;
-    csv += `,,,,,Food Total:,${report.foodRevenue || 0}\n`;
-    csv += `,,,,,Service Charge:,${report.serviceCharge || 0}\n`;
-    csv += `,,,,,Total Revenue:,${report.totalRevenue || 0}\n`;
-    csv += `,,,,,Cash Revenue:,${report.cashRevenue || 0}\n`;
-    csv += `,,,,,Card Revenue:,${report.cardRevenue || 0}\n`;
+    csv += `,,,Total Orders:,${report.totalOrders}\n`;
+    csv += `,,,Food Total:,${report.foodRevenue || 0}\n`;
+    csv += `,,,Service Charge:,${report.serviceCharge || 0}\n`;
+    csv += `,,,Total Revenue:,${report.totalRevenue || 0}\n`;
+    csv += `,,,Cash Revenue:,${report.cashRevenue || 0}\n`;
+    csv += `,,,Card Revenue:,${report.cardRevenue || 0}\n`;
 
     return csv;
   }
@@ -445,24 +429,23 @@ export class ReportsService {
   async generateRangeCsv(restaurantId: number, fromDate: string, toDate: string): Promise<string> {
     const report = await this.getRangeReport(restaurantId, fromDate, toDate);
 
-    let csv = 'Order No,Table/Room,Date/Time,Item Name,Qty,Line Total,Service Charge,Payment Method,Cashier\n';
+    let csv = 'Order No,Table/Room,Date/Time,Total Revenue,Service Charge,Payment Method,Cashier\n';
     
     for (const row of report.rows) {
       const dateTime = this.formatSLTime(row.createdAt);
       const tableRoomVal = this.formatTableRoom(row.roomNo, row.tableNo);
-      const itemNameEscaped = `"${(row.itemName || '').replace(/"/g, '""')}"`;
       const cashierEscaped = `"${(row.cashier || 'N/A').replace(/"/g, '""')}"`;
       
-      csv += `${row.orderNo},"${tableRoomVal}","${dateTime}",${itemNameEscaped},${row.qty},${row.lineTotal},${row.serviceCharge},"${row.paymentMethod || 'CASH'}",${cashierEscaped}\n`;
+      csv += `${row.orderNo},"${tableRoomVal}","${dateTime}",${row.totalAmount},${row.serviceCharge},"${row.paymentMethod || 'CASH'}",${cashierEscaped}\n`;
     }
 
     csv += `\n`;
-    csv += `,,,,,Total Orders:,${report.totalOrders}\n`;
-    csv += `,,,,,Food Total:,${report.foodRevenue || 0}\n`;
-    csv += `,,,,,Service Charge:,${report.serviceCharge || 0}\n`;
-    csv += `,,,,,Total Revenue:,${report.totalRevenue || 0}\n`;
-    csv += `,,,,,Cash Revenue:,${report.cashRevenue || 0}\n`;
-    csv += `,,,,,Card Revenue:,${report.cardRevenue || 0}\n`;
+    csv += `,,,Total Orders:,${report.totalOrders}\n`;
+    csv += `,,,Food Total:,${report.foodRevenue || 0}\n`;
+    csv += `,,,Service Charge:,${report.serviceCharge || 0}\n`;
+    csv += `,,,Total Revenue:,${report.totalRevenue || 0}\n`;
+    csv += `,,,Cash Revenue:,${report.cashRevenue || 0}\n`;
+    csv += `,,,Card Revenue:,${report.cardRevenue || 0}\n`;
 
     return csv;
   }
@@ -470,24 +453,23 @@ export class ReportsService {
   async generateMonthlyCsv(restaurantId: number, year: number, month: number): Promise<string> {
     const report = await this.getMonthlyReport(restaurantId, year, month);
 
-    let csv = 'Order No,Table/Room,Date/Time,Item Name,Qty,Line Total,Service Charge,Payment Method,Cashier\n';
+    let csv = 'Order No,Table/Room,Date/Time,Total Revenue,Service Charge,Payment Method,Cashier\n';
     
     for (const row of report.rows) {
       const dateTime = this.formatSLTime(row.createdAt);
       const tableRoomVal = this.formatTableRoom(row.roomNo, row.tableNo);
-      const itemNameEscaped = `"${(row.itemName || '').replace(/"/g, '""')}"`;
       const cashierEscaped = `"${(row.cashier || 'N/A').replace(/"/g, '""')}"`;
       
-      csv += `${row.orderNo},"${tableRoomVal}","${dateTime}",${itemNameEscaped},${row.qty},${row.lineTotal},${row.serviceCharge},"${row.paymentMethod || 'CASH'}",${cashierEscaped}\n`;
+      csv += `${row.orderNo},"${tableRoomVal}","${dateTime}",${row.totalAmount},${row.serviceCharge},"${row.paymentMethod || 'CASH'}",${cashierEscaped}\n`;
     }
 
     csv += `\n`;
-    csv += `,,,,,Total Orders:,${report.totalOrders}\n`;
-    csv += `,,,,,Food Total:,${report.foodRevenue || 0}\n`;
-    csv += `,,,,,Service Charge:,${report.serviceCharge || 0}\n`;
-    csv += `,,,,,Total Revenue:,${report.totalRevenue || 0}\n`;
-    csv += `,,,,,Cash Revenue:,${report.cashRevenue || 0}\n`;
-    csv += `,,,,,Card Revenue:,${report.cardRevenue || 0}\n`;
+    csv += `,,,Total Orders:,${report.totalOrders}\n`;
+    csv += `,,,Food Total:,${report.foodRevenue || 0}\n`;
+    csv += `,,,Service Charge:,${report.serviceCharge || 0}\n`;
+    csv += `,,,Total Revenue:,${report.totalRevenue || 0}\n`;
+    csv += `,,,Cash Revenue:,${report.cashRevenue || 0}\n`;
+    csv += `,,,Card Revenue:,${report.cardRevenue || 0}\n`;
 
     return csv;
   }
