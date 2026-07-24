@@ -22,7 +22,10 @@ const OrderHistory = () => {
   // Filter states - default to today
   const getTodayDate = () => {
     const today = new Date();
-    return today.toISOString().split('T')[0];
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   const [filters, setFilters] = useState({
@@ -34,7 +37,7 @@ const OrderHistory = () => {
     orderNo: ''
   });
 
-  const historyStatuses = ['SERVED', 'CANCELLED'];
+  const historyStatuses = ['SERVED', 'CANCELLED', 'BILLED'];
 
   useEffect(() => {
     fetchOrders();
@@ -72,10 +75,10 @@ const OrderHistory = () => {
       
       // Calculate statistics
       const totalRevenue = historyOrders
-        .filter(order => order.status === 'SERVED')
+        .filter(order => order.status === 'SERVED' || order.status === 'BILLED')
         .reduce((sum, order) => sum + parseFloat(order.totalAmount || 0), 0);
       
-      const servedCount = historyOrders.filter(order => order.status === 'SERVED').length;
+      const servedCount = historyOrders.filter(order => order.status === 'SERVED' || order.status === 'BILLED').length;
       const cancelledCount = historyOrders.filter(order => order.status === 'CANCELLED').length;
       
       setStats({
@@ -139,6 +142,7 @@ const OrderHistory = () => {
   const getStatusBadgeClass = (status) => {
     const statusClasses = {
       SERVED: 'badge-success',
+      BILLED: 'badge-success',
       CANCELLED: 'badge-danger'
     };
     return statusClasses[status] || 'badge-secondary';
