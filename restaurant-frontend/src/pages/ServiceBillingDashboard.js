@@ -517,13 +517,29 @@ const ServiceBillingDashboard = ({
   const [invError, setInvError] = useState('');
 
   // Filter state for invoice history
-  const [filterFrom, setFilterFrom] = useState('');
-  const [filterTo, setFilterTo] = useState('');
+  const [filterFrom, setFilterFrom] = useState(getLocalDateString());
+  const [filterTo, setFilterTo] = useState(getLocalDateString());
   const [filterTable, setFilterTable] = useState('');
 
-  // Summary state
-  const [summaryData, setSummaryData] = useState(null);
-  const [loadingSummary, setLoadingSummary] = useState(false);
+  // Summary state (dynamically computed from current invoices view)
+  const summaryData = useMemo(() => {
+    if (!isCashierDashboard) return null;
+    let totalRevenue = 0, cashRevenue = 0, cardRevenue = 0, serviceCharge = 0, foodRevenue = 0, totalOrders = 0;
+    invoices.forEach(inv => {
+      if (inv.invoiceStatus === 'PAID') {
+        const amount = parseFloat(inv.totalAmount || 0);
+        const sub = parseFloat(inv.subtotal || 0);
+        const sc = parseFloat(inv.serviceCharge || 0);
+        totalRevenue += amount;
+        foodRevenue += sub;
+        serviceCharge += sc;
+        totalOrders += 1;
+        if (inv.paymentMethod === 'CASH') cashRevenue += amount;
+        if (inv.paymentMethod === 'CARD') cardRevenue += amount;
+      }
+    });
+    return { totalRevenue, cashRevenue, cardRevenue, serviceCharge, foodRevenue, totalOrders };
+  }, [invoices, isCashierDashboard]);
 
   // Modal state
   const [createModalOrder, setCreateModalOrder] = useState(null);
@@ -639,18 +655,7 @@ const ServiceBillingDashboard = ({
     }
   }, [filterFrom, filterTo, filterTable]);
 
-  const fetchSummary = useCallback(async () => {
-    if (!isCashierDashboard) return;
-    try {
-      setLoadingSummary(true);
-      const res = await reportsAPI.getSummary(getLocalDateString());
-      setSummaryData(res.data?.daily || null);
-    } catch (err) {
-      console.error('Failed to fetch summary:', err);
-    } finally {
-      setLoadingSummary(false);
-    }
-  }, [isCashierDashboard]);
+  // Removed fetchSummary as summaryData is now computed directly from invoices
 
   // Download CSV for current invoice filters (cashier-scoped by backend)
   const handleDownloadInvoiceCsv = async () => {
@@ -694,8 +699,7 @@ const ServiceBillingDashboard = ({
   useEffect(() => {
     fetchCashierQueue();
     fetchReadyOrders();
-    fetchSummary();
-  }, [fetchCashierQueue, fetchReadyOrders, fetchSummary]);
+  }, [fetchCashierQueue, fetchReadyOrders]);
   useEffect(() => { fetchInvoices(); }, [fetchInvoices]);
   useEffect(() => {
     if (!isCashierDashboard) return;
@@ -964,7 +968,6 @@ const ServiceBillingDashboard = ({
       setViewInvoice(res.data);
       fetchCashierQueue();
       fetchInvoices();
-      fetchSummary(); // Refresh stats too!
       showToast(`Invoice marked as paid via ${paymentMethod}!`);
       return true;
     } catch (err) {
@@ -1046,7 +1049,6 @@ const ServiceBillingDashboard = ({
                     if (isCashierDashboard) {
                       fetchCashierQueue();
                       fetchCashierTransactions(transferDate);
-                      fetchSummary();
                     } else {
                       fetchReadyOrders();
                     }
