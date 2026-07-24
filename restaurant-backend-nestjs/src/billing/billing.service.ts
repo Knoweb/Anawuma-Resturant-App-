@@ -823,6 +823,8 @@ export class BillingService {
 
     if (status) {
       query.andWhere('invoice.invoiceStatus = :status', { status });
+    } else {
+      query.andWhere('invoice.invoiceStatus != :pendingStatus', { pendingStatus: InvoiceStatus.PENDING });
     }
 
     if (from || to) {
