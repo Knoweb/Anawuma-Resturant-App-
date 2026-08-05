@@ -135,10 +135,11 @@ export class CategoriesController {
     @Body() updateCategoryDto: UpdateCategoryDto,
     @Request() req: RequestWithUser,
   ) {
+    const restaurantId = req.user.isSuperAdmin ? undefined : (req.user.restaurantId || 0);
     return this.categoriesService.update(
       +id,
       updateCategoryDto,
-      req.user.restaurantId || 0,
+      restaurantId,
     );
   }
 

@@ -73,11 +73,14 @@ export class CategoriesService {
   async update(
     id: number,
     updateCategoryDto: UpdateCategoryDto,
-    restaurantId: number,
+    restaurantId?: number,
   ): Promise<Category> {
-    const category = await this.categoriesRepository.findOne({
-      where: { categoryId: id, restaurantId },
-    });
+    const where: any = { categoryId: id };
+    if (restaurantId !== undefined) {
+      where.restaurantId = restaurantId;
+    }
+
+    const category = await this.categoriesRepository.findOne({ where });
 
     if (!category) {
       throw new NotFoundException(`Category with ID ${id} not found`);
