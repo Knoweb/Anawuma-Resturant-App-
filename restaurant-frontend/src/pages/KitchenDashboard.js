@@ -34,10 +34,25 @@ const KitchenDashboard = () => {
         apiClient.get('/orders', { params: { status: 'READY' } }),
       ]);
 
+      const filterKitchenOrders = (orders) => {
+        if (!Array.isArray(orders)) return [];
+        return orders
+          .map(order => {
+            if (order.orderItems) {
+              const filteredItems = order.orderItems.filter(
+                item => item.foodItem?.category?.requiresKitchen !== false
+              );
+              return { ...order, orderItems: filteredItems };
+            }
+            return order;
+          })
+          .filter(order => order.orderItems && order.orderItems.length > 0);
+      };
+
       setOrdersByStatus({
-        NEW: Array.isArray(newOrders.data) ? newOrders.data : [],
-        COOKING: Array.isArray(cookingOrders.data) ? cookingOrders.data : [],
-        READY: Array.isArray(readyOrders.data) ? readyOrders.data : [],
+        NEW: filterKitchenOrders(newOrders.data),
+        COOKING: filterKitchenOrders(cookingOrders.data),
+        READY: filterKitchenOrders(readyOrders.data),
       });
     } catch (fetchError) {
       setError(
