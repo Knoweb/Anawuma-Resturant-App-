@@ -181,6 +181,7 @@ export class OrdersService {
       .createQueryBuilder('order')
       .leftJoinAndSelect('order.orderItems', 'orderItems')
       .leftJoinAndSelect('orderItems.foodItem', 'foodItem')
+      .leftJoinAndSelect('foodItem.category', 'category')
       .where('order.restaurantId = :restaurantId', { restaurantId })
       .orderBy('order.createdAt', 'DESC'); // Latest first
 
