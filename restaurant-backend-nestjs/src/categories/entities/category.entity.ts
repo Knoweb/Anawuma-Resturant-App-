@@ -22,6 +22,9 @@ export class Category {
   @Column({ name: 'menu_id' })
   menuId: number;
 
+  @Column({ name: 'requires_kitchen', default: true })
+  requiresKitchen: boolean;
+
   @Column({ name: 'image_url', length: 255 })
   imageUrl: string;
 

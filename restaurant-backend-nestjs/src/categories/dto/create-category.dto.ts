@@ -19,4 +19,7 @@ export class CreateCategoryDto {
   @IsOptional()
   @MaxLength(255)
   imageUrl?: string;
+
+  @IsOptional()
+  requiresKitchen?: boolean;
 }

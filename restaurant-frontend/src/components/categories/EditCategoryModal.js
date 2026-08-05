@@ -8,7 +8,8 @@ function EditCategoryModal({ show, onHide, onSuccess, category }) {
     categoryName: '',
     description: '',
     menuId: '',
-    imageUrl: ''
+    imageUrl: '',
+    requiresKitchen: true
   });
   const [selectedFile, setSelectedFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -28,7 +29,8 @@ function EditCategoryModal({ show, onHide, onSuccess, category }) {
         categoryName: category.categoryName || '',
         description: category.description || '',
         menuId: category.menuId || '',
-        imageUrl: category.imageUrl || ''
+        imageUrl: category.imageUrl || '',
+        requiresKitchen: category.requiresKitchen !== false
       });
       setImagePreview(category.imageUrl || null);
       setSelectedFile(null);
@@ -46,10 +48,10 @@ function EditCategoryModal({ show, onHide, onSuccess, category }) {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
@@ -120,6 +122,7 @@ function EditCategoryModal({ show, onHide, onSuccess, category }) {
         categoryName: formData.categoryName.trim(),
         description: formData.description.trim(),
         menuId: parseInt(formData.menuId),
+        requiresKitchen: formData.requiresKitchen,
         imageUrl: finalImageUrl
       };
 
@@ -204,6 +207,25 @@ function EditCategoryModal({ show, onHide, onSuccess, category }) {
             />
             <Form.Control.Feedback type="invalid">{errors.description}</Form.Control.Feedback>
             <small className="text-muted">{formData.description.length}/500</small>
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Check
+              type="checkbox"
+              id="edit-requiresKitchen"
+              name="requiresKitchen"
+              label={
+                <span>
+                  <strong>Requires Kitchen Preparation (KDS)</strong>
+                  <div className="text-muted small">
+                    If unchecked, items in this category will NOT be sent to the Kitchen Dashboard.
+                  </div>
+                </span>
+              }
+              checked={formData.requiresKitchen}
+              onChange={handleChange}
+              disabled={submitting}
+            />
           </Form.Group>
 
           <Form.Group className="mb-3">

@@ -12,6 +12,7 @@ function AddCategory() {
     categoryName: '',
     menuId: '',
     description: '',
+    requiresKitchen: true,
   });
   const [menus, setMenus] = useState([]);
   const [errors, setErrors] = useState({});
@@ -60,7 +61,7 @@ function AddCategory() {
 
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: e.target.type === 'checkbox' ? e.target.checked : value
     }));
 
     if (errors[name]) {
@@ -123,7 +124,8 @@ function AddCategory() {
         categoryName: formData.categoryName.trim(),
         menuId: parseInt(formData.menuId),
         description: formData.description.trim(),
-        imageUrl: finalImageUrl || undefined
+        imageUrl: finalImageUrl || undefined,
+        requiresKitchen: formData.requiresKitchen,
       };
 
       await apiClient.post('/categories', payload);
@@ -196,6 +198,28 @@ function AddCategory() {
                   {errors.categoryName && (
                     <div className="invalid-feedback">{errors.categoryName}</div>
                   )}
+                </div>
+
+                {/* Requires Kitchen Checkbox */}
+                <div className="form-group mb-4">
+                  <div className="form-check form-switch">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="requiresKitchen"
+                      name="requiresKitchen"
+                      checked={formData.requiresKitchen}
+                      onChange={handleChange}
+                      disabled={submitting}
+                      style={{ cursor: 'pointer' }}
+                    />
+                    <label className="form-check-label ms-2" htmlFor="requiresKitchen" style={{ cursor: 'pointer' }}>
+                      <strong>Requires Kitchen Preparation (KDS)</strong>
+                      <div className="text-muted small">
+                        If unchecked, items in this category will NOT be sent to the Kitchen Dashboard.
+                      </div>
+                    </label>
+                  </div>
                 </div>
 
                 {/* Select Menu */}

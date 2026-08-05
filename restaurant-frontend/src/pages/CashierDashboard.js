@@ -15,6 +15,10 @@ const TAB_CONFIG = {
     pageTitle: 'Cashier Invoice History',
     pageIcon: 'fas fa-history',
   },
+  'live-orders': {
+    pageTitle: 'Live QR Orders',
+    pageIcon: 'fas fa-concierge-bell',
+  },
 };
 
 function CashierDashboard() {

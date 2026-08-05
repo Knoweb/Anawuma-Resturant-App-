@@ -269,9 +269,13 @@ export class OrdersService {
     const statusCountsRaw = await this.ordersRepository
       .createQueryBuilder('order')
       .select('order.status', 'status')
-      .addSelect('COUNT(*)', 'count')
+      .addSelect('COUNT(DISTINCT order.orderId)', 'count')
+      .innerJoin('order.orderItems', 'orderItems')
+      .innerJoin('orderItems.foodItem', 'foodItem')
+      .innerJoin('foodItem.category', 'category')
       .where('order.restaurantId = :restaurantId', { restaurantId })
       .andWhere('order.status IN (:...activeStatuses)', { activeStatuses })
+      .andWhere('category.requiresKitchen = :reqKitchen', { reqKitchen: true })
       .groupBy('order.status')
       .getRawMany();
 
@@ -294,21 +298,38 @@ export class OrdersService {
 
     const urgentCount = await this.ordersRepository
       .createQueryBuilder('order')
+      .innerJoin('order.orderItems', 'orderItems')
+      .innerJoin('orderItems.foodItem', 'foodItem')
+      .innerJoin('foodItem.category', 'category')
       .where('order.restaurantId = :restaurantId', { restaurantId })
       .andWhere('order.status IN (:...urgentStatuses)', {
         urgentStatuses: [OrderStatus.NEW],
       })
       .andWhere('order.createdAt <= :urgentBefore', { urgentBefore })
+      .andWhere('category.requiresKitchen = :reqKitchen', { reqKitchen: true })
       .getCount();
 
-    const queue = await this.ordersRepository
+    let queue = await this.ordersRepository
       .createQueryBuilder('order')
       .leftJoinAndSelect('order.orderItems', 'orderItems')
+      .leftJoinAndSelect('orderItems.foodItem', 'foodItem')
+      .leftJoinAndSelect('foodItem.category', 'category')
       .where('order.restaurantId = :restaurantId', { restaurantId })
       .andWhere('order.status IN (:...activeStatuses)', { activeStatuses })
       .orderBy('order.createdAt', 'DESC')
-      .take(limit)
+      // Note: We fetch more than limit because we will filter in JS.
+      // A better way is to use a subquery, but JS filtering is safer for the items.
+      .take(limit * 2) 
       .getMany();
+
+    // Filter out items that don't require kitchen, and filter out orders that have no kitchen items left
+    queue = queue.map(order => {
+      if (order.orderItems) {
+        order.orderItems = order.orderItems.filter(item => item.foodItem?.category?.requiresKitchen !== false);
+      }
+      return order;
+    }).filter(order => order.orderItems && order.orderItems.length > 0)
+      .slice(0, limit); // Apply the exact limit after filtering
 
     return {
       summary: {

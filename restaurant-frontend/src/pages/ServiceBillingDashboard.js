@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/common/Navbar';
 import Sidebar from '../components/common/Sidebar';
+import LiveOrdersQueue from '../components/cashier/LiveOrdersQueue';
 import apiClient, { billingAPI, reportsAPI } from '../api/apiClient';
 import Swal from 'sweetalert2';
 import { useWebSocket } from '../hooks/useWebSocket';
@@ -1403,6 +1404,16 @@ const ServiceBillingDashboard = ({
                     </table>
                   </div>
                 )}
+              </section>
+            )}
+
+            {isCashierDashboard && resolvedCashierTab === 'live-orders' && (
+              <section className="billing-section mb-4">
+                <div className="section-heading">
+                  <i className="fas fa-concierge-bell text-info me-2"></i>
+                  Live QR Orders
+                </div>
+                <LiveOrdersQueue />
               </section>
             )}
 

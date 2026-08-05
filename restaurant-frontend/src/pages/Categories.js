@@ -201,6 +201,13 @@ function Categories() {
                       </div>
                       <div className="card-body">
                         <h5 className="category-title">{category.categoryName}</h5>
+                        <div className="mb-2">
+                          {category.requiresKitchen !== false ? (
+                            <span className="badge bg-danger"><i className="fas fa-fire me-1"></i>Kitchen</span>
+                          ) : (
+                            <span className="badge bg-secondary"><i className="fas fa-ban me-1"></i>No KDS</span>
+                          )}
+                        </div>
                         <p className="category-text text-muted mb-4">{category.description}</p>
 
                         <div className="category-actions-vertical">
