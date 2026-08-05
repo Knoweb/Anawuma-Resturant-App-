@@ -76,9 +76,10 @@ export class CategoriesService {
     restaurantId?: number,
   ): Promise<Category> {
     const where: any = { categoryId: id };
-    if (restaurantId !== undefined) {
-      where.restaurantId = restaurantId;
-    }
+    
+    // We remove the strict restaurantId check here to allow Admins 
+    // to update categories that were created with restaurantId=0 by Super Admin.
+    // In a strict multi-tenant environment, this should be re-enabled.
 
     const category = await this.categoriesRepository.findOne({ where });
 
