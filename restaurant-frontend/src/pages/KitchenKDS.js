@@ -126,9 +126,25 @@ const KitchenKDS = () => {
         return [];
       };
 
-      const newOrdersList = extractOrders(newOrders.data);
-      const cookingOrdersList = extractOrders(cookingOrders.data);
-      const readyOrdersList = extractOrders(readyOrders.data);
+      const filterKitchenOrders = (ordersList) => {
+        if (!Array.isArray(ordersList)) return [];
+        return ordersList
+          .map((order) => {
+            if (order.orderItems) {
+              const filteredItems = order.orderItems.filter((item) => {
+                const reqK = item.foodItem?.category?.requiresKitchen;
+                return reqK !== false && reqK !== 0 && reqK !== '0' && reqK !== 'false';
+              });
+              return { ...order, orderItems: filteredItems };
+            }
+            return order;
+          })
+          .filter((order) => order.orderItems && order.orderItems.length > 0);
+      };
+
+      const newOrdersList = filterKitchenOrders(extractOrders(newOrders.data));
+      const cookingOrdersList = filterKitchenOrders(extractOrders(cookingOrders.data));
+      const readyOrdersList = filterKitchenOrders(extractOrders(readyOrders.data));
 
       // Detect newly arrived orders using ref instead of state
       const currentNewOrderIds = new Set(
