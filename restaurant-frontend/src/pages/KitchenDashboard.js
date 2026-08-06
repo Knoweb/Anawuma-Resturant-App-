@@ -39,9 +39,11 @@ const KitchenDashboard = () => {
         return orders
           .map(order => {
             if (order.orderItems) {
-              const filteredItems = order.orderItems.filter(
-                item => item.foodItem?.category?.requiresKitchen !== false
-              );
+              const filteredItems = order.orderItems.filter(item => {
+                const reqK = item.foodItem?.category?.requiresKitchen;
+                // If it's explicitly false or 0, filter it out. Otherwise keep it.
+                return reqK !== false && reqK !== 0 && reqK !== '0' && reqK !== 'false';
+              });
               return { ...order, orderItems: filteredItems };
             }
             return order;

@@ -69,7 +69,10 @@ function LiveOrdersQueue() {
       <div className="row g-4 mt-2">
         {orders.map(order => {
           // Check if order only has non-kitchen items
-          const hasKitchenItems = order.orderItems?.some(item => item.foodItem?.category?.requiresKitchen !== false);
+          const hasKitchenItems = order.orderItems?.some(item => {
+            const reqK = item.foodItem?.category?.requiresKitchen;
+            return reqK !== false && reqK !== 0 && reqK !== '0' && reqK !== 'false';
+          });
           
           return (
             <div className="col-md-6 col-lg-4" key={order.orderId}>
@@ -85,9 +88,13 @@ function LiveOrdersQueue() {
                       <li key={idx} className="d-flex justify-content-between border-bottom py-1">
                         <span>
                           {item.qty}x {item.itemName} 
-                          {item.foodItem?.category?.requiresKitchen === false && (
-                             <span className="badge bg-secondary ms-1" style={{fontSize: '0.6rem'}}>Bar</span>
-                          )}
+                          {(() => {
+                            const reqK = item.foodItem?.category?.requiresKitchen;
+                            const isBar = reqK === false || reqK === 0 || reqK === '0' || reqK === 'false';
+                            return isBar ? (
+                              <span className="badge bg-secondary ms-1" style={{fontSize: '0.6rem'}}>Bar</span>
+                            ) : null;
+                          })()}
                         </span>
                       </li>
                     ))}
