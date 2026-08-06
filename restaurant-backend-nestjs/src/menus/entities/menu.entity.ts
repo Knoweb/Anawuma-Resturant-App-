@@ -12,8 +12,11 @@ export class Menu {
   @Column({ length: 500 })
   description: string;
 
-  @Column({ name: 'image_url', length: 255 })
+  @Column({ name: 'image_url', length: 255, nullable: true })
   imageUrl: string;
+
+  @Column({ name: 'requires_kitchen', default: true })
+  requiresKitchen: boolean;
 
   @Column({ name: 'restaurant_id' })
   restaurantId: number;

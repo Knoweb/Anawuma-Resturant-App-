@@ -70,8 +70,13 @@ function LiveOrdersQueue() {
         {orders.map(order => {
           // Check if order only has non-kitchen items
           const hasKitchenItems = order.orderItems?.some(item => {
-            const reqK = item.foodItem?.category?.requiresKitchen;
-            return reqK !== false && reqK !== 0 && reqK !== '0' && reqK !== 'false';
+            const reqCat = item.foodItem?.category?.requiresKitchen;
+            const reqMenu = item.foodItem?.menu?.requiresKitchen;
+            
+            const isCatNoKds = reqCat === false || reqCat === 0 || reqCat === '0' || reqCat === 'false';
+            const isMenuNoKds = reqMenu === false || reqMenu === 0 || reqMenu === '0' || reqMenu === 'false';
+            
+            return !(isCatNoKds || isMenuNoKds);
           });
           
           return (
@@ -89,9 +94,13 @@ function LiveOrdersQueue() {
                         <span>
                           {item.qty}x {item.itemName} 
                           {(() => {
-                            const reqK = item.foodItem?.category?.requiresKitchen;
-                            const isBar = reqK === false || reqK === 0 || reqK === '0' || reqK === 'false';
-                            return isBar ? (
+                            const reqCat = item.foodItem?.category?.requiresKitchen;
+                            const reqMenu = item.foodItem?.menu?.requiresKitchen;
+                            
+                            const isCatNoKds = reqCat === false || reqCat === 0 || reqCat === '0' || reqCat === 'false';
+                            const isMenuNoKds = reqMenu === false || reqMenu === 0 || reqMenu === '0' || reqMenu === 'false';
+                            
+                            return (isCatNoKds || isMenuNoKds) ? (
                               <span className="badge bg-secondary ms-1" style={{fontSize: '0.6rem'}}>Bar</span>
                             ) : null;
                           })()}

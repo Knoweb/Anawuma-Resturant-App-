@@ -15,4 +15,7 @@ export class CreateMenuDto {
   @IsOptional()
   @MaxLength(255)
   imageUrl?: string;
+
+  @IsOptional()
+  requiresKitchen?: boolean;
 }

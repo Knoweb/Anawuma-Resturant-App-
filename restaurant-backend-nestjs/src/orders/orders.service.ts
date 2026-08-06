@@ -182,6 +182,7 @@ export class OrdersService {
       .leftJoinAndSelect('order.orderItems', 'orderItems')
       .leftJoinAndSelect('orderItems.foodItem', 'foodItem')
       .leftJoinAndSelect('foodItem.category', 'category')
+      .leftJoinAndSelect('foodItem.menu', 'menu')
       .where('order.restaurantId = :restaurantId', { restaurantId })
       .orderBy('order.createdAt', 'DESC'); // Latest first
 

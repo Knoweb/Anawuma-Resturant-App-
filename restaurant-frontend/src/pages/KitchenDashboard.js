@@ -40,9 +40,14 @@ const KitchenDashboard = () => {
           .map(order => {
             if (order.orderItems) {
               const filteredItems = order.orderItems.filter(item => {
-                const reqK = item.foodItem?.category?.requiresKitchen;
-                // If it's explicitly false or 0, filter it out. Otherwise keep it.
-                return reqK !== false && reqK !== 0 && reqK !== '0' && reqK !== 'false';
+                const reqCat = item.foodItem?.category?.requiresKitchen;
+                const reqMenu = item.foodItem?.menu?.requiresKitchen;
+                
+                // If EITHER the category OR the menu explicitly says requiresKitchen = false/0, we filter it out.
+                const isCatNoKds = reqCat === false || reqCat === 0 || reqCat === '0' || reqCat === 'false';
+                const isMenuNoKds = reqMenu === false || reqMenu === 0 || reqMenu === '0' || reqMenu === 'false';
+                
+                return !(isCatNoKds || isMenuNoKds);
               });
               return { ...order, orderItems: filteredItems };
             }

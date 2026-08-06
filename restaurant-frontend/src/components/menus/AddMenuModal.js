@@ -7,6 +7,7 @@ function AddMenuModal({ show, onHide, onSuccess }) {
   const [formData, setFormData] = useState({
     menuName: '',
     description: '',
+    requiresKitchen: true,
   });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -40,7 +41,7 @@ function AddMenuModal({ show, onHide, onSuccess }) {
 
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: e.target.type === 'checkbox' ? e.target.checked : value
     }));
 
     if (errors[name]) {
@@ -85,6 +86,7 @@ function AddMenuModal({ show, onHide, onSuccess }) {
       const payload = {
         menuName: formData.menuName.trim(),
         description: formData.description.trim(),
+        requiresKitchen: formData.requiresKitchen,
         imageUrl: finalImageUrl || undefined
       };
 
@@ -136,6 +138,21 @@ function AddMenuModal({ show, onHide, onSuccess }) {
               disabled={submitting}
             />
             <Form.Control.Feedback type="invalid">{errors.menuName}</Form.Control.Feedback>
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Check
+              type="checkbox"
+              id="requiresKitchen-add"
+              name="requiresKitchen"
+              label="Requires Kitchen Preparation (KDS)"
+              checked={formData.requiresKitchen}
+              onChange={handleChange}
+              disabled={submitting}
+            />
+            <Form.Text className="text-muted">
+              Uncheck this if all items in this menu (like cafe or drinks menus) should NOT go to the Kitchen Display System.
+            </Form.Text>
           </Form.Group>
 
           <Form.Group className="mb-3">

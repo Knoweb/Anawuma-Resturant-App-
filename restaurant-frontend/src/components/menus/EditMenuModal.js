@@ -19,7 +19,8 @@ function EditMenuModal({ show, onHide, onSuccess, menu }) {
       setFormData({
         menuName: menu.menuName || '',
         description: menu.description || '',
-        imageUrl: menu.imageUrl || ''
+        imageUrl: menu.imageUrl || '',
+        requiresKitchen: menu.requiresKitchen !== undefined ? menu.requiresKitchen : true
       });
       setImagePreview(menu.imageUrl || null);
       setSelectedFile(null);
@@ -54,7 +55,7 @@ function EditMenuModal({ show, onHide, onSuccess, menu }) {
 
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: e.target.type === 'checkbox' ? e.target.checked : value
     }));
     // Clear error for this field when user types
     if (errors[name]) {
@@ -117,6 +118,7 @@ function EditMenuModal({ show, onHide, onSuccess, menu }) {
       const payload = {
         menuName: formData.menuName.trim(),
         description: formData.description.trim(),
+        requiresKitchen: formData.requiresKitchen,
         imageUrl: finalImageUrl
       };
 
@@ -200,6 +202,25 @@ function EditMenuModal({ show, onHide, onSuccess, menu }) {
                 {errors.menuName && (
                   <div className="invalid-feedback">{errors.menuName}</div>
                 )}
+              </div>
+
+              {/* Requires Kitchen */}
+              <div className="mb-3 form-check">
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  id="requiresKitchen-edit"
+                  name="requiresKitchen"
+                  checked={formData.requiresKitchen}
+                  onChange={handleChange}
+                  disabled={submitting}
+                />
+                <label className="form-check-label fw-bold" htmlFor="requiresKitchen-edit">
+                  Requires Kitchen Preparation (KDS)
+                </label>
+                <small className="form-text text-muted d-block">
+                  Uncheck this if all items in this menu (like cafe or drinks menus) should NOT go to the Kitchen Display System.
+                </small>
               </div>
 
               {/* Description */}
