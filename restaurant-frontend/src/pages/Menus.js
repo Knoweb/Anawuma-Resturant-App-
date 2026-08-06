@@ -178,7 +178,12 @@ function Menus() {
                         >
                           Explore
                         </button>
-                        <h5 className="card-title">{menu.menuName}</h5>
+                        <h5 className="card-title d-flex justify-content-between align-items-start">
+                          <span>{menu.menuName}</span>
+                          {(menu.requiresKitchen === false || menu.requiresKitchen === 0 || menu.requiresKitchen === '0' || menu.requiresKitchen === 'false') && (
+                            <span className="badge bg-danger" style={{ fontSize: '0.7rem' }}>NO KDS</span>
+                          )}
+                        </h5>
                         <p className="card-text text-muted">{menu.description}</p>
                         <div className="card-actions-vertical">
                           <button
