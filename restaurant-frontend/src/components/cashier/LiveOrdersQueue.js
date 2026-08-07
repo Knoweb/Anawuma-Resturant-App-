@@ -8,8 +8,12 @@ function LiveOrdersQueue() {
 
   const fetchOrders = useCallback(async () => {
     try {
-      const response = await apiClient.get('/orders');
-      const activeStatuses = ['NEW', 'ACCEPTED', 'COOKING', 'READY'];
+      // Get today's date in YYYY-MM-DD format
+      const today = new Date().toISOString().split('T')[0];
+      const response = await apiClient.get('/orders', {
+        params: { from: today, to: today }
+      });
+      const activeStatuses = ['NEW', 'ACCEPTED', 'COOKING', 'READY', 'SERVED'];
       const activeOrders = response.data.filter(o => activeStatuses.includes(o.status));
       setOrders(activeOrders);
     } catch (error) {
@@ -65,7 +69,7 @@ function LiveOrdersQueue() {
       {!loading && orders.length === 0 && (
         <div className="alert alert-info text-center">No live orders at the moment.</div>
       )}
-      <div className="row g-4 mt-2">
+      <div className="d-flex flex-column mt-3 gap-2">
         {orders.map(order => {
           // Check if order only has non-kitchen items
           const hasKitchenItems = order.orderItems?.some(item => {
@@ -79,61 +83,80 @@ function LiveOrdersQueue() {
           });
           
           return (
-            <div className="col-md-6 col-lg-4" key={order.orderId}>
-              <div className="card shadow-sm h-100">
-                <div className="card-header d-flex justify-content-between align-items-center bg-light">
-                  <span className="fw-bold">{order.roomNo ? `Room ${order.roomNo}` : `Table ${order.tableNo}`}</span>
-                  <span className={`badge ${getStatusBadge(order.status)}`}>{order.status}</span>
-                </div>
-                <div className="card-body d-flex flex-column">
-                  <div className="mb-2 text-muted small d-flex justify-content-between align-items-center">
-                    <span>Order #{order.orderNo || order.orderId}</span>
+            <div className="card shadow-sm" key={order.orderId}>
+              <div className="card-body p-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                
+                {/* Left Side: Order Info */}
+                <div className="d-flex flex-column gap-1" style={{ minWidth: '150px' }}>
+                  <div className="d-flex align-items-center gap-2">
+                    <span className="fw-bold">
+                      {String(order.roomNo || order.tableNo).toUpperCase().match(/^(ROOM|TABLE)/) 
+                        ? (order.roomNo || order.tableNo) 
+                        : (order.roomNo ? `Room ${order.roomNo}` : `Table ${order.tableNo}`)}
+                    </span>
                     <span className={`badge ${order.orderType === 'MANUAL_CASHIER' ? 'bg-secondary' : 'bg-primary'}`} style={{fontSize: '0.65rem'}}>
-                      {order.orderType === 'MANUAL_CASHIER' ? 'Manual Order' : 'QR Order'}
+                      {order.orderType === 'MANUAL_CASHIER' ? 'Manual' : 'QR Order'}
                     </span>
                   </div>
-                  <ul className="list-unstyled mb-3">
+                  <div className="text-muted small">Order #{order.orderNo || order.orderId}</div>
+                </div>
+
+                {/* Middle: Items List */}
+                <div className="flex-grow-1 border-start border-end px-md-3">
+                  <ul className="list-unstyled mb-0 m-0">
                     {order.orderItems?.map((item, idx) => (
-                      <li key={idx} className="d-flex justify-content-between border-bottom py-1">
-                        <span>
-                          {item.qty}x {item.itemName} 
-                          {(() => {
-                            const reqCat = item.foodItem?.category?.requiresKitchen;
-                            const reqMenu = item.foodItem?.menu?.requiresKitchen;
-                            
-                            const isCatNoKds = reqCat === false || reqCat === 0 || reqCat === '0' || reqCat === 'false';
-                            const isMenuNoKds = reqMenu === false || reqMenu === 0 || reqMenu === '0' || reqMenu === 'false';
-                            
-                            return (isCatNoKds || isMenuNoKds) ? (
-                              <span className="badge bg-secondary ms-1" style={{fontSize: '0.6rem'}}>Bar</span>
-                            ) : null;
-                          })()}
-                        </span>
+                      <li key={idx} className="d-flex align-items-center py-1 small">
+                        <span className="fw-medium me-2">{item.qty}x</span>
+                        <span>{item.itemName}</span>
+                        {(() => {
+                          const reqCat = item.foodItem?.category?.requiresKitchen;
+                          const reqMenu = item.foodItem?.menu?.requiresKitchen;
+                          const isCatNoKds = reqCat === false || reqCat === 0 || reqCat === '0' || reqCat === 'false';
+                          const isMenuNoKds = reqMenu === false || reqMenu === 0 || reqMenu === '0' || reqMenu === 'false';
+                          return (isCatNoKds || isMenuNoKds) ? (
+                            <span className="badge bg-secondary ms-2" style={{fontSize: '0.6rem'}}>Bar</span>
+                          ) : null;
+                        })()}
                       </li>
                     ))}
                   </ul>
+                </div>
+
+                {/* Right Side: Status & Actions */}
+                <div className="d-flex flex-column align-items-end justify-content-center gap-2" style={{ minWidth: '180px' }}>
+                  <span className={`badge ${getStatusBadge(order.status)} fs-6 px-3 py-2 w-100`}>{order.status}</span>
+                  
                   {!hasKitchenItems && order.status !== 'READY' && (
                     <button 
-                      className="btn btn-primary btn-sm w-100 mt-auto"
+                      className="btn btn-primary btn-sm w-100"
                       onClick={() => handleUpdateStatus(order.orderId, order.status)}
                     >
                       Mark {order.status === 'NEW' ? 'Accepted' : 'Ready'}
                     </button>
                   )}
+                  
                   {hasKitchenItems && order.status !== 'READY' && (
-                    <div className="text-muted small text-center mt-auto">
-                      <i className="fas fa-fire me-1"></i> Waiting for Kitchen
+                    <div className="text-muted small text-center w-100 border rounded py-1 bg-light">
+                      <i className="fas fa-fire me-1 text-warning"></i> Waiting Kitchen
                     </div>
                   )}
+                  
                   {order.status === 'READY' && (
                     <button 
-                      className="btn btn-success btn-sm w-100 mt-auto"
+                      className="btn btn-success btn-sm w-100"
                       onClick={() => handleUpdateStatus(order.orderId, order.status)}
                     >
                       <i className="fas fa-check-double me-1"></i> Mark Delivered
                     </button>
                   )}
+                  
+                  {order.status === 'SERVED' && (
+                    <div className="text-success small fw-bold text-center w-100 border border-success rounded py-1 bg-light">
+                      <i className="fas fa-check-circle me-1"></i> Delivered
+                    </div>
+                  )}
                 </div>
+                
               </div>
             </div>
           );
