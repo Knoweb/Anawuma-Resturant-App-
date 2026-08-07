@@ -126,28 +126,16 @@ function LiveOrdersQueue() {
                 <div className="d-flex flex-column align-items-end justify-content-center gap-2" style={{ minWidth: '180px' }}>
                   <span className={`badge ${getStatusBadge(order.status)} fs-6 px-3 py-2 w-100`}>{order.status}</span>
                   
-                  {!hasKitchenItems && order.status !== 'READY' && (
-                    <button 
-                      className="btn btn-primary btn-sm w-100"
-                      onClick={() => handleUpdateStatus(order.orderId, order.status)}
-                    >
-                      Mark {order.status === 'NEW' ? 'Accepted' : 'Ready'}
-                    </button>
-                  )}
-                  
-                  {hasKitchenItems && order.status !== 'READY' && (
+                  {!hasKitchenItems && order.status !== 'READY' && order.status !== 'SERVED' && (
                     <div className="text-muted small text-center w-100 border rounded py-1 bg-light">
-                      <i className="fas fa-fire me-1 text-warning"></i> Waiting Kitchen
+                      <i className="fas fa-clock me-1 text-info"></i> Waiting Cashier
                     </div>
                   )}
                   
-                  {order.status === 'READY' && (
-                    <button 
-                      className="btn btn-success btn-sm w-100"
-                      onClick={() => handleUpdateStatus(order.orderId, order.status)}
-                    >
-                      <i className="fas fa-check-double me-1"></i> Mark Delivered
-                    </button>
+                  {hasKitchenItems && order.status !== 'READY' && order.status !== 'SERVED' && (
+                    <div className="text-muted small text-center w-100 border rounded py-1 bg-light">
+                      <i className="fas fa-fire me-1 text-warning"></i> Waiting Kitchen
+                    </div>
                   )}
                   
                   {order.status === 'SERVED' && (
