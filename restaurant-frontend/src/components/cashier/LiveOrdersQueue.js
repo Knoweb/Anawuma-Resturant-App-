@@ -32,6 +32,7 @@ function LiveOrdersQueue() {
     let newStatus = '';
     if (currentStatus === 'NEW') newStatus = 'ACCEPTED';
     else if (currentStatus === 'ACCEPTED' || currentStatus === 'COOKING') newStatus = 'READY';
+    else if (currentStatus === 'READY') newStatus = 'SERVED';
     else return;
 
     try {
@@ -120,6 +121,14 @@ function LiveOrdersQueue() {
                     <div className="text-muted small text-center mt-auto">
                       <i className="fas fa-fire me-1"></i> Waiting for Kitchen
                     </div>
+                  )}
+                  {order.status === 'READY' && (
+                    <button 
+                      className="btn btn-success btn-sm w-100 mt-auto"
+                      onClick={() => handleUpdateStatus(order.orderId, order.status)}
+                    >
+                      <i className="fas fa-check-double me-1"></i> Mark Delivered
+                    </button>
                   )}
                 </div>
               </div>
