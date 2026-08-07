@@ -340,13 +340,40 @@ const CustomerQROrder = ({ isManual = false }) => {
       ]);
 
       const restaurantMenus = (menusRes.data || []).filter(
-        menu => menu.restaurantId === restaurantId
+        menu => {
+          if (menu.restaurantId !== restaurantId) return false;
+          // Hide NO KDS menus from QR customers
+          if (!isManual) {
+            const isNoKds = menu.requiresKitchen === false || menu.requiresKitchen === 0 || menu.requiresKitchen === '0' || menu.requiresKitchen === 'false';
+            if (isNoKds) return false;
+          }
+          return true;
+        }
       );
       const restaurantCategories = (categoriesRes.data || []).filter(
-        cat => cat.restaurantId === restaurantId
+        cat => {
+          if (cat.restaurantId !== restaurantId) return false;
+          // Hide NO KDS categories from QR customers
+          if (!isManual) {
+            const isNoKds = cat.requiresKitchen === false || cat.requiresKitchen === 0 || cat.requiresKitchen === '0' || cat.requiresKitchen === 'false';
+            if (isNoKds) return false;
+          }
+          return true;
+        }
       );
       const restaurantFoodItems = (foodItemsRes.data || []).filter(
-        item => item.restaurantId === restaurantId && item.isAvailable !== false
+        item => {
+          if (item.restaurantId !== restaurantId || item.isAvailable === false) return false;
+          // Hide NO KDS food items from QR customers
+          if (!isManual) {
+            const reqCat = item.category?.requiresKitchen;
+            const reqMenu = item.menu?.requiresKitchen;
+            const isCatNoKds = reqCat === false || reqCat === 0 || reqCat === '0' || reqCat === 'false';
+            const isMenuNoKds = reqMenu === false || reqMenu === 0 || reqMenu === '0' || reqMenu === 'false';
+            if (isCatNoKds || isMenuNoKds) return false;
+          }
+          return true;
+        }
       );
 
       console.log('restaurantFoodItems fetched:', restaurantFoodItems);
