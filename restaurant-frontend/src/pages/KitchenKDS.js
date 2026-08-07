@@ -891,9 +891,13 @@ const KitchenKDS = () => {
         <div className="card-header d-flex justify-content-between align-items-center">
           <div>
             <strong className="order-number">{order.orderNo}</strong>
-            {order.orderType === 'MANUAL_CASHIER' && (
+            {order.orderType === 'MANUAL_CASHIER' ? (
               <span className="badge bg-secondary ms-2" style={{ fontSize: '0.65em', verticalAlign: 'middle' }}>
                 <i className="fas fa-user-edit me-1"></i>Manual
+              </span>
+            ) : (
+              <span className="badge bg-primary ms-2" style={{ fontSize: '0.65em', verticalAlign: 'middle' }}>
+                <i className="fas fa-qrcode me-1"></i>QR Order
               </span>
             )}
             {(order.tableNo || order.roomNo) && (

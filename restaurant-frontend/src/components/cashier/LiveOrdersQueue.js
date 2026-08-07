@@ -88,7 +88,12 @@ function LiveOrdersQueue() {
                   <span className={`badge ${getStatusBadge(order.status)}`}>{order.status}</span>
                 </div>
                 <div className="card-body d-flex flex-column">
-                  <div className="mb-2 text-muted small">Order #{order.orderNo || order.orderId}</div>
+                  <div className="mb-2 text-muted small d-flex justify-content-between align-items-center">
+                    <span>Order #{order.orderNo || order.orderId}</span>
+                    <span className={`badge ${order.orderType === 'MANUAL_CASHIER' ? 'bg-secondary' : 'bg-primary'}`} style={{fontSize: '0.65rem'}}>
+                      {order.orderType === 'MANUAL_CASHIER' ? 'Manual Order' : 'QR Order'}
+                    </span>
+                  </div>
                   <ul className="list-unstyled mb-3">
                     {order.orderItems?.map((item, idx) => (
                       <li key={idx} className="d-flex justify-content-between border-bottom py-1">

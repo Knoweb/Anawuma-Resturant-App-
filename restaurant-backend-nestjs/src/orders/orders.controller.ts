@@ -83,7 +83,7 @@ export class OrdersController {
   @Get()
   @SkipThrottle() // Skip rate limiting for authenticated GET requests
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.KITCHEN, UserRole.HOUSEKEEPER)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.KITCHEN, UserRole.HOUSEKEEPER, UserRole.CASHIER)
   @Header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
   @Header('Pragma', 'no-cache')
   @Header('Expires', '0')
