@@ -960,10 +960,6 @@ const KitchenKDS = () => {
               )}
             </ul>
           </div>
-
-          <div className="order-total mt-2 pt-2 border-top">
-            <strong>Total: Rs. {parseFloat(order.totalAmount).toFixed(2)}</strong>
-          </div>
         </div>
         <div className="card-footer kds-card-footer">
           {statusButton && (
@@ -1222,19 +1218,6 @@ const KitchenKDS = () => {
                     </tr>
                   )}
                 </tbody>
-                <tfoot className="table-light">
-                  <tr>
-                    <td colSpan="3" className="text-end">
-                      <strong>Grand Total:</strong>
-                    </td>
-                    <td className="text-end">
-                      <strong className="text-primary h5 mb-0">
-                        ${parseFloat(selectedOrder.totalAmount).toFixed(2)}
-                      </strong>
-                    </td>
-                    <td></td>
-                  </tr>
-                </tfoot>
               </table>
             </div>
           </div>
