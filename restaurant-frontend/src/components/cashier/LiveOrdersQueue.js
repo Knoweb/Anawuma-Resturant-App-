@@ -8,9 +8,7 @@ function LiveOrdersQueue() {
 
   const fetchOrders = useCallback(async () => {
     try {
-      const response = await apiClient.get('/orders', {
-        params: { status: '' } // Fetch all, we'll filter in JS or backend
-      });
+      const response = await apiClient.get('/orders');
       const activeStatuses = ['NEW', 'ACCEPTED', 'COOKING', 'READY'];
       const activeOrders = response.data.filter(o => activeStatuses.includes(o.status));
       setOrders(activeOrders);
