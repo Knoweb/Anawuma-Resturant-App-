@@ -12,11 +12,11 @@ const TAB_CONFIG = {
     pageIcon: 'fas fa-share-square',
   },
   history: {
-    pageTitle: 'Cashier Invoice History',
+    pageTitle: 'Invoice History',
     pageIcon: 'fas fa-history',
   },
   'live-orders': {
-    pageTitle: 'Live QR Orders',
+    pageTitle: 'Live Orders',
     pageIcon: 'fas fa-concierge-bell',
   },
 };

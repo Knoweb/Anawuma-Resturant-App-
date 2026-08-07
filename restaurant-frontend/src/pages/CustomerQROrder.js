@@ -197,19 +197,19 @@ const CustomerQROrder = ({ isManual = false }) => {
               if (newStatus === 'ACCEPTED') {
                 showNotification(
                   'Order Accepted! 👨‍🍳',
-                  `Your order #${orderSuccess.orderNo} has been accepted by the kitchen.`,
+                  `Your order ${orderSuccess.orderNo} has been accepted by the kitchen.`,
                   'success'
                 );
               } else if (newStatus === 'READY') {
                 showNotification(
                   'Order Ready! 🍽️',
-                  `Your order #${orderSuccess.orderNo} is ready! We'll bring it to your room shortly.`,
+                  `Your order ${orderSuccess.orderNo} is ready! We'll bring it to your room shortly.`,
                   'success'
                 );
               } else if (newStatus === 'CANCELLED') {
                 showNotification(
                   'Order Cancelled ❌',
-                  `Your order #${orderSuccess.orderNo} has been cancelled. Please contact staff for assistance.`,
+                  `Your order ${orderSuccess.orderNo} has been cancelled. Please contact staff for assistance.`,
                   'error'
                 );
               }
@@ -805,7 +805,7 @@ const CustomerQROrder = ({ isManual = false }) => {
 
         Swal.fire({
           title: 'Order Completed',
-          text: `Order #${createdOrder.orderNo} placed, bill generated and ready for print.`,
+          text: `Order ${createdOrder.orderNo} placed, bill generated and ready for print.`,
           icon: 'success',
           timer: 3000,
           showConfirmButton: true
@@ -960,7 +960,7 @@ const CustomerQROrder = ({ isManual = false }) => {
       // Success UI
       Swal.fire({
         title: 'Order Completed',
-        text: `Order #${orderData.orderNo} placed, bill generated and assigned to ${modalOrderType === 'room' ? 'room' : 'table'}.`,
+        text: `Order ${orderData.orderNo} placed, bill generated and assigned to ${modalOrderType === 'room' ? 'room' : 'table'}.`,
         icon: 'success',
         timer: 3000,
         showConfirmButton: true

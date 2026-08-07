@@ -238,7 +238,7 @@ function Sidebar() {
               <li className={isCashierTabActive('live-orders')}>
                 <Link to="/cashier/dashboard/live-orders" onClick={closeSubmenus}>
                   <i className="fas fa-concierge-bell"></i>
-                  <span>Live QR Orders</span>
+                  <span>Live Orders</span>
                 </Link>
               </li>
               <li className={isCashierTabActive('queue')}>

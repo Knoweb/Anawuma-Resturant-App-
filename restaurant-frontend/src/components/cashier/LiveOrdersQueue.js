@@ -98,7 +98,7 @@ function LiveOrdersQueue() {
                       {order.orderType === 'MANUAL_CASHIER' ? 'Manual' : 'QR Order'}
                     </span>
                   </div>
-                  <div className="text-muted small">Order #{order.orderNo || order.orderId}</div>
+                  <div className="text-muted small">Order {order.orderNo || order.orderId}</div>
                 </div>
 
                 {/* Middle: Items List */}

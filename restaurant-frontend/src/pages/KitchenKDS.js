@@ -810,8 +810,8 @@ const KitchenKDS = () => {
     const serviceCharge = parseFloat(order.serviceCharge || (order.totalAmount - order.totalAmount / 1.1)).toFixed(2);
     const message =
       `Hello ${order.customerName || ''} 👋\n` +
-      `Here is your bill for order #${order.orderNo}.\n\n` +
-      `Order ID: #${order.orderNo}\n` +
+      `Here is your bill for order ${order.orderNo}.\n\n` +
+      `Order ID: ${order.orderNo}\n` +
       `Table: ${order.tableNo || '-'}\n\n` +
       `Items:\n${itemsList}\n\n` +
       `Subtotal: Rs. ${subtotal}\n` +

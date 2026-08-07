@@ -1411,7 +1411,7 @@ const ServiceBillingDashboard = ({
               <section className="billing-section mb-4">
                 <div className="section-heading">
                   <i className="fas fa-concierge-bell text-info me-2"></i>
-                  Live QR Orders
+                  Live Orders
                 </div>
                 <LiveOrdersQueue />
               </section>
