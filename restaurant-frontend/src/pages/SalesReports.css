@@ -508,6 +508,8 @@
   .report-table tbody td {
     padding: 5px 6px !important;
     border: 1px solid #ddd !important;
+    word-break: break-word !important;
+    white-space: normal !important;
   }
 
   .report-table tfoot td {
@@ -597,22 +599,16 @@
 }
 
 @media print {
-  body {
-    margin-bottom: 80px !important;
-  }
-
   .report-print-footer {
     display: flex !important;
     justify-content: space-between !important;
     align-items: flex-end !important;
-    position: fixed !important;
-    bottom: 30px !important;
-    left: 40px !important;
-    right: 40px !important;
+    margin-top: 40px !important;
     font-size: 12px !important;
     font-family: inherit !important;
     background: transparent !important;
-    width: calc(100% - 80px) !important;
+    width: 100% !important;
+    page-break-inside: avoid;
   }
 
   .print-footer-sig {
