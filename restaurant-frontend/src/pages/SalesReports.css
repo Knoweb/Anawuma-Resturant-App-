@@ -495,7 +495,16 @@
   }
 
   .report-table tfoot {
-    display: table-row-group;
+    display: table-row-group !important;
+  }
+
+  .report-table th:first-child,
+  .report-table td:first-child {
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+    word-break: break-all !important;
+    white-space: normal !important;
   }
 
   .report-table thead th {
