@@ -332,7 +332,7 @@ function MonthlyReport() {
                           <table className="table report-table">
                             <thead>
                               <tr>
-                                <th>#</th>
+                                <th>Ord No</th>
                                 <th>Table No</th>
                                 <th>Date & Time</th>
                                 <th>Item Name</th>
