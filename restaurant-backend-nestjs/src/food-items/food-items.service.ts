@@ -339,6 +339,7 @@ export class FoodItemsService {
     }
 
     try {
+      await this.foodItemsRepository.query('DELETE FROM offer_food_items_tbl WHERE food_item_id = ?', [id]);
       await this.foodItemsRepository.remove(foodItem);
     } catch (error) {
       throw new InternalServerErrorException(

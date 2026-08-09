@@ -63,7 +63,7 @@ export class Offer {
   @JoinColumn({ name: 'restaurant_id' })
   restaurant: Restaurant;
 
-  @ManyToMany(() => FoodItem, (foodItem) => foodItem.offers)
+  @ManyToMany(() => FoodItem, (foodItem) => foodItem.offers, { onDelete: 'CASCADE' })
   @JoinTable({
     name: 'offer_food_items_tbl',
     joinColumn: { name: 'offer_id', referencedColumnName: 'offerId' },

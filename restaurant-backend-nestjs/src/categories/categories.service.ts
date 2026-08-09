@@ -108,6 +108,9 @@ export class CategoriesService {
       // Nullify all related order items to preserve history
       await this.orderItemsRepository.update({ foodItemId: In(foodItemIds) }, { foodItemId: null });
       // Delete all related food items
+      if (foodItemIds.length > 0) {
+        await this.foodItemsRepository.query(`DELETE FROM offer_food_items_tbl WHERE food_item_id IN (${foodItemIds.join(',')})`);
+      }
       await this.foodItemsRepository.delete({ foodItemId: In(foodItemIds) });
     }
 
