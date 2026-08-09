@@ -378,7 +378,6 @@
 /* Print Styles */
 @media print {
   @page {
-    size: landscape;
     margin: 0.5cm;
   }
 
@@ -496,7 +495,7 @@
   }
 
   .report-table tfoot {
-    display: table-footer-group;
+    display: table-row-group;
   }
 
   .report-table thead th {
