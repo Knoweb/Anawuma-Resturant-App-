@@ -300,7 +300,7 @@ function DailyReport() {
                     <table className="table report-table">
                       <thead>
                         <tr>
-                          <th>Order No</th>
+                          <th>#</th>
                           <th>Table No</th>
                           <th>Date & Time</th>
                           <th>Item Name</th>

@@ -597,7 +597,7 @@ const SalesReports = () => {
                     <table className="table table-striped report-table admin-report-table">
                       <thead>
                         <tr>
-                          <th>Order No</th><th>Table No</th><th>Date/Time</th>
+                          <th>#</th><th>Table No</th><th>Date/Time</th>
                           <th>Item Name</th><th>Qty</th>
                           <th>Total</th><th>Service Charge</th><th>Payment</th><th>Cashier</th>
                         </tr>
