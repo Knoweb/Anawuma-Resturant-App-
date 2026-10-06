@@ -93,7 +93,7 @@ export class SettingsRequestsService {
       requestedBy: userId,
       requestedChanges: changedSettings, // Send only actual changes
       createdAt: savedRequest.createdAt,
-    });
+    }, restaurantId);
 
     console.log('🔔 Settings change request created:', savedRequest.requestId);
 

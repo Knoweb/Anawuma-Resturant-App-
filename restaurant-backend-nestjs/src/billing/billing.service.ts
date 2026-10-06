@@ -431,7 +431,7 @@ export class BillingService {
       invoiceId: savedInvoice.invoiceId,
       orderId: savedInvoice.orderId,
       restaurantId: savedInvoice.restaurantId,
-    });
+    }, savedInvoice.restaurantId);
 
     return this.hydrateOrderNo(savedInvoice);
   }
@@ -558,6 +558,7 @@ export class BillingService {
         invoiceIds: invoices.map((invoice) => invoice.invoiceId),
         sentAt: now.toISOString(),
       },
+      restaurantId
     );
 
     this.websocketGateway.emitToRole('cashier', 'accountant:transfer-updated', {
@@ -565,7 +566,7 @@ export class BillingService {
       date: dateLabel,
       status: AccountantTransferStatus.PENDING,
       count: invoices.length,
-    });
+    }, restaurantId);
 
     return {
       success: true,
@@ -689,6 +690,7 @@ export class BillingService {
         invoiceIds: invoices.map((invoice) => invoice.invoiceId),
         reviewedAt: now.toISOString(),
       },
+      restaurantId
     );
 
     return {
@@ -752,6 +754,7 @@ export class BillingService {
         invoiceIds: invoices.map((invoice) => invoice.invoiceId),
         reviewedAt: now.toISOString(),
       },
+      restaurantId
     );
 
     return {
