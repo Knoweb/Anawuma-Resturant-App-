@@ -32,7 +32,7 @@ interface RequestWithUser extends Request {
     id: number;
     email: string;
     restaurantId?: number;
-    isSuperAdmin?: boolean;
+    role?: string;
   };
 }
 
@@ -73,7 +73,7 @@ export class MenusController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   create(@Body() createMenuDto: CreateMenuDto, @Request() req: RequestWithUser) {
-    const restaurantId = req.user.isSuperAdmin
+    const restaurantId = req.user.role === UserRole.SUPER_ADMIN
       ? (createMenuDto as any).restaurantId
       : req.user.restaurantId;
 
@@ -84,7 +84,7 @@ export class MenusController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   findAll(@Request() req: any) {
-    if (req.user.isSuperAdmin) {
+    if (req.user.role === UserRole.SUPER_ADMIN) {
       return this.menusService.findAllForSuperAdmin();
     }
     return this.menusService.findAll(req.user.restaurantId || 0);

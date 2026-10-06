@@ -34,7 +34,7 @@ interface RequestWithUser extends Request {
     id: number;
     email: string;
     restaurantId?: number;
-    isSuperAdmin?: boolean;
+    role?: string;
   };
 }
 
@@ -81,7 +81,7 @@ export class CategoriesController {
     @Body() createCategoryDto: CreateCategoryDto,
     @Request() req: RequestWithUser,
   ) {
-    const restaurantId = req.user.isSuperAdmin
+    const restaurantId = req.user.role === UserRole.SUPER_ADMIN
       ? (createCategoryDto as any).restaurantId || req.user.restaurantId
       : req.user.restaurantId;
 
@@ -137,7 +137,7 @@ export class CategoriesController {
     @Body() updateCategoryDto: UpdateCategoryDto,
     @Request() req: RequestWithUser,
   ) {
-    const restaurantId = req.user.isSuperAdmin ? undefined : (req.user.restaurantId || 0);
+    const restaurantId = req.user.role === UserRole.SUPER_ADMIN ? undefined : (req.user.restaurantId || 0);
     return this.categoriesService.update(
       +id,
       updateCategoryDto,
