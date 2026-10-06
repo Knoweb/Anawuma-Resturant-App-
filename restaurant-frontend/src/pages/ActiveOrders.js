@@ -315,7 +315,7 @@ const ActiveOrders = () => {
                   </div>
 
                   <div className="filter-field">
-                    <label className="form-label">Table No</label>
+                    <label className="form-label">Table / Room No</label>
                     <input
                       type="text"
                       className="form-control"
@@ -377,7 +377,7 @@ const ActiveOrders = () => {
                       <thead>
                         <tr>
                           <th>Order No</th>
-                          <th>Table</th>
+                          <th>Table / Room</th>
                           <th>Status</th>
                           <th>Items</th>
                           <th>Total Amount</th>
@@ -393,7 +393,9 @@ const ActiveOrders = () => {
                               <strong>{order.orderNo}</strong>
                             </td>
                             <td>
-                              <span className="badge bg-dark">{order.tableNo}</span>
+                              <span className="badge bg-dark">
+                                {order.roomNo ? `Room ${order.roomNo}` : (order.tableNo ? `Table ${order.tableNo}` : '–')}
+                              </span>
                             </td>
                             <td>
                               <span className={`badge ${getStatusBadgeClass(order.status)}`}>

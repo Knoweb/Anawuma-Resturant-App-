@@ -206,9 +206,9 @@ export class OrdersService {
       });
     }
 
-    // Table number partial match
+    // Table number or Room number partial match
     if (tableNo) {
-      query.andWhere('order.tableNo LIKE :tableNo', {
+      query.andWhere('(order.tableNo LIKE :tableNo OR order.roomNo LIKE :tableNo)', {
         tableNo: `%${tableNo}%`,
       });
     }
