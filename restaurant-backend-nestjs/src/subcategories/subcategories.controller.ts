@@ -19,6 +19,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../auth/enums/role.enum';
 import { RestaurantsService } from '../restaurants/restaurants.service';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 
 @Controller('subcategories')
 export class SubcategoriesController {
@@ -37,6 +38,7 @@ export class SubcategoriesController {
   }
 
   @Get()
+  @UseGuards(OptionalJwtAuthGuard)
   async findAll(
     @Query('categoryId') categoryId?: string,
     @Query('restaurantId') restaurantIdQuery?: string,

@@ -26,6 +26,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../auth/enums/role.enum';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { RestaurantsService } from '../restaurants/restaurants.service';
 
 interface RequestWithUser extends Request {
@@ -88,6 +89,7 @@ export class CategoriesController {
   }
 
   @Get()
+  @UseGuards(OptionalJwtAuthGuard)
   async findAll(
     @Query('menuId') menuId?: string,
     @Query('restaurantId') restaurantIdQuery?: string,

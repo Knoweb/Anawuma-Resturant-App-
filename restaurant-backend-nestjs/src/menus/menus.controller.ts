@@ -25,6 +25,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../auth/enums/role.enum';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 
 interface RequestWithUser extends Request {
   user: {
@@ -90,8 +91,10 @@ export class MenusController {
   }
 
   @Get('all') // Added for backward compatibility if needed by frontend
-  findAllPublic(@Query('restaurantId') restaurantId?: string) {
-    return this.menusService.findAll(+(restaurantId || 0));
+  @UseGuards(OptionalJwtAuthGuard)
+  findAllPublic(@Query('restaurantId') restaurantIdQuery?: string, @Request() req?: any) {
+    const restaurantId = req?.user?.restaurantId || +(restaurantIdQuery || 0);
+    return this.menusService.findAll(restaurantId);
   }
 
   @Get(':id')
