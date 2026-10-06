@@ -250,7 +250,7 @@ export class BillingService {
     }
 
     // 5. Notify frontend
-    this.websocketGateway.server.emit('dashboard:refresh');
+    this.websocketGateway.server.to(`restaurant_${restaurantId}`).emit('dashboard:refresh');
 
     return savedInvoice;
   }
@@ -799,7 +799,7 @@ export class BillingService {
       status: saved.status,
       restaurantId: saved.restaurantId,
     });
-    this.websocketGateway.server.emit('dashboard:refresh');
+    this.websocketGateway.server.to(`restaurant_${order.restaurantId}`).emit('dashboard:refresh');
 
     return saved;
   }
@@ -1057,7 +1057,7 @@ export class BillingService {
       .andWhere('invoiceStatus != :paid', { paid: InvoiceStatus.PAID })
       .execute();
 
-    this.websocketGateway.server.emit('dashboard:refresh');
+    this.websocketGateway.server.to(`restaurant_${restaurantId}`).emit('dashboard:refresh');
 
     return {
       success: true,
@@ -1094,7 +1094,7 @@ export class BillingService {
     });
 
     const saved = await this.deleteRequestsRepository.save(req);
-    this.websocketGateway.server.emit('dashboard:refresh');
+    this.websocketGateway.server.to(`restaurant_${restaurantId}`).emit('dashboard:refresh');
     return saved;
   }
 
@@ -1130,7 +1130,7 @@ export class BillingService {
     invoice.invoiceStatus = InvoiceStatus.VOIDED;
     await this.invoicesRepository.save(invoice);
 
-    this.websocketGateway.server.emit('dashboard:refresh');
+    this.websocketGateway.server.to(`restaurant_${restaurantId}`).emit('dashboard:refresh');
     return { success: true, message: 'Invoice delete request approved and invoice voided.' };
   }
 
@@ -1153,7 +1153,7 @@ export class BillingService {
     request.adminNotes = adminNotes || null;
     await this.deleteRequestsRepository.save(request);
 
-    this.websocketGateway.server.emit('dashboard:refresh');
+    this.websocketGateway.server.to(`restaurant_${restaurantId}`).emit('dashboard:refresh');
     return { success: true, message: 'Invoice delete request rejected.' };
   }
 }

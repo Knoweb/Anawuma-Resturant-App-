@@ -168,7 +168,7 @@ export class OrdersService {
     });
 
     // Emit dashboard update
-    this.websocketGateway.server.emit('dashboard:refresh');
+    this.websocketGateway.server.to(`restaurant_${savedOrder.restaurantId}`).emit('dashboard:refresh');
     console.log('✅ WebSocket events emitted for order:', savedOrder.orderNo);
 
     return savedOrder;
@@ -376,7 +376,7 @@ export class OrdersService {
     });
 
     // Emit dashboard update
-    this.websocketGateway.server.emit('dashboard:refresh');
+    this.websocketGateway.server.to(`restaurant_${restaurantId}`).emit('dashboard:refresh');
 
     return updatedOrder;
   }
@@ -401,7 +401,7 @@ export class OrdersService {
     });
 
     // Emit dashboard update
-    this.websocketGateway.server.emit('dashboard:refresh');
+    this.websocketGateway.server.to(`restaurant_${order.restaurantId}`).emit('dashboard:refresh');
 
     return updatedOrder;
   }

@@ -28,7 +28,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
   server: Server;
 
   private logger = new Logger('WebsocketGateway');
-  private connectedClients = new Map<string, { socketId: string; userId?: number; role?: string }>();
+  private connectedClients = new Map<string, { socketId: string; userId?: number; role?: string; restaurantId?: number }>();
 
   afterInit(server: Server) {
     this.logger.log('WebSocket Gateway initialized');
@@ -50,67 +50,73 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
   @SubscribeMessage('authenticate')
   handleAuthenticate(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { userId: number; role: string },
+    @MessageBody() data: { userId: number; role: string; restaurantId?: number },
   ) {
     this.connectedClients.set(client.id, {
       socketId: client.id,
       userId: data.userId,
       role: data.role,
+      restaurantId: data.restaurantId,
     });
-    this.logger.log(`Client authenticated: ${client.id} - User: ${data.userId} - Role: ${data.role}`);
+    
+    if (data.restaurantId) {
+      client.join(`restaurant_${data.restaurantId}`);
+    }
+    
+    this.logger.log(`Client authenticated: ${client.id} - User: ${data.userId} - Role: ${data.role} - Restaurant: ${data.restaurantId}`);
     return { success: true };
   }
 
-  private dashboardUpdateTimeout: NodeJS.Timeout | null = null;
-  private latestDashboardStats: any = null;
+  private dashboardUpdateTimeout = new Map<number, NodeJS.Timeout>();
+  private latestDashboardStats = new Map<number, any>();
 
-  // Emit dashboard stats update to all clients with debouncing
-  emitDashboardUpdate(stats: any) {
-    this.latestDashboardStats = stats;
-    if (!this.dashboardUpdateTimeout) {
-      this.dashboardUpdateTimeout = setTimeout(() => {
-        if (this.latestDashboardStats) {
-          this.server.emit('dashboard:update', this.latestDashboardStats);
-          this.logger.log('Dashboard stats broadcasted (debounced)');
+  // Emit dashboard stats update with debouncing per restaurant
+  emitDashboardUpdate(stats: any, restaurantId: number) {
+    this.latestDashboardStats.set(restaurantId, stats);
+    if (!this.dashboardUpdateTimeout.has(restaurantId)) {
+      const timeout = setTimeout(() => {
+        const currentStats = this.latestDashboardStats.get(restaurantId);
+        if (currentStats) {
+          this.server.to(`restaurant_${restaurantId}`).emit('dashboard:update', currentStats);
+          this.logger.log(`Dashboard stats broadcasted to restaurant ${restaurantId} (debounced)`);
         }
-        this.dashboardUpdateTimeout = null;
-      }, 500); // 500ms debounce
+        this.dashboardUpdateTimeout.delete(restaurantId);
+      }, 500);
+      this.dashboardUpdateTimeout.set(restaurantId, timeout);
     }
   }
 
   // Emit new order notification
   emitNewOrder(order: any) {
-    const clientCount = this.connectedClients.size;
-    this.logger.log(`🔔 EMITTING NEW ORDER EVENT to ${clientCount} clients`);
-    this.logger.log(`Order details: ${JSON.stringify(order)}`);
-    
-    setImmediate(() => {
-      this.server.emit('order:new', order);
-      this.logger.log(`✅ New order notification sent to all ${clientCount} connected clients (async)`);
-    });
+    const restaurantId = order.restaurantId;
+    if (restaurantId) {
+      setImmediate(() => {
+        this.server.to(`restaurant_${restaurantId}`).emit('order:new', order);
+        this.logger.log(`✅ New order notification sent to restaurant ${restaurantId} (async)`);
+      });
+    }
   }
 
   // Emit order status update
   emitOrderStatusUpdate(order: any) {
-    const clientCount = this.connectedClients.size;
-    this.logger.log(`📋 EMITTING ORDER STATUS UPDATE to ${clientCount} clients`);
-    this.logger.log(`Order details: ${JSON.stringify(order)}`);
-    
-    setImmediate(() => {
-      this.server.emit('order:status-update', order);
-      this.logger.log(`✅ Order status update sent to all ${clientCount} connected clients (async)`);
-    });
+    const restaurantId = order.restaurantId;
+    if (restaurantId) {
+      setImmediate(() => {
+        this.server.to(`restaurant_${restaurantId}`).emit('order:status-update', order);
+        this.logger.log(`✅ Order status update sent to restaurant ${restaurantId} (async)`);
+      });
+    }
   }
 
-  // Emit notification to specific user role
-  emitToRole(role: string, event: string, data: any) {
+  // Emit notification to specific user role within a restaurant
+  emitToRole(role: string, event: string, data: any, restaurantId: number) {
     const roleClients = Array.from(this.connectedClients.values())
-      .filter((client) => client.role === role);
+      .filter((client) => client.role === role && client.restaurantId === restaurantId);
     
     roleClients.forEach((client) => {
       this.server.to(client.socketId).emit(event, data);
     });
     
-    this.logger.log(`Event ${event} sent to ${roleClients.length} clients with role: ${role}`);
+    this.logger.log(`Event ${event} sent to ${roleClients.length} clients with role: ${role} in restaurant: ${restaurantId}`);
   }
 }

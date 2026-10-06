@@ -185,6 +185,7 @@ export const WebSocketProvider = ({ children }) => {
           newSocket.emit('authenticate', {
             userId: currentUser.id,
             role: currentUser.role,
+            restaurantId: currentUser.restaurantId,
           });
         }
       });
