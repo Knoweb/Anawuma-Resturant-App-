@@ -51,12 +51,12 @@ export class OrdersService {
     // Fetch all food items in one query
     const foodItemIds = items.map((item) => item.foodItemId);
     const foodItems = await this.foodItemsRepository.find({
-      where: { foodItemId: In(foodItemIds) },
+      where: { foodItemId: In(foodItemIds), restaurantId },
       relations: ['offers'],
     });
 
     if (foodItems.length !== foodItemIds.length) {
-      throw new NotFoundException('One or more food items not found');
+      throw new BadRequestException('Your cart contains items that are unavailable or from another restaurant. Please clear your cart and try again.');
     }
 
     // Create a map for quick lookup
