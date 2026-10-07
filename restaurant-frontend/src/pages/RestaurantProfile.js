@@ -175,7 +175,9 @@ function RestaurantProfile() {
         Swal.fire('Success!', 'Role added successfully.', 'success');
         fetchData();
       } catch (error) {
-        Swal.fire('Error!', error.response?.data?.message || 'Failed to add role.', 'error');
+        const msg = error.response?.data?.message;
+        const text = Array.isArray(msg) ? msg.join('\\n') : (msg || 'Failed to add role.');
+        Swal.fire('Error!', text, 'error');
       }
     }
   };
