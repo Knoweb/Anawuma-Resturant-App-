@@ -86,7 +86,7 @@ export class Order {
   @Column({ name: 'restaurant_id', type: 'int' })
   restaurantId: number;
 
-  @ManyToOne(() => Restaurant, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Restaurant, { onDelete: 'CASCADE', createForeignKeyConstraints: false })
   @JoinColumn({ name: 'restaurant_id' })
   restaurant: Restaurant;
 
