@@ -8,6 +8,7 @@ import {
   ManyToOne,
   JoinColumn,
   Index,
+  Unique,
 } from 'typeorm';
 import { OrderItem } from './order-item.entity';
 import { Restaurant } from '../../restaurants/entities/restaurant.entity';
@@ -34,11 +35,12 @@ export enum OrderType {
 @Index(['restaurantId'])
 @Index(['status'])
 @Index(['createdAt'])
+@Unique(['restaurantId', 'orderNo'])
 export class Order {
   @PrimaryGeneratedColumn({ name: 'order_id' })
   orderId: number;
 
-  @Column({ name: 'order_no', type: 'varchar', length: 50, unique: true, nullable: true })
+  @Column({ name: 'order_no', type: 'varchar', length: 50, nullable: true })
   orderNo: string;
 
   @Column({ name: 'customer_name', type: 'varchar', length: 255, nullable: true })

@@ -53,15 +53,7 @@ export class OrdersController {
       orderType
     };
 
-    try {
-      return await this.ordersService.create(orderData, restaurantId);
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      // Send the real error message to the client so we can see it on the frontend modal!
-      throw new BadRequestException(`DEBUG ERROR: ${error.message} \nStack: ${error.stack}`);
-    }
+    return this.ordersService.create(orderData, restaurantId);
   }
 
   @Post('manual')
