@@ -28,7 +28,7 @@ export class Subcategory {
   @JoinColumn({ name: 'parent_category_id' })
   category: Category;
 
-  @ManyToOne(() => Restaurant)
+  @ManyToOne(() => Restaurant, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'restaurant_id' })
   restaurant: Restaurant;
 

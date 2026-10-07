@@ -9,6 +9,7 @@ import {
   Index,
 } from 'typeorm';
 import { Admin } from '../../auth/entities/admin.entity';
+import { Restaurant } from '../../restaurants/entities/restaurant.entity';
 
 export enum InvoiceStatus {
   PENDING = 'PENDING',
@@ -43,6 +44,10 @@ export class Invoice {
 
   @Column({ name: 'restaurant_id', type: 'int' })
   restaurantId: number;
+
+  @ManyToOne(() => Restaurant, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'restaurant_id' })
+  restaurant: Restaurant;
 
   @Column({
     name: 'customer_name',

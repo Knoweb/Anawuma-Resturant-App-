@@ -34,7 +34,7 @@ export class ReportsHistory {
   @CreateDateColumn({ name: 'generated_at' })
   generatedAt: Date;
 
-  @ManyToOne(() => Restaurant)
+  @ManyToOne(() => Restaurant, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'restaurant_id' })
   restaurant: Restaurant;
 }

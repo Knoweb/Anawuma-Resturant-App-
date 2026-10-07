@@ -59,7 +59,7 @@ export class Offer {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @ManyToOne(() => Restaurant)
+  @ManyToOne(() => Restaurant, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'restaurant_id' })
   restaurant: Restaurant;
 

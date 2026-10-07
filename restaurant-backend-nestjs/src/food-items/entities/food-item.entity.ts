@@ -77,7 +77,7 @@ export class FoodItem {
   @JoinColumn({ name: 'subcategory_id' })
   subcategory: Subcategory;
 
-  @ManyToOne(() => Restaurant)
+  @ManyToOne(() => Restaurant, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'restaurant_id' })
   restaurant: Restaurant;
 

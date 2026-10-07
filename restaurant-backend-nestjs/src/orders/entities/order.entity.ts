@@ -10,6 +10,8 @@ import {
   Index,
 } from 'typeorm';
 import { OrderItem } from './order-item.entity';
+import { Restaurant } from '../../restaurants/entities/restaurant.entity';
+import { Admin } from '../../auth/entities/admin.entity';
 
 export enum OrderStatus {
   NEW = 'NEW',
@@ -27,7 +29,6 @@ export enum OrderType {
   MANUAL_CASHIER = 'MANUAL_CASHIER',
 }
 
-import { Admin } from '../../auth/entities/admin.entity';
 
 @Entity('kitchen_orders_tbl')
 @Index(['restaurantId'])
@@ -84,6 +85,10 @@ export class Order {
 
   @Column({ name: 'restaurant_id', type: 'int' })
   restaurantId: number;
+
+  @ManyToOne(() => Restaurant, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'restaurant_id' })
+  restaurant: Restaurant;
 
   @Column({ name: 'created_by_admin_id', type: 'int', nullable: true })
   createdByAdminId: number | null;
