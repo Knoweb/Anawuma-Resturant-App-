@@ -42,9 +42,13 @@ export class MenusService {
     return menus.map((menu) => this.resolveImageUrl(menu));
   }
 
-  async findOne(id: number, restaurantId: number): Promise<Menu> {
+  async findOne(id: number, restaurantId?: number): Promise<Menu> {
+    const where: any = { menuId: id };
+    if (restaurantId !== undefined) {
+      where.restaurantId = restaurantId;
+    }
     const menu = await this.menusRepository.findOne({
-      where: { menuId: id, restaurantId },
+      where,
     });
 
     if (!menu) {
@@ -54,9 +58,13 @@ export class MenusService {
     return this.resolveImageUrl(menu);
   }
 
-  async update(id: number, updateMenuDto: UpdateMenuDto, restaurantId: number): Promise<Menu> {
+  async update(id: number, updateMenuDto: UpdateMenuDto, restaurantId?: number): Promise<Menu> {
+    const where: any = { menuId: id };
+    if (restaurantId !== undefined) {
+      where.restaurantId = restaurantId;
+    }
     const menu = await this.menusRepository.findOne({
-      where: { menuId: id, restaurantId },
+      where,
     });
 
     if (!menu) {
@@ -68,7 +76,7 @@ export class MenusService {
     return this.resolveImageUrl(updatedMenu);
   }
 
-  async remove(id: number, restaurantId: number): Promise<void> {
+  async remove(id: number, restaurantId?: number): Promise<void> {
     const menu = await this.findOne(id, restaurantId);
 
     // Find all food items for this menu

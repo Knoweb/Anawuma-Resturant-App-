@@ -101,7 +101,8 @@ export class MenusController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   findOne(@Param('id') id: string, @Request() req: RequestWithUser) {
-    return this.menusService.findOne(+id, req.user.restaurantId || 0);
+    const restaurantId = req.user.role === UserRole.SUPER_ADMIN ? undefined : (req.user.restaurantId || 0);
+    return this.menusService.findOne(+id, restaurantId);
   }
 
   @Patch(':id')
@@ -112,10 +113,11 @@ export class MenusController {
     @Body() updateMenuDto: UpdateMenuDto,
     @Request() req: RequestWithUser,
   ) {
+    const restaurantId = req.user.role === UserRole.SUPER_ADMIN ? undefined : (req.user.restaurantId || 0);
     return this.menusService.update(
       +id,
       updateMenuDto,
-      req.user.restaurantId || 0,
+      restaurantId,
     );
   }
 
@@ -123,6 +125,7 @@ export class MenusController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   remove(@Param('id') id: string, @Request() req: RequestWithUser) {
-    return this.menusService.remove(+id, req.user.restaurantId || 0);
+    const restaurantId = req.user.role === UserRole.SUPER_ADMIN ? undefined : (req.user.restaurantId || 0);
+    return this.menusService.remove(+id, restaurantId);
   }
 }

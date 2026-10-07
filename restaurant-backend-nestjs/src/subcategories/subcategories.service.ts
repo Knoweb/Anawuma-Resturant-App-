@@ -69,9 +69,13 @@ export class SubcategoriesService {
     });
   }
 
-  async findOne(id: number, restaurantId: number): Promise<Subcategory> {
+  async findOne(id: number, restaurantId?: number): Promise<Subcategory> {
+    const where: any = { subcategoryId: id };
+    if (restaurantId !== undefined) {
+      where.restaurantId = restaurantId;
+    }
     const subcategory = await this.subcategoriesRepository.findOne({
-      where: { subcategoryId: id, restaurantId },
+      where,
       relations: ['category'],
     });
 
@@ -85,7 +89,7 @@ export class SubcategoriesService {
   async update(
     id: number,
     updateSubcategoryDto: UpdateSubcategoryDto,
-    restaurantId: number,
+    restaurantId?: number,
   ): Promise<Subcategory> {
     const subcategory = await this.findOne(id, restaurantId);
 
@@ -109,9 +113,13 @@ export class SubcategoriesService {
     return await this.subcategoriesRepository.save(subcategory);
   }
 
-  async remove(id: number, restaurantId: number): Promise<void> {
+  async remove(id: number, restaurantId?: number): Promise<void> {
+    const where: any = { subcategoryId: id };
+    if (restaurantId !== undefined) {
+      where.restaurantId = restaurantId;
+    }
     const subcategory = await this.subcategoriesRepository.findOne({
-      where: { subcategoryId: id, restaurantId },
+      where,
       relations: ['foodItems'],
     });
 

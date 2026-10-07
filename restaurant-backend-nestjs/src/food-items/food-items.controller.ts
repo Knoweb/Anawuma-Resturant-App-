@@ -158,7 +158,7 @@ export class FoodItemsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   findOne(@Param('id', ParseIntPipe) id: number, @Request() req) {
-    const restaurantId = req.user.restaurantId;
+    const restaurantId = req.user.role === UserRole.SUPER_ADMIN ? undefined : req.user.restaurantId;
     return this.foodItemsService.findOne(id, restaurantId);
   }
 
@@ -170,7 +170,7 @@ export class FoodItemsController {
     @Body() updateFoodItemDto: UpdateFoodItemDto,
     @Request() req,
   ) {
-    const restaurantId = req.user.restaurantId;
+    const restaurantId = req.user.role === UserRole.SUPER_ADMIN ? undefined : req.user.restaurantId;
     return this.foodItemsService.update(id, updateFoodItemDto, restaurantId);
   }
 
@@ -178,7 +178,7 @@ export class FoodItemsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   remove(@Param('id', ParseIntPipe) id: number, @Request() req) {
-    const restaurantId = req.user.restaurantId;
+    const restaurantId = req.user.role === UserRole.SUPER_ADMIN ? undefined : req.user.restaurantId;
     return this.foodItemsService.remove(id, restaurantId);
   }
 }

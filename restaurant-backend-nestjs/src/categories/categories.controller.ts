@@ -126,7 +126,8 @@ export class CategoriesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   findOne(@Param('id') id: string, @Request() req: RequestWithUser) {
-    return this.categoriesService.findOne(+id, req.user.restaurantId || 0);
+    const restaurantId = req.user.role === UserRole.SUPER_ADMIN ? undefined : (req.user.restaurantId || 0);
+    return this.categoriesService.findOne(+id, restaurantId);
   }
 
   @Patch(':id')
@@ -149,7 +150,8 @@ export class CategoriesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   async remove(@Param('id') id: string, @Request() req: RequestWithUser) {
-    await this.categoriesService.remove(+id, req.user.restaurantId || 0);
+    const restaurantId = req.user.role === UserRole.SUPER_ADMIN ? undefined : (req.user.restaurantId || 0);
+    await this.categoriesService.remove(+id, restaurantId);
     return { message: 'Category deleted successfully' };
   }
 }

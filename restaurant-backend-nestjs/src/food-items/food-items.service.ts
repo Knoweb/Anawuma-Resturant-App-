@@ -230,10 +230,14 @@ export class FoodItemsService {
     return item;
   }
 
-  async findOne(id: number, restaurantId: number): Promise<any> {
+  async findOne(id: number, restaurantId?: number): Promise<any> {
     const now = new Date();
+    const where: any = { foodItemId: id };
+    if (restaurantId !== undefined) {
+      where.restaurantId = restaurantId;
+    }
     const foodItem = await this.foodItemsRepository.findOne({
-      where: { foodItemId: id, restaurantId },
+      where,
       relations: ['menu', 'category', 'subcategory', 'offers'],
     });
 
@@ -257,7 +261,7 @@ export class FoodItemsService {
   async update(
     id: number,
     updateFoodItemDto: UpdateFoodItemDto,
-    restaurantId: number,
+    restaurantId?: number,
   ): Promise<FoodItem> {
     const foodItem = await this.findOne(id, restaurantId);
 
@@ -327,7 +331,7 @@ export class FoodItemsService {
     return await this.findOne(id, restaurantId);
   }
 
-  async remove(id: number, restaurantId: number): Promise<void> {
+  async remove(id: number, restaurantId?: number): Promise<void> {
     const foodItem = await this.findOne(id, restaurantId);
     
     // Per user request: keep history by setting foodItemId to NULL

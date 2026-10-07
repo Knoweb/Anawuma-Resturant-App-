@@ -57,9 +57,13 @@ export class CategoriesService {
     return categories.map((category) => this.resolveImageUrl(category));
   }
 
-  async findOne(id: number, restaurantId: number): Promise<Category> {
+  async findOne(id: number, restaurantId?: number): Promise<Category> {
+    const where: any = { categoryId: id };
+    if (restaurantId !== undefined) {
+      where.restaurantId = restaurantId;
+    }
     const category = await this.categoriesRepository.findOne({
-      where: { categoryId: id, restaurantId },
+      where,
       relations: ['menu'],
     });
 
@@ -93,9 +97,13 @@ export class CategoriesService {
     return this.resolveImageUrl(updatedCategory);
   }
 
-  async remove(id: number, restaurantId: number): Promise<void> {
+  async remove(id: number, restaurantId?: number): Promise<void> {
+    const where: any = { categoryId: id };
+    if (restaurantId !== undefined) {
+      where.restaurantId = restaurantId;
+    }
     const category = await this.categoriesRepository.findOne({
-      where: { categoryId: id, restaurantId },
+      where,
       relations: ['subcategories', 'foodItems'],
     });
 

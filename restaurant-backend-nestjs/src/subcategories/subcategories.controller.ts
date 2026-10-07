@@ -33,7 +33,7 @@ export class SubcategoriesController {
   @Post()
   create(@Body() createSubcategoryDto: CreateSubcategoryDto, @Request() req) {
     const restaurantId =
-      req.user.role === 'super_admin' ? null : req.user.restaurantId;
+      req.user.role === 'super_admin' ? undefined : req.user.restaurantId;
     return this.subcategoriesService.create(createSubcategoryDto, restaurantId);
   }
 
@@ -72,7 +72,7 @@ export class SubcategoriesController {
   @Get(':id')
   findOne(@Param('id') id: string, @Request() req) {
     const restaurantId =
-      req.user.role === 'super_admin' ? null : req.user.restaurantId;
+      req.user.role === 'super_admin' ? undefined : req.user.restaurantId;
     return this.subcategoriesService.findOne(+id, restaurantId);
   }
 
@@ -85,7 +85,7 @@ export class SubcategoriesController {
     @Request() req,
   ) {
     const restaurantId =
-      req.user.role === 'super_admin' ? null : req.user.restaurantId;
+      req.user.role === 'super_admin' ? undefined : req.user.restaurantId;
     return this.subcategoriesService.update(+id, updateSubcategoryDto, restaurantId);
   }
 
@@ -94,7 +94,7 @@ export class SubcategoriesController {
   @Delete(':id')
   remove(@Param('id') id: string, @Request() req) {
     const restaurantId =
-      req.user.role === 'super_admin' ? null : req.user.restaurantId;
+      req.user.role === 'super_admin' ? undefined : req.user.restaurantId;
     return this.subcategoriesService.remove(+id, restaurantId);
   }
 }
