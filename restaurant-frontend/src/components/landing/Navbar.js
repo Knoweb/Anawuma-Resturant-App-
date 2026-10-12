@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { sanitizeUrl } from '../../api/apiClient';
@@ -176,158 +177,166 @@ const Navbar = () => {
           </button>
         </nav>
       </div>
+    </header>
 
-      {/* ===================================== */}
-      {/* MOBILE & TABLET DRAWER OVERLAY       */}
-      {/* ===================================== */}
-      <div
-        className={`nav-drawer-backdrop${menuOpen ? ' open' : ''}`}
-        onClick={() => setMenuOpen(false)}
-        aria-hidden={!menuOpen}
-      />
+    {/* ===================================== */}
+    {/* MOBILE & TABLET DRAWER OVERLAY       */}
+    {/* Rendered into body via createPortal   */}
+    {/* to avoid header backdrop-filter clip */}
+    {/* ===================================== */}
+    {typeof document !== 'undefined' && createPortal(
+      <>
+        <div
+          className={`nav-drawer-backdrop${menuOpen ? ' open' : ''}`}
+          onClick={() => setMenuOpen(false)}
+          aria-hidden={!menuOpen}
+        />
 
-      <aside
-        className={`nav-drawer${menuOpen ? ' open' : ''}`}
-        aria-hidden={!menuOpen}
-      >
-        {/* Drawer Header */}
-        <div className="nav-drawer-header">
-          <Link to="/" className="drawer-logo" onClick={() => setMenuOpen(false)}>
-            <img src="/assets/images/logos/logo-rmbg-2.png" alt="Anawuma" />
-          </Link>
-          <button
-            type="button"
-            className="nav-drawer-close"
-            onClick={() => setMenuOpen(false)}
-            aria-label="Close menu"
-          >
-            <i className="fas fa-times"></i>
-          </button>
-        </div>
-
-        {/* Drawer Scrollable Content */}
-        <div className="nav-drawer-content">
-          {/* Main Navigation Links */}
-          <div className="drawer-section">
-            <span className="drawer-section-title">Navigation</span>
-            <ul className="drawer-nav-list">
-              <li>
-                <a href="/#home" onClick={() => setMenuOpen(false)} className={isActive('/#home') ? 'active-drawer-link' : ''}>
-                  <i className="fas fa-home"></i>
-                  <span>Home</span>
-                </a>
-              </li>
-              <li>
-                <a href="/#features" onClick={() => setMenuOpen(false)} className={isActive('/#features') ? 'active-drawer-link' : ''}>
-                  <i className="fas fa-layer-group"></i>
-                  <span>Features</span>
-                </a>
-              </li>
-              <li>
-                <Link to="/pricing" onClick={() => setMenuOpen(false)} className={isActive('/pricing') ? 'active-drawer-link' : ''}>
-                  <i className="fas fa-tags"></i>
-                  <span>Pricing</span>
-                </Link>
-              </li>
-              <li>
-                <Link to="/about" onClick={() => setMenuOpen(false)} className={isActive('/about') ? 'active-drawer-link' : ''}>
-                  <i className="fas fa-info-circle"></i>
-                  <span>About</span>
-                </Link>
-              </li>
-              <li>
-                <Link to="/blog" onClick={() => setMenuOpen(false)} className={isActive('/blog') ? 'active-drawer-link' : ''}>
-                  <i className="fas fa-newspaper"></i>
-                  <span>Blogs</span>
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" onClick={() => setMenuOpen(false)} className={isActive('/contact') ? 'active-drawer-link' : ''}>
-                  <i className="fas fa-envelope"></i>
-                  <span>Contact</span>
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Portals & Logins Section */}
-          <div className="drawer-section">
+        <aside
+          className={`nav-drawer${menuOpen ? ' open' : ''}`}
+          aria-hidden={!menuOpen}
+        >
+          {/* Drawer Header */}
+          <div className="nav-drawer-header">
+            <Link to="/" className="drawer-logo" onClick={() => setMenuOpen(false)}>
+              <img src="/assets/images/logos/logo-rmbg-2.png" alt="Anawuma" />
+            </Link>
             <button
               type="button"
-              className="drawer-accordion-btn"
-              onClick={() => setMobilePortalsOpen(prev => !prev)}
+              className="nav-drawer-close"
+              onClick={() => setMenuOpen(false)}
+              aria-label="Close menu"
             >
-              <div className="accordion-label-group">
-                <i className="fas fa-th-large"></i>
-                <span>Portals & Staff Logins</span>
-                <span className="portal-badge-count">{portalLinks.length}</span>
-              </div>
-              <i className={`fas fa-chevron-down accordion-arrow${mobilePortalsOpen ? ' rotated' : ''}`}></i>
+              <i className="fas fa-times"></i>
             </button>
+          </div>
 
-            <div className={`drawer-portals-grid${mobilePortalsOpen ? ' open' : ''}`}>
-              {portalLinks.map(portal => (
-                <Link
-                  key={portal.to}
-                  to={portal.to}
-                  className="drawer-portal-card"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  <div className="portal-card-icon-wrap">
-                    <i className={`fas ${portal.icon}`}></i>
+          {/* Drawer Scrollable Content */}
+          <div className="nav-drawer-content">
+            {/* Main Navigation Links */}
+            <div className="drawer-section">
+              <span className="drawer-section-title">Navigation</span>
+              <ul className="drawer-nav-list">
+                <li>
+                  <a href="/#home" onClick={() => setMenuOpen(false)} className={isActive('/#home') ? 'active-drawer-link' : ''}>
+                    <i className="fas fa-home"></i>
+                    <span>Home</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/#features" onClick={() => setMenuOpen(false)} className={isActive('/#features') ? 'active-drawer-link' : ''}>
+                    <i className="fas fa-layer-group"></i>
+                    <span>Features</span>
+                  </a>
+                </li>
+                <li>
+                  <Link to="/pricing" onClick={() => setMenuOpen(false)} className={isActive('/pricing') ? 'active-drawer-link' : ''}>
+                    <i className="fas fa-tags"></i>
+                    <span>Pricing</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/about" onClick={() => setMenuOpen(false)} className={isActive('/about') ? 'active-drawer-link' : ''}>
+                    <i className="fas fa-info-circle"></i>
+                    <span>About</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/blog" onClick={() => setMenuOpen(false)} className={isActive('/blog') ? 'active-drawer-link' : ''}>
+                    <i className="fas fa-newspaper"></i>
+                    <span>Blogs</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/contact" onClick={() => setMenuOpen(false)} className={isActive('/contact') ? 'active-drawer-link' : ''}>
+                    <i className="fas fa-envelope"></i>
+                    <span>Contact</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Portals & Logins Section */}
+            <div className="drawer-section">
+              <button
+                type="button"
+                className="drawer-accordion-btn"
+                onClick={() => setMobilePortalsOpen(prev => !prev)}
+              >
+                <div className="accordion-label-group">
+                  <i className="fas fa-th-large"></i>
+                  <span>Portals & Staff Logins</span>
+                  <span className="portal-badge-count">{portalLinks.length}</span>
+                </div>
+                <i className={`fas fa-chevron-down accordion-arrow${mobilePortalsOpen ? ' rotated' : ''}`}></i>
+              </button>
+
+              <div className={`drawer-portals-grid${mobilePortalsOpen ? ' open' : ''}`}>
+                {portalLinks.map(portal => (
+                  <Link
+                    key={portal.to}
+                    to={portal.to}
+                    className="drawer-portal-card"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <div className="portal-card-icon-wrap">
+                      <i className={`fas ${portal.icon}`}></i>
+                    </div>
+                    <div className="portal-card-info">
+                      <span className="portal-card-title">{portal.label}</span>
+                      <span className="portal-card-badge">{portal.badge}</span>
+                    </div>
+                    <i className="fas fa-arrow-right portal-card-arrow"></i>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Auth / Action Section */}
+            <div className="drawer-section drawer-cta-section">
+              {user ? (
+                <div className="drawer-user-box">
+                  <div className="drawer-user-info">
+                    <div className="drawer-user-avatar">
+                      {user.restaurantLogo ? (
+                        <img src={sanitizeUrl(user.restaurantLogo)} alt="Restaurant Logo" />
+                      ) : (
+                        <i className="fas fa-store"></i>
+                      )}
+                    </div>
+                    <div className="drawer-user-meta">
+                      <span className="drawer-user-name">{user.restaurantName || 'My Hotel'}</span>
+                      <span className="drawer-user-role">{user.role || 'Administrator'}</span>
+                    </div>
                   </div>
-                  <div className="portal-card-info">
-                    <span className="portal-card-title">{portal.label}</span>
-                    <span className="portal-card-badge">{portal.badge}</span>
-                  </div>
-                  <i className="fas fa-arrow-right portal-card-arrow"></i>
-                </Link>
-              ))}
+                  <Link to="/my-hotel" className="drawer-btn-hotel" onClick={() => setMenuOpen(false)}>
+                    Manage Hotel <i className="fas fa-cog"></i>
+                  </Link>
+                </div>
+              ) : (
+                <div className="drawer-auth-buttons">
+                  <Link to="/register" className="drawer-btn-register" onClick={() => setMenuOpen(false)}>
+                    <span>Register Restaurant</span>
+                    <i className="fas fa-arrow-right"></i>
+                  </Link>
+                  <Link to="/login" className="drawer-btn-login" onClick={() => setMenuOpen(false)}>
+                    <i className="fas fa-lock"></i>
+                    <span>Restaurant Login</span>
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Auth / Action Section */}
-          <div className="drawer-section drawer-cta-section">
-            {user ? (
-              <div className="drawer-user-box">
-                <div className="drawer-user-info">
-                  <div className="drawer-user-avatar">
-                    {user.restaurantLogo ? (
-                      <img src={sanitizeUrl(user.restaurantLogo)} alt="Restaurant Logo" />
-                    ) : (
-                      <i className="fas fa-store"></i>
-                    )}
-                  </div>
-                  <div className="drawer-user-meta">
-                    <span className="drawer-user-name">{user.restaurantName || 'My Hotel'}</span>
-                    <span className="drawer-user-role">{user.role || 'Administrator'}</span>
-                  </div>
-                </div>
-                <Link to="/my-hotel" className="drawer-btn-hotel" onClick={() => setMenuOpen(false)}>
-                  Manage Hotel <i className="fas fa-cog"></i>
-                </Link>
-              </div>
-            ) : (
-              <div className="drawer-auth-buttons">
-                <Link to="/register" className="drawer-btn-register" onClick={() => setMenuOpen(false)}>
-                  <span>Register Restaurant</span>
-                  <i className="fas fa-arrow-right"></i>
-                </Link>
-                <Link to="/login" className="drawer-btn-login" onClick={() => setMenuOpen(false)}>
-                  <i className="fas fa-lock"></i>
-                  <span>Restaurant Login</span>
-                </Link>
-              </div>
-            )}
+          {/* Drawer Footer */}
+          <div className="nav-drawer-footer">
+            <p>© {new Date().getFullYear()} Anawuma. Cloud Restaurant POS.</p>
           </div>
-        </div>
-
-        {/* Drawer Footer */}
-        <div className="nav-drawer-footer">
-          <p>© {new Date().getFullYear()} Anawuma. Cloud Restaurant POS.</p>
-        </div>
-      </aside>
-    </header>
+        </aside>
+      </>,
+      document.body
+    )}
+  </>
   );
 };
 
