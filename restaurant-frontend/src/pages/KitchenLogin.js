@@ -97,11 +97,6 @@ function KitchenLogin() {
 
     return (
         <div className="role-login-page theme-kitchen">
-            {/* Background Ambience */}
-            <div className="role-bg-orb role-bg-orb-1"></div>
-            <div className="role-bg-orb role-bg-orb-2"></div>
-            <div className="role-grid-overlay"></div>
-
             {/* Brand Header */}
             <Link to="/" className="role-header-brand" title="Back to Home">
                 <img src="/assets/images/logos/logo-rmbg-2.png" alt="Anawuma" />
