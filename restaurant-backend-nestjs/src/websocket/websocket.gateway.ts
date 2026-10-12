@@ -67,6 +67,35 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     return { success: true };
   }
 
+  @SubscribeMessage('join_restaurant')
+  handleJoinRestaurant(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { restaurantId: number },
+  ) {
+    if (data && data.restaurantId) {
+      client.join(`restaurant_${data.restaurantId}`);
+      this.logger.log(`👥 Guest client ${client.id} joined restaurant_${data.restaurantId}`);
+      return { success: true };
+    }
+    return { success: false };
+  }
+
+  @SubscribeMessage('join_order')
+  handleJoinOrder(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { orderId: number; restaurantId?: number },
+  ) {
+    if (data && data.orderId) {
+      client.join(`order_${data.orderId}`);
+      if (data.restaurantId) {
+        client.join(`restaurant_${data.restaurantId}`);
+      }
+      this.logger.log(`📦 Guest client ${client.id} joined order_${data.orderId}`);
+      return { success: true };
+    }
+    return { success: false };
+  }
+
   private dashboardUpdateTimeout = new Map<number, NodeJS.Timeout>();
   private latestDashboardStats = new Map<number, any>();
 
@@ -97,15 +126,19 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     }
   }
 
-  // Emit order status update
+  // Emit order status update to restaurant room AND specific order room
   emitOrderStatusUpdate(order: any) {
     const restaurantId = order.restaurantId;
-    if (restaurantId) {
-      setImmediate(() => {
+    const orderId = order.orderId || order.id;
+    setImmediate(() => {
+      if (restaurantId) {
         this.server.to(`restaurant_${restaurantId}`).emit('order:status-update', order);
-        this.logger.log(`✅ Order status update sent to restaurant ${restaurantId} (async)`);
-      });
-    }
+      }
+      if (orderId) {
+        this.server.to(`order_${orderId}`).emit('order:status-update', order);
+      }
+      this.logger.log(`✅ Order status update sent to restaurant ${restaurantId} & order ${orderId} (async)`);
+    });
   }
 
   // Emit notification to specific user role within a restaurant

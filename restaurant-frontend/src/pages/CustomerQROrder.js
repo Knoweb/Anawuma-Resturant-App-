@@ -120,7 +120,7 @@ const CustomerQROrder = ({ isManual = false }) => {
   const [currentOrderStatus, setCurrentOrderStatus] = useState(null);
   // eslint-disable-next-line no-unused-vars
   const [shownNotifications, setShownNotifications] = useState(new Set());
-  const { subscribe, connected } = useWebSocket();
+  const { subscribe, emit, connected } = useWebSocket();
   const [offers, setOffers] = useState([]);
   const [showOffersModal, setShowOffersModal] = useState(false);
 
@@ -190,6 +190,16 @@ const CustomerQROrder = ({ isManual = false }) => {
 
       const newStatus = response.data.status;
 
+      setOrderSuccess(prev => {
+        if (!prev) return prev;
+        const updated = { ...prev, status: newStatus };
+        try {
+          const key = tableKey || roomKey;
+          if (key) localStorage.setItem(`active_order_${key}`, JSON.stringify(updated));
+        } catch (e) {}
+        return updated;
+      });
+
       setCurrentOrderStatus(prevStatus => {
         if (newStatus !== prevStatus) {
           setShownNotifications(prevNotifications => {
@@ -199,6 +209,12 @@ const CustomerQROrder = ({ isManual = false }) => {
                   'Order Accepted! 👨‍🍳',
                   `Your order ${orderSuccess.orderNo} has been accepted by the kitchen.`,
                   'success'
+                );
+              } else if (newStatus === 'COOKING') {
+                showNotification(
+                  'Order Cooking! 🍳',
+                  `Your order ${orderSuccess.orderNo} is being prepared by the kitchen.`,
+                  'info'
                 );
               } else if (newStatus === 'READY') {
                 showNotification(
@@ -223,38 +239,79 @@ const CustomerQROrder = ({ isManual = false }) => {
     } catch (error) {
       console.error('Error fetching order status:', error);
     }
-  }, [orderSuccess, tableKey, roomKey, showNotification]);
+  }, [orderSuccess, tableKey, roomKey, isManual, showNotification]);
+
+  // Join restaurant and order rooms on WebSocket connect
+  useEffect(() => {
+    if (!connected) return;
+
+    const restId = tableInfo?.restaurantId || orderSuccess?.restaurantId;
+    if (restId) {
+      emit('join_restaurant', { restaurantId: Number(restId) });
+    }
+
+    if (orderSuccess?.orderId) {
+      emit('join_order', {
+        orderId: Number(orderSuccess.orderId),
+        restaurantId: restId ? Number(restId) : undefined,
+      });
+    }
+  }, [connected, emit, tableInfo?.restaurantId, orderSuccess?.orderId, orderSuccess?.restaurantId]);
 
   // Real-time listener for order status updates
   useEffect(() => {
     if (!connected || !orderSuccess) return;
 
     const unsubscribe = subscribe('order:status-update', (updatedOrder) => {
-      // Only refresh if the update is for THIS specific order
-      if (updatedOrder && updatedOrder.orderId === orderSuccess.orderId) {
+      if (!updatedOrder) return;
+      const isTargetOrder =
+        (updatedOrder.orderId && Number(updatedOrder.orderId) === Number(orderSuccess.orderId)) ||
+        (updatedOrder.id && Number(updatedOrder.id) === Number(orderSuccess.orderId)) ||
+        (updatedOrder.orderNo && String(updatedOrder.orderNo) === String(orderSuccess.orderNo));
+
+      if (isTargetOrder) {
         console.log('WS: Order status updated for current order!', updatedOrder.status);
+
+        if (updatedOrder.status) {
+          setCurrentOrderStatus(updatedOrder.status);
+          setOrderSuccess(prev => {
+            if (!prev) return prev;
+            const updated = { ...prev, status: updatedOrder.status };
+            try {
+              const key = tableKey || roomKey;
+              if (key) localStorage.setItem(`active_order_${key}`, JSON.stringify(updated));
+            } catch (e) {}
+            return updated;
+          });
+        }
+
         refreshOrderStatus();
       }
     });
 
     return () => unsubscribe();
-  }, [connected, subscribe, orderSuccess, refreshOrderStatus]);
+  }, [connected, subscribe, orderSuccess, tableKey, roomKey, refreshOrderStatus]);
 
-  // Occasional polling fallback (safety first)
+  // Active tracking polling fallback (every 5 seconds while order is active)
   useEffect(() => {
     let pollInterval;
 
     if (orderSuccess && orderSuccess.orderId) {
       setCurrentOrderStatus(orderSuccess.status);
 
-      // Fallback poll every 2 minutes
-      pollInterval = setInterval(refreshOrderStatus, 120000);
+      const activeStatus = currentOrderStatus || orderSuccess.status;
+      const isTerminal = ['COMPLETED', 'CANCELLED', 'BILLED'].includes(activeStatus);
+
+      // Fast 5-second polling while order is actively being prepared
+      if (!isTerminal) {
+        pollInterval = setInterval(refreshOrderStatus, 5000);
+      }
     }
 
     return () => {
       if (pollInterval) clearInterval(pollInterval);
     };
-  }, [orderSuccess, refreshOrderStatus]);
+  }, [orderSuccess, currentOrderStatus, refreshOrderStatus]);
 
   const fetchTableInfo = useCallback(async () => {
     try {
