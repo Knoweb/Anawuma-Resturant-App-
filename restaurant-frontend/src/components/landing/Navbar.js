@@ -73,7 +73,6 @@ const Navbar = () => {
     { to: '/kitchen-login', label: 'Kitchen Login', icon: 'fa-fire', badge: 'KDS' },
     { to: '/cashier-login', label: 'Cashier Login', icon: 'fa-cash-register', badge: 'POS' },
     { to: '/accountant-login', label: 'Accountant Login', icon: 'fa-file-invoice-dollar', badge: 'Finance' },
-    { to: '/housekeeper', label: 'HouseKeeper Login', icon: 'fa-broom', badge: 'Staff' },
   ];
 
   return (
