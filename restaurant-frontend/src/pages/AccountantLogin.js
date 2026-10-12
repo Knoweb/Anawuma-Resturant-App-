@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { authAPI } from '../api/apiClient';
 import apiClient from '../api/apiClient';
 import { useAuthStore } from '../store/authStore';
 import Swal from 'sweetalert2';
+import { AccountantSvg } from '../components/icons/RoleLoginIcons';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import './SuperAdminLogin.css';
+import './RoleLogin.css';
 
 function AccountantLogin() {
   const [email, setEmail] = useState('');
@@ -49,12 +51,12 @@ function AccountantLogin() {
             updateUser(profileRes.data.data);
           }
         } catch (_) {
-          // Non-fatal fallback
+          // Non-fatal
         }
 
         Swal.fire({
           icon: 'success',
-          title: 'Login Successful!',
+          title: 'Welcome Back, Accountant!',
           toast: true,
           position: 'top-end',
           showConfirmButton: false,
@@ -82,67 +84,94 @@ function AccountantLogin() {
   };
 
   return (
-    <div className="sa-login-page">
-      <div className="sa-logo">
+    <div className="role-login-page theme-accountant">
+      {/* Background Ambience */}
+      <div className="role-bg-orb role-bg-orb-1"></div>
+      <div className="role-bg-orb role-bg-orb-2"></div>
+      <div className="role-grid-overlay"></div>
+
+      {/* Brand Header */}
+      <Link to="/" className="role-header-brand" title="Back to Home">
         <img src="/assets/images/logos/logo-rmbg-2.png" alt="Anawuma" />
-      </div>
+      </Link>
 
-      <div className="sa-deco sa-deco-1"></div>
-      <div className="sa-deco sa-deco-2"></div>
-      <div className="sa-deco sa-deco-3"></div>
-      <div className="sa-deco sa-deco-4"></div>
-      <div className="sa-deco sa-deco-5"></div>
-      <div className="sa-deco sa-deco-6"></div>
-
-      <div className="sa-card">
-        <h2 className="sa-card-title">Accountant Login</h2>
+      {/* Main Glass Card */}
+      <div className="role-card">
+        <div className="text-center">
+          <div className="role-icon-hero">
+            <div className="role-icon-circle">
+              <AccountantSvg />
+            </div>
+          </div>
+          <span className="role-badge">Finance & Audit Portal</span>
+          <h2 className="role-title">Accountant Login</h2>
+          <p className="role-subtitle">Sign in to review financial records and transfers</p>
+        </div>
 
         <form onSubmit={handleSubmit}>
-          <input
-            className="sa-input"
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            autoComplete="username"
-          />
-
-          <div className="sa-password-wrap">
-            <input
-              className="sa-input"
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-            />
-            <button
-              type="button"
-              className="sa-toggle-pw"
-              onClick={() => setShowPassword(!showPassword)}
-              aria-label="Toggle password visibility"
-            >
-              <i className={`fas fa-eye${showPassword ? '-slash' : ''}`}></i>
-            </button>
+          <div className="role-field">
+            <label className="role-label">Accountant Email</label>
+            <div className="role-input-wrap">
+              <input
+                className="role-input"
+                type="email"
+                placeholder="accountant@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="username"
+              />
+              <i className="fas fa-envelope role-input-icon"></i>
+            </div>
           </div>
 
-          <button className="sa-btn" type="submit" disabled={loading}>
+          <div className="role-field">
+            <label className="role-label">Password</label>
+            <div className="role-input-wrap">
+              <input
+                className="role-input"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Enter password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+              />
+              <i className="fas fa-lock role-input-icon"></i>
+              <button
+                type="button"
+                className="role-password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label="Toggle password visibility"
+              >
+                <i className={`fas fa-eye${showPassword ? '-slash' : ''}`}></i>
+              </button>
+            </div>
+          </div>
+
+          <button className="role-submit-btn" type="submit" disabled={loading}>
             {loading ? (
               <>
-                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                Logging in...
+                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span>Authenticating...</span>
               </>
             ) : (
-              'Login'
+              <>
+                <span>Enter Finance Desk</span>
+                <i className="fas fa-arrow-right"></i>
+              </>
             )}
           </button>
         </form>
 
-        <p className="sa-back-link">
-          Restaurant login? <a href="/login">Click here</a>
-        </p>
+        <div className="role-footer-links">
+          <Link to="/" className="role-footer-link">
+            <i className="fas fa-arrow-left"></i> Home
+          </Link>
+          <a href="/login" className="role-footer-link highlight">
+            Admin Login <i className="fas fa-external-link-alt"></i>
+          </a>
+        </div>
       </div>
     </div>
   );
