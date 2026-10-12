@@ -2044,7 +2044,7 @@ const CustomerQROrder = ({ isManual = false }) => {
                         <button className="btn btn-sm text-muted p-0" onClick={() => removeFromCart(item.foodItemId)}>Remove</button>
                       </div>
                     </div>
-                    <div className="fw-bold small">Rs. {(item.price * item.qty).toFixed(0)}</div>
+                    <div className="fw-bold small text-nowrap ms-2">Rs. {(item.price * item.qty).toFixed(0)}</div>
                   </div>
                 ))}
 
@@ -2055,7 +2055,8 @@ const CustomerQROrder = ({ isManual = false }) => {
                       country={'lk'}
                       value={whatsappNumber}
                       onChange={setWhatsappNumber}
-                      inputStyle={{ width: '100%', borderRadius: '0' }}
+                      inputStyle={{ width: '100%', boxSizing: 'border-box', height: '46px', fontSize: '16px', borderRadius: '4px' }}
+                      containerStyle={{ width: '100%', boxSizing: 'border-box' }}
                     />
                   </div>
                   <div className="mb-3">
@@ -2066,6 +2067,7 @@ const CustomerQROrder = ({ isManual = false }) => {
                       placeholder="Special instructions..."
                       value={orderNotes}
                       onChange={(e) => setOrderNotes(e.target.value)}
+                      style={{ fontSize: '16px', boxSizing: 'border-box' }}
                     ></textarea>
                   </div>
                 </div>
@@ -2074,19 +2076,19 @@ const CustomerQROrder = ({ isManual = false }) => {
           </div>
           {cart.length > 0 && (
             <div className="cart-footer p-4 border-top">
-              <div className="d-flex justify-content-between mb-2">
+              <div className="d-flex justify-content-between align-items-center mb-2">
                 <span className="small text-muted uppercase">Subtotal</span>
-                <span className="fw-bold">Rs. {calculateSubtotal().toFixed(0)}</span>
+                <span className="fw-bold text-nowrap ms-2">Rs. {calculateSubtotal().toFixed(0)}</span>
               </div>
-              <div className="d-flex justify-content-between mb-3">
+              <div className="d-flex justify-content-between align-items-center mb-3">
                 <span className="small text-muted uppercase">Service Charge</span>
-                <span className="fw-bold">Rs. {calculateServiceCharge().toFixed(0)}</span>
+                <span className="fw-bold text-nowrap ms-2">Rs. {calculateServiceCharge().toFixed(0)}</span>
               </div>
-              <div className="d-flex justify-content-between mb-4 pt-2 border-top">
+              <div className="d-flex justify-content-between align-items-center mb-4 pt-2 border-top">
                 <span className="fw-bold uppercase">Total</span>
-                <span className="h4 mb-0 fw-bold">Rs. {parseFloat(calculateTotal()).toFixed(0)}</span>
+                <span className="h4 mb-0 fw-bold text-nowrap ms-2">Rs. {parseFloat(calculateTotal()).toFixed(0)}</span>
               </div>
-              <button className="shopify-add-to-cart m-0" onClick={placeOrder}>
+              <button className="shopify-add-to-cart m-0 w-100" onClick={placeOrder}>
                 COMPLETE ORDER
               </button>
               <button 
