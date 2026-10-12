@@ -77,7 +77,8 @@ const Navbar = () => {
   ];
 
   return (
-    <header className={`landing-header${scrolled ? ' scrolled' : ''}`}>
+    <>
+      <header className={`landing-header${scrolled ? ' scrolled' : ''}`}>
       <div className="landing-container">
         <nav className="landing-nav">
           {/* Logo */}
