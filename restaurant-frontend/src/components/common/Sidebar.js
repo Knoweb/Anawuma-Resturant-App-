@@ -66,13 +66,28 @@ function Sidebar() {
     document.body.classList.remove('sb-sidenav-toggled');
   };
 
+  // Close sidebar on mobile/tablet when route changes
+  useEffect(() => {
+    if (window.innerWidth <= 1024) {
+      closeSidebar();
+    }
+  }, [location.pathname, location.search]);
+
   useEffect(() => {
     const sidebarEl = document.getElementById('sidebar');
     if (!sidebarEl) return;
 
     const handleSidebarClick = (event) => {
-      if (!event.target.closest('a')) return;
-      if (window.innerWidth < 992) {
+      const link = event.target.closest('a');
+      if (!link) return;
+      
+      // If clicking a submenu dropdown toggle (e.g., Cashier Dashboard, Settings), DO NOT close sidebar
+      if (link.closest('.has-submenu') && link.parentElement.classList.contains('has-submenu')) {
+        return;
+      }
+
+      // Only close sidebar on mobile/tablet if clicking an actual navigation item
+      if (window.innerWidth <= 1024) {
         closeSidebar();
       }
     };
