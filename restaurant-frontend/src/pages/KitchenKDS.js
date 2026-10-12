@@ -1288,17 +1288,13 @@ const KitchenKDS = () => {
                       {connected ? 'Live' : 'Disconnected'}
                     </span>
                     <button 
-                      className="btn btn-outline-primary btn-sm me-2"
+                      className="btn btn-outline-primary btn-sm"
                       onClick={fetchAllOrders}
                       disabled={loading}
                     >
                       <i className={`fas fa-sync-alt ${loading ? 'fa-spin' : ''} me-1`}></i>
                       Refresh
                     </button>
-                    <span className="badge bg-secondary">
-                      <i className="far fa-clock me-1"></i>
-                      Sync: 30s
-                    </span>
                   </div>
                 </div>
               </div>

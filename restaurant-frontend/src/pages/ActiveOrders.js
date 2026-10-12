@@ -257,14 +257,6 @@ const ActiveOrders = () => {
                     <i className="fas fa-circle me-1"></i>
                     {connected ? 'Live' : 'Offline'}
                   </div>
-                  <button
-                    className={`btn ${autoRefresh ? 'btn-success' : 'btn-outline-secondary'} btn-sm`}
-                    onClick={() => setAutoRefresh(!autoRefresh)}
-                    title={autoRefresh ? 'Sync Fallback ON' : 'Sync Fallback OFF'}
-                  >
-                    <i className={`fas fa-sync-alt ${autoRefresh ? 'fa-spin' : ''} me-1`}></i>
-                    {autoRefresh ? 'Sync: 60s' : 'Sync: OFF'}
-                  </button>
                 <button
                   className="btn btn-primary btn-sm ms-2"
                   onClick={() => fetchOrders(filters)}
