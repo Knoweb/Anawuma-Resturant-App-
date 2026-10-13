@@ -67,8 +67,24 @@ function AddFoodItem() {
 
   useEffect(() => {
     if (formData.menuId) {
-      const filtered = categories.filter(c => c.menuId === parseInt(formData.menuId));
+      const menuIdNum = parseInt(formData.menuId);
+      // Immediately filter existing categories
+      const filtered = categories.filter(c => 
+        Number(c.menuId) === menuIdNum || 
+        Number(c.menu?.menuId) === menuIdNum
+      );
       setFilteredCategories(filtered);
+
+      // Also query directly from backend for the latest categories of this menu
+      apiClient.get(`/categories?menuId=${menuIdNum}`)
+        .then(res => {
+          if (Array.isArray(res.data) && res.data.length > 0) {
+            setFilteredCategories(res.data);
+          }
+        })
+        .catch(err => {
+          console.error('Error fetching categories for menu:', err);
+        });
     } else {
       setFilteredCategories([]);
     }
@@ -109,10 +125,13 @@ function AddFoodItem() {
   const validateForm = () => {
     const newErrors = {};
     if (!formData.itemName.trim()) newErrors.itemName = 'Item name is required';
-    if (!formData.price) newErrors.price = 'Price is required';
+    if (!formData.price || isNaN(formData.price) || parseFloat(formData.price) <= 0) {
+      newErrors.price = 'Please enter a valid price greater than 0';
+    }
     if (!formData.menuId) newErrors.menuId = 'Please select a menu';
-    if (formData.description.length > 350) newErrors.description = 'Limit exceeded';
-    if (formData.moreDetails.length > 400) newErrors.moreDetails = 'Limit exceeded';
+    if (!formData.categoryId) newErrors.categoryId = 'Please select a category';
+    if (formData.description && formData.description.length > 350) newErrors.description = 'Limit exceeded (max 350 characters)';
+    if (formData.moreDetails && formData.moreDetails.length > 400) newErrors.moreDetails = 'Limit exceeded (max 400 characters)';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -129,31 +148,26 @@ function AddFoodItem() {
       for (const [key, file] of Object.entries(imageFiles)) {
         if (file) {
           const imgData = new FormData();
-          imgData.append('image', file); // Should be 'image' per backend controller
-          const res = await apiClient.post('/food-items/upload-image', imgData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-          });
+          imgData.append('image', file);
+          const res = await apiClient.post('/food-items/upload-image', imgData);
           console.log(`DEBUG: Upload result for ${key}:`, res.data);
           
-          if (!res.data.success || !res.data.imageUrl) {
-            throw new Error(`Failed to upload ${key}: ${res.data.message || 'No URL returned'}`);
+          if (!res.data || !res.data.imageUrl) {
+            throw new Error(`Failed to upload ${key}: ${res.data?.message || 'No URL returned'}`);
           }
           
           imageUrls[key] = res.data.imageUrl;
         }
       }
-      console.log('DEBUG: imageUrls after upload loop:', JSON.stringify(imageUrls, null, 2));
 
       // 2. Upload Video
       let videoUrl = '';
       if (videoFile) {
         const vidData = new FormData();
-        vidData.append('video', videoFile); // Should be 'video' per backend controller
-        const res = await apiClient.post('/food-items/upload-video', vidData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-        if (!res.data.success || !res.data.videoUrl) {
-          throw new Error(`Failed to upload video: ${res.data.message || 'No URL returned'}`);
+        vidData.append('video', videoFile);
+        const res = await apiClient.post('/food-items/upload-video', vidData);
+        if (!res.data || !res.data.videoUrl) {
+          throw new Error(`Failed to upload video: ${res.data?.message || 'No URL returned'}`);
         }
         videoUrl = res.data.videoUrl;
       }
@@ -161,30 +175,52 @@ function AddFoodItem() {
       // 3. Create Food Item
       const payload = {
         itemName: formData.itemName.trim(),
-        description: formData.description.trim(),
-        moreDetails: formData.moreDetails.trim(),
         price: parseFloat(formData.price),
         menuId: parseInt(formData.menuId),
-        categoryId: formData.categoryId ? parseInt(formData.categoryId) : null,
-        imageUrl1: imageUrls.image1,
-        imageUrl2: imageUrls.image2,
-        imageUrl3: imageUrls.image3,
-        imageUrl4: imageUrls.image4,
-        videoLink: videoUrl,
-        blogLink: formData.blogLink.trim(),
+        isAvailable: formData.isAvailable !== false,
         currencyId: 1, // Default to LKR
-        isAvailable: formData.isAvailable
       };
+
+      if (formData.description?.trim()) payload.description = formData.description.trim();
+      if (formData.moreDetails?.trim()) payload.moreDetails = formData.moreDetails.trim();
+      if (formData.categoryId) payload.categoryId = parseInt(formData.categoryId);
+      if (imageUrls.image1) payload.imageUrl1 = imageUrls.image1;
+      if (imageUrls.image2) payload.imageUrl2 = imageUrls.image2;
+      if (imageUrls.image3) payload.imageUrl3 = imageUrls.image3;
+      if (imageUrls.image4) payload.imageUrl4 = imageUrls.image4;
+      if (videoUrl) payload.videoLink = videoUrl;
+      if (formData.blogLink?.trim()) payload.blogLink = formData.blogLink.trim();
 
       console.log('DEBUG: Final Food Item Payload ready to send:', JSON.stringify(payload, null, 2));
       
       const createResponse = await apiClient.post('/food-items', payload);
       console.log('DEBUG: Create Food Item Response:', createResponse.data);
-      Swal.fire({ icon: 'success', title: 'Food item added!', timer: 2000, showConfirmButton: false });
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: 'Food item added successfully!',
+        timer: 2000,
+        showConfirmButton: false,
+      });
       navigate('/menus/food-items');
     } catch (error) {
-      console.error(error);
-      Swal.fire('Error', 'Failed to add food item', 'error');
+      console.error('Add food item error:', error);
+      let errorMessage = 'Failed to add food item';
+      if (error.response?.data?.message) {
+        if (Array.isArray(error.response.data.message)) {
+          errorMessage = error.response.data.message.join(', ');
+        } else {
+          errorMessage = error.response.data.message;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: errorMessage,
+      });
     } finally {
       setSubmitting(false);
     }
@@ -280,9 +316,9 @@ function AddFoodItem() {
                     {errors.menuId && <div className="invalid-feedback">{errors.menuId}</div>}
                   </div>
                   <div className="col-md-6">
-                    <label className="form-label">Category (Optional)</label>
+                    <label className="form-label">Category <span className="text-danger">*</span></label>
                     <select
-                      className="form-select"
+                      className={`form-select ${errors.categoryId ? 'is-invalid' : ''}`}
                       name="categoryId"
                       value={formData.categoryId}
                       onChange={handleChange}
@@ -291,7 +327,11 @@ function AddFoodItem() {
                       <option value="">Select Category</option>
                       {filteredCategories.map(c => <option key={c.categoryId} value={c.categoryId}>{c.categoryName}</option>)}
                     </select>
+                    {errors.categoryId && <div className="invalid-feedback">{errors.categoryId}</div>}
                     {!formData.menuId && <small className="text-muted">Select a menu first</small>}
+                    {formData.menuId && filteredCategories.length === 0 && (
+                      <small className="text-warning d-block mt-1">No categories found for this menu. Please add a category first.</small>
+                    )}
                   </div>
                 </div>
 

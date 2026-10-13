@@ -150,8 +150,13 @@ const apiClient = axios.create({
   },
 });
 
-// Add token to requests
+// Add token to requests & ensure proper multipart boundary for FormData
 apiClient.interceptors.request.use((config) => {
+  if (config.data instanceof FormData) {
+    if (config.headers) {
+      delete config.headers['Content-Type'];
+    }
+  }
   try {
     const authData = localStorage.getItem('auth-storage');
     if (authData) {

@@ -41,6 +41,10 @@ export class CreateFoodItemDto {
 
   @IsInt()
   @IsOptional()
+  restaurantId?: number;
+
+  @IsInt()
+  @IsOptional()
   categoryId?: number;
 
   @IsInt()

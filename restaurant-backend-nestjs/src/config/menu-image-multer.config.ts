@@ -2,6 +2,8 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { BadRequestException } from '@nestjs/common';
 
+import * as fs from 'fs';
+
 // File validation for menu images
 export const menuImageFileFilter = (req, file, callback) => {
   if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp|ico)$/i)) {
@@ -15,7 +17,13 @@ export const menuImageFileFilter = (req, file, callback) => {
 
 // Storage configuration for menu images
 export const menuImageStorage = diskStorage({
-  destination: './uploads/menus',
+  destination: (req, file, callback) => {
+    const uploadPath = './uploads/menus';
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    callback(null, uploadPath);
+  },
   filename: (req, file, callback) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     const ext = extname(file.originalname);

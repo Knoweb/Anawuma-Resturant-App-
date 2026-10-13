@@ -24,8 +24,18 @@ async function bootstrap() {
     credentials: true,
   });
   
+  // Ensure uploads directory and subdirectories exist
+  const uploadsDir = join(__dirname, '..', 'uploads');
+  const subdirs = ['food-items', 'categories', 'menus', 'offers', 'logos', 'restaurants'];
+  for (const sub of subdirs) {
+    const fullPath = join(uploadsDir, sub);
+    if (!require('fs').existsSync(fullPath)) {
+      require('fs').mkdirSync(fullPath, { recursive: true });
+    }
+  }
+
   // Serve static files from uploads directory
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+  app.useStaticAssets(uploadsDir, {
     prefix: '/uploads',
   });
   

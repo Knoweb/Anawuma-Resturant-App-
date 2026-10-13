@@ -37,12 +37,11 @@ export class FoodItemsService {
     console.log('DEBUG: Backend Received CreateFoodItemDto:', JSON.stringify(createFoodItemDto, null, 2));
     
     // Verify menu exists
-    const menu = await this.menusRepository.findOne({
-      where: {
-        menuId: createFoodItemDto.menuId,
-        restaurantId,
-      },
-    });
+    const menuWhere: any = { menuId: createFoodItemDto.menuId };
+    if (restaurantId) {
+      menuWhere.restaurantId = restaurantId;
+    }
+    const menu = await this.menusRepository.findOne({ where: menuWhere });
 
     if (!menu) {
       throw new NotFoundException(
@@ -53,46 +52,60 @@ export class FoodItemsService {
     // Verify category exists if provided
     if (createFoodItemDto.categoryId) {
       const category = await this.categoriesRepository.findOne({
-        where: {
-          categoryId: createFoodItemDto.categoryId,
-          menuId: createFoodItemDto.menuId, // Ensure category belongs to the selected menu
-          restaurantId,
-        },
+        where: { categoryId: createFoodItemDto.categoryId },
       });
 
       if (!category) {
         throw new NotFoundException(
-          `Category with ID ${createFoodItemDto.categoryId} not found or does not belong to the selected menu`,
+          `Category with ID ${createFoodItemDto.categoryId} not found`,
+        );
+      }
+
+      if (restaurantId && category.restaurantId && category.restaurantId !== restaurantId) {
+        throw new BadRequestException(
+          `Category with ID ${createFoodItemDto.categoryId} does not belong to your restaurant`,
+        );
+      }
+
+      if (category.menuId && category.menuId !== createFoodItemDto.menuId) {
+        throw new BadRequestException(
+          `Category with ID ${createFoodItemDto.categoryId} does not belong to the selected menu`,
         );
       }
 
       // If subcategoryId is provided, verify it exists and belongs to the same category
       if (createFoodItemDto.subcategoryId) {
         const subcategory = await this.subcategoriesRepository.findOne({
-          where: {
-            subcategoryId: createFoodItemDto.subcategoryId,
-            categoryId: createFoodItemDto.categoryId,
-            restaurantId,
-          },
+          where: { subcategoryId: createFoodItemDto.subcategoryId },
         });
 
         if (!subcategory) {
           throw new BadRequestException(
-            `Subcategory with ID ${createFoodItemDto.subcategoryId} not found or does not belong to category ${createFoodItemDto.categoryId}`,
+            `Subcategory with ID ${createFoodItemDto.subcategoryId} not found`,
+          );
+        }
+
+        if (subcategory.categoryId && subcategory.categoryId !== createFoodItemDto.categoryId) {
+          throw new BadRequestException(
+            `Subcategory with ID ${createFoodItemDto.subcategoryId} does not belong to category ${createFoodItemDto.categoryId}`,
           );
         }
       }
     }
 
+    const effectiveRestaurantId = restaurantId || menu.restaurantId || 1;
+    const effectiveCurrencyId = createFoodItemDto.currencyId || 1;
+
     const foodItem = this.foodItemsRepository.create({
       ...createFoodItemDto,
-      restaurantId,
+      currencyId: effectiveCurrencyId,
+      restaurantId: effectiveRestaurantId,
     });
 
     const savedItem = await this.foodItemsRepository.save(foodItem);
 
     // Return with relations
-    return await this.findOne(savedItem.foodItemId, restaurantId);
+    return await this.findOne(savedItem.foodItemId, effectiveRestaurantId);
   }
 
   async findAll(

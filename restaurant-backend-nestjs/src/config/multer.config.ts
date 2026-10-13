@@ -18,9 +18,17 @@ export const imageFileFilter = (req: any, file: Express.Multer.File, callback: a
   callback(null, true);
 };
 
+import * as fs from 'fs';
+
 // Storage configuration for offer images
 export const offerImageStorage = diskStorage({
-  destination: './uploads/offers',
+  destination: (req, file, callback) => {
+    const uploadPath = './uploads/offers';
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    callback(null, uploadPath);
+  },
   filename: (req, file, callback) => {
     // Generate unique filename: timestamp-randomnumber-originalname
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
@@ -32,7 +40,13 @@ export const offerImageStorage = diskStorage({
 
 // Storage configuration for restaurant logos
 export const logoStorage = diskStorage({
-  destination: './uploads/logos',
+  destination: (req, file, callback) => {
+    const uploadPath = './uploads/logos';
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    callback(null, uploadPath);
+  },
   filename: (req, file, callback) => {
     // Generate unique filename: timestamp-randomnumber-originalname
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);

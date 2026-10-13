@@ -100,7 +100,9 @@ export class FoodItemsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   create(@Body() createFoodItemDto: CreateFoodItemDto, @Request() req) {
-    const restaurantId = req.user.restaurantId;
+    const restaurantId = req.user.role === UserRole.SUPER_ADMIN
+      ? (createFoodItemDto as any).restaurantId || req.user.restaurantId
+      : req.user.restaurantId;
     return this.foodItemsService.create(createFoodItemDto, restaurantId);
   }
 

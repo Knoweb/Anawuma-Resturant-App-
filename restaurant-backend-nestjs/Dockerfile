@@ -22,7 +22,7 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/package*.json ./
 
 # Create uploads directory (with proper permissions)
-RUN mkdir -p uploads && chmod 777 uploads
+RUN mkdir -p uploads/food-items uploads/categories uploads/menus uploads/offers uploads/logos uploads/restaurants && chmod -R 777 uploads
 
 EXPOSE 3000
 
