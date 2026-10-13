@@ -5,6 +5,7 @@
 :root {
   --header-height-desktop: 70px;
   --header-height-mobile: 60px;
+  --sidebar-width: 250px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
@@ -130,6 +131,14 @@ code {
 .main-content {
   padding-top: calc(var(--header-height-desktop) + var(--safe-top)) !important;
   min-height: 100vh;
+  margin-left: var(--sidebar-width, 250px);
+  transition: margin-left 0.25s ease-in-out;
+  flex: 1;
+}
+
+body.sb-sidenav-toggled .content-wrapper,
+body.sb-sidenav-toggled .main-content {
+  margin-left: 0 !important;
 }
 
 /* Global Mobile Overrides */
