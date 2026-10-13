@@ -213,58 +213,24 @@ function FoodItems() {
         />
         <div className="dashboard-content">
           <div className="container-fluid">
-            {/* Modern Header with Back, Title and Actions */}
-            <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-              <div className="d-flex align-items-center gap-3">
-                <button
-                  type="button"
-                  className="btn btn-white shadow-sm rounded-circle d-flex align-items-center justify-content-center"
-                  onClick={() => navigate('/menus/categories')}
-                  title="Back to Categories"
-                  style={{
-                    width: '42px',
-                    height: '42px',
-                    backgroundColor: '#fff',
-                    border: '1px solid #e2e8f0',
-                    color: '#235F61',
-                    fontSize: '1rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    flexShrink: 0
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#f1f5f9';
-                    e.currentTarget.style.transform = 'translateX(-3px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#fff';
-                    e.currentTarget.style.transform = 'translateX(0)';
-                  }}
-                >
-                  <i className="fas fa-arrow-left"></i>
-                </button>
-                <div>
-                  <h1 className="h4 fw-bold mb-0 text-dark">Food Items</h1>
-                  <div className="text-muted small">Manage food items, pricing, and availability</div>
-                </div>
-              </div>
+            {/* Header with Back and New Item */}
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <button
+                className="btn btn-secondary border-0 shadow-sm px-4"
+                onClick={() => navigate('/menus/categories')}
+              >
+                <i className="fas fa-arrow-left me-2"></i>
+                Back
+              </button>
 
               <div className="d-flex gap-2">
-                <button
-                  className="btn btn-outline-secondary shadow-sm px-3"
-                  onClick={() => setShowAddCategoryModal(true)}
-                  style={{ borderRadius: '8px', borderColor: '#cbd5e1' }}
-                >
+                <button className="btn btn-outline-primary shadow-sm px-4" onClick={() => setShowAddCategoryModal(true)}>
                   <i className="fas fa-folder-plus me-2"></i>
                   New Category
                 </button>
-                <button
-                  className="btn text-white shadow-sm px-4"
-                  onClick={() => navigate('/menus/food-items/add')}
-                  style={{ backgroundColor: '#235F61', borderColor: '#235F61', borderRadius: '8px' }}
-                >
+                <button className="btn btn-primary shadow-sm px-4 ivory-btn text-dark" onClick={() => navigate('/menus/food-items/add')}>
                   <i className="fas fa-plus me-2"></i>
-                  Add Food Item
+                  New Product
                 </button>
               </div>
             </div>

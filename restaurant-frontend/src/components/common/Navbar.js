@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { useWebSocket } from '../../hooks/useWebSocket';
 import apiClient, { BASE_URL, sanitizeUrl } from '../../api/apiClient';
@@ -8,12 +8,16 @@ import './Navbar.css';
 
 function Navbar({ cartCount, onCartClick }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useAuthStore();
   const [showDropdown, setShowDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
   const [notifications, setNotifications] = useState([]);
   const { subscribe, connected } = useWebSocket();
+
+  // Check if we can show back button (not on main dashboard pages)
+  const hideBackBtn = ['/dashboard', '/kitchen/dashboard', '/cashier/dashboard', '/super-admin/dashboard'].includes(location.pathname.replace(/\/$/, ''));
 
   const getRoleLabel = (role) => {
     const normalizedRole = role?.toString().trim().toLowerCase();
@@ -169,6 +173,18 @@ function Navbar({ cartCount, onCartClick }) {
           <button className="btn btn-link text-white sidebar-toggle-btn p-0 me-3" onClick={toggleSidebar} type="button">
             <i className="fas fa-bars"></i>
           </button>
+
+          {!hideBackBtn && (
+            <button
+              className="btn btn-link text-white back-nav-btn d-flex align-items-center me-3"
+              onClick={() => navigate(-1)}
+              type="button"
+              style={{ textDecoration: 'none', background: 'rgba(255,255,255,0.1)', borderRadius: '8px', padding: '5px 10px', fontSize: '0.85rem', whiteSpace: 'nowrap' }}
+            >
+              <i className="fas fa-chevron-left me-1"></i>
+              <span>Back</span>
+            </button>
+          )}
 
           <div className="hotel-brand" title={restaurantName}>
             {restaurantLogoUrl ? (

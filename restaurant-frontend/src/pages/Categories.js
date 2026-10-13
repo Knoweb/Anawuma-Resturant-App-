@@ -149,52 +149,24 @@ function Categories() {
 
         <div className="dashboard-content">
           <div className="container-fluid">
-            {/* Modern Header with Back, Title and Action */}
-            <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-              <div className="d-flex align-items-center gap-3">
-                <button
-                  type="button"
-                  className="btn btn-white shadow-sm rounded-circle d-flex align-items-center justify-content-center"
-                  onClick={() => navigate('/menus/all')}
-                  title="Back to Menus"
-                  style={{
-                    width: '42px',
-                    height: '42px',
-                    backgroundColor: '#fff',
-                    border: '1px solid #e2e8f0',
-                    color: '#235F61',
-                    fontSize: '1rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    flexShrink: 0
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#f1f5f9';
-                    e.currentTarget.style.transform = 'translateX(-3px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#fff';
-                    e.currentTarget.style.transform = 'translateX(0)';
-                  }}
-                >
-                  <i className="fas fa-arrow-left"></i>
-                </button>
-                <div>
-                  <h1 className="h4 fw-bold mb-0 text-dark">
-                    {menuName ? `${menuName} Categories` : 'All Categories'}
-                  </h1>
-                  <div className="text-muted small">Manage item categories and classifications</div>
-                </div>
-              </div>
-
+            {/* Back Button and Header */}
+            <div className="mb-4">
               <button
-                className="btn text-white shadow-sm px-4"
-                onClick={() => setShowAddModal(true)}
-                style={{ backgroundColor: '#235F61', borderColor: '#235F61', borderRadius: '8px' }}
+                className="btn btn-secondary mb-3"
+                onClick={() => navigate('/menus/all')}
               >
-                <i className="fas fa-plus me-2"></i>
-                Add New Category
+                <i className="fas fa-arrow-left me-2"></i>
+                Back
               </button>
+              <div className="d-flex justify-content-between align-items-center">
+                <h2 className="page-title text-dark">
+                  {menuName ? `${menuName} Categories` : 'All Categories'}
+                </h2>
+                <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
+                  <i className="fas fa-plus me-2"></i>
+                  Add New Category
+                </button>
+              </div>
             </div>
 
             {/* Categories Grid */}

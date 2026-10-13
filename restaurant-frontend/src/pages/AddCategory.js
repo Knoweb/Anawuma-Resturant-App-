@@ -172,67 +172,12 @@ function AddCategory() {
         <Navbar />
         <div className="dashboard-content">
           <div className="container-fluid py-4">
-            <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-              {/* Modern Page Header */}
-              <div className="d-flex align-items-center justify-content-between mb-4">
-                <div className="d-flex align-items-center gap-3">
-                  <button
-                    type="button"
-                    className="btn btn-white shadow-sm rounded-circle d-flex align-items-center justify-content-center"
-                    onClick={handleCancel}
-                    title="Back to Categories"
-                    style={{
-                      width: '42px',
-                      height: '42px',
-                      backgroundColor: '#fff',
-                      border: '1px solid #e2e8f0',
-                      color: '#235F61',
-                      fontSize: '1rem',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      flexShrink: 0
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#f1f5f9';
-                      e.currentTarget.style.transform = 'translateX(-3px)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = '#fff';
-                      e.currentTarget.style.transform = 'translateX(0)';
-                    }}
-                  >
-                    <i className="fas fa-arrow-left"></i>
-                  </button>
-                  <div>
-                    <div className="text-muted small mb-1 d-flex align-items-center gap-1">
-                      <span
-                        role="button"
-                        onClick={handleCancel}
-                        className="text-decoration-none fw-semibold"
-                        style={{ color: '#235F61', cursor: 'pointer' }}
-                      >
-                        Categories
-                      </span>
-                      <span>/</span>
-                      <span className="text-secondary">Add New</span>
-                    </div>
-                    <h1 className="h4 fw-bold mb-0" style={{ color: '#1e293b' }}>
-                      Add New Category
-                    </h1>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary btn-sm px-3 d-none d-sm-inline-flex align-items-center gap-2"
-                  onClick={handleCancel}
-                  style={{ borderRadius: '8px', borderColor: '#cbd5e1' }}
-                >
-                  <i className="fas fa-times"></i>
-                  <span>Cancel</span>
-                </button>
-              </div>
-
-              <div className="add-menu-container bg-white p-4 rounded-3 shadow-sm border">
+            <button className="btn btn-secondary btn-sm mb-3" onClick={handleCancel}>
+              <i className="fas fa-arrow-left me-2"></i>
+              Back
+            </button>
+            <div className="add-menu-container">
+              <h1 className="add-menu-title">Add New Category</h1>
 
               <form onSubmit={handleSubmit} className="add-menu-form">
                 {/* Category Name */}
@@ -363,37 +308,24 @@ function AddCategory() {
                 </div>
 
                 {/* Actions */}
-                <div className="d-flex justify-content-end align-items-center gap-2 border-top pt-4 mt-5">
+                <div className="form-actions mt-5">
+                  <button
+                    type="submit"
+                    className="btn btn-primary btn-add-menu me-2"
+                    disabled={submitting}
+                  >
+                    {submitting ? 'Adding...' : 'Add Category'}
+                  </button>
                   <button
                     type="button"
-                    className="btn btn-light px-4"
+                    className="btn btn-secondary btn-cancel"
                     onClick={handleCancel}
                     disabled={submitting}
-                    style={{ border: '1px solid #e2e8f0' }}
                   >
                     Cancel
                   </button>
-                  <button
-                    type="submit"
-                    className="btn px-4 text-white shadow-sm"
-                    disabled={submitting}
-                    style={{ backgroundColor: '#235F61', borderColor: '#235F61' }}
-                  >
-                    {submitting ? (
-                      <>
-                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                        Adding...
-                      </>
-                    ) : (
-                      <>
-                        <i className="fas fa-plus-circle me-2"></i>
-                        Add Category
-                      </>
-                    )}
-                  </button>
                 </div>
               </form>
-            </div>
             </div>
           </div>
         </div>
