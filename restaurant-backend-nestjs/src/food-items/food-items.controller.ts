@@ -13,6 +13,7 @@ import {
   UseInterceptors,
   UploadedFile,
   Headers,
+  BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -80,8 +81,13 @@ export class FoodItemsController {
     FileInterceptor('video', {
       storage: foodItemImageStorage, // reusing same storage folder
       fileFilter: (req, file, callback) => {
-        if (!file.originalname.match(/\.(mp4|webm|avi|mov|mkv)$/i)) {
-          return callback(new Error('Only video files are allowed!'), false);
+        const isVideoMime = file.mimetype && file.mimetype.toLowerCase().startsWith('video/');
+        const isVideoExt = Boolean(
+          file.originalname &&
+          file.originalname.match(/\.(mp4|webm|avi|mov|mkv|flv|wmv|m4v|3gp)$/i),
+        );
+        if (!isVideoMime && !isVideoExt) {
+          return callback(new BadRequestException('Only video files are allowed!'), false);
         }
         callback(null, true);
       },

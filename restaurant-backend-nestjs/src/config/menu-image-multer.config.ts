@@ -5,14 +5,21 @@ import { BadRequestException } from '@nestjs/common';
 import * as fs from 'fs';
 
 // File validation for menu images
-export const menuImageFileFilter = (req, file, callback) => {
-  if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp|ico)$/i)) {
-    return callback(
-      new BadRequestException('Only image files are allowed!'),
-      false,
-    );
+export const menuImageFileFilter = (req: any, file: Express.Multer.File, callback: any) => {
+  const isImageMime = file.mimetype && file.mimetype.toLowerCase().startsWith('image/');
+  const isImageExt = Boolean(
+    file.originalname &&
+    file.originalname.match(/\.(jpg|jpeg|png|gif|webp|ico|jfif|avif|bmp|tiff|heic|heif|svg)$/i),
+  );
+
+  if (isImageMime || isImageExt) {
+    return callback(null, true);
   }
-  callback(null, true);
+
+  return callback(
+    new BadRequestException('Only image files are allowed! (e.g. JPG, PNG, WEBP, JFIF, AVIF, GIF)'),
+    false,
+  );
 };
 
 // Storage configuration for menu images
@@ -26,7 +33,14 @@ export const menuImageStorage = diskStorage({
   },
   filename: (req, file, callback) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    const ext = extname(file.originalname);
+    let ext = extname(file.originalname).toLowerCase();
+    if (!ext || ext === '.jfif') {
+      if (file.mimetype?.includes('png')) ext = '.png';
+      else if (file.mimetype?.includes('webp')) ext = '.webp';
+      else if (file.mimetype?.includes('gif')) ext = '.gif';
+      else if (file.mimetype?.includes('avif')) ext = '.avif';
+      else ext = '.jpg';
+    }
     callback(null, `menu-${uniqueSuffix}${ext}`);
   },
 });

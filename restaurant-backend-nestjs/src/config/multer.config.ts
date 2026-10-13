@@ -9,13 +9,20 @@ import { BadRequestException } from '@nestjs/common';
 
 // Allowed file types
 export const imageFileFilter = (req: any, file: Express.Multer.File, callback: any) => {
-  if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-    return callback(
-      new BadRequestException('Only image files are allowed (jpg, jpeg, png, gif, webp)'),
-      false,
-    );
+  const isImageMime = file.mimetype && file.mimetype.toLowerCase().startsWith('image/');
+  const isImageExt = Boolean(
+    file.originalname &&
+    file.originalname.match(/\.(jpg|jpeg|png|gif|webp|ico|jfif|avif|bmp|tiff|heic|heif|svg)$/i),
+  );
+
+  if (isImageMime || isImageExt) {
+    return callback(null, true);
   }
-  callback(null, true);
+
+  return callback(
+    new BadRequestException('Only image files are allowed! (e.g. JPG, PNG, WEBP, JFIF, AVIF, GIF)'),
+    false,
+  );
 };
 
 import * as fs from 'fs';
