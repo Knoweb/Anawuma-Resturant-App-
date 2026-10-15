@@ -42,7 +42,10 @@ function DailyReport() {
     setLoading(true);
     try {
       const response = await apiClient.get('/reports/daily', {
-        params: { date: selectedDate }
+        params: { 
+          date: selectedDate,
+          cashierId: selectedCashier !== 'all' ? selectedCashier : undefined,
+        }
       });
       setReportData(response.data);
       Swal.fire({
@@ -76,7 +79,10 @@ function DailyReport() {
 
     try {
       const response = await apiClient.get('/reports/daily/csv', {
-        params: { date: selectedDate },
+        params: { 
+          date: selectedDate,
+          cashierId: selectedCashier !== 'all' ? selectedCashier : undefined,
+        },
         responseType: 'blob'
       });
 

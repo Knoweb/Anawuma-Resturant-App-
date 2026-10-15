@@ -161,6 +161,11 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
       return;
     }
 
+    if (!formData.categoryId) {
+      Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Please select a category' });
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -191,7 +196,7 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
         price: parseFloat(formData.price),
         currencyId: parseInt(formData.currencyId),
         menuId: parseInt(formData.menuId),
-        categoryId: formData.categoryId ? parseInt(formData.categoryId) : null,
+        categoryId: parseInt(formData.categoryId),
         imageUrl1: imageUrls.imageUrl1,
         imageUrl2: imageUrls.imageUrl2,
         imageUrl3: imageUrls.imageUrl3,
@@ -286,13 +291,14 @@ function EditFoodItemModal({ show, onHide, onSuccess, foodItem }) {
             <div className="col-md-6 mb-3">
               <Form.Group>
                 <Form.Label>
-                  Category (Optional)
+                  Category <span className="text-danger">*</span>
                 </Form.Label>
                 <Form.Select
                   name="categoryId"
                   value={formData.categoryId}
                   onChange={handleChange}
                   disabled={!formData.menuId}
+                  required
                 >
                   <option value="">Select Category</option>
                   {filteredCategories.map((category) => (

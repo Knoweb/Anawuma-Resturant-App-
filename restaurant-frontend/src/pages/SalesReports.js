@@ -185,6 +185,9 @@ const SalesReports = () => {
       } else {
         params = { from: f, to: t };
       }
+      if (selectedCashier !== 'all') {
+        params.cashierId = selectedCashier;
+      }
       
       const res = await apiClient.get(`/reports/${endpoint}/csv`, { params, responseType: 'blob' });
       const suffix = activeTab === 'single' ? f : (activeTab === 'monthly' ? monthYear : `${f}-to-${t}`);

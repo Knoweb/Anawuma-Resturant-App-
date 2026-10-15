@@ -46,8 +46,8 @@ import { AboutModule } from './about/about.module';
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_DATABASE'),
         autoLoadEntities: true,
-        synchronize: true, // Set to false in production
-        logging: true,
+        synchronize: configService.get('NODE_ENV') === 'production' ? (configService.get('DB_SYNCHRONIZE') === 'true') : (configService.get('DB_SYNCHRONIZE') !== 'false'),
+        logging: configService.get('DB_LOGGING') === 'true',
       }),
       inject: [ConfigService],
     }),

@@ -36,6 +36,32 @@ export class BillingService {
     private websocketGateway: WebsocketGateway,
   ) { }
 
+  private async generateInvoiceNumber(restaurantId: number): Promise<string> {
+    const lastInvoice = await this.invoicesRepository
+      .createQueryBuilder('invoice')
+      .where('invoice.restaurantId = :restaurantId', { restaurantId })
+      .andWhere('invoice.invoiceNumber LIKE :pattern', { pattern: `INV-${restaurantId}-%` })
+      .orderBy('invoice.invoiceId', 'DESC')
+      .getOne();
+
+    let nextSeq = 1;
+    if (lastInvoice && lastInvoice.invoiceNumber) {
+      const parts = lastInvoice.invoiceNumber.split('-');
+      const lastSeq = parseInt(parts[parts.length - 1], 10);
+      if (!isNaN(lastSeq)) {
+        nextSeq = lastSeq + 1;
+      }
+    }
+
+    let invoiceNumber = `INV-${restaurantId}-${String(nextSeq).padStart(4, '0')}`;
+    while (await this.invoicesRepository.findOne({ where: { invoiceNumber } })) {
+      nextSeq++;
+      invoiceNumber = `INV-${restaurantId}-${String(nextSeq).padStart(4, '0')}`;
+    }
+
+    return invoiceNumber;
+  }
+
   private async buildInvoiceSnapshot(
     order: Order,
     adminId?: number,
@@ -49,8 +75,7 @@ export class BillingService {
     const serviceCharge = order.serviceCharge ? parseFloat(order.serviceCharge.toString()) : 0;
     const finalTotal = parseFloat(order.totalAmount.toString());
 
-    const invCount = await this.invoicesRepository.count({ where: { restaurantId: order.restaurantId } });
-    const invoiceNumber = `INV-${order.restaurantId}-${String(invCount).padStart(4, '0')}`;
+    const invoiceNumber = await this.generateInvoiceNumber(order.restaurantId);
 
     const orderItemsSnapshot = (order.orderItems || []).map((item) => ({
       itemName: item.itemName,
@@ -214,8 +239,7 @@ export class BillingService {
     });
 
     const now = new Date();
-    const invCount = await this.invoicesRepository.count({ where: { restaurantId } });
-    const invoiceNumber = `INV-${restaurantId}-${String(invCount).padStart(4, '0')}`;
+    const invoiceNumber = await this.generateInvoiceNumber(restaurantId);
 
     // 3. Create Aggregated Invoice
     const invoice = (this.invoicesRepository.create as any)({

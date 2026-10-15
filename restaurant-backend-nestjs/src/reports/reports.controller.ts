@@ -52,12 +52,16 @@ export class ReportsController {
   }
 
   @Get('daily')
-  async getDailyReport(@Request() req, @Query('date') date: string) {
+  async getDailyReport(
+    @Request() req,
+    @Query('date') date: string,
+    @Query('cashierId') cashierId?: string,
+  ) {
     if (!date) {
       throw new Error('Date parameter is required (YYYY-MM-DD)');
     }
     const restaurantId = req.user.restaurantId;
-    return this.reportsService.getDailyReport(restaurantId, date);
+    return this.reportsService.getDailyReport(restaurantId, date, cashierId);
   }
 
   @Get('range')
@@ -65,12 +69,13 @@ export class ReportsController {
     @Request() req,
     @Query('from') fromDate: string,
     @Query('to') toDate: string,
+    @Query('cashierId') cashierId?: string,
   ) {
     if (!fromDate || !toDate) {
       throw new Error('Both from and to date parameters are required (YYYY-MM-DD)');
     }
     const restaurantId = req.user.restaurantId;
-    return this.reportsService.getRangeReport(restaurantId, fromDate, toDate);
+    return this.reportsService.getRangeReport(restaurantId, fromDate, toDate, cashierId);
   }
 
   @Get('monthly')
@@ -78,12 +83,13 @@ export class ReportsController {
     @Request() req,
     @Query('year') year: string,
     @Query('month') month: string,
+    @Query('cashierId') cashierId?: string,
   ) {
     if (!year || !month) {
       throw new Error('Both year and month parameters are required');
     }
     const restaurantId = req.user.restaurantId;
-    return this.reportsService.getMonthlyReport(restaurantId, parseInt(year), parseInt(month));
+    return this.reportsService.getMonthlyReport(restaurantId, parseInt(year), parseInt(month), cashierId);
   }
 
   @Get('history')
@@ -97,13 +103,14 @@ export class ReportsController {
   async getDailyCsv(
     @Request() req,
     @Query('date') date: string,
+    @Query('cashierId') cashierId: string,
     @Res() res: Response,
   ) {
     if (!date) {
       throw new Error('Date parameter is required (YYYY-MM-DD)');
     }
     const restaurantId = req.user.restaurantId;
-    const csv = await this.reportsService.generateDailyCsv(restaurantId, date);
+    const csv = await this.reportsService.generateDailyCsv(restaurantId, date, cashierId);
 
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader(
@@ -118,6 +125,7 @@ export class ReportsController {
     @Request() req,
     @Query('from') fromDate: string,
     @Query('to') toDate: string,
+    @Query('cashierId') cashierId: string,
     @Res() res: Response,
   ) {
     if (!fromDate || !toDate) {
@@ -128,6 +136,7 @@ export class ReportsController {
       restaurantId,
       fromDate,
       toDate,
+      cashierId,
     );
 
     res.setHeader('Content-Type', 'text/csv');
@@ -143,6 +152,7 @@ export class ReportsController {
     @Request() req,
     @Query('year') year: string,
     @Query('month') month: string,
+    @Query('cashierId') cashierId: string,
     @Res() res: Response,
   ) {
     if (!year || !month) {
@@ -153,6 +163,7 @@ export class ReportsController {
       restaurantId,
       parseInt(year),
       parseInt(month),
+      cashierId,
     );
 
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',

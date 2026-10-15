@@ -14,6 +14,8 @@ import { Menu } from '../menus/entities/menu.entity';
 import { CreateFoodItemDto } from './dto/create-food-item.dto';
 import { UpdateFoodItemDto } from './dto/update-food-item.dto';
 import { OrderItem } from '../orders/entities/order-item.entity';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class FoodItemsService {
@@ -358,10 +360,40 @@ export class FoodItemsService {
     try {
       await this.foodItemsRepository.query('DELETE FROM offer_food_items_tbl WHERE food_item_id = ?', [id]);
       await this.foodItemsRepository.remove(foodItem);
+
+      // Clean up physical media files
+      this.cleanupMediaFiles([
+        foodItem.imageUrl1,
+        foodItem.imageUrl2,
+        foodItem.imageUrl3,
+        foodItem.imageUrl4,
+        foodItem.videoLink,
+      ]);
     } catch (error) {
       throw new InternalServerErrorException(
         'An error occurred while trying to delete the food item. It might be referenced by other records.'
       );
+    }
+  }
+
+  private cleanupMediaFiles(paths: (string | undefined | null)[]) {
+    for (const rawPath of paths) {
+      if (!rawPath) continue;
+      try {
+        let relativePath = rawPath;
+        if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
+          const urlObj = new URL(relativePath);
+          relativePath = urlObj.pathname;
+        }
+        if (relativePath.startsWith('/uploads/food-items/')) {
+          const filePath = path.join(process.cwd(), relativePath.slice(1));
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+          }
+        }
+      } catch (err) {
+        console.warn(`Failed to cleanup media file ${rawPath}:`, err);
+      }
     }
   }
 

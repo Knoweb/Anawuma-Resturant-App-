@@ -39,7 +39,8 @@ function MonthlyReport() {
       const response = await apiClient.get('/reports/monthly', {
         params: { 
           year: selectedYear,
-          month: selectedMonth
+          month: selectedMonth,
+          cashierId: selectedCashier !== 'all' ? selectedCashier : undefined,
         }
       });
       setReportData(response.data);
@@ -76,7 +77,8 @@ function MonthlyReport() {
       const response = await apiClient.get('/reports/monthly/csv', {
         params: { 
           year: selectedYear,
-          month: selectedMonth
+          month: selectedMonth,
+          cashierId: selectedCashier !== 'all' ? selectedCashier : undefined,
         },
         responseType: 'blob'
       });

@@ -120,7 +120,33 @@ export class ReportsService {
     };
   }
 
-  async getDailyReport(restaurantId: number, date: string) {
+  private async getPaidInvoicesForPeriod(
+    restaurantId: number,
+    start: Date,
+    end: Date,
+    cashierId?: string | number,
+  ): Promise<Invoice[]> {
+    const query = this.invoicesRepository
+      .createQueryBuilder('invoice')
+      .leftJoinAndSelect('invoice.createdBy', 'createdBy')
+      .where('invoice.restaurantId = :restaurantId', { restaurantId })
+      .andWhere('invoice.invoiceStatus = :status', { status: InvoiceStatus.PAID })
+      .andWhere('invoice.createdAt BETWEEN :start AND :end', { start, end })
+      .orderBy('invoice.createdAt', 'DESC');
+
+    if (cashierId && cashierId !== 'all') {
+      const parsedId = parseInt(String(cashierId), 10);
+      if (!isNaN(parsedId) && /^\d+$/.test(String(cashierId).trim())) {
+        query.andWhere('invoice.createdByAdminId = :cashierId', { cashierId: parsedId });
+      } else {
+        query.andWhere('createdBy.email = :cashierEmail', { cashierEmail: String(cashierId).trim() });
+      }
+    }
+
+    return query.getMany();
+  }
+
+  async getDailyReport(restaurantId: number, date: string, cashierId?: string | number) {
     const dateObj = new Date(date);
     const dayOfWeek = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
     const formattedDate = dateObj.toLocaleDateString('en-US', {
@@ -132,15 +158,7 @@ export class ReportsService {
 
     const start = this.getLocalStartOfDay(date);
     const end = this.getLocalEndOfDay(date);
-    const invoices = await this.invoicesRepository.find({
-      where: {
-        restaurantId,
-        invoiceStatus: InvoiceStatus.PAID,
-        createdAt: Between(start, end),
-      },
-      relations: ['createdBy'],
-      order: { createdAt: 'DESC' },
-    });
+    const invoices = await this.getPaidInvoicesForPeriod(restaurantId, start, end, cashierId);
     
     const rows: any[] = [];
     let totalRevenue = 0;
@@ -200,7 +218,7 @@ export class ReportsService {
     };
   }
 
-  async getRangeReport(restaurantId: number, fromDate: string, toDate: string) {
+  async getRangeReport(restaurantId: number, fromDate: string, toDate: string, cashierId?: string | number) {
     const from = new Date(fromDate);
     const to = new Date(toDate);
     const formattedFrom = from.toLocaleDateString('en-US', {
@@ -217,15 +235,7 @@ export class ReportsService {
 
     const start = this.getLocalStartOfDay(fromDate);
     const end = this.getLocalEndOfDay(toDate);
-    const invoices = await this.invoicesRepository.find({
-      where: {
-        restaurantId,
-        invoiceStatus: InvoiceStatus.PAID,
-        createdAt: Between(start, end),
-      },
-      relations: ['createdBy'],
-      order: { createdAt: 'DESC' },
-    });
+    const invoices = await this.getPaidInvoicesForPeriod(restaurantId, start, end, cashierId);
 
     const rows: any[] = [];
     let totalRevenue = 0;
@@ -285,7 +295,7 @@ export class ReportsService {
     };
   }
 
-  async getMonthlyReport(restaurantId: number, year: number, month: number) {
+  async getMonthlyReport(restaurantId: number, year: number, month: number, cashierId?: string | number) {
     // Calculate first and last day of the month
     const firstDay = new Date(year, month - 1, 1);
     const lastDay = new Date(year, month, 0);
@@ -299,15 +309,7 @@ export class ReportsService {
 
     const start = this.getLocalStartOfDay(fromDate);
     const end = this.getLocalEndOfDay(toDate);
-    const invoices = await this.invoicesRepository.find({
-      where: {
-        restaurantId,
-        invoiceStatus: InvoiceStatus.PAID,
-        createdAt: Between(start, end),
-      },
-      relations: ['createdBy'],
-      order: { createdAt: 'DESC' },
-    });
+    const invoices = await this.getPaidInvoicesForPeriod(restaurantId, start, end, cashierId);
 
     const rows: any[] = [];
     let totalRevenue = 0;
@@ -417,8 +419,8 @@ export class ReportsService {
     return '-';
   }
 
-  async generateDailyCsv(restaurantId: number, date: string): Promise<string> {
-    const report = await this.getDailyReport(restaurantId, date);
+  async generateDailyCsv(restaurantId: number, date: string, cashierId?: string | number): Promise<string> {
+    const report = await this.getDailyReport(restaurantId, date, cashierId);
 
     let csv = 'Order No,Table/Room,Date/Time,Item Name,Qty,Line Total,Service Charge,Payment Method,Cashier\n';
     
@@ -442,8 +444,8 @@ export class ReportsService {
     return csv;
   }
 
-  async generateRangeCsv(restaurantId: number, fromDate: string, toDate: string): Promise<string> {
-    const report = await this.getRangeReport(restaurantId, fromDate, toDate);
+  async generateRangeCsv(restaurantId: number, fromDate: string, toDate: string, cashierId?: string | number): Promise<string> {
+    const report = await this.getRangeReport(restaurantId, fromDate, toDate, cashierId);
 
     let csv = 'Order No,Table/Room,Date/Time,Item Name,Qty,Line Total,Service Charge,Payment Method,Cashier\n';
     
@@ -467,8 +469,8 @@ export class ReportsService {
     return csv;
   }
 
-  async generateMonthlyCsv(restaurantId: number, year: number, month: number): Promise<string> {
-    const report = await this.getMonthlyReport(restaurantId, year, month);
+  async generateMonthlyCsv(restaurantId: number, year: number, month: number, cashierId?: string | number): Promise<string> {
+    const report = await this.getMonthlyReport(restaurantId, year, month, cashierId);
 
     let csv = 'Order No,Table/Room,Date/Time,Item Name,Qty,Line Total,Service Charge,Payment Method,Cashier\n';
     

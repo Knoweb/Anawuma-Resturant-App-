@@ -124,8 +124,19 @@ export class OrdersService {
     const totalAmount = subtotal + serviceCharge;
 
     // Generate sequential order number starting from 1 for this restaurant
-    const count = await this.ordersRepository.count({ where: { restaurantId } });
-    const orderNo = `${count + 1}`;
+    const maxOrder = await this.ordersRepository
+      .createQueryBuilder('order')
+      .select('MAX(CAST(order.orderNo AS UNSIGNED))', 'maxNo')
+      .where('order.restaurantId = :restaurantId', { restaurantId })
+      .getRawOne();
+    let nextNo = (parseInt(maxOrder?.maxNo, 10) || 0) + 1;
+    let orderNo = `${nextNo}`;
+
+    // Safety check against existing duplicate
+    while (await this.ordersRepository.findOne({ where: { restaurantId, orderNo } })) {
+      nextNo++;
+      orderNo = `${nextNo}`;
+    }
 
     // Create order with cascade
     const order = this.ordersRepository.create({

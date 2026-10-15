@@ -49,27 +49,24 @@ async function clearTransactions() {
   }
 
   if (!conn) {
-    const passwords = ['', '7154$La1'];
-    for (const password of passwords) {
-      try {
-        console.log(`Connecting to MySQL database at ${dbHost}:${dbPort} with password: "${password}"...`);
-        conn = await mysql.createConnection({
-          host: dbHost,
-          port: dbPort,
-          user: dbUser,
-          password: password,
-          database: dbName
-        });
-        console.log('✅ Connected successfully to MySQL database!');
-        break;
-      } catch (err) {
-        console.error(`Failed with password "${password}":`, err.message);
-      }
+    const password = process.env.DB_PASSWORD || '';
+    try {
+      console.log(`Connecting to MySQL database at ${dbHost}:${dbPort}...`);
+      conn = await mysql.createConnection({
+        host: dbHost,
+        port: dbPort,
+        user: dbUser,
+        password: password,
+        database: dbName
+      });
+      console.log('✅ Connected successfully to MySQL database!');
+    } catch (err) {
+      console.error('Failed to connect to database:', err.message);
     }
   }
 
   if (!conn) {
-    console.error('❌ Error: Could not connect to MySQL database.');
+    console.error('❌ Error: Could not connect to MySQL database. Please ensure DB_PASSWORD and other connection parameters are set.');
     process.exit(1);
   }
 
