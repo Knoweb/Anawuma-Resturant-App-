@@ -145,7 +145,9 @@ function Sidebar() {
       ? '/cashier/dashboard/history'
       : isAccountant
         ? '/accountant/dashboard'
-        : '/dashboard';
+        : isHousekeeper
+          ? '/room-orders'
+          : '/dashboard';
 
   const canAccessManualOrder = (isCashier || isAdmin || isSuperAdmin) && isCashierEnabled;
 

@@ -27,6 +27,10 @@ function RoleBasedRedirect() {
   if (role === 'accountant') {
     return <Navigate to="/accountant/dashboard" replace />;
   }
+
+  if (role === 'housekeeper') {
+    return <Navigate to="/room-orders" replace />;
+  }
   
   // All other roles → Restaurant Dashboard
   return <Navigate to="/dashboard" replace />;

@@ -28,7 +28,6 @@ import ChangePassword from './pages/ChangePassword';
 import RoomOrderManagement from './pages/RoomOrderManagement';
 import RoomQRCodes from './pages/RoomQRCodes';
 import GenerateRoomQRCodes from './pages/GenerateRoomQRCodes';
-import GuestRequestForm from './pages/GuestRequestForm';
 import AddOffer from './pages/AddOffer';
 import EditOffer from './pages/EditOffer';
 import Offers from './pages/Offers';

@@ -35,6 +35,8 @@ function Login() {
         return '/my-hotel';
 
       case 'housekeeper':
+        return '/room-orders';
+
       case 'manager':
       case 'staff':
         return '/dashboard';
