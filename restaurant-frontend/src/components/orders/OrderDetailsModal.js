@@ -19,7 +19,14 @@ import './OrderDetailsModal.css';
  *    - Requires: node-thermal-printer or escpos npm package
  */
 
-const OrderDetailsModal = ({ order, onClose, onStatusUpdate, readOnly = false }) => {
+const OrderDetailsModal = ({
+  order,
+  onClose,
+  onStatusUpdate,
+  readOnly = false,
+  showPrint = true,
+  showWhatsApp = true,
+}) => {
   const orderStatuses = ['NEW', 'COOKING', 'READY', 'SERVED'];
   const canSendBill = order.status === 'READY' || order.status === 'SERVED';
   
@@ -418,7 +425,7 @@ const OrderDetailsModal = ({ order, onClose, onStatusUpdate, readOnly = false })
         </div>
 
         <div className="modal-footer-custom">
-          {order.whatsappNumber && (
+          {showWhatsApp && order.whatsappNumber && (
             <button 
               className={`btn btn-success ${!canSendBill ? 'disabled opacity-50' : ''}`} 
               onClick={sendWhatsAppBill}
@@ -429,10 +436,12 @@ const OrderDetailsModal = ({ order, onClose, onStatusUpdate, readOnly = false })
               Send Bill to {order.customerName || 'Customer'}
             </button>
           )}
-          <button className="btn btn-dark" onClick={handlePrint}>
-            <i className="fas fa-print me-2"></i>
-            Print Ticket
-          </button>
+          {showPrint && (
+            <button className="btn btn-dark" onClick={handlePrint}>
+              <i className="fas fa-print me-2"></i>
+              Print Ticket
+            </button>
+          )}
           <button className="btn btn-secondary" onClick={onClose}>
             <i className="fas fa-times me-1"></i>
             Close

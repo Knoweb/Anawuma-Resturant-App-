@@ -371,6 +371,8 @@ const RoomOrderManagement = () => {
         {showModal && selectedOrder && (
           <OrderDetailsModal
             order={selectedOrder}
+            showPrint={false}
+            showWhatsApp={false}
             onClose={() => {
               setShowModal(false);
               setSelectedOrder(null);
