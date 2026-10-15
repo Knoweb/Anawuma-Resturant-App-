@@ -362,9 +362,9 @@ function App() {
               }
             />
 
-            {/* Housekeeping */}
+            {/* Room Orders */}
             <Route
-              path="/housekeeping/messages"
+              path="/room-orders"
               element={
                 <PrivateRoute>
                   <RoleRoute allowedRoles={['admin', 'super_admin', 'housekeeper']}>
@@ -377,7 +377,7 @@ function App() {
             />
 
             <Route
-              path="/housekeeping/room-qr"
+              path="/room-orders/qr-codes"
               element={
                 <PrivateRoute>
                   <RoleRoute allowedRoles={['admin', 'super_admin']}>
@@ -390,7 +390,7 @@ function App() {
             />
 
             <Route
-              path="/housekeeping/room-qr/generate"
+              path="/room-orders/qr-codes/generate"
               element={
                 <PrivateRoute>
                   <RoleRoute allowedRoles={['admin', 'super_admin']}>
@@ -401,6 +401,11 @@ function App() {
                 </PrivateRoute>
               }
             />
+
+            {/* Legacy Housekeeping redirects */}
+            <Route path="/housekeeping/messages" element={<Navigate to="/room-orders" replace />} />
+            <Route path="/housekeeping/room-qr" element={<Navigate to="/room-orders/qr-codes" replace />} />
+            <Route path="/housekeeping/room-qr/generate" element={<Navigate to="/room-orders/qr-codes/generate" replace />} />
 
             {/* Reports */}
             <Route

@@ -293,8 +293,8 @@ function Sidebar() {
                   </Link>
                 </li>
                 {isHousekeepingEnabled && (
-                  <li className={isActive('/housekeeping/room-qr')}>
-                    <Link to="/housekeeping/room-qr">
+                  <li className={isActive('/room-orders/qr-codes') || isActive('/housekeeping/room-qr')}>
+                    <Link to="/room-orders/qr-codes">
                       <i className="fas fa-door-open me-2"></i>
                       Room QR Codes
                     </Link>
@@ -358,14 +358,14 @@ function Sidebar() {
                 <i className={`fas fa-chevron-${menuStates.housekeeping ? 'down' : 'right'} submenu-arrow`}></i>
               </a>
               <ul className="submenu" style={{ display: menuStates.housekeeping ? 'block' : 'none' }}>
-                <li className={isActive('/housekeeping/messages')}>
-                  <Link to="/housekeeping/messages">
+                <li className={isActive('/room-orders') || isActive('/housekeeping/messages')}>
+                  <Link to="/room-orders">
                     <i className="fas fa-list-ul"></i>
                     Track Orders
                   </Link>
                 </li>
-                <li className={isActive('/housekeeping/room-qr/generate')}>
-                  <Link to="/housekeeping/room-qr/generate">
+                <li className={isActive('/room-orders/qr-codes/generate') || isActive('/housekeeping/room-qr/generate')}>
+                  <Link to="/room-orders/qr-codes/generate">
                     <i className="fas fa-plus-circle"></i>
                     Generate Room QRs
                   </Link>

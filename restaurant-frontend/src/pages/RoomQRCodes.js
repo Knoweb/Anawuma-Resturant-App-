@@ -131,7 +131,7 @@ const RoomQRCodes = () => {
             </button>
             <button
               className="btn btn-light"
-              onClick={() => navigate('/housekeeping/room-qr/generate')}
+              onClick={() => navigate('/room-orders/qr-codes/generate')}
             >
               <i className="fas fa-plus me-2"></i>
               Generate New
@@ -187,7 +187,7 @@ const RoomQRCodes = () => {
           {!searchTerm && (
             <button
               className="btn btn-primary"
-              onClick={() => navigate('/housekeeping/room-qr/generate')}
+              onClick={() => navigate('/room-orders/qr-codes/generate')}
             >
               <i className="fas fa-plus me-2"></i>
               Generate QR Codes
