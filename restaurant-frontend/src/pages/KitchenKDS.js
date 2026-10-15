@@ -35,6 +35,7 @@ const KitchenKDS = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const previousNewOrderIdsRef = useRef(new Set());
   const { subscribe, connected } = useWebSocket();
+  const [, setTimeTicker] = useState(0);
 
   // Defensive cleanup: prevents rare cases where SweetAlert backdrop remains
   // on screen after async flows (WhatsApp/print actions).
@@ -221,7 +222,15 @@ const KitchenKDS = () => {
       fetchAllOrders();
     }, 30000);
 
-    return () => clearInterval(interval);
+    // Live minute ticker to update time badges smoothly every 15 seconds
+    const ticker = setInterval(() => {
+      setTimeTicker((t) => t + 1);
+    }, 15000);
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(ticker);
+    };
   }, [fetchAllOrders]);
 
   // WebSocket subscriptions for real-time updates
@@ -370,23 +379,40 @@ const KitchenKDS = () => {
     });
   };
 
+  const parseOrderDate = (dateString) => {
+    if (!dateString) return null;
+    if (dateString instanceof Date) return isNaN(dateString.getTime()) ? null : dateString;
+    if (typeof dateString === 'string') {
+      // Replace space with T for cross-browser Safari/WebKit compatibility
+      const isoCandidate = dateString.includes('T') ? dateString : dateString.replace(' ', 'T');
+      const d = new Date(isoCandidate);
+      if (!isNaN(d.getTime())) return d;
+    }
+    const fallback = new Date(dateString);
+    return isNaN(fallback.getTime()) ? null : fallback;
+  };
+
+  const getElapsedMinutes = (dateString) => {
+    const date = parseOrderDate(dateString);
+    if (!date) return 0;
+    return Math.max(0, Math.floor((Date.now() - date.getTime()) / 60000));
+  };
+
   const formatTime = (dateString) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMinutes = Math.floor((now - date) / 1000 / 60);
+    const date = parseOrderDate(dateString);
+    if (!date) return '-';
+
+    const diffMinutes = getElapsedMinutes(dateString);
 
     if (diffMinutes < 1) return 'Just now';
     if (diffMinutes < 60) return `${diffMinutes}m ago`;
-    
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
+    const hours = Math.floor(diffMinutes / 60);
+    const mins = diffMinutes % 60;
+    return mins > 0 ? `${hours}h ${mins}m ago` : `${hours}h ago`;
   };
 
   const getTimeClass = (dateString) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMinutes = Math.floor((now - date) / 1000 / 60);
+    const diffMinutes = getElapsedMinutes(dateString);
 
     if (diffMinutes > 15) return 'time-critical';
     if (diffMinutes > 10) return 'time-warning';
@@ -909,7 +935,10 @@ const KitchenKDS = () => {
               </span>
             )}
           </div>
-          <span className={`time-badge ${getTimeClass(order.createdAt)}`}>
+          <span 
+            className={`time-badge ${getTimeClass(order.createdAt)}`}
+            title={parseOrderDate(order.createdAt)?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) || ''}
+          >
             <i className="far fa-clock me-1"></i>
             {formatTime(order.createdAt)}
           </span>
@@ -1134,7 +1163,7 @@ const KitchenKDS = () => {
                 <label className="text-muted small mb-1">Order Time</label>
                 <div>
                   <i className="far fa-clock me-2"></i>
-                  {new Date(selectedOrder.createdAt).toLocaleString()}
+                  {parseOrderDate(selectedOrder.createdAt)?.toLocaleString() || selectedOrder.createdAt}
                 </div>
               </div>
             </div>
