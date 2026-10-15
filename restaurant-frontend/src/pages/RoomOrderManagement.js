@@ -5,7 +5,6 @@ import { useWebSocket } from '../hooks/useWebSocket';
 import Sidebar from '../components/common/Sidebar';
 import Navbar from '../components/common/Navbar';
 import OrderDetailsModal from '../components/orders/OrderDetailsModal';
-import { useAuthStore } from '../store/authStore';
 import './RoomOrderManagement.css';
 
 const RoomOrderManagement = () => {
@@ -21,8 +20,6 @@ const RoomOrderManagement = () => {
     status: '',
     roomNo: '',
   });
-
-  const { user } = useAuthStore();
 
   // Fetch orders
   const fetchOrders = useCallback(async () => {
@@ -129,6 +126,23 @@ const RoomOrderManagement = () => {
         title: 'Error',
         text: error.response?.data?.message || 'Failed to update status',
       });
+    }
+  };
+
+  // View order details
+  const handleViewOrder = async (order) => {
+    setSelectedOrder(order);
+    setShowModal(true);
+
+    if (order?.orderId) {
+      try {
+        const response = await apiClient.get(`/orders/${order.orderId}`);
+        if (response.data) {
+          setSelectedOrder(response.data);
+        }
+      } catch (err) {
+        console.warn('Could not fetch latest order details:', err);
+      }
     }
   };
 
@@ -337,10 +351,7 @@ const RoomOrderManagement = () => {
                             )}
                             <button
                               className="btn btn-outline-info action-btn"
-                              onClick={() => {
-                                setSelectedOrder(order);
-                                setShowModal(true);
-                              }}
+                              onClick={() => handleViewOrder(order)}
                               title="View Details"
                             >
                               <i className="fas fa-eye"></i>

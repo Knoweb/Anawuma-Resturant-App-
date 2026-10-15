@@ -27,8 +27,13 @@ const OrderDetailsModal = ({ order, onClose, onStatusUpdate, readOnly = false })
   // For production: Add REACT_APP_RESTAURANT_NAME to .env file
   const restaurantName = process.env.REACT_APP_RESTAURANT_NAME || 'Restaurant Name';
 
+  const orderItems = (Array.isArray(order.orderItems) && order.orderItems.length > 0)
+    ? order.orderItems
+    : (Array.isArray(order.items) ? order.items : []);
+
   const formatCurrency = (amount) => {
-    return `Rs. ${parseFloat(amount).toFixed(2)}`;
+    const num = parseFloat(amount);
+    return `Rs. ${(isNaN(num) ? 0 : num).toFixed(2)}`;
   };
 
   const formatDateTime = (dateString) => {
@@ -54,12 +59,17 @@ const OrderDetailsModal = ({ order, onClose, onStatusUpdate, readOnly = false })
   };
 
   const calculateLineTotal = (item) => {
-    if (item.lineTotal !== undefined && item.lineTotal !== null) {
+    if (item.lineTotal !== undefined && item.lineTotal !== null && !isNaN(Number(item.lineTotal))) {
       return Number(item.lineTotal);
     }
 
-    const qty = item.qty || item.quantity || 0;
-    return qty * Number(item.unitPrice || 0);
+    const qty = Number(item.qty || item.quantity || 1);
+    const unitPrice = Number(
+      item.unitPrice !== undefined && item.unitPrice !== null
+        ? item.unitPrice
+        : (item.price || item.foodItem?.price || 0)
+    );
+    return qty * (isNaN(unitPrice) ? 0 : unitPrice);
   };
 
   const normalizeWhatsAppNumber = (phone) => {
@@ -155,10 +165,10 @@ const OrderDetailsModal = ({ order, onClose, onStatusUpdate, readOnly = false })
       return;
     }
 
-    const itemsList = order.orderItems.map(item => {
-      const name = item.foodItem?.itemName || item.itemName || 'Item';
+    const itemsList = orderItems.map(item => {
+      const name = item.foodItem?.itemName || item.itemName || item.name || 'Item';
       const qty = item.qty || item.quantity || 1;
-      const total = item.lineTotal || (qty * item.unitPrice) || 0;
+      const total = calculateLineTotal(item).toFixed(2);
       return `${name} x${qty} - Rs. ${total}`;
     }).join('\n');
 
@@ -220,10 +230,10 @@ const OrderDetailsModal = ({ order, onClose, onStatusUpdate, readOnly = false })
             <hr style={{ borderTop: '2px dashed #000', margin: '10px 0' }} />
 
             {/* Items */}
-            {order.orderItems && order.orderItems.map((item, index) => (
-              <div key={item.orderItemId || index} style={{ marginBottom: '10px' }}>
+            {orderItems.map((item, index) => (
+              <div key={item.orderItemId || item.id || index} style={{ marginBottom: '10px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
-                  <span>{item.foodItem?.itemName || item.itemName || 'Unknown Item'} x {item.qty || item.quantity || 1}</span>
+                  <span>{item.foodItem?.itemName || item.itemName || item.name || 'Unknown Item'} x {item.qty || item.quantity || 1}</span>
                   <span>Rs. {calculateLineTotal(item).toFixed(2)}</span>
                 </div>
                 {item.notes && (
@@ -324,32 +334,42 @@ const OrderDetailsModal = ({ order, onClose, onStatusUpdate, readOnly = false })
                   </tr>
                 </thead>
                 <tbody>
-                  {order.orderItems && order.orderItems.length > 0 ? (
-                    order.orderItems.map((item, index) => (
-                      <tr key={item.orderItemId}>
-                        <td>{index + 1}</td>
-                        <td>
-                          <strong>{item.foodItem?.itemName || item.itemName || 'Unknown Item'}</strong>
-                          {item.notes && (
-                            <div className="item-notes">
-                              <i className="fas fa-comment-dots me-1"></i>
-                              {item.notes}
-                            </div>
-                          )}
-                        </td>
-                        <td>
-                          <span className="quantity-badge">{item.qty || item.quantity || 1}</span>
-                        </td>
-                        <td>{formatCurrency(item.unitPrice)}</td>
-                        <td>
-                          <strong>{formatCurrency(calculateLineTotal(item))}</strong>
-                        </td>
-                      </tr>
-                    ))
+                  {orderItems.length > 0 ? (
+                    orderItems.map((item, index) => {
+                      const itemName = item.foodItem?.itemName || item.itemName || item.name || 'Unknown Item';
+                      const qty = item.qty || item.quantity || 1;
+                      const unitPrice = item.unitPrice !== undefined && item.unitPrice !== null
+                        ? item.unitPrice
+                        : (item.price || item.foodItem?.price || 0);
+                      const lineTotal = calculateLineTotal(item);
+
+                      return (
+                        <tr key={item.orderItemId || item.id || index}>
+                          <td style={{ fontWeight: 600, color: '#718096' }}>{index + 1}</td>
+                          <td>
+                            <strong style={{ color: '#1a202c', fontSize: '14.5px' }}>{itemName}</strong>
+                            {item.notes && (
+                              <div className="item-notes">
+                                <i className="fas fa-comment-dots me-1"></i>
+                                {item.notes}
+                              </div>
+                            )}
+                          </td>
+                          <td>
+                            <span className="quantity-badge">{qty}</span>
+                          </td>
+                          <td style={{ fontWeight: 500, color: '#4a5568' }}>{formatCurrency(unitPrice)}</td>
+                          <td>
+                            <strong style={{ color: '#266668', fontSize: '15px' }}>{formatCurrency(lineTotal)}</strong>
+                          </td>
+                        </tr>
+                      );
+                    })
                   ) : (
                     <tr>
-                      <td colSpan="5" className="text-center text-muted">
-                        No items found
+                      <td colSpan="5" className="text-center text-muted py-4">
+                        <i className="fas fa-utensils me-2"></i>
+                        No items found in this order
                       </td>
                     </tr>
                   )}

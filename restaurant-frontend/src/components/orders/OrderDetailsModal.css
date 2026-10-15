@@ -162,27 +162,50 @@
 
 .order-items-table {
   margin-bottom: 0;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
 }
 
-.order-items-table thead {
-  background-color: #f1f3f5;
+.order-items-table thead,
+.order-items-table thead tr {
+  background: linear-gradient(135deg, #266668 0%, #1a4648 100%) !important;
 }
 
 .order-items-table thead th {
-  font-weight: 600;
-  font-size: 13px;
-  text-transform: uppercase;
-  color: #495057;
-  padding: 12px;
-  border: none;
-  letter-spacing: 0.5px;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+  text-transform: uppercase !important;
+  color: #ffffff !important;
+  background: transparent !important;
+  padding: 14px 14px !important;
+  border: none !important;
+  letter-spacing: 0.8px !important;
+  vertical-align: middle !important;
+}
+
+.order-items-table thead th:first-child {
+  border-top-left-radius: 7px;
+}
+
+.order-items-table thead th:last-child {
+  border-top-right-radius: 7px;
 }
 
 .order-items-table tbody td {
-  padding: 15px 12px;
+  padding: 14px 14px;
   vertical-align: middle;
   font-size: 14px;
-  border-bottom: 1px solid #e9ecef;
+  color: #2d3748;
+  border-bottom: 1px solid #edf2f7;
+  background-color: #ffffff;
+}
+
+.order-items-table tbody tr:hover td {
+  background-color: #f7fafc;
 }
 
 .order-items-table tbody tr:last-child td {
@@ -191,34 +214,37 @@
 
 .item-notes {
   font-size: 12px;
-  color: #6c757d;
+  color: #718096;
   font-style: italic;
   margin-top: 5px;
 }
 
 .quantity-badge {
   display: inline-block;
-  background-color: #266668;
-  color: white;
+  background-color: #e6fffa;
+  color: #234e52;
+  border: 1px solid #b2f5ea;
   padding: 4px 12px;
   border-radius: 12px;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 13px;
 }
 
 .total-row {
-  background-color: #f8f9fa;
-  font-size: 16px;
+  background-color: #f8fafc;
+  font-size: 15px;
 }
 
 .total-row td {
-  padding: 15px 12px !important;
-  border-top: 2px solid #dee2e6 !important;
+  padding: 16px 14px !important;
+  border-top: 2px solid #e2e8f0 !important;
+  background-color: #f8fafc !important;
 }
 
 .total-row .total-amount {
-  color: #27ae60;
+  color: #266668;
   font-size: 18px;
+  font-weight: 800;
 }
 
 /* Status Update Section */
