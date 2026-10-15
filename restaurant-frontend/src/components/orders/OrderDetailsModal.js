@@ -213,15 +213,15 @@ const OrderDetailsModal = ({ order, onClose, onStatusUpdate, readOnly = false })
 
             {/* Order Information */}
             <h5 className="text-center" style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '10px' }}>ORDER DETAILS</h5>
-            <p style={{ margin: '5px 0' }}><strong>Order:</strong> {order.orderNo}</p>
-            <p style={{ margin: '5px 0' }}><strong>Table:</strong> {order.tableNo}</p>
+            <p style={{ margin: '5px 0' }}><strong>Order:</strong> {order.orderNo || order.orderId}</p>
+            <p style={{ margin: '5px 0' }}><strong>{order.roomNo ? 'Room:' : 'Table:'}</strong> {order.roomNo || order.tableNo || '-'}</p>
             <p style={{ margin: '5px 0' }}><strong>Date:</strong> {new Date(order.createdAt).toLocaleString()}</p>
             <p style={{ margin: '5px 0' }}><strong>Status:</strong> {order.status}</p>
             <hr style={{ borderTop: '2px dashed #000', margin: '10px 0' }} />
 
             {/* Items */}
             {order.orderItems && order.orderItems.map((item, index) => (
-              <div key={item.orderItemId} style={{ marginBottom: '10px' }}>
+              <div key={item.orderItemId || index} style={{ marginBottom: '10px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
                   <span>{item.foodItem?.itemName || item.itemName || 'Unknown Item'} x {item.qty || item.quantity || 1}</span>
                   <span>Rs. {calculateLineTotal(item).toFixed(2)}</span>
@@ -240,10 +240,10 @@ const OrderDetailsModal = ({ order, onClose, onStatusUpdate, readOnly = false })
               <strong>Rs. {parseFloat(order.totalAmount).toFixed(2)}</strong>
             </div>
 
-            {order.specialInstructions && (
+            {(order.notes || order.specialInstructions) && (
               <div style={{ marginTop: '15px', padding: '8px', border: '1px dashed #000' }}>
                 <strong>Special Instructions:</strong>
-                <div style={{ fontSize: '11px', marginTop: '5px' }}>{order.specialInstructions}</div>
+                <div style={{ fontSize: '11px', marginTop: '5px' }}>{order.notes || order.specialInstructions}</div>
               </div>
             )}
 
@@ -256,11 +256,11 @@ const OrderDetailsModal = ({ order, onClose, onStatusUpdate, readOnly = false })
               <div className="col-md-6">
                 <div className="info-group">
                   <label>Order Number:</label>
-                  <span className="info-value">{order.orderNo}</span>
+                  <span className="info-value">{order.orderNo || order.orderId}</span>
                 </div>
                 <div className="info-group">
-                  <label>Table Number:</label>
-                  <span className="info-value">{order.tableNo}</span>
+                  <label>{order.roomNo ? 'Room Number:' : 'Table Number:'}</label>
+                  <span className="info-value">{order.roomNo || order.tableNo || '-'}</span>
                 </div>
                 <div className="info-group">
                   <label>Status:</label>
@@ -296,11 +296,11 @@ const OrderDetailsModal = ({ order, onClose, onStatusUpdate, readOnly = false })
               </div>
             </div>
 
-            {order.specialInstructions && (
+            {(order.notes || order.specialInstructions) && (
               <div className="info-group mt-3">
-                <label>Special Instructions:</label>
+                <label>Special Instructions / Notes:</label>
                 <div className="special-instructions">
-                  {order.specialInstructions}
+                  {order.notes || order.specialInstructions}
                 </div>
               </div>
             )}

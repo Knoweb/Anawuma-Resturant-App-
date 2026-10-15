@@ -4,14 +4,16 @@ import apiClient from '../api/apiClient';
 import { useWebSocket } from '../hooks/useWebSocket';
 import Sidebar from '../components/common/Sidebar';
 import Navbar from '../components/common/Navbar';
+import OrderDetailsModal from '../components/orders/OrderDetailsModal';
 import { useAuthStore } from '../store/authStore';
 import './RoomOrderManagement.css';
 
 const RoomOrderManagement = () => {
   const [orders, setOrders] = useState([]);
-  const [restaurantProfile, setRestaurantProfile] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [autoRefresh] = useState(true);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const { subscribe, connected } = useWebSocket();
 
   // Filters
@@ -21,19 +23,6 @@ const RoomOrderManagement = () => {
   });
 
   const { user } = useAuthStore();
-
-  // Fetch restaurant profile
-  useEffect(() => {
-    if (!user?.restaurantId) return;
-
-    apiClient.get(`/restaurant/${user.restaurantId}`)
-      .then(res => {
-        if (res.data.success) {
-          setRestaurantProfile(res.data.data);
-        }
-      })
-      .catch(err => console.error('Error fetching restaurant profile:', err));
-  }, [user?.restaurantId]);
 
   // Fetch orders
   const fetchOrders = useCallback(async () => {
@@ -173,101 +162,6 @@ const RoomOrderManagement = () => {
       day: '2-digit',
       month: 'short'
     });
-  };
-
-  const escapeHtml = (value) => {
-    return String(value ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  };
-
-  const formatBillCurrency = (value) => {
-    return `Rs. ${parseFloat(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  };
-
-  const printOrderBill = (order) => {
-    const printWindow = window.open('', '_blank', 'width=800,height=600');
-    if (!printWindow) {
-      Swal.fire('Popup Blocked', 'Please allow popups to print the bill.', 'warning');
-      return;
-    }
-
-    const itemsMarkup = (order.orderItems || []).map((item, index) => {
-      const qty = item.qty || item.quantity || 1;
-      const unitPrice = item.unitPrice || 0;
-      const itemName = item.itemName || item.foodItem?.itemName || 'Item';
-      return `
-        <tr>
-          <td style="padding:8px;border-bottom:1px solid #eee;">${index + 1}</td>
-          <td style="padding:8px;border-bottom:1px solid #eee;">${escapeHtml(itemName)}</td>
-          <td style="padding:8px;border-bottom:1px solid #eee;text-align:center;">${qty}</td>
-          <td style="padding:8px;border-bottom:1px solid #eee;text-align:right;">${formatBillCurrency(unitPrice)}</td>
-          <td style="padding:8px;border-bottom:1px solid #eee;text-align:right;">${formatBillCurrency(qty * unitPrice)}</td>
-        </tr>
-      `;
-    }).join('');
-
-    const html = `
-      <html>
-        <head>
-          <title>Bill - ${order.orderNo}</title>
-          <style>
-            body { font-family: 'Courier New', Courier, monospace; padding: 20px; color: #333; }
-            .bill-container { max-width: 400px; margin: 0 auto; border: 1px solid #eee; padding: 15px; }
-            .header { text-align: center; margin-bottom: 20px; border-bottom: 2px dashed #eee; padding-bottom: 10px; }
-            .restaurant-name { font-size: 20px; font-weight: bold; margin-bottom: 5px; }
-            .details { font-size: 14px; margin-bottom: 20px; }
-            table { width: 100%; border-collapse: collapse; font-size: 13px; }
-            .total { margin-top: 20px; border-top: 2px dashed #eee; padding-top: 10px; text-align: right; font-size: 18px; font-weight: bold; }
-            @media print { .no-print { display: none; } }
-          </style>
-        </head>
-        <body>
-          <div class="no-print" style="margin-bottom: 20px; text-align: center;">
-            <button onclick="window.print()" style="padding: 10px 20px; background: #266668; color: white; border: none; border-radius: 5px; cursor: pointer;">Print Receipt</button>
-          </div>
-          <div class="bill-container">
-            <div class="header">
-              <div class="restaurant-name">${escapeHtml(restaurantProfile?.restaurantName || 'RESTAURANT')}</div>
-              <div style="font-size: 12px; color: #666;">${escapeHtml(restaurantProfile?.address || '')}</div>
-              <div style="font-size: 12px; color: #666;">${escapeHtml(restaurantProfile?.phone || '')}</div>
-              <h3 style="margin-top: 15px;">ROOM SERVICE BILL</h3>
-            </div>
-            <div class="details">
-              <div><strong>Order #</strong> ${order.orderNo}</div>
-              <div><strong>Room #</strong> ${order.roomNo}</div>
-              <div><strong>Guest:</strong> ${escapeHtml(order.customerName || 'Walk-in')}</div>
-              <div><strong>Date:</strong> ${new Date(order.createdAt).toLocaleString()}</div>
-            </div>
-            <table>
-              <thead>
-                <tr style="border-bottom: 1px solid #333;">
-                  <th style="text-align:left;">#</th>
-                  <th style="text-align:left;">Item</th>
-                  <th>Qty</th>
-                  <th style="text-align:right;">Price</th>
-                  <th style="text-align:right;">Total</th>
-                </tr>
-              </thead>
-              <tbody>${itemsMarkup}</tbody>
-            </table>
-            <div class="total">
-              Grand Total: ${formatBillCurrency(order.totalAmount)}
-            </div>
-            <div style="margin-top:30px; text-align:center; font-size: 12px; color: #777;">
-              Thank you for choose our service!<br>
-              Printed on ${new Date().toLocaleString()}
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
-
-    printWindow.document.write(html);
-    printWindow.document.close();
   };
 
   return (
@@ -442,30 +336,10 @@ const RoomOrderManagement = () => {
                               </button>
                             )}
                             <button
-                              className="btn btn-outline-dark action-btn"
-                              onClick={() => printOrderBill(order)}
-                              title="Print Bill"
-                            >
-                              <i className="fas fa-print"></i>
-                            </button>
-                            <button
                               className="btn btn-outline-info action-btn"
                               onClick={() => {
-                                Swal.fire({
-                                  title: `Order #${order.orderNo}`,
-                                  html: `
-                                    <div style="text-align: left;">
-                                      <p><strong>Customer:</strong> ${order.customerName || 'N/A'}</p>
-                                      <p><strong>Notes:</strong> ${order.notes || 'None'}</p>
-                                      <hr/>
-                                      <p><strong>Items:</strong></p>
-                                      <ul>
-                                        ${order.orderItems.map(i => `<li>${i.qty || i.quantity || 1}x ${i.itemName || i.foodItem?.itemName || 'Item'}</li>`).join('')}
-                                      </ul>
-                                    </div>
-                                  `,
-                                  icon: 'info'
-                                });
+                                setSelectedOrder(order);
+                                setShowModal(true);
                               }}
                               title="View Details"
                             >
@@ -481,6 +355,23 @@ const RoomOrderManagement = () => {
             )}
           </div>
         </div>
+
+        {/* Order Details Modal */}
+        {showModal && selectedOrder && (
+          <OrderDetailsModal
+            order={selectedOrder}
+            onClose={() => {
+              setShowModal(false);
+              setSelectedOrder(null);
+            }}
+            onStatusUpdate={async (orderId, newStatus) => {
+              await handleUpdateStatus(orderId, newStatus);
+              setSelectedOrder((prev) =>
+                prev && prev.orderId === orderId ? { ...prev, status: newStatus } : prev,
+              );
+            }}
+          />
+        )}
       </div>
     </div>
   );
