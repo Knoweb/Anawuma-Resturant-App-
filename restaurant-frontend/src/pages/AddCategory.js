@@ -124,7 +124,7 @@ function AddCategory() {
         categoryName: formData.categoryName.trim(),
         menuId: parseInt(formData.menuId),
         description: formData.description.trim(),
-        imageUrl: finalImageUrl || undefined,
+        imageUrl: finalImageUrl || '',
         requiresKitchen: formData.requiresKitchen,
       };
 

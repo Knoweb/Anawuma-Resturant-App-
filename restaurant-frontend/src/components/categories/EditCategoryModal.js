@@ -123,7 +123,7 @@ function EditCategoryModal({ show, onHide, onSuccess, category }) {
         description: formData.description.trim(),
         menuId: parseInt(formData.menuId),
         requiresKitchen: formData.requiresKitchen,
-        imageUrl: finalImageUrl
+        imageUrl: finalImageUrl || ''
       };
 
       await apiClient.patch(`/categories/${category.categoryId}`, payload);

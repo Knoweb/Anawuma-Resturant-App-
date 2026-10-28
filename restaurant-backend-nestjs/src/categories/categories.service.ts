@@ -26,6 +26,8 @@ export class CategoriesService {
   ): Promise<Category> {
     const category = this.categoriesRepository.create({
       ...createCategoryDto,
+      imageUrl: createCategoryDto.imageUrl || null,
+      requiresKitchen: createCategoryDto.requiresKitchen ?? true,
       restaurantId,
     });
 

@@ -9,6 +9,7 @@ function AddCategoryModal(props) {
     categoryName: '',
     description: '',
     menuId: '',
+    requiresKitchen: true,
   });
   const [selectedFile, setSelectedFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -109,7 +110,8 @@ function AddCategoryModal(props) {
         categoryName: formData.categoryName.trim(),
         description: formData.description.trim(),
         menuId: parseInt(formData.menuId),
-        imageUrl: finalImageUrl || undefined
+        requiresKitchen: formData.requiresKitchen,
+        imageUrl: finalImageUrl || ''
       };
 
       await apiClient.post('/categories', payload);
@@ -122,7 +124,7 @@ function AddCategoryModal(props) {
         showConfirmButton: false
       });
 
-      setFormData({ categoryName: '', description: '', menuId: menuId || '' });
+      setFormData({ categoryName: '', description: '', menuId: menuId || '', requiresKitchen: true });
       setSelectedFile(null);
       setImagePreview(null);
       setErrors({});
@@ -181,6 +183,21 @@ function AddCategoryModal(props) {
               ))}
             </Form.Select>
             <Form.Control.Feedback type="invalid">{errors.menuId}</Form.Control.Feedback>
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Check
+              type="switch"
+              id="requiresKitchen"
+              name="requiresKitchen"
+              label="Requires Kitchen Preparation (KDS)"
+              checked={formData.requiresKitchen}
+              onChange={(e) => setFormData(prev => ({ ...prev, requiresKitchen: e.target.checked }))}
+              disabled={submitting}
+            />
+            <small className="text-muted">
+              If unchecked, items in this category will NOT be sent to the Kitchen Dashboard.
+            </small>
           </Form.Group>
 
           <Form.Group className="mb-3">

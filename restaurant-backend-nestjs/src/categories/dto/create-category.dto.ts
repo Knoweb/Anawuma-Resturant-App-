@@ -22,4 +22,8 @@ export class CreateCategoryDto {
 
   @IsOptional()
   requiresKitchen?: boolean;
+
+  @IsInt()
+  @IsOptional()
+  restaurantId?: number;
 }

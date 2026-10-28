@@ -25,8 +25,8 @@ export class Category {
   @Column({ name: 'requires_kitchen', default: true })
   requiresKitchen: boolean;
 
-  @Column({ name: 'image_url', length: 255 })
-  imageUrl: string;
+  @Column({ name: 'image_url', length: 255, nullable: true })
+  imageUrl: string | null;
 
   @Column({ length: 500 })
   description: string;
