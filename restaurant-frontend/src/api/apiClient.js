@@ -9,12 +9,26 @@ const shouldUseEnvApiUrl = (envApiUrl, frontendHost) => {
     return false;
   }
 
+  if (envApiUrl.startsWith('/')) {
+    return true;
+  }
+
   try {
     const resolved = new URL(envApiUrl, window.location.origin);
     const envHost = resolved.hostname;
 
+    // Prevent mixed content: if frontend is on HTTPS, never use insecure HTTP
+    if (window.location.protocol === 'https:' && resolved.protocol === 'http:') {
+      return false;
+    }
+
     // If frontend is opened via LAN IP, ignore stale env host values.
     if (isIpv4Host(frontendHost) && envHost !== frontendHost) {
+      return false;
+    }
+
+    // If frontend is opened via a domain (e.g. anawuma.com), ignore env values pointing to an IP or different host
+    if (!isIpv4Host(frontendHost) && envHost !== frontendHost) {
       return false;
     }
 
@@ -41,6 +55,14 @@ const resolveApiBaseUrl = () => {
       return LOCAL_API_BASE_URL;
     }
 
+    // When opened on a domain (e.g. anawuma.com) or via HTTPS, use same-origin /api through reverse proxy
+    if (window.location.protocol === 'https:' || (!isIpv4Host(host) && !isLocalFrontend)) {
+      if (shouldUseEnvApiUrl(envApiUrl, host)) {
+        return envApiUrl;
+      }
+      return '/api';
+    }
+
     if (shouldUseEnvApiUrl(envApiUrl, host)) {
       return envApiUrl;
     }
@@ -65,10 +87,15 @@ export const sanitizeUrl = (url) => {
 
   const currentHostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
   const currentProtocol = typeof window !== 'undefined' ? window.location.protocol : 'http:';
+  const isLocal = currentHostname === 'localhost' || currentHostname === '127.0.0.1';
+  const isHttpsOrDomain = currentProtocol === 'https:' || (!isIpv4Host(currentHostname) && !isLocal);
 
-  // Dynamically resolve base URL for this specific sanitize call
-  const dynamicBaseUrl = (currentHostname === 'localhost' || currentHostname === '127.0.0.1')
+  // Dynamically resolve base URL for this specific sanitize call.
+  // When on HTTPS or domain, Nginx reverse-proxies /uploads, so do not append :3000!
+  const dynamicBaseUrl = isLocal
     ? 'http://localhost:3000'
+    : isHttpsOrDomain
+    ? `${currentProtocol}//${currentHostname}`
     : `${currentProtocol}//${currentHostname}:3000`;
 
   // If it's a relative path, resolve it based on the type of asset
@@ -96,12 +123,16 @@ export const sanitizeUrl = (url) => {
   try {
     const urlObj = new URL(url);
 
-    // If accessing via LAN IP/different host, ensure absolute URLs point to current backend host
-    if (currentHostname && currentHostname !== 'localhost' && currentHostname !== '127.0.0.1') {
+    // If accessing via domain or LAN IP, ensure absolute URLs point to current backend host
+    if (currentHostname && !isLocal) {
       if (urlObj.hostname !== currentHostname) {
         urlObj.hostname = currentHostname;
-        // Keep the backend port (3000) unless it was something else explicitly
-        if (!urlObj.port) urlObj.port = '3000';
+        if (isHttpsOrDomain) {
+          urlObj.protocol = currentProtocol;
+          urlObj.port = '';
+        } else {
+          if (!urlObj.port) urlObj.port = '3000';
+        }
         return urlObj.toString();
       }
     }

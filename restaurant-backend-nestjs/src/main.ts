@@ -14,9 +14,18 @@ async function bootstrap() {
     : ['http://localhost:3000', 'http://localhost:3001'];
 
   // Ensure standard fallbacks are included
-  if (!allowedOrigins.includes('http://localhost:3000')) allowedOrigins.push('http://localhost:3000');
-  if (!allowedOrigins.includes('http://localhost:3001')) allowedOrigins.push('http://localhost:3001');
-  if (!allowedOrigins.includes('http://152.42.179.36')) allowedOrigins.push('http://152.42.179.36');
+  const standardOrigins = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://152.42.179.36',
+    'https://anawuma.com',
+    'https://www.anawuma.com',
+    'http://anawuma.com',
+    'http://www.anawuma.com',
+  ];
+  for (const origin of standardOrigins) {
+    if (!allowedOrigins.includes(origin)) allowedOrigins.push(origin);
+  }
 
   app.enableCors({
     origin: allowedOrigins,

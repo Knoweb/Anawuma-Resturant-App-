@@ -18,12 +18,26 @@ const shouldUseEnvApiUrl = (envApiUrl, frontendHost) => {
     return false;
   }
 
+  if (envApiUrl.startsWith('/')) {
+    return true;
+  }
+
   try {
     const resolved = new URL(envApiUrl, window.location.origin);
     const envHost = resolved.hostname;
 
+    // Prevent mixed content
+    if (window.location.protocol === 'https:' && resolved.protocol === 'http:') {
+      return false;
+    }
+
     // If frontend is opened via LAN IP, ignore stale env host values.
     if (isIpv4Host(frontendHost) && envHost !== frontendHost) {
+      return false;
+    }
+
+    // If frontend is opened via a domain, ignore env values pointing to an IP or different host
+    if (!isIpv4Host(frontendHost) && envHost !== frontendHost) {
       return false;
     }
 
@@ -95,6 +109,13 @@ export const WebSocketProvider = ({ children }) => {
         const isLocalFrontend = host === 'localhost' || host === '127.0.0.1';
         if (isLocalFrontend) {
           return 'http://localhost:3000';
+        }
+
+        if (window.location.protocol === 'https:' || (!isIpv4Host(host) && !isLocalFrontend)) {
+          if (shouldUseEnvApiUrl(envApiUrl, host)) {
+            return envApiUrl.replace(/\/api\/?$/, '');
+          }
+          return window.location.origin;
         }
 
         if (shouldUseEnvApiUrl(envApiUrl, host)) {
