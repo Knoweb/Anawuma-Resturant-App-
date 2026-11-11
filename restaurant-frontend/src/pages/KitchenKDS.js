@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 import apiClient, { billingAPI } from '../api/apiClient';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAuthStore } from '../store/authStore';
+import { formatBillDateTime } from '../utils/dateUtils';
 import './KitchenKDS.css';
 
 const KitchenKDS = () => {
@@ -168,7 +169,15 @@ const KitchenKDS = () => {
 
       // If there are new arrivals, play sound and highlight them
       if (newArrivals.length > 0 && previousNewOrderIdsRef.current.size > 0) {
-        playNotificationSound();
+        // Only play sound if at least one new arrival is NOT a manual cashier order
+        const hasNonManualArrival = newArrivals.some((id) => {
+          const ord = newOrdersList.find((o) => o.orderId === id);
+          return ord && ord.orderType !== 'MANUAL_CASHIER';
+        });
+
+        if (hasNonManualArrival) {
+          playNotificationSound();
+        }
         
         // Add new arrivals to the highlight set
         setNewlyArrivedOrders(prev => {
@@ -239,7 +248,9 @@ const KitchenKDS = () => {
 
     const unsubscribeNew = subscribe('order:new', (order) => {
       console.log('WS: New order received, refreshing KDS...', order);
-      playNotificationSound();
+      if (order?.orderType !== 'MANUAL_CASHIER') {
+        playNotificationSound();
+      }
       fetchAllOrders();
     });
 
@@ -383,9 +394,11 @@ const KitchenKDS = () => {
     if (!dateString) return null;
     if (dateString instanceof Date) return isNaN(dateString.getTime()) ? null : dateString;
     if (typeof dateString === 'string') {
-      // Replace space with T for cross-browser Safari/WebKit compatibility
-      const isoCandidate = dateString.includes('T') ? dateString : dateString.replace(' ', 'T');
-      const d = new Date(isoCandidate);
+      let str = dateString.trim();
+      if (!str.endsWith('Z') && !str.includes('+') && !str.includes('GMT')) {
+        str = str.replace(' ', 'T') + 'Z';
+      }
+      const d = new Date(str);
       if (!isNaN(d.getTime())) return d;
     }
     const fallback = new Date(dateString);
@@ -704,7 +717,7 @@ const KitchenKDS = () => {
               </div>
               <div class="info-item" style="text-align: right;">
                 <span class="info-label">Date & Time</span>
-                <span class="info-value">${new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                <span class="info-value">${formatBillDateTime(order.createdAt || new Date())}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">${order.roomNo ? 'Room' : 'Table'}</span>

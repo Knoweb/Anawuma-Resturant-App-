@@ -1,5 +1,6 @@
 import React from 'react';
 import Swal from 'sweetalert2';
+import { formatBillDateTime } from '../../utils/dateUtils';
 import './OrderDetailsModal.css';
 
 /**
@@ -232,7 +233,7 @@ const OrderDetailsModal = ({
             <h5 className="text-center" style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '10px' }}>ORDER DETAILS</h5>
             <p style={{ margin: '5px 0' }}><strong>Order:</strong> {order.orderNo || order.orderId}</p>
             <p style={{ margin: '5px 0' }}><strong>{order.roomNo ? 'Room:' : 'Table:'}</strong> {order.roomNo || order.tableNo || '-'}</p>
-            <p style={{ margin: '5px 0' }}><strong>Date:</strong> {new Date(order.createdAt).toLocaleString()}</p>
+            <p style={{ margin: '5px 0' }}><strong>Date:</strong> {formatBillDateTime(order.createdAt)}</p>
             <p style={{ margin: '5px 0' }}><strong>Status:</strong> {order.status}</p>
             <hr style={{ borderTop: '2px dashed #000', margin: '10px 0' }} />
 

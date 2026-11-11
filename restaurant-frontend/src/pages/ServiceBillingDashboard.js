@@ -7,6 +7,7 @@ import apiClient, { billingAPI, reportsAPI } from '../api/apiClient';
 import Swal from 'sweetalert2';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAuthStore } from '../store/authStore';
+import { formatBillDateTime } from '../utils/dateUtils';
 import './ServiceBillingDashboard.css';
 
 // ---------------------------------------------------------------------------
@@ -27,10 +28,7 @@ function formatCurrency(val) {
 
 function formatDateTime(dateStr) {
   if (!dateStr) return '–';
-  return new Date(dateStr).toLocaleString('en-GB', {
-    day: '2-digit', month: 'short', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  });
+  return formatBillDateTime(dateStr);
 }
 
 function getLocalDateString(date = new Date()) {

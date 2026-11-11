@@ -8,6 +8,7 @@ import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import Navbar from '../components/common/Navbar';
 import Sidebar from '../components/common/Sidebar';
+import { formatBillDateTime, formatBillTime } from '../utils/dateUtils';
 import './PremiumShopifyTheme.css';
 import './CustomerQROrder.css';
 
@@ -925,7 +926,7 @@ const CustomerQROrder = ({ isManual = false }) => {
                     <h2 style="margin:0">${tableInfo?.restaurantName || 'Restaurant'}</h2>
                     <p style="margin:5px 0">Order Receipt</p>
                     <p style="margin:2px 0">Order No: ${order.orderNo}</p>
-                    <p style="margin:2px 0">${new Date(order.createdAt).toLocaleString()}</p>
+                    <p style="margin:2px 0">${formatBillDateTime(order.createdAt)}</p>
                     ${identifier ? `<p style="margin:2px 0">${modalOrderType === 'room' ? 'Room' : 'Table'}: ${identifier}</p>` : ''}
                 </div>
                 <div class="items">
@@ -1669,7 +1670,7 @@ const CustomerQROrder = ({ isManual = false }) => {
                     >
                       <div className="d-flex justify-content-between">
                         <span className="fw-bold small">{order.orderNo}</span>
-                        <span className="small text-muted">{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span className="small text-muted">{formatBillTime(order.createdAt)}</span>
                       </div>
                       <div className="small">Rs. {order.totalAmount} • {order.status}</div>
                     </div>
@@ -1866,7 +1867,7 @@ const CustomerQROrder = ({ isManual = false }) => {
            <div className="mb-5">
               <h1 className="fw-bold mb-1">Order Details</h1>
               <div className="text-muted uppercase small">Order Number: {order.orderNo}</div>
-              <div className="text-muted small">Placed on: {new Date(order.createdAt).toLocaleString()}</div>
+              <div className="text-muted small">Placed on: {formatBillDateTime(order.createdAt)}</div>
            </div>
 
            <div className="p-4 border rounded bg-light mb-4">

@@ -5,6 +5,7 @@ import Navbar from '../components/common/Navbar';
 import Swal from 'sweetalert2';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAuthStore } from '../store/authStore';
+import { formatBillDateTime, formatBillDate, formatBillTime } from '../utils/dateUtils';
 import './ManualOrders.css';
 
 const ManualRoomOrders = () => {
@@ -100,7 +101,7 @@ const ManualRoomOrders = () => {
                         <h2 style="margin:0; font-size:14px; font-weight:bold; text-transform:uppercase;">${restaurantName}</h2>
                         <p style="margin:5px 0">Order Receipt</p>
                         <p style="margin:2px 0">Order No: ${order.orderNo}</p>
-                        <p style="margin:2px 0">${new Date(order.createdAt).toLocaleString()}</p>
+                        <p style="margin:2px 0">${formatBillDateTime(order.createdAt)}</p>
                         ${roomNo ? `<p style="margin:2px 0">${roomNo}</p>` : ''}
                     </div>
                     <div class="items">
@@ -176,7 +177,7 @@ const ManualRoomOrders = () => {
                         `}
                         <h3 style="margin-top: 10px; font-size: 14px; font-weight: bold;">BILL SUMMARY (ROOM ${id})</h3>
                         <p style="margin: 3px 0; font-size: 11px;">Currency: ${currency}</p>
-                        <p style="margin: 3px 0; font-size: 11px;">Printed: ${new Date().toLocaleString()}</p>
+                        <p style="margin: 3px 0; font-size: 11px;">Printed: ${formatBillDateTime(new Date())}</p>
                     </div>
 
                     <div style="border-bottom: 1px dashed #000; padding-bottom: 8px; margin-bottom: 12px;">
@@ -188,7 +189,7 @@ const ManualRoomOrders = () => {
                     
                     ${account.orders.map(order => `
                         <div class="order-block">
-                            <div style="font-weight:bold; font-size: 11px; margin-bottom: 5px;">Order No: ${order.orderNo} - ${new Date(order.createdAt).toLocaleTimeString()}</div>
+                            <div style="font-weight:bold; font-size: 11px; margin-bottom: 5px;">Order No: ${order.orderNo} - ${formatBillTime(order.createdAt)}</div>
                             ${order.orderItems.map(item => `
                                 <div class="item-row">
                                     <span>${item.itemName} x${item.qty}</span>
@@ -331,8 +332,8 @@ const ManualRoomOrders = () => {
 
     const showInvoiceModal = (account, roomNo) => {
         const now = new Date();
-        const dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const dateStr = formatBillDate(now);
+        const timeStr = formatBillTime(now);
         const tempInv = 'INV-DRAFT';
 
         // Default Exchange Rates
@@ -585,7 +586,7 @@ const ManualRoomOrders = () => {
                   </button>
                 ` : ''}
               </span>
-              <span class="order-group-date">${new Date(order.createdAt).toLocaleDateString()} ${new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+              <span class="order-group-date">${formatBillDateTime(order.createdAt)}</span>
             </div>
             <div class="item-list">
               ${order.orderItems.map(item => `
@@ -717,7 +718,7 @@ const ManualRoomOrders = () => {
                                                                         Rs. {account.totalAmount.toLocaleString()}
                                                                     </div>
                                                                     <div className="last-order-time">
-                                                                        Last: {new Date(account.lastOrderAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                        Last: {formatBillTime(account.lastOrderAt)}
                                                                     </div>
                                                                 </>
                                                             ) : (
