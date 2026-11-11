@@ -460,6 +460,10 @@ export class OrdersService {
 
   async getManualActiveAccounts(restaurantId: number, type: 'ROOM' | 'TABLE') {
     const activeStatuses: OrderStatus[] = [
+      OrderStatus.NEW,
+      OrderStatus.ACCEPTED,
+      OrderStatus.COOKING,
+      OrderStatus.READY,
       OrderStatus.SERVED,
     ];
 

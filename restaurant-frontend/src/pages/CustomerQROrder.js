@@ -971,8 +971,8 @@ const CustomerQROrder = ({ isManual = false }) => {
   const placeQuickManualOrder = async () => {
     if (isSubmitting) return;
 
-    if (orderLocation === 'inside' && !manualTableNo.trim()) {
-      Swal.fire('Validation Error', `Please enter a ${modalOrderType === 'room' ? 'Room' : 'Table'} number`, 'warning');
+    if (!manualTableNo.trim()) {
+      Swal.fire('Validation Error', `Please select a ${modalOrderType === 'room' || manualOrderType === 'ROOM' ? 'Room' : 'Table'} number`, 'warning');
       return;
     }
 
@@ -991,15 +991,13 @@ const CustomerQROrder = ({ isManual = false }) => {
         orderType: 'MANUAL_CASHIER'
       };
 
-      let identifier = '';
-      if (orderLocation === 'inside') {
-        const normalizedManualNo = manualTableNo.trim().replace(/^0+/, '') || manualTableNo.trim();
-        identifier = normalizedManualNo;
-        if (modalOrderType === 'room') {
-          orderPayload.roomNo = normalizedManualNo;
-        } else {
-          orderPayload.tableNo = normalizedManualNo;
-        }
+      const normalizedManualNo = manualTableNo.trim().replace(/^0+/, '') || manualTableNo.trim();
+      const identifier = normalizedManualNo;
+      const isRoom = modalOrderType === 'room' || manualOrderType === 'ROOM';
+      if (isRoom) {
+        orderPayload.roomNo = normalizedManualNo;
+      } else {
+        orderPayload.tableNo = normalizedManualNo;
       }
 
       // 1. Place Order
@@ -1018,7 +1016,7 @@ const CustomerQROrder = ({ isManual = false }) => {
       // Success UI
       Swal.fire({
         title: 'Order Completed',
-        text: `Order ${orderData.orderNo} placed, bill generated and assigned to ${modalOrderType === 'room' ? 'room' : 'table'}.`,
+        text: `Order ${orderData.orderNo} placed, bill generated and assigned to ${isRoom ? 'room' : 'table'}.`,
         icon: 'success',
         timer: 3000,
         showConfirmButton: true
@@ -1029,7 +1027,7 @@ const CustomerQROrder = ({ isManual = false }) => {
       setActiveItemDetail(null);
       setModalOrderNotes('');
 
-      const target = modalOrderType === 'room' ? '/manual-orders/rooms' : '/manual-orders/tables';
+      const target = isRoom ? '/manual-orders/rooms' : '/manual-orders/tables';
       navigate(target);
 
     } catch (error) {
@@ -2221,6 +2219,12 @@ const CustomerQROrder = ({ isManual = false }) => {
           </div>
           {cart.length > 0 && (
             <div className="cart-footer p-3 border-top bg-light">
+               {isManual && manualTableNo && (
+                 <div className="badge bg-light text-dark border mb-2 p-2 w-100 text-start" style={{ fontSize: '0.85rem' }}>
+                   <i className={`fas ${manualOrderType === 'ROOM' ? 'fa-hotel' : 'fa-chair'} me-2`}></i>
+                   Assigned to: <strong>{manualOrderType === 'ROOM' ? 'Room' : 'Table'} {manualTableNo}</strong>
+                 </div>
+               )}
                <div className="d-flex justify-content-between fw-bold h5 mb-3"><span>Total:</span><span style={{ color: '#266668' }}>Rs. {calculateTotal()}</span></div>
                <button className="btn btn-primary w-100 p-3 fw-bold" style={{ backgroundColor: '#266668', border: 'none' }} onClick={placeOrder} disabled={isSubmitting}>
                  {isSubmitting ? 'PLACING ORDER...' : 'PLACE MANUAL ORDER'}

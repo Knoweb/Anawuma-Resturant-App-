@@ -63,3 +63,4 @@ export const formatBillDate = (dateVal) => {
     year: 'numeric',
   });
 };
+

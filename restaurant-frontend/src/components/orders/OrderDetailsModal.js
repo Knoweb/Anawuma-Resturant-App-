@@ -30,7 +30,7 @@ const OrderDetailsModal = ({
 }) => {
   const orderStatuses = ['NEW', 'COOKING', 'READY', 'SERVED'];
   const canSendBill = order.status === 'READY' || order.status === 'SERVED';
-  
+
   // Get restaurant name (can be configured via env variable or fetched from backend)
   // For production: Add REACT_APP_RESTAURANT_NAME to .env file
   const restaurantName = process.env.REACT_APP_RESTAURANT_NAME || 'Restaurant Name';
@@ -181,7 +181,7 @@ const OrderDetailsModal = ({
     }).join('\n');
 
     const message = `Hello 👋\nYour order is ready!\n\nOrder ID: #${order.orderNo}\nItems:\n${itemsList}\n\nTotal: Rs. ${parseFloat(order.totalAmount).toFixed(2)}\n\nThank you for ordering with us 🍔`;
-    
+
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${normalizedWhatsapp}&text=${encodedMessage}`;
     const popup = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
@@ -194,7 +194,7 @@ const OrderDetailsModal = ({
       });
       return;
     }
-    
+
     Swal.fire({
       icon: 'success',
       title: 'WhatsApp message ready',
@@ -408,12 +408,11 @@ const OrderDetailsModal = ({
                   status !== order.status && (
                     <button
                       key={status}
-                      className={`btn btn-sm btn-outline-${
-                        status === 'NEW' ? 'primary' :
-                        status === 'COOKING' ? 'info' :
-                        status === 'READY' ? 'primary' :
-                        'success'
-                      }`}
+                      className={`btn btn-sm btn-outline-${status === 'NEW' ? 'primary' :
+                          status === 'COOKING' ? 'info' :
+                            status === 'READY' ? 'primary' :
+                              'success'
+                        }`}
                       onClick={() => onStatusUpdate(order.orderId, status)}
                     >
                       Update to {status}
@@ -427,8 +426,8 @@ const OrderDetailsModal = ({
 
         <div className="modal-footer-custom">
           {showWhatsApp && order.whatsappNumber && (
-            <button 
-              className={`btn btn-success ${!canSendBill ? 'disabled opacity-50' : ''}`} 
+            <button
+              className={`btn btn-success ${!canSendBill ? 'disabled opacity-50' : ''}`}
               onClick={sendWhatsAppBill}
               title={canSendBill ? 'Send bill message via WhatsApp' : 'Only available for READY or SERVED orders'}
               disabled={!canSendBill}
