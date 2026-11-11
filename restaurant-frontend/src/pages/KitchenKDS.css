@@ -1,36 +1,32 @@
-/* KDS Viewport Layout Rules */
-@media (min-width: 769px) {
-  .kds-layout-active .main-content {
-    height: 100vh;
-  }
+/* KDS Viewport Layout Rules - Flexbox Driven for All Displays (TV, Desktop, Tablet) */
+.kds-layout-active {
+  height: 100vh;
+  overflow: hidden;
+}
 
-  .kds-layout-active .dashboard-content {
-    height: calc(100vh - 75px);
-    display: flex;
-    flex-direction: column;
-    padding: 1.5rem !important;
-  }
+.kds-layout-active .main-content {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #f0f2f5;
+}
 
-  .kds-layout-active .status-column {
-    display: flex;
-    flex-direction: column;
-    max-height: calc(100vh - 260px) !important;
-    height: calc(100vh - 260px) !important;
-    min-height: 0 !important;
-    overflow: hidden;
-  }
+.kds-layout-active .dashboard-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem 1rem !important;
+  overflow: hidden;
+}
 
-  .kds-layout-active .status-header {
-    flex-shrink: 0;
-  }
-
-  .kds-layout-active .orders-container {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding-right: 6px;
-  }
+.kds-layout-active .kds-page-container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
 }
 
 .kds-header {
@@ -38,16 +34,18 @@
   justify-content: space-between;
   align-items: center;
   background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 0.65rem 1rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .kds-header h2 {
   margin: 0;
-  font-size: 1.8rem;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 700;
   color: #2c3e50;
+  display: flex;
+  align-items: center;
 }
 
 .header-actions {
@@ -58,58 +56,65 @@
 
 /* Fluid KDS Grid Layout */
 .kds-grid {
+  flex: 1;
+  min-height: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: var(--space-md);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  overflow: hidden;
 }
 
 .kds-column-wrapper {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  height: 100%;
 }
 
 /* Status Columns */
 .status-column {
   background: #f8f9fa;
-  border-radius: 12px;
-  padding: 1rem;
-  height: calc(100vh - 330px);
-  min-height: 400px;
+  border-radius: 10px;
+  padding: 0.75rem;
+  height: 100% !important;
+  max-height: 100% !important;
+  min-height: 0 !important;
   display: flex;
   flex-direction: column;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
 }
 
 .status-column.bg-new {
   background: linear-gradient(135deg, #e3f2fd 0%, #f8f9fa 100%);
-  border-left: 4px solid #2196f3;
+  border-top: 4px solid #2196f3;
 }
 
 .status-column.bg-accepted {
   background: linear-gradient(135deg, #fff3e0 0%, #f8f9fa 100%);
-  border-left: 4px solid #ff9800;
+  border-top: 4px solid #ff9800;
 }
 
 .status-column.bg-cooking {
   background: linear-gradient(135deg, #fce4ec 0%, #f8f9fa 100%);
-  border-left: 4px solid #e91e63;
+  border-top: 4px solid #e91e63;
 }
 
 .status-column.bg-ready {
   background: linear-gradient(135deg, #e8f5e9 0%, #f8f9fa 100%);
-  border-left: 4px solid #4caf50;
+  border-top: 4px solid #4caf50;
 }
 
 .status-header {
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   color: #2c3e50;
-  margin-bottom: 1rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .status-header .badge {
@@ -118,17 +123,20 @@
 
 .orders-container {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
-  padding-right: 0.5rem;
+  overflow-x: hidden;
+  padding-right: 4px;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Custom scrollbar */
 .orders-container::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 
 .orders-container::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(0, 0, 0, 0.03);
   border-radius: 10px;
 }
 
@@ -138,7 +146,7 @@
 }
 
 .orders-container::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.35);
 }
 
 /* Order Cards */
@@ -345,35 +353,124 @@
   font-weight: 500;
 }
 
-/* Responsive Design */
-@media (max-width: 1400px) {
+/* Fullscreen KDS Mode (Hardware-Grade Display for Kitchen Tablets) */
+.kds-fullscreen .sidebar,
+.kds-fullscreen nav.navbar,
+.kds-fullscreen .sb-topnav {
+  display: none !important;
+}
+
+.kds-fullscreen .main-content {
+  margin-left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+}
+
+.kds-fullscreen .dashboard-content {
+  height: 100vh !important;
+  padding: 0.4rem 0.6rem !important;
+}
+
+.kds-fullscreen .kds-header {
+  padding: 0.4rem 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.kds-fullscreen .kds-header h2 {
+  font-size: 1.15rem;
+}
+
+/* Tablet in Landscape / Low Height Screens (<= 768px height) */
+@media (max-height: 768px) {
+  .kds-layout-active .dashboard-content {
+    padding: 0.4rem 0.6rem !important;
+  }
+
+  .kds-header {
+    padding: 0.4rem 0.75rem;
+  }
+
+  .kds-header h2 {
+    font-size: 1.1rem;
+  }
+
   .status-column {
-    height: calc(100vh - 330px);
-    min-height: 400px;
+    padding: 0.5rem;
+  }
+
+  .status-header {
+    font-size: 0.95rem;
+    margin-bottom: 0.35rem;
+    padding-bottom: 0.3rem;
+  }
+
+  .order-card {
+    margin-bottom: 0.5rem !important;
+  }
+
+  .order-card .card-header {
+    padding: 0.35rem 0.55rem;
+  }
+
+  .order-card .card-body {
+    padding: 0.45rem 0.55rem;
+  }
+
+  .order-card .card-footer {
+    padding: 0.35rem 0.55rem;
+  }
+
+  .order-items h6 {
+    font-size: 0.8rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .order-items li {
+    padding: 0.1rem 0;
+    font-size: 0.82rem;
+  }
+
+  .customer-info-box {
+    padding: 0.25rem 0.4rem;
+    font-size: 0.78rem;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .kds-card-footer .btn {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.8rem;
   }
 }
 
+/* Mobile & Portrait Mode (<= 768px width) */
 @media (max-width: 768px) {
   .kds-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
+    gap: 0.6rem;
+    padding: 0.5rem 0.75rem;
   }
 
   .header-actions {
     width: 100%;
     justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .kds-grid {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
   }
 
   .status-column {
     margin-bottom: 1rem;
-    min-height: auto;
+    min-height: 350px !important;
     height: auto !important;
     max-height: none !important;
   }
 
   .orders-container {
-    max-height: 50vh;
+    max-height: 55vh;
   }
 }
 

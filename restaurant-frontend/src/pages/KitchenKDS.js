@@ -34,9 +34,45 @@ const KitchenKDS = () => {
   const [newlyArrivedOrders, setNewlyArrivedOrders] = useState(new Set());
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const previousNewOrderIdsRef = useRef(new Set());
   const { subscribe, connected } = useWebSocket();
   const [, setTimeTicker] = useState(0);
+
+  // Fullscreen toggle for KDS (optimized for Kitchen Tablets)
+  const toggleFullscreen = useCallback(() => {
+    try {
+      const isCurrentlyFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+      if (!isCurrentlyFs) {
+        const docEl = document.documentElement;
+        if (docEl.requestFullscreen) {
+          docEl.requestFullscreen().catch(() => {});
+        } else if (docEl.webkitRequestFullscreen) {
+          docEl.webkitRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      }
+    } catch (e) {
+      console.warn('Fullscreen error:', e);
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement || document.webkitFullscreenElement));
+    };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    document.addEventListener('webkitfullscreenchange', handleFsChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFsChange);
+      document.removeEventListener('webkitfullscreenchange', handleFsChange);
+    };
+  }, []);
 
   // Defensive cleanup: prevents rare cases where SweetAlert backdrop remains
   // on screen after async flows (WhatsApp/print actions).
@@ -1310,27 +1346,35 @@ const KitchenKDS = () => {
   };
 
   return (
-    <div className="dashboard-layout kds-layout-active">
+    <div className={`dashboard-layout kds-layout-active ${isFullscreen ? 'kds-fullscreen' : ''}`}>
       <Sidebar />
       <div className="main-content">
-        <Navbar />
+        {!isFullscreen && <Navbar />}
         <div className="dashboard-content">
-          <div className="container-fluid h-100 d-flex flex-column">
+          <div className="container-fluid h-100 d-flex flex-column kds-page-container">
             {/* Page Header */}
-            <div className="row mb-4 flex-shrink-0">
+            <div className="row mb-2 flex-shrink-0 kds-header-row">
               <div className="col-12">
                 <div className="kds-header">
                   <h2>
                     <i className="fas fa-chart-line me-2"></i>
-                    Kitchen Display System
+                    {isFullscreen ? (restaurantName || 'Kitchen Display') : 'Kitchen Display System'}
                   </h2>
                   <div className="header-actions">
                     <span className={`kd-live-pill ${connected ? 'online' : 'offline'} me-2`}>
                       <i className={`fas ${connected ? 'fa-wifi' : 'fa-wifi-slash'} me-1`}></i>
                       {connected ? 'Live' : 'Disconnected'}
                     </span>
+                    <button
+                      className="btn btn-outline-primary btn-sm me-2"
+                      onClick={toggleFullscreen}
+                      title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen (Best for Tablets)'}
+                    >
+                      <i className={`fas ${isFullscreen ? 'fa-compress' : 'fa-expand'} me-1`}></i>
+                      {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                    </button>
                     <button 
-                      className="btn btn-outline-primary btn-sm"
+                      className="btn btn-outline-secondary btn-sm"
                       onClick={fetchAllOrders}
                       disabled={loading}
                     >
