@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository, In, Brackets } from 'typeorm';
 import { Order, OrderStatus, OrderType } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { FoodItem } from '../food-items/entities/food-item.entity';
@@ -459,7 +459,7 @@ export class OrdersService {
   }
 
   async getManualActiveAccounts(restaurantId: number, type: 'ROOM' | 'TABLE') {
-    const activeStatuses: OrderStatus[] = [
+    const manualStatuses: OrderStatus[] = [
       OrderStatus.NEW,
       OrderStatus.ACCEPTED,
       OrderStatus.COOKING,
@@ -471,7 +471,17 @@ export class OrdersService {
       .createQueryBuilder('order')
       .leftJoinAndSelect('order.orderItems', 'orderItems')
       .where('order.restaurantId = :restaurantId', { restaurantId })
-      .andWhere('order.status IN (:...activeStatuses)', { activeStatuses });
+      .andWhere(
+        new Brackets((qb) => {
+          qb.where(
+            '(order.orderType = :manualType AND order.status IN (:...manualStatuses))',
+            { manualType: OrderType.MANUAL_CASHIER, manualStatuses }
+          ).orWhere(
+            '((order.orderType IS NULL OR order.orderType != :manualType) AND order.status = :servedStatus)',
+            { manualType: OrderType.MANUAL_CASHIER, servedStatus: OrderStatus.SERVED }
+          );
+        })
+      );
 
     // Hide extremely old data (older than 7 days) to keep dashboard clean
     const sevenDaysAgo = new Date();

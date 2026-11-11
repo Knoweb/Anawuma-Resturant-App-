@@ -1395,7 +1395,7 @@ const KitchenKDS = () => {
                 <p className="mt-2">Loading orders...</p>
               </div>
             ) : (
-              <div className="kds-grid flex-grow-1 overflow-hidden" style={{ minHeight: 0 }}>
+              <div className="kds-grid flex-grow-1 overflow-hidden" style={{ minHeight: 0, height: '100%' }}>
                 <StatusColumn
                   title="New Orders"
                   status="NEW"
