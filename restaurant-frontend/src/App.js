@@ -66,6 +66,7 @@ import { useAuthStore } from './store/authStore';
 import apiClient from './api/apiClient';
 
 import './App.css';
+import './utils/thermalPrint.css';
 
 // Keeps user.restaurantSettings in the auth store in sync whenever settings
 // are changed (approved request or direct super-admin save). Runs globally so

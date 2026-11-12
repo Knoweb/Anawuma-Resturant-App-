@@ -6,6 +6,7 @@ import Navbar from '../components/common/Navbar';
 import './SalesReports.css';
 
 import { useAuthStore } from '../store/authStore';
+import { clearThermalPrintMode } from '../utils/thermalPrint';
 
 /* ── date helpers ─────────────────────────────────────────────────────────── */
 const toISO = (d) => d.toISOString().split('T')[0];
@@ -207,6 +208,7 @@ const CashierReport = () => {
 
   const handlePrint = () => {
     if (!reportData) { Swal.fire('Info', 'Please generate a report first', 'info'); return; }
+    clearThermalPrintMode();
     window.print();
   };
 

@@ -9,6 +9,8 @@ import 'react-phone-input-2/lib/style.css';
 import Navbar from '../components/common/Navbar';
 import Sidebar from '../components/common/Sidebar';
 import { formatBillDateTime, formatBillTime } from '../utils/dateUtils';
+import { printThermalDocument } from '../utils/thermalPrint';
+import { buildOrderReceiptDocument } from '../utils/receiptTemplates';
 import './PremiumShopifyTheme.css';
 import './CustomerQROrder.css';
 
@@ -854,9 +856,9 @@ const CustomerQROrder = ({ isManual = false }) => {
         const createdOrder = response.data;
         const invoiceResponse = await apiClient.post(`/billing/orders/${createdOrder.orderId}/create-invoice`);
 
-        // 3. Trigger Printing (Popup)
+        // 3. Trigger Printing
         const identifier = manualTableNo.trim().replace(/^0+/, '') || manualTableNo.trim();
-        printOrder(createdOrder, identifier);
+        await printOrder(createdOrder, identifier);
 
         // 4. Mark as Printed
         await apiClient.patch(`/billing/invoices/${invoiceResponse.data.invoiceId}/mark-printed`);
@@ -901,70 +903,18 @@ const CustomerQROrder = ({ isManual = false }) => {
     }
   };
 
-  const printOrder = (order, identifier = null) => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      Swal.fire('Print Blocked', 'Please allow popups to print the bill.', 'warning');
-      return;
-    }
-    const content = `
-        <html>
-            <head>
-                <title>Print Order - ${order.orderNo}</title>
-                <style>
-                    @page { margin: 0; }
-                    body { font-family: 'Courier New', Courier, monospace; padding: 5px; width: 280px; margin: 0 auto; box-sizing: border-box; }
-                    .header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
-                    .item-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 5px; }
-                    .total-section { border-top: 1px dashed #000; margin-top: 10px; padding-top: 10px; }
-                    .total-row { display: flex; justify-content: space-between; font-weight: bold; }
-                    .footer { text-align: center; margin-top: 20px; font-size: 12px; }
-                </style>
-            </head>
-            <body>
-                <div class="header">
-                    <h2 style="margin:0">${tableInfo?.restaurantName || 'Restaurant'}</h2>
-                    <p style="margin:5px 0">Order Receipt</p>
-                    <p style="margin:2px 0">Order No: ${order.orderNo}</p>
-                    <p style="margin:2px 0">${formatBillDateTime(order.createdAt)}</p>
-                    ${identifier ? `<p style="margin:2px 0">${modalOrderType === 'room' ? 'Room' : 'Table'}: ${identifier}</p>` : ''}
-                </div>
-                <div class="items">
-                    ${order.orderItems.map(item => `
-                        <div class="item-row">
-                            <span>${item.itemName} x${item.qty}</span>
-                            <span>${parseFloat(item.lineTotal).toFixed(0)}</span>
-                        </div>
-                    `).join('')}
-                </div>
-                <div class="total-section">
-                    <div class="item-row">
-                        <span>Subtotal:</span>
-                        <span>${parseFloat(order.subtotal).toFixed(0)}</span>
-                    </div>
-                    <div class="item-row">
-                        <span>Service Charge (10%):</span>
-                        <span>${parseFloat(order.serviceCharge).toFixed(0)}</span>
-                    </div>
-                    <div class="total-row" style="font-size:18px; margin-top:5px">
-                        <span>TOTAL:</span>
-                        <span>Rs. ${parseFloat(order.totalAmount).toFixed(0)}</span>
-                    </div>
-                </div>
-                <div class="footer">
-                    <p>Thank You!</p>
-                </div>
-                <script>
-                  window.onload = function() {
-                    window.print();
-                    setTimeout(function() { window.close(); }, 500);
-                  };
-                </script>
-            </body>
-        </html>
-    `;
-    printWindow.document.write(content);
-    printWindow.document.close();
+  const printOrder = async (order, identifier = null) => {
+    const locationLine = identifier
+      ? `${modalOrderType === 'room' || manualOrderType === 'ROOM' ? 'Room' : 'Table'}: ${identifier}`
+      : null;
+
+    const doc = buildOrderReceiptDocument({
+      restaurantName: tableInfo?.restaurantName || 'Restaurant',
+      order,
+      locationLine,
+      formatDateTime: formatBillDateTime,
+    });
+    await printThermalDocument(doc);
   };
 
   // eslint-disable-next-line no-unused-vars
@@ -1007,8 +957,8 @@ const CustomerQROrder = ({ isManual = false }) => {
       // 2. Automatically Generate Invoice (Bill)
       const invoiceResponse = await apiClient.post(`/billing/orders/${orderData.orderId}/create-invoice`);
 
-      // 3. Trigger Printing (Popup)
-      printOrder(orderData, identifier);
+      // 3. Trigger Printing
+      await printOrder(orderData, identifier);
 
       // 4. Mark as Printed (This technically "assigns" to room in our logic)
       await apiClient.patch(`/billing/invoices/${invoiceResponse.data.invoiceId}/mark-printed`);

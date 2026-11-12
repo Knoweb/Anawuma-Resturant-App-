@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAuthStore } from '../store/authStore';
 import { formatBillDateTime } from '../utils/dateUtils';
+import { printThermalDocument } from '../utils/thermalPrint';
 import './ServiceBillingDashboard.css';
 
 // ---------------------------------------------------------------------------
@@ -162,15 +163,10 @@ function InvoiceModal({ invoice, restaurantName, address, contactNumber, onClose
       await billingAPI.markInvoicePrinted(invoice.invoiceId);
       setIsPrinted(true);
 
-      const printModeClass = 'billing-invoice-print-mode';
-      const cleanupPrintMode = () => {
-        document.body.classList.remove(printModeClass);
-      };
-
-      document.body.classList.add(printModeClass);
-      window.addEventListener('afterprint', cleanupPrintMode, { once: true });
-      window.print();
-      window.setTimeout(cleanupPrintMode, 1000);
+      const printableHtml = printRef.current?.innerHTML;
+      if (printableHtml) {
+        await printThermalDocument({ html: printableHtml });
+      }
     } catch (err) {
       console.error('Print recording failed:', err);
     } finally {

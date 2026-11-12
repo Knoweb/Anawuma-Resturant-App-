@@ -6,6 +6,8 @@ import Swal from 'sweetalert2';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAuthStore } from '../store/authStore';
 import { formatBillDateTime, formatBillDate, formatBillTime } from '../utils/dateUtils';
+import { printThermalDocument } from '../utils/thermalPrint';
+import { buildOrderReceiptDocument, buildAccountBillDocument } from '../utils/receiptTemplates';
 import './ManualOrders.css';
 
 const ManualTableOrders = () => {
@@ -55,180 +57,35 @@ const ManualTableOrders = () => {
         return () => unsubscribe();
     }, [subscribe]);
 
-    const printOrder = (order, tableNo = null) => {
-        const printWindow = window.open('', '_blank');
-        const content = `
-            <html>
-                <head>
-                    <title>Print Order - ${order.orderNo}</title>
-                    <style>
-                        body { font-family: 'Courier New', Courier, monospace; padding: 20px; width: 300px; }
-                        .header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
-                        .item-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 5px; }
-                        .total-section { border-top: 1px dashed #000; margin-top: 10px; padding-top: 10px; }
-                        .total-row { display: flex; justify-content: space-between; font-weight: bold; }
-                        .footer { text-align: center; margin-top: 20px; font-size: 12px; }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h2 style="margin:0; font-size:14px; font-weight:bold; text-transform:uppercase;">${restaurantName}</h2>
-                        <p style="margin:5px 0">Order Receipt</p>
-                        <p style="margin:2px 0">Order No: ${order.orderNo}</p>
-                        <p style="margin:2px 0">${formatBillDateTime(order.createdAt)}</p>
-                        ${tableNo ? `<p style="margin:2px 0">Table: ${tableNo}</p>` : ''}
-                    </div>
-                    <div class="items">
-                        ${order.orderItems.map(item => `
-                            <div class="item-row">
-                                <span>${item.itemName} x${item.qty}</span>
-                                <span>${parseFloat(item.lineTotal).toFixed(0)}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="total-section">
-                        <div class="item-row">
-                            <span>Subtotal:</span>
-                            <span>${parseFloat(order.subtotal).toFixed(0)}</span>
-                        </div>
-                        <div class="item-row">
-                            <span>Service Charge (10%):</span>
-                            <span>${parseFloat(order.serviceCharge).toFixed(0)}</span>
-                        </div>
-                        <div class="total-row" style="font-size:18px; margin-top:5px">
-                            <span>TOTAL:</span>
-                            <span>Rs. ${parseFloat(order.totalAmount).toFixed(0)}</span>
-                        </div>
-                    </div>
-                    <div class="footer">
-                        <p>Thank You!</p>
-                    </div>
-                    <script>window.print(); window.close();</script>
-                </body>
-            </html>
-        `;
-        printWindow.document.write(content);
-        printWindow.document.close();
-    };    const printAccountBill = (account, id, currency = 'LKR', rate = 1, symbol = 'Rs.', invoiceNumber = null) => {
-        const printWindow = window.open('', '_blank');
-        const subtotal = account.orders.reduce((sum, o) => sum + parseFloat(o.subtotal), 0);
-        const serviceCharge = account.orders.reduce((sum, o) => sum + parseFloat(o.serviceCharge), 0);
-        const total = parseFloat(account.totalAmount);
-        const orderNos = account.orders.map(o => o.orderNo).join(', ');
-        // Use absolute URL for the QR so it works in the print popup window
+    const printOrder = async (order, tableNo = null) => {
+        const doc = buildOrderReceiptDocument({
+            restaurantName,
+            order,
+            locationLine: tableNo ? `Table: ${tableNo}` : null,
+            formatDateTime: formatBillDateTime,
+        });
+        await printThermalDocument(doc);
+    };
+
+    const printAccountBill = async (account, id, currency = 'LKR', rate = 1, symbol = 'Rs.', invoiceNumber = null) => {
+        const tableLabel = id.toString().toUpperCase().startsWith('TABLE') ? id : `TABLE-${id}`;
         const qrUrl = `${window.location.origin}/google-review-qr.jpeg`;
-
-        const content = `
-            <html>
-                <head>
-                    <title>Bill - Table ${id}</title>
-                    <style>
-                        @page { margin: 0; }
-                        body { font-family: 'Courier New', Courier, monospace; padding: 5px; width: 280px; margin: 0 auto; box-sizing: border-box; }
-                        .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
-                        .meta-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 3px; }
-                        .order-block { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dotted #ccc; }
-                        .item-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 3px; }
-                        .total-section { border-top: 2px solid #000; margin-top: 15px; padding-top: 10px; }
-                        .grand-total { display: flex; justify-content: space-between; font-size: 20px; font-weight: bold; margin-top: 5px; }
-                        .footer { text-align: center; margin-top: 20px; font-size: 12px; }
-                        .qr-section { text-align: center; margin-top: 18px; border-top: 1px dashed #000; padding-top: 14px; }
-                        .qr-section img { width: 140px; height: 140px; object-fit: contain; image-rendering: pixelated; image-rendering: crisp-edges; }
-                        .qr-section p { font-size: 11px; margin: 6px 0 0; }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h1 style="margin:0; font-size: 20px; font-weight: bold;">${restaurantName}</h1>
-                        ${(restaurantInfo?.address || restaurantInfo?.contactNumber) ? `
-                            <div style="font-size: 11px; color: #333; margin-top: 5px; border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 4px 0;">
-                                ${restaurantInfo.address ? `<div style="margin-bottom: 2px;">${restaurantInfo.address}</div>` : ''}
-                                ${restaurantInfo.contactNumber ? `<div>Tel: ${restaurantInfo.contactNumber}</div>` : ''}
-                            </div>
-                        ` : `
-                            <div style="border-top: 1px dashed #000; margin-top: 5px;"></div>
-                        `}
-                        <h3 style="margin-top: 10px; font-size: 14px; font-weight: bold;">BILL SUMMARY (${id.toString().toUpperCase().startsWith('TABLE') ? id : `TABLE-${id}`})</h3>
-                        <p style="margin: 3px 0; font-size: 11px;">Currency: ${currency}</p>
-                        <p style="margin: 3px 0; font-size: 11px;">Printed: ${formatBillDateTime(new Date())}</p>
-                    </div>
-
-                    <div style="border-bottom: 1px dashed #000; padding-bottom: 8px; margin-bottom: 12px;">
-                        <div class="meta-row"><span><b>Invoice No:</b></span><span>${invoiceNumber || 'INV-DRAFT'}</span></div>
-                        <div class="meta-row"><span><b>Order No(s):</b></span><span>${orderNos}</span></div>
-                        <div class="meta-row"><span><b>Table:</b></span><span>${id.toString().toUpperCase().startsWith('TABLE') ? id : `TABLE-${id}`}</span></div>
-                        <div class="meta-row"><span><b>Payment:</b></span><span>${(account.selectedPaymentMethod || 'CASH').toUpperCase()}</span></div>
-                    </div>
-                    
-                    ${account.orders.map(order => `
-                        <div class="order-block">
-                            <div style="font-weight:bold; font-size: 11px; margin-bottom: 5px;">Order No: ${order.orderNo} - ${formatBillTime(order.createdAt)}</div>
-                            ${order.orderItems.map(item => `
-                                <div class="item-row">
-                                    <span>${item.itemName} x${item.qty}</span>
-                                    <span>${symbol} ${(parseFloat(item.lineTotal) / rate).toFixed(2)}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `).join('')}
-
-                    <div class="total-section">
-                        <div class="item-row" style="font-size: 14px; margin-bottom: 5px;">
-                            <span>Subtotal:</span>
-                            <span>${symbol} ${(subtotal / rate).toFixed(2)}</span>
-                        </div>
-                        <div class="item-row" style="font-size: 14px; margin-bottom: 5px;">
-                            <span>Service Charge (10%):</span>
-                            <span>${symbol} ${(serviceCharge / rate).toFixed(2)}</span>
-                        </div>
-                        <div class="grand-total" style="border-top: 1px solid #000; padding-top: 5px;">
-                            <span>TOTAL DUE:</span>
-                            <span>${symbol} ${(total / rate).toFixed(2)}</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 14px; margin-top: 8px; font-weight: bold; border-top: 1px dashed #000; padding-top: 5px;">
-                            <span>PAYMENT METHOD:</span>
-                            <span>${(account.selectedPaymentMethod || 'CASH').toUpperCase()}</span>
-                        </div>
-                    </div>
-                    <div class="footer">
-                        <p>Thank You For Dining With Us!</p>
-                    </div>
-
-                    <!-- Google Review QR Code -->
-                    <div class="qr-section">
-                        <p style="font-size:12px; font-weight:bold; margin-bottom:8px;">⭐ Rate Your Experience</p>
-                        <img src="${qrUrl}" alt="Google Review QR" id="qr-image" />
-                        <p>Scan to leave us a Google Review!</p>
-                    </div>
-
-                    <script>
-                        let printed = false;
-                        function doPrint() {
-                            if (!printed) {
-                                printed = true;
-                                window.print();
-                                window.close();
-                            }
-                        }
-                        const img = document.getElementById('qr-image');
-                        if (img) {
-                            if (img.complete) {
-                                doPrint();
-                            } else {
-                                img.onload = doPrint;
-                                img.onerror = doPrint;
-                            }
-                        } else {
-                            doPrint();
-                        }
-                        // Fallback in case loading hangs
-                        setTimeout(doPrint, 2000);
-                    <\/script>
-                </body>
-            </html>
-        `;
-        printWindow.document.write(content);
-        printWindow.document.close();
+        const doc = buildAccountBillDocument({
+            restaurantName,
+            restaurantInfo,
+            account,
+            summaryHeading: `BILL SUMMARY (${tableLabel})`,
+            locationLabel: 'Table',
+            locationValue: tableLabel,
+            currency,
+            rate,
+            symbol,
+            invoiceNumber,
+            qrUrl,
+            formatDateTime: formatBillDateTime,
+            formatTime: formatBillTime,
+        });
+        await printThermalDocument(doc);
     };
 
 
@@ -283,7 +140,7 @@ const ManualTableOrders = () => {
                 
                 if (shouldPrint) {
                     const { currency = 'LKR', rate = 1, symbol = 'Rs.' } = printOptions;
-                    printAccountBill(account, tableNo, currency, rate, symbol, invoiceNumber);
+                    await printAccountBill(account, tableNo, currency, rate, symbol, invoiceNumber);
                 }
 
                 Swal.fire({

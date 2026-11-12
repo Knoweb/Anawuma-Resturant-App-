@@ -1,0 +1,95 @@
+/* Unified thermal receipt & ticket print stylesheet.
+ * Uses an offscreen sibling container directly under <body> so Android Chrome
+ * & Print Spooler never suffer from popup premature-close bugs, popup blockers,
+ * hidden-iframe blank captures, or fullscreen/position:fixed clipping.
+ */
+
+@media screen {
+  #anawuma-print-root {
+    position: fixed !important;
+    left: -99999px !important;
+    top: 0 !important;
+    width: 72mm !important;
+    height: auto !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+}
+
+@media print {
+  /* Never specify size: 80mm auto; it causes blank/0-height canvas in Android PrintSpooler.
+     Omitting size lets Android Print Service / printer driver supply selected paper dimensions cleanly. */
+  @page {
+    margin: 0;
+  }
+
+  html.anawuma-printing-html,
+  body.anawuma-printing {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Remove #root, modals, sidebars, and SweetAlert overlays from print layout flow completely */
+  body.anawuma-printing > *:not(#anawuma-print-root) {
+    display: none !important;
+  }
+
+  body.anawuma-printing > #anawuma-print-root {
+    display: block !important;
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: auto !important;
+    pointer-events: auto !important;
+    width: 100% !important;
+    max-width: 74mm !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    margin: 0 auto !important;
+    padding: 3mm 3mm !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-sizing: border-box !important;
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+  }
+
+  body.anawuma-printing > #anawuma-print-root * {
+    visibility: visible !important;
+    box-shadow: none !important;
+  }
+
+  body.anawuma-printing #anawuma-print-root .printable-invoice,
+  body.anawuma-printing #anawuma-print-root .anawuma-print-sheet {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
+  body.anawuma-printing #anawuma-print-root .no-print,
+  body.anawuma-printing #anawuma-print-root .bill-actions,
+  body.anawuma-printing #anawuma-print-root .bill-hint,
+  body.anawuma-printing #anawuma-print-root .bill-status {
+    display: none !important;
+  }
+}

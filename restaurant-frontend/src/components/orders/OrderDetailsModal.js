@@ -1,6 +1,7 @@
 import React from 'react';
 import Swal from 'sweetalert2';
 import { formatBillDateTime } from '../../utils/dateUtils';
+import { printThermalDocument } from '../../utils/thermalPrint';
 import './OrderDetailsModal.css';
 
 /**
@@ -105,7 +106,7 @@ const OrderDetailsModal = ({
     }
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     const printArea = document.querySelector('.print-area');
 
     if (!printArea) {
@@ -113,56 +114,26 @@ const OrderDetailsModal = ({
       return;
     }
 
-    const printWindow = window.open('', '_blank', 'width=420,height=700');
-
-    if (!printWindow) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Popup blocked',
-        text: 'Allow popups for this site to print the ticket.',
-      });
-      return;
-    }
-
-    const printableHtml = `
-      <!doctype html>
-      <html>
-      <head>
-        <meta charset="utf-8" />
-        <title>Ticket ${order.orderNo || ''}</title>
-        <style>
-          @page { size: 80mm auto; margin: 0; }
-          html, body { margin: 0; padding: 0; }
-          body { font-family: Arial, sans-serif; width: 80mm; font-size: 12px; color: #000; }
-          .ticket-wrap { width: 80mm; box-sizing: border-box; padding: 10px; }
-          .text-center { text-align: center; }
-        </style>
-      </head>
-      <body>
-        <div class="ticket-wrap">${printArea.innerHTML}</div>
-        <script>
-          window.onload = function () {
-            setTimeout(function () {
-              window.focus();
-              window.print();
-            }, 150);
-          };
-
-          window.onafterprint = function () {
-            window.close();
-          };
-        </script>
-      </body>
-      </html>
+    const styles = `
+      #anawuma-print-root .ticket-wrap {
+        font-family: Arial, sans-serif;
+        width: 100%;
+        font-size: 12px;
+        color: #000;
+        box-sizing: border-box;
+        padding: 4px;
+      }
+      #anawuma-print-root .text-center {
+        text-align: center;
+      }
     `;
 
-    printWindow.document.open();
-    printWindow.document.write(printableHtml);
-    printWindow.document.close();
+    await printThermalDocument({
+      html: `<div class="ticket-wrap">${printArea.innerHTML}</div>`,
+      styles,
+    });
 
-    setTimeout(() => {
-      onClose();
-    }, 300);
+    onClose();
   };
 
   const sendWhatsAppBill = () => {

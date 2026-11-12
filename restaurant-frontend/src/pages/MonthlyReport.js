@@ -3,6 +3,7 @@ import Sidebar from '../components/common/Sidebar';
 import apiClient from '../api/apiClient';
 import Swal from 'sweetalert2';
 import Navbar from '../components/common/Navbar';
+import { clearThermalPrintMode } from '../utils/thermalPrint';
 import './MonthlyReport.css';
 
 function MonthlyReport() {
@@ -120,6 +121,7 @@ function MonthlyReport() {
       });
       return;
     }
+    clearThermalPrintMode();
     window.print();
   };
 

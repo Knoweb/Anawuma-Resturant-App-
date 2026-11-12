@@ -3,6 +3,7 @@ import Sidebar from '../components/common/Sidebar';
 import Navbar from '../components/common/Navbar';
 import apiClient from '../api/apiClient';
 import Swal from 'sweetalert2';
+import { clearThermalPrintMode } from '../utils/thermalPrint';
 import './DailyReport.css';
 
 function DailyReport() {
@@ -122,6 +123,7 @@ function DailyReport() {
       });
       return;
     }
+    clearThermalPrintMode();
     window.print();
   };
 
