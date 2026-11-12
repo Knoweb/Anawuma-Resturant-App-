@@ -14,6 +14,14 @@ import {
   clearThermalPrintMode,
 } from '../utils/thermalPrint';
 import { buildKdsOrderTicketDocument } from '../utils/receiptTemplates';
+import {
+  KDS_PRINT_MODES,
+  getSavedKdsPrintMode,
+  saveKdsPrintMode,
+  buildKdsEscPosBytes,
+  sendToRawbtWebSocket,
+  sendToRawbtIntentSync,
+} from '../utils/rawbtPrint';
 import './KitchenKDS.css';
 
 const KitchenKDS = () => {
@@ -29,6 +37,7 @@ const KitchenKDS = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [kdsPrintMode, setKdsPrintMode] = useState(() => getSavedKdsPrintMode());
   const previousNewOrderIdsRef = useRef(new Set());
   const { subscribe, connected } = useWebSocket();
   const [, setTimeTicker] = useState(0);
@@ -358,10 +367,11 @@ const KitchenKDS = () => {
     }
 
     let printedSynchronously = false;
+    const cookingOrderSnapshot = { ...order, status: 'COOKING' };
 
-    if (currentStatus === 'NEW') {
+    if (currentStatus === 'NEW' && kdsPrintMode === KDS_PRINT_MODES.BROWSER) {
       const doc = buildKdsOrderTicketDocument({
-        order: { ...order, status: 'COOKING' },
+        order: cookingOrderSnapshot,
         formatDateTime: formatBillDateTime,
       });
       prepareThermalPrint(doc);
@@ -385,8 +395,15 @@ const KitchenKDS = () => {
             confirmBtn.addEventListener(
               'click',
               () => {
-                // Trigger print synchronously on tap so Android Chrome keeps user activation.
-                printedSynchronously = triggerPreparedThermalPrintSync();
+                if (kdsPrintMode === KDS_PRINT_MODES.BROWSER) {
+                  printedSynchronously = triggerPreparedThermalPrintSync();
+                } else if (kdsPrintMode === KDS_PRINT_MODES.RAWBT_INTENT) {
+                  const escPosBytes = buildKdsEscPosBytes({
+                    order: cookingOrderSnapshot,
+                    formatDateTime: formatBillDateTime,
+                  });
+                  printedSynchronously = sendToRawbtIntentSync(escPosBytes);
+                }
               },
               { capture: true, once: true }
             );
@@ -395,8 +412,28 @@ const KitchenKDS = () => {
       },
     }).then(async (result) => {
       if (!result.isConfirmed) {
-        if (currentStatus === 'NEW') {
+        if (currentStatus === 'NEW' && kdsPrintMode === KDS_PRINT_MODES.BROWSER) {
           clearThermalPrintMode();
+        }
+        return;
+      }
+
+      if (currentStatus === 'NEW' && kdsPrintMode === KDS_PRINT_MODES.RAWBT_WS) {
+        const escPosBytes = buildKdsEscPosBytes({
+          order: cookingOrderSnapshot,
+          formatDateTime: formatBillDateTime,
+        });
+        const wsPrintPromise = sendToRawbtWebSocket(escPosBytes);
+        const updated = await updateOrderStatus(order.orderId, nextStatus);
+
+        if (updated) {
+          billingAPI.createInvoiceForOrder(order.orderId).catch(err => {
+            console.error('Auto-bill generation failed:', err);
+          });
+          const wsResult = await wsPrintPromise;
+          if (!wsResult.ok) {
+            promptRawbtFallback(cookingOrderSnapshot, escPosBytes);
+          }
         }
         return;
       }
@@ -412,7 +449,7 @@ const KitchenKDS = () => {
 
           // Fallback if confirmed via keyboard Enter rather than button click
           if (!printedSynchronously) {
-            printOrderBill({ ...order, status: 'COOKING' });
+            printOrderBill(cookingOrderSnapshot);
           }
         }
 
@@ -555,7 +592,130 @@ const KitchenKDS = () => {
     }
   };
 
+  const cycleKdsPrintMode = () => {
+    const orderOfModes = [
+      KDS_PRINT_MODES.RAWBT_WS,
+      KDS_PRINT_MODES.RAWBT_INTENT,
+      KDS_PRINT_MODES.BROWSER,
+    ];
+    const nextIndex = (orderOfModes.indexOf(kdsPrintMode) + 1) % orderOfModes.length;
+    const nextMode = orderOfModes[nextIndex];
+    setKdsPrintMode(nextMode);
+    saveKdsPrintMode(nextMode);
+
+    const modeLabels = {
+      [KDS_PRINT_MODES.RAWBT_WS]: 'RawBT WebSocket (Silent Auto-Cut)',
+      [KDS_PRINT_MODES.RAWBT_INTENT]: 'RawBT App Direct (No Preview)',
+      [KDS_PRINT_MODES.BROWSER]: 'Browser Print Preview',
+    };
+
+    Swal.fire({
+      icon: 'info',
+      title: 'Print Mode',
+      text: modeLabels[nextMode],
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 2200,
+    });
+  };
+
+  const getPrintModeBadgeMeta = () => {
+    switch (kdsPrintMode) {
+      case KDS_PRINT_MODES.RAWBT_WS:
+        return { label: 'RawBT WS', icon: 'fa-bolt', cls: 'kds-ctrl-rawbt' };
+      case KDS_PRINT_MODES.RAWBT_INTENT:
+        return { label: 'RawBT App', icon: 'fa-print', cls: 'kds-ctrl-rawbt' };
+      default:
+        return { label: 'Browser', icon: 'fa-desktop', cls: 'kds-ctrl-browser' };
+    }
+  };
+
+  const promptRawbtFallback = (order, escPosBytes) => {
+    const doc = buildKdsOrderTicketDocument({
+      order,
+      formatDateTime: formatBillDateTime,
+    });
+    prepareThermalPrint(doc);
+
+    Swal.fire({
+      icon: 'warning',
+      title: 'RawBT WebSocket Not Reachable',
+      text: 'Port 40213 background WebSocket is not running. Tap below to print via RawBT App directly or Browser Print:',
+      showDenyButton: true,
+      showCancelButton: true,
+      confirmButtonText: 'RawBT App (Auto-Cut)',
+      denyButtonText: 'Browser Print',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#266668',
+      denyButtonColor: '#475569',
+      didOpen: () => {
+        const confirmBtn = Swal.getConfirmButton();
+        const denyBtn = Swal.getDenyButton();
+
+        if (confirmBtn) {
+          confirmBtn.addEventListener(
+            'click',
+            () => {
+              clearThermalPrintMode();
+              setKdsPrintMode(KDS_PRINT_MODES.RAWBT_INTENT);
+              saveKdsPrintMode(KDS_PRINT_MODES.RAWBT_INTENT);
+              sendToRawbtIntentSync(escPosBytes);
+            },
+            { capture: true, once: true }
+          );
+        }
+
+        if (denyBtn) {
+          denyBtn.addEventListener(
+            'click',
+            () => {
+              setKdsPrintMode(KDS_PRINT_MODES.BROWSER);
+              saveKdsPrintMode(KDS_PRINT_MODES.BROWSER);
+              triggerPreparedThermalPrintSync();
+            },
+            { capture: true, once: true }
+          );
+        }
+      },
+    }).then((res) => {
+      if (!res.isConfirmed && !res.isDenied) {
+        clearThermalPrintMode();
+      }
+    });
+  };
+
   const printOrderBill = async (order) => {
+    if (kdsPrintMode === KDS_PRINT_MODES.RAWBT_INTENT) {
+      const escPosBytes = buildKdsEscPosBytes({
+        order,
+        formatDateTime: formatBillDateTime,
+      });
+      sendToRawbtIntentSync(escPosBytes);
+      return;
+    }
+
+    if (kdsPrintMode === KDS_PRINT_MODES.RAWBT_WS) {
+      const escPosBytes = buildKdsEscPosBytes({
+        order,
+        formatDateTime: formatBillDateTime,
+      });
+      const wsResult = await sendToRawbtWebSocket(escPosBytes);
+      if (wsResult.ok) {
+        Swal.fire({
+          icon: 'success',
+          title: 'KOT Sent to Printer',
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      } else {
+        promptRawbtFallback(order, escPosBytes);
+      }
+      return;
+    }
+
     const doc = buildKdsOrderTicketDocument({
       order,
       formatDateTime: formatBillDateTime,
@@ -1073,6 +1233,20 @@ const KitchenKDS = () => {
                       <i className={`fas ${connected ? 'fa-wifi' : 'fa-wifi-slash'} me-1`}></i>
                       {connected ? 'Live' : 'Disconnected'}
                     </span>
+                    {(() => {
+                      const modeMeta = getPrintModeBadgeMeta();
+                      return (
+                        <button
+                          type="button"
+                          className={`kds-ctrl-btn ${modeMeta.cls}`}
+                          onClick={cycleKdsPrintMode}
+                          title="Switch KDS Print Mode (RawBT WS / RawBT App / Browser)"
+                        >
+                          <i className={`fas ${modeMeta.icon}`}></i>
+                          <span>{modeMeta.label}</span>
+                        </button>
+                      );
+                    })()}
                     <button
                       type="button"
                       className="kds-ctrl-btn kds-ctrl-fs"
