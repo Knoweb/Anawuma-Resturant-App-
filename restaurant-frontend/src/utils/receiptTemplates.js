@@ -1,8 +1,6 @@
 import { escapeHtml } from './thermalPrint';
 
 export const buildKdsOrderTicketDocument = ({
-  restaurantName,
-  restaurantInfo,
   order,
   formatDateTime,
 }) => {
@@ -24,8 +22,20 @@ export const buildKdsOrderTicketDocument = ({
     })
     .join('');
 
-  const locationLabel = order?.roomNo ? 'Room' : 'Table';
-  const locationValue = escapeHtml(order?.roomNo || order?.tableNo || '-');
+  const rawOrderNo = String(order?.orderNo || '-').replace(/^#/, '');
+  const rawLocation = order?.roomNo || order?.tableNo || '';
+  let formattedLocation = '';
+  if (rawLocation) {
+    const trimmedLoc = String(rawLocation).trim();
+    if (/^(ROOM|TABLE)\b/i.test(trimmedLoc)) {
+      formattedLocation = trimmedLoc;
+    } else {
+      formattedLocation = order?.roomNo ? `Room ${trimmedLoc}` : `Table ${trimmedLoc}`;
+    }
+  }
+  const kotHeader = formattedLocation
+    ? `KOT #${rawOrderNo} - ${formattedLocation}`
+    : `KOT #${rawOrderNo}`;
 
   const styles = `
     #anawuma-print-root .kds-bill-wrap {
@@ -33,140 +43,107 @@ export const buildKdsOrderTicketDocument = ({
       width: 100%;
       color: #000;
       box-sizing: border-box;
+      font-size: 11.5px;
+      line-height: 1.15;
+      margin: 0;
+      padding: 0;
     }
     #anawuma-print-root .kds-receipt-header {
       text-align: center;
-      border-bottom: 2px dashed #444;
-      padding-bottom: 10px;
-      margin-bottom: 12px;
+      border-bottom: 1px dashed #000;
+      padding: 0 0 3px 0;
+      margin: 0 0 3px 0;
     }
-    #anawuma-print-root .kds-restaurant-name {
-      font-size: 20px;
+    #anawuma-print-root .kds-kot-title {
+      font-size: 13.5px;
       font-weight: 800;
       margin: 0;
+      padding: 0;
       color: #000;
-      text-transform: uppercase;
-    }
-    #anawuma-print-root .kds-contact-box {
-      font-size: 13px;
-      color: #333;
-      margin-top: 6px;
-      border-top: 1px dashed #666;
-      border-bottom: 1px dashed #666;
-      padding: 4px 0;
-    }
-    #anawuma-print-root .kds-invoice-label {
-      font-size: 13px;
-      font-weight: bold;
-      margin-top: 5px;
-      color: #444;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      line-height: 1.15;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     #anawuma-print-root .kds-meta-table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 12px;
-      font-size: 13px;
+      margin: 0 0 3px 0;
+      font-size: 10.5px;
+      line-height: 1.15;
     }
     #anawuma-print-root .kds-meta-table td {
-      padding: 3px 0;
-      vertical-align: top;
-    }
-    #anawuma-print-root .kds-info-label {
-      display: block;
-      font-weight: bold;
-      color: #555;
-      font-size: 10px;
-      text-transform: uppercase;
-    }
-    #anawuma-print-root .kds-info-value {
-      display: block;
-      font-weight: bold;
+      padding: 1px 0;
+      vertical-align: middle;
+      font-weight: 600;
       color: #000;
-      font-size: 13px;
     }
     #anawuma-print-root .kds-items-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 15px;
+      font-size: 12px;
+      line-height: 1.15;
+      margin: 0;
     }
     #anawuma-print-root .kds-items-table th {
-      padding: 6px 4px;
-      border-bottom: 2px solid #222;
+      padding: 2px 2px;
+      font-size: 11px;
+      font-weight: 700;
+      border-bottom: 1px solid #000;
+      line-height: 1.15;
     }
     #anawuma-print-root .kds-td-item {
-      padding: 6px 4px;
-      border-bottom: 1px solid #ddd;
+      padding: 3px 2px;
+      border-bottom: 1px dotted #999;
       text-align: left;
+      line-height: 1.15;
     }
     #anawuma-print-root .kds-td-qty {
-      padding: 6px 4px;
-      border-bottom: 1px solid #ddd;
+      padding: 3px 2px;
+      border-bottom: 1px dotted #999;
       text-align: right;
       font-weight: bold;
-      font-size: 15px;
+      font-size: 12px;
       white-space: nowrap;
+      line-height: 1.15;
     }
     #anawuma-print-root .kds-item-note {
-      font-size: 12px;
-      color: #444;
-      margin-top: 2px;
+      font-size: 10.5px;
+      color: #333;
+      margin-top: 1px;
+      line-height: 1.15;
     }
     #anawuma-print-root .kds-prepare-banner {
-      margin-top: 12px;
+      margin: 3px 0 0 0;
+      border-top: 1px dashed #000;
+      padding: 3px 0 0 0;
       text-align: center;
-      border-top: 2px dashed #444;
-      padding-top: 8px;
+      line-height: 1.15;
     }
     #anawuma-print-root .kds-prepare-banner p {
       margin: 0;
+      padding: 0;
       font-weight: bold;
-      font-size: 14px;
-    }
-    #anawuma-print-root .kds-receipt-footer {
-      border-top: 2px dashed #444;
-      padding-top: 10px;
-      margin-top: 12px;
-      text-align: center;
+      font-size: 10.5px;
+      line-height: 1.15;
     }
   `;
 
   const html = `
     <div class="kds-bill-wrap">
       <div class="kds-receipt-header">
-        <h1 class="kds-restaurant-name">${escapeHtml(restaurantName || 'ANAWUMA')}</h1>
-        ${(restaurantInfo?.address || restaurantInfo?.contactNumber) ? `
-          <div class="kds-contact-box">
-            ${restaurantInfo.address ? `<div style="margin-bottom:2px;">${escapeHtml(restaurantInfo.address)}</div>` : ''}
-            ${restaurantInfo.contactNumber ? `<div>Tel: ${escapeHtml(restaurantInfo.contactNumber)}</div>` : ''}
-          </div>
-        ` : `
-          <div class="kds-invoice-label">ORDER TICKET</div>
-        `}
+        <div class="kds-kot-title">${escapeHtml(kotHeader)}</div>
       </div>
 
       <table class="kds-meta-table">
         <tbody>
           <tr>
-            <td style="text-align:left;">
-              <span class="kds-info-label">Order No</span>
-              <span class="kds-info-value">${escapeHtml(order?.orderNo || '-')}</span>
-            </td>
-            <td style="text-align:right;">
-              <span class="kds-info-label">Date &amp; Time</span>
-              <span class="kds-info-value">${escapeHtml(formatDateTime(order?.createdAt || new Date()))}</span>
-            </td>
+            <td style="text-align:left;">Order: #${escapeHtml(rawOrderNo)}</td>
+            <td style="text-align:right;">${escapeHtml(formatDateTime(order?.createdAt || new Date()))}</td>
           </tr>
           <tr>
-            <td style="text-align:left;">
-              <span class="kds-info-label">${locationLabel}</span>
-              <span class="kds-info-value">${locationValue}</span>
-            </td>
-            <td style="text-align:right;">
-              <span class="kds-info-label">Customer</span>
-              <span class="kds-info-value">${escapeHtml(order?.customerName || 'Guest')}</span>
-            </td>
+            <td style="text-align:left;">${escapeHtml(formattedLocation || '-')}</td>
+            <td style="text-align:right;">${escapeHtml(order?.customerName || 'Guest')}</td>
           </tr>
         </tbody>
       </table>
@@ -185,11 +162,6 @@ export const buildKdsOrderTicketDocument = ({
 
       <div class="kds-prepare-banner">
         <p>PLEASE PREPARE THE ABOVE ITEMS</p>
-      </div>
-
-      <div class="kds-receipt-footer">
-        <div style="font-size:13px;font-weight:bold;margin-bottom:4px;">THANK YOU FOR VISITING!</div>
-        <div style="font-size:12px;color:#555;">Please come again.</div>
       </div>
     </div>
   `;
@@ -479,3 +451,4 @@ export const buildAccountBillDocument = ({
 
   return { html, styles };
 };
+

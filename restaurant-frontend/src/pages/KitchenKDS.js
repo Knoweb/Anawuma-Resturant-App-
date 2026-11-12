@@ -14,19 +14,6 @@ import './KitchenKDS.css';
 const KitchenKDS = () => {
   const { user } = useAuthStore();
   const restaurantName = user?.restaurantName || 'ANAWUMA';
-  const [restaurantInfo, setRestaurantInfo] = useState(null);
-
-  useEffect(() => {
-    if (user?.restaurantId) {
-      apiClient.get(`/restaurant/${user.restaurantId}`)
-        .then(res => {
-          if (res.data.success) {
-            setRestaurantInfo(res.data.data);
-          }
-        })
-        .catch(err => console.error('Error fetching restaurant info:', err));
-    }
-  }, [user?.restaurantId]);
   const [orders, setOrders] = useState({
     NEW: [],
     COOKING: [],
@@ -533,8 +520,6 @@ const KitchenKDS = () => {
 
   const printOrderBill = async (order) => {
     const doc = buildKdsOrderTicketDocument({
-      restaurantName,
-      restaurantInfo,
       order,
       formatDateTime: formatBillDateTime,
     });

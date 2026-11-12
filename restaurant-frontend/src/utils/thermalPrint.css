@@ -64,12 +64,12 @@
     max-height: none !important;
     overflow: visible !important;
     margin: 0 auto !important;
-    padding: 3mm 3mm !important;
+    padding: 2px 4px !important;
     background: #ffffff !important;
     color: #000000 !important;
     box-sizing: border-box !important;
-    font-size: 13px !important;
-    line-height: 1.35 !important;
+    font-size: 12px !important;
+    line-height: 1.15 !important;
   }
 
   body.anawuma-printing > #anawuma-print-root * {
