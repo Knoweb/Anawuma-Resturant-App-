@@ -723,7 +723,7 @@ const KitchenKDS = () => {
 
           {(status === 'NEW' || status === 'COOKING') && (
             <button
-              className="btn btn-outline-primary btn-sm kds-action-btn kds-print-btn"
+              className="btn btn-outline-primary btn-sm kds-icon-btn kds-print-btn"
               onClick={(e) => {
                 e.stopPropagation();
                 printOrderBill(order);
@@ -1019,30 +1019,40 @@ const KitchenKDS = () => {
             <div className="row mb-2 flex-shrink-0 kds-header-row">
               <div className="col-12">
                 <div className="kds-header">
-                  <h2>
-                    <i className="fas fa-chart-line me-2"></i>
-                    {isFullscreen ? (restaurantName || 'Kitchen Display') : 'Kitchen Display System'}
-                  </h2>
-                  <div className="header-actions">
-                    <span className={`kd-live-pill ${connected ? 'online' : 'offline'} me-2`}>
+                  <div className="kds-header-brand">
+                    <h2>
+                      <i className="fas fa-chart-line me-2 kds-header-icon"></i>
+                      <span className="kds-title-text">
+                        {isFullscreen ? (restaurantName || 'Kitchen Display') : 'Kitchen Display System'}
+                      </span>
+                    </h2>
+                    <span className={`kd-live-pill kds-live-mobile ${connected ? 'online' : 'offline'}`}>
+                      <i className={`fas ${connected ? 'fa-wifi' : 'fa-wifi-slash'} me-1`}></i>
+                      {connected ? 'Live' : 'Offline'}
+                    </span>
+                  </div>
+                  <div className="kds-header-actions">
+                    <span className={`kd-live-pill kds-live-desktop ${connected ? 'online' : 'offline'}`}>
                       <i className={`fas ${connected ? 'fa-wifi' : 'fa-wifi-slash'} me-1`}></i>
                       {connected ? 'Live' : 'Disconnected'}
                     </span>
                     <button
-                      className="btn btn-outline-primary btn-sm me-2"
+                      type="button"
+                      className="kds-ctrl-btn kds-ctrl-fs"
                       onClick={toggleFullscreen}
                       title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen (Best for Tablets)'}
                     >
-                      <i className={`fas ${isFullscreen ? 'fa-compress' : 'fa-expand'} me-1`}></i>
-                      {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                      <i className={`fas ${isFullscreen ? 'fa-compress' : 'fa-expand'}`}></i>
+                      <span>{isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}</span>
                     </button>
-                    <button 
-                      className="btn btn-outline-secondary btn-sm"
+                    <button
+                      type="button"
+                      className="kds-ctrl-btn kds-ctrl-refresh"
                       onClick={fetchAllOrders}
                       disabled={loading}
                     >
-                      <i className={`fas fa-sync-alt ${loading ? 'fa-spin' : ''} me-1`}></i>
-                      Refresh
+                      <i className={`fas fa-sync-alt ${loading ? 'fa-spin' : ''}`}></i>
+                      <span>Refresh</span>
                     </button>
                   </div>
                 </div>

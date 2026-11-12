@@ -179,10 +179,11 @@ function Navbar({ cartCount, onCartClick }) {
               className="btn btn-link text-white back-nav-btn d-flex align-items-center me-3"
               onClick={() => navigate(-1)}
               type="button"
-              style={{ textDecoration: 'none', background: 'rgba(255,255,255,0.1)', borderRadius: '8px', padding: '5px 10px', fontSize: '0.85rem', whiteSpace: 'nowrap' }}
+              aria-label="Back"
+              title="Back"
             >
-              <i className="fas fa-chevron-left me-1"></i>
-              <span>Back</span>
+              <i className="fas fa-chevron-left back-nav-icon"></i>
+              <span className="back-nav-label">Back</span>
             </button>
           )}
 
@@ -219,7 +220,7 @@ function Navbar({ cartCount, onCartClick }) {
           )}
 
           {/* Notifications */}
-          <div className="dropdown me-3 position-relative">
+          <div className="dropdown nav-notif-wrap me-3 position-relative">
             <button
               className="btn btn-link text-white position-relative"
               type="button"

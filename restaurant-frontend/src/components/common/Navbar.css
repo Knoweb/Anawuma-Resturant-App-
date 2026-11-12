@@ -7,7 +7,11 @@
   box-shadow: none;
   border-top: 1px solid rgba(255, 255, 255, 0.15);
   border-bottom: 1px solid rgba(255, 255, 255, 0.8);
-  min-height: 70px;
+  height: calc(var(--header-height-desktop) + var(--safe-top));
+  min-height: calc(var(--header-height-desktop) + var(--safe-top));
+  padding: var(--safe-top) 0.75rem 0 !important;
+  display: flex;
+  align-items: center;
   transition: left 0.15s ease-in-out;
 }
 
@@ -58,12 +62,28 @@
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
+.back-nav-btn {
+  text-decoration: none !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-radius: 8px !important;
+  padding: 5px 10px !important;
+  font-size: 0.85rem !important;
+  white-space: nowrap;
+  flex-shrink: 0;
+  gap: 0.3rem;
+}
+
+.back-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.22) !important;
+}
+
 .sidebar-toggle-btn {
   font-size: 1.2rem;
-  color: rgba(255, 255, 255, 0.55) !important;
+  color: rgba(255, 255, 255, 0.75) !important;
   margin-left: 0.4rem;
   margin-right: 0.5rem;
   text-decoration: none !important;
+  flex-shrink: 0;
 }
 
 .sidebar-toggle-btn:hover,
@@ -190,22 +210,67 @@
 
 @media (max-width: 640px) {
   .navbar {
+    height: calc(var(--header-height-mobile) + var(--safe-top));
     min-height: calc(var(--header-height-mobile) + var(--safe-top));
-    padding-top: var(--safe-top);
+    padding: var(--safe-top) 0.45rem 0 !important;
+    display: flex;
+    align-items: center;
+  }
+
+  .navbar > .container-fluid {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+
+  .sidebar-toggle-btn {
+    margin-left: 0.15rem !important;
+    margin-right: 0.55rem !important;
+    font-size: 1.15rem;
+  }
+
+  .back-nav-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0 !important;
+    justify-content: center;
+    margin-right: 0.55rem !important;
+    border-radius: 50% !important;
+  }
+
+  .back-nav-label {
+    display: none;
   }
 
   .hotel-brand {
-    max-width: 180px;
+    flex: 1;
+    min-width: 0;
+    max-width: 100%;
+    margin-right: 0.35rem;
   }
 
   .hotel-brand-name {
-    font-size: 1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
   }
   
   .hotel-brand-logo {
+    width: 30px;
+    height: 30px;
+    margin-right: 0.45rem;
+    flex-shrink: 0;
+  }
+
+  .nav-notif-wrap {
+    margin-right: 0.45rem !important;
+  }
+
+  .nav-notif-wrap > .btn-link {
+    padding: 0.25rem 0.4rem !important;
+  }
+
+  .user-avatar-modern {
     width: 32px;
     height: 32px;
-    margin-right: 0.5rem;
   }
 
   .dropdown-menu {

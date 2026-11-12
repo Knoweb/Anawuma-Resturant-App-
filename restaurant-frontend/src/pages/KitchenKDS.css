@@ -33,25 +33,98 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
   background: white;
   padding: 0.65rem 1rem;
-  border-radius: 10px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.kds-header-brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-width: 0;
 }
 
 .kds-header h2 {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 700;
-  color: #2c3e50;
+  color: #1e293b;
   display: flex;
   align-items: center;
+  min-width: 0;
 }
 
-.header-actions {
+.kds-header-icon {
+  color: #266668;
+  flex-shrink: 0;
+}
+
+.kds-title-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kds-live-mobile {
+  display: none !important;
+}
+
+.kds-live-desktop {
+  display: inline-flex;
+}
+
+.kds-header-actions {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.kds-ctrl-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  height: 34px;
+  padding: 0 0.85rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.kds-ctrl-fs {
+  background: #f0fdfa;
+  color: #1a4648;
+  border: 1.5px solid #266668;
+}
+
+.kds-ctrl-fs:hover {
+  background: #266668;
+  color: #ffffff;
+}
+
+.kds-ctrl-refresh {
+  background: #f8fafc;
+  color: #334155;
+  border: 1.5px solid #cbd5e1;
+}
+
+.kds-ctrl-refresh:hover:not(:disabled) {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.kds-ctrl-refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Fluid KDS Grid Layout */
@@ -327,6 +400,28 @@
   display: inline-block;
 }
 
+.kds-print-btn {
+  border: 1.5px solid #2563eb !important;
+  color: #2563eb !important;
+  background: #eff6ff !important;
+}
+
+.kds-print-btn:hover {
+  background: #2563eb !important;
+  color: #ffffff !important;
+}
+
+.kds-cancel-btn {
+  border: 1.5px solid #dc3545 !important;
+  color: #dc3545 !important;
+  background: #fef2f2 !important;
+}
+
+.kds-cancel-btn:hover {
+  background: #dc3545 !important;
+  color: #ffffff !important;
+}
+
 .btn-whatsapp-send {
   background: linear-gradient(135deg, #25d366, #128c7e) !important;
   border: 1px solid #128c7e !important;
@@ -460,17 +555,48 @@
 
 /* Mobile & Portrait Mode (<= 768px width) */
 @media (max-width: 768px) {
-  .kds-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.6rem;
-    padding: 0.5rem 0.75rem;
+  .kds-layout-active .dashboard-content {
+    padding: 0.6rem 0.6rem !important;
   }
 
-  .header-actions {
+  .kds-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.55rem;
+    padding: 0.6rem 0.75rem;
+  }
+
+  .kds-header-brand {
     width: 100%;
-    justify-content: space-between;
-    flex-wrap: wrap;
+  }
+
+  .kds-header h2 {
+    font-size: 1.05rem;
+  }
+
+  .kds-live-mobile {
+    display: inline-flex !important;
+    padding: 0.25rem 0.6rem !important;
+    font-size: 0.68rem !important;
+    flex-shrink: 0;
+  }
+
+  .kds-live-desktop {
+    display: none !important;
+  }
+
+  .kds-header-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .kds-ctrl-btn {
+    width: 100%;
+    height: 36px;
+    padding: 0 0.5rem;
+    font-size: 0.82rem;
   }
 
   .kds-grid {
@@ -480,8 +606,8 @@
   }
 
   .status-column {
-    margin-bottom: 1rem;
-    min-height: 350px !important;
+    margin-bottom: 0.85rem;
+    min-height: 320px !important;
     height: auto !important;
     max-height: none !important;
   }
@@ -493,19 +619,26 @@
 
 @media (max-width: 640px) {
   .kds-card-footer {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.45rem;
   }
   
   .kds-action-btn {
-    width: 100%;
-    flex: none;
-    margin-bottom: 0.5rem;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-bottom: 0;
+    white-space: nowrap;
   }
   
   .kds-icon-btn {
-    width: 100%;
-    margin-top: 0.25rem;
+    flex: 0 0 40px;
+    width: 40px;
+    min-width: 40px;
+    height: 36px;
+    min-height: 36px;
+    margin-top: 0;
   }
 }
 
