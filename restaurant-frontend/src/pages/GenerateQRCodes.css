@@ -90,47 +90,47 @@
   font-weight: 500;
 }
 
-/* Button Styles */
-.btn {
+/* Button Styles (scoped to GenerateQRCodes page) */
+.generate-qr-container .btn {
   border-radius: 0;
   padding: 10px 20px;
   font-weight: 500;
   transition: all 0.3s;
 }
 
-.btn-primary {
+.generate-qr-container .btn-primary {
   background-color: #0d6efd;
   border-color: #0d6efd;
 }
 
-.btn-primary:hover {
+.generate-qr-container .btn-primary:hover {
   background-color: #0b5ed7;
   border-color: #0a58ca;
   transform: translateY(-2px);
 }
 
-.btn-danger {
+.generate-qr-container .btn-danger {
   background-color: #dc3545;
   border-color: #dc3545;
 }
 
-.btn-danger:hover {
+.generate-qr-container .btn-danger:hover {
   background-color: #bb2d3b;
   border-color: #b02a37;
   transform: translateY(-2px);
 }
 
-.btn-success {
+.generate-qr-container .btn-success {
   background-color: #198754;
   border-color: #198754;
 }
 
-.btn-success:hover {
+.generate-qr-container .btn-success:hover {
   background-color: #157347;
   border-color: #146c43;
 }
 
-.btn-outline-danger:hover {
+.generate-qr-container .btn-outline-danger:hover {
   background-color: #dc3545;
   border-color: #dc3545;
   color: white;
@@ -151,7 +151,7 @@
     gap: 15px;
   }
 
-  .btn {
+  .generate-qr-container .btn {
     width: 100%;
     margin-bottom: 10px;
   }

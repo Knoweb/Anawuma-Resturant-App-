@@ -238,8 +238,7 @@ function Navbar({ cartCount, onCartClick }) {
 
             {/* Notification Dropdown */}
             {showNotifications && (
-              <div className="dropdown-menu dropdown-menu-end show" style={{
-                width: '350px',
+              <div className="dropdown-menu dropdown-menu-end show navbar-notif-dropdown" style={{
                 maxHeight: '400px',
                 overflowY: 'auto',
                 position: 'absolute',
@@ -296,14 +295,14 @@ function Navbar({ cartCount, onCartClick }) {
           </div>
 
           {/* User Profile */}
-          <div className="dropdown">
+          <div className="dropdown position-relative">
             <button
-              className="btn btn-link text-white dropdown-toggle d-flex align-items-center"
+              className="btn btn-link text-white dropdown-toggle d-flex align-items-center navbar-profile-btn"
               type="button"
               style={{ textDecoration: 'none' }}
               onClick={() => setShowDropdown(!showDropdown)}
             >
-              <div className="user-avatar-modern me-2">
+              <div className="user-avatar-modern me-1 me-md-2">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" style={{ width: '22px', height: '22px' }}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                 </svg>
@@ -315,7 +314,7 @@ function Navbar({ cartCount, onCartClick }) {
             </button>
 
             {showDropdown && (
-              <ul className="dropdown-menu dropdown-menu-end show">
+              <ul className="dropdown-menu dropdown-menu-end show navbar-profile-dropdown">
                 <li>
                   <a className="dropdown-item" href="/settings/profile">
                     <i className="fas fa-user me-2"></i>

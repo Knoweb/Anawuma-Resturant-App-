@@ -77,11 +77,41 @@
   background: rgba(255, 255, 255, 0.22) !important;
 }
 
+.navbar .btn {
+  width: auto !important;
+  margin-bottom: 0 !important;
+}
+
+.navbar .dropdown-menu.dropdown-menu-end {
+  right: 0 !important;
+  left: auto !important;
+  top: 100% !important;
+  position: absolute !important;
+  margin-top: 0.45rem !important;
+}
+
+.navbar .navbar-profile-dropdown {
+  width: auto !important;
+  min-width: 195px !important;
+  max-width: calc(100vw - 16px) !important;
+}
+
+.navbar .navbar-notif-dropdown {
+  width: 340px !important;
+  max-width: calc(100vw - 16px) !important;
+}
+
 .sidebar-toggle-btn {
   font-size: 1.2rem;
-  color: rgba(255, 255, 255, 0.75) !important;
-  margin-left: 0.4rem;
+  color: rgba(255, 255, 255, 0.85) !important;
+  margin-left: 0.25rem;
   margin-right: 0.5rem;
+  padding: 0 !important;
+  width: 34px !important;
+  height: 34px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   text-decoration: none !important;
   flex-shrink: 0;
 }
@@ -273,9 +303,13 @@
     height: 32px;
   }
 
-  .dropdown-menu {
+  .navbar-profile-btn {
+    padding: 0.2rem 0.25rem !important;
+  }
+
+  .navbar .navbar-notif-dropdown {
     width: 300px !important;
-    max-width: 90vw !important;
+    max-width: calc(100vw - 16px) !important;
   }
   
   .user-name, .user-role {
