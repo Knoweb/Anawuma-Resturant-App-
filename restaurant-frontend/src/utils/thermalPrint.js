@@ -6,6 +6,7 @@ const BODY_PRINT_CLASS = 'anawuma-printing';
 
 let activeCleanup = null;
 let activePrintToken = 0;
+let preparedPrintJob = null;
 
 const ensurePrintRoot = () => {
   let root = document.getElementById(PRINT_ROOT_ID);
@@ -26,6 +27,8 @@ const ensurePrintRoot = () => {
  * Report pages (A4) should call this before triggering their own window.print().
  */
 export const clearThermalPrintMode = () => {
+  preparedPrintJob = null;
+
   if (typeof activeCleanup === 'function') {
     activeCleanup();
     activeCleanup = null;
@@ -101,35 +104,26 @@ const waitForNextFramesAndDelay = (delayMs) => {
   });
 };
 
-/**
- * Prints isolated receipt/ticket HTML using an in-page print root under <body>.
- * Avoids Android Chrome popup closing races, popup blockers after async awaits,
- * hidden-iframe blank captures, and fullscreen compositor blank layers.
- */
-export const printThermalDocument = async ({ html = '', styles = '' } = {}) => {
-  if (typeof document === 'undefined' || typeof window === 'undefined') return false;
-
+const mountPrintContent = ({ html = '', styles = '' } = {}) => {
   clearThermalPrintMode();
   const printToken = ++activePrintToken;
 
   const printRoot = ensurePrintRoot();
   printRoot.innerHTML = `${styles ? `<style>${styles}</style>` : ''}<div class="anawuma-print-sheet">${html}</div>`;
+  void printRoot.offsetHeight;
+
+  return { printRoot, printToken };
+};
+
+const activateAndPrintSync = (printRoot, printToken) => {
+  if (!printRoot || printToken !== activePrintToken) return false;
 
   document.documentElement.classList.add(HTML_PRINT_CLASS);
   document.body.classList.add(BODY_PRINT_CLASS);
 
-  const exitedFullscreen = await exitFullscreenIfActive();
-  if (printToken !== activePrintToken) return false;
-
-  await waitForImages(printRoot, 2500);
-  if (printToken !== activePrintToken) return false;
-
   // Force synchronous layout reflow so mobile Chrome paints the print tree before spooler capture.
   void printRoot.offsetHeight;
   void document.body.offsetHeight;
-
-  await waitForNextFramesAndDelay(exitedFullscreen ? 350 : 200);
-  if (printToken !== activePrintToken) return false;
 
   const startedAt = Date.now();
   let didLeaveToSpooler = false;
@@ -221,6 +215,50 @@ export const printThermalDocument = async ({ html = '', styles = '' } = {}) => {
   }
 
   return true;
+};
+
+/**
+ * Pre-mounts receipt HTML and exits fullscreen before a confirmation button click,
+ * allowing triggerPreparedThermalPrintSync() to call window.print() synchronously inside
+ * the native click event (prevents Android Chrome transient-activation blocking).
+ */
+export const prepareThermalPrint = ({ html = '', styles = '' } = {}) => {
+  if (typeof document === 'undefined' || typeof window === 'undefined') return;
+  const job = mountPrintContent({ html, styles });
+  preparedPrintJob = job;
+
+  exitFullscreenIfActive().catch(() => {});
+  waitForImages(job.printRoot, 2500).catch(() => {});
+};
+
+/**
+ * Fires window.print() synchronously for a previously prepared document.
+ */
+export const triggerPreparedThermalPrintSync = () => {
+  if (!preparedPrintJob) return false;
+  const { printRoot, printToken } = preparedPrintJob;
+  preparedPrintJob = null;
+  return activateAndPrintSync(printRoot, printToken);
+};
+
+/**
+ * Prints isolated receipt/ticket HTML using an in-page print root under <body>.
+ */
+export const printThermalDocument = async ({ html = '', styles = '' } = {}) => {
+  if (typeof document === 'undefined' || typeof window === 'undefined') return false;
+
+  const { printRoot, printToken } = mountPrintContent({ html, styles });
+
+  const exitedFullscreen = await exitFullscreenIfActive();
+  if (printToken !== activePrintToken) return false;
+
+  await waitForImages(printRoot, 2500);
+  if (printToken !== activePrintToken) return false;
+
+  await waitForNextFramesAndDelay(exitedFullscreen ? 350 : 200);
+  if (printToken !== activePrintToken) return false;
+
+  return activateAndPrintSync(printRoot, printToken);
 };
 
 export const escapeHtml = (value) => {

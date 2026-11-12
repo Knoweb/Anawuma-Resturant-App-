@@ -7,7 +7,12 @@ import apiClient, { billingAPI } from '../api/apiClient';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAuthStore } from '../store/authStore';
 import { formatBillDateTime } from '../utils/dateUtils';
-import { printThermalDocument } from '../utils/thermalPrint';
+import {
+  printThermalDocument,
+  prepareThermalPrint,
+  triggerPreparedThermalPrintSync,
+  clearThermalPrintMode,
+} from '../utils/thermalPrint';
 import { buildKdsOrderTicketDocument } from '../utils/receiptTemplates';
 import './KitchenKDS.css';
 
@@ -352,6 +357,16 @@ const KitchenKDS = () => {
         return;
     }
 
+    let printedSynchronously = false;
+
+    if (currentStatus === 'NEW') {
+      const doc = buildKdsOrderTicketDocument({
+        order: { ...order, status: 'COOKING' },
+        formatDateTime: formatBillDateTime,
+      });
+      prepareThermalPrint(doc);
+    }
+
     Swal.fire({
       title: actionText,
       text:
@@ -363,37 +378,59 @@ const KitchenKDS = () => {
       confirmButtonColor: '#28a745',
       cancelButtonColor: '#6c757d',
       confirmButtonText: 'Yes, proceed',
+      didOpen: () => {
+        if (currentStatus === 'NEW') {
+          const confirmBtn = Swal.getConfirmButton();
+          if (confirmBtn) {
+            confirmBtn.addEventListener(
+              'click',
+              () => {
+                // Trigger print synchronously on tap so Android Chrome keeps user activation.
+                printedSynchronously = triggerPreparedThermalPrintSync();
+              },
+              { capture: true, once: true }
+            );
+          }
+        }
+      },
     }).then(async (result) => {
-      if (result.isConfirmed) {
-        const updated = await updateOrderStatus(order.orderId, nextStatus);
+      if (!result.isConfirmed) {
+        if (currentStatus === 'NEW') {
+          clearThermalPrintMode();
+        }
+        return;
+      }
 
-        if (updated) {
-          // If we just accepted the order, auto-generate the bill in the background (Requirement: auto-generate on accept)
-          if (currentStatus === 'NEW') {
-             billingAPI.createInvoiceForOrder(order.orderId).catch(err => {
-               console.error('Auto-bill generation failed:', err);
-             });
+      const updated = await updateOrderStatus(order.orderId, nextStatus);
 
-             // Auto-open print bill window for immediate hard copy (Requirement: Print when accepting)
-             printOrderBill({ ...order, status: 'COOKING' });
+      if (updated) {
+        // If we just accepted the order, auto-generate the bill in the background (Requirement: auto-generate on accept)
+        if (currentStatus === 'NEW') {
+          billingAPI.createInvoiceForOrder(order.orderId).catch(err => {
+            console.error('Auto-bill generation failed:', err);
+          });
+
+          // Fallback if confirmed via keyboard Enter rather than button click
+          if (!printedSynchronously) {
+            printOrderBill({ ...order, status: 'COOKING' });
           }
+        }
 
-          if (currentStatus === 'READY') {
-            const servedOrder = { ...order, status: 'SERVED' };
+        if (currentStatus === 'READY') {
+          const servedOrder = { ...order, status: 'SERVED' };
 
-            // Automatically send to cashier directly as per new workflow.
-            await sendPaymentDetailsToCashier(servedOrder, { showFeedback: false });
-            
-            Swal.fire({
-              icon: 'success',
-              title: 'Order Completed',
-              text: 'Order served and bill sent to cashier desk.',
-              timer: 2000,
-              showConfirmButton: false,
-              toast: true,
-              position: 'top-end'
-            });
-          }
+          // Automatically send to cashier directly as per new workflow.
+          await sendPaymentDetailsToCashier(servedOrder, { showFeedback: false });
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'Order Completed',
+            text: 'Order served and bill sent to cashier desk.',
+            timer: 2000,
+            showConfirmButton: false,
+            toast: true,
+            position: 'top-end'
+          });
         }
       }
     });
