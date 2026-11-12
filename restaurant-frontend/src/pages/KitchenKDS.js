@@ -594,9 +594,9 @@ const KitchenKDS = () => {
 
   const cycleKdsPrintMode = () => {
     const orderOfModes = [
-      KDS_PRINT_MODES.RAWBT_WS,
       KDS_PRINT_MODES.RAWBT_INTENT,
       KDS_PRINT_MODES.BROWSER,
+      KDS_PRINT_MODES.RAWBT_WS,
     ];
     const nextIndex = (orderOfModes.indexOf(kdsPrintMode) + 1) % orderOfModes.length;
     const nextMode = orderOfModes[nextIndex];

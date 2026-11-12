@@ -28,7 +28,7 @@ export const getSavedKdsPrintMode = () => {
   } catch {
     // Ignore storage access errors
   }
-  return isAndroidDevice() ? KDS_PRINT_MODES.RAWBT_WS : KDS_PRINT_MODES.BROWSER;
+  return isAndroidDevice() ? KDS_PRINT_MODES.RAWBT_INTENT : KDS_PRINT_MODES.BROWSER;
 };
 
 export const saveKdsPrintMode = (mode) => {
