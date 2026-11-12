@@ -106,7 +106,7 @@ const formatKotHeaderText = (order) => {
   return {
     rawOrderNo,
     formattedLocation,
-    headerLine: formattedLocation ? `KOT #${rawOrderNo} - ${formattedLocation}` : `KOT #${rawOrderNo}`,
+    headerLine: formattedLocation ? `KOT ${rawOrderNo} - ${formattedLocation}` : `KOT ${rawOrderNo}`,
   };
 };
 
@@ -143,7 +143,7 @@ export const buildKdsEscPosBytes = ({ order, formatDateTime }) => {
   pushText(divider);
 
   // 2-line compact metadata
-  pushText(formatPairLine(`Order: #${rawOrderNo}`, dateStr));
+  pushText(formatPairLine(`Order: ${rawOrderNo}`, dateStr));
   pushText(formatPairLine(formattedLocation || '-', order?.customerName || 'Guest'));
 
   pushText(divider);
@@ -168,14 +168,10 @@ export const buildKdsEscPosBytes = ({ order, formatDateTime }) => {
 
   pushText(divider);
 
-  // Compact kitchen prompt (no customer footer)
+  // Compact kitchen prompt (no customer footer; RawBT handles the single end-of-job feed & cut)
   pushBytes(ESC, 0x61, 0x01, ESC, 0x45, 0x01);
   pushText('PLEASE PREPARE THE ABOVE ITEMS\n');
   pushBytes(ESC, 0x45, 0x00, ESC, 0x61, 0x00);
-
-  // Feed paper past cutter blade and execute partial auto-cut (GS V B 0)
-  pushBytes(ESC, 0x64, 0x04);
-  pushBytes(GS, 0x56, 0x42, 0x00);
 
   const totalLength = chunks.reduce((sum, c) => sum + c.length, 0);
   const result = new Uint8Array(totalLength);
@@ -276,3 +272,4 @@ export const sendToRawbtIntentSync = (escPosBytes) => {
     return false;
   }
 };
+

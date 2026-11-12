@@ -34,8 +34,8 @@ export const buildKdsOrderTicketDocument = ({
     }
   }
   const kotHeader = formattedLocation
-    ? `KOT #${rawOrderNo} - ${formattedLocation}`
-    : `KOT #${rawOrderNo}`;
+    ? `KOT ${rawOrderNo} - ${formattedLocation}`
+    : `KOT ${rawOrderNo}`;
 
   const styles = `
     #anawuma-print-root .kds-bill-wrap {
@@ -138,7 +138,7 @@ export const buildKdsOrderTicketDocument = ({
       <table class="kds-meta-table">
         <tbody>
           <tr>
-            <td style="text-align:left;">Order: #${escapeHtml(rawOrderNo)}</td>
+            <td style="text-align:left;">Order: ${escapeHtml(rawOrderNo)}</td>
             <td style="text-align:right;">${escapeHtml(formatDateTime(order?.createdAt || new Date()))}</td>
           </tr>
           <tr>
