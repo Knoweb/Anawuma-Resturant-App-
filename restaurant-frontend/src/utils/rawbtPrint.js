@@ -3,7 +3,6 @@ const GS = 0x1d;
 const LINE_WIDTH = 48; // Standard 80mm thermal paper (Font A = 48 chars)
 
 export const KDS_PRINT_MODES = {
-  RAWBT_WS: 'rawbt-ws',
   RAWBT_INTENT: 'rawbt-intent',
   BROWSER: 'browser',
 };
@@ -18,12 +17,13 @@ export const isAndroidDevice = () => {
 export const getSavedKdsPrintMode = () => {
   try {
     const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (
-      saved === KDS_PRINT_MODES.RAWBT_WS ||
-      saved === KDS_PRINT_MODES.RAWBT_INTENT ||
-      saved === KDS_PRINT_MODES.BROWSER
-    ) {
+    if (saved === KDS_PRINT_MODES.RAWBT_INTENT || saved === KDS_PRINT_MODES.BROWSER) {
       return saved;
+    }
+    // Migrate legacy rawbt-ws preference directly to RawBT App mode
+    if (saved === 'rawbt-ws') {
+      window.localStorage.setItem(STORAGE_KEY, KDS_PRINT_MODES.RAWBT_INTENT);
+      return KDS_PRINT_MODES.RAWBT_INTENT;
     }
   } catch {
     // Ignore storage access errors
