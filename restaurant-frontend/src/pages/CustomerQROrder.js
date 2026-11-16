@@ -94,6 +94,19 @@ const FoodItemImageCarousel = ({ item, getImageUrl, className = "menu-thumb" }) 
   );
 };
 
+const MANUAL_ROOM_OPTIONS = [
+  'Room 101', 'Room 102', 'Room 103',
+  'Room 107', 'Room 108',
+  'Room 204', 'Room 205',
+  'Room 209', 'Room 210', 'Room 211',
+  'Room 306',
+  'Room 312', 'Room 313', 'Room 314',
+  'Room 415', 'Room 416', 'Room 417',
+  ...Array.from({ length: 8 }, (_, i) => `HB - ${String(i + 1).padStart(2, '0')}`)
+];
+
+const MANUAL_TABLE_OPTIONS = Array.from({ length: 25 }, (_, i) => (i + 1).toString());
+
 const CustomerQROrder = ({ isManual = false }) => {
   const { tableKey, roomKey } = useParams();
   const navigate = useNavigate();
@@ -983,7 +996,7 @@ const CustomerQROrder = ({ isManual = false }) => {
       // Success UI
       Swal.fire({
         title: 'Order Completed',
-        text: `Order ${orderData.orderNo} placed, bill generated and assigned to ${isRoom ? 'room' : 'table'}.`,
+        text: `Order ${orderData.orderNo} placed, bill generated and ${isTakeaway ? 'marked for Take Away (0% SC)' : `assigned to ${isRoom ? 'room' : 'table'}`}.`,
         icon: 'success',
         timer: 3000,
         showConfirmButton: true
@@ -1284,9 +1297,86 @@ const CustomerQROrder = ({ isManual = false }) => {
       return (
         <div className="manual-dashboard-layout d-flex" style={{ minHeight: 'calc(100vh - 80px)', backgroundColor: '#fcfcfc' }}>
           <div className="manual-content-main flex-grow-1 p-0">
-            <div className="w-100 mb-5 px-4 pt-5 text-center">
+            <div className="w-100 mb-4 px-4 pt-5 text-center">
               <h1 className="manual-main-title">Create Manual Order</h1>
               <div className="title-divider mx-auto"></div>
+            </div>
+
+            {/* Cashier Upfront Order Mode & Destination Selector */}
+            <div className="manual-order-header-bar mx-4 mb-4 p-3 bg-white border rounded-3 shadow-sm">
+              <div className="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div className="d-flex align-items-center gap-2">
+                  <span className="fw-bold text-muted small text-uppercase">
+                    <i className="fas fa-utensils me-1" style={{ color: '#266668' }}></i> Order Mode:
+                  </span>
+                  <div className="btn-group" role="group">
+                    <button
+                      type="button"
+                      className={`btn btn-sm ${manualOrderType === 'ROOM' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                      style={manualOrderType === 'ROOM' ? { backgroundColor: '#266668', borderColor: '#266668', fontWeight: 600 } : {}}
+                      onClick={() => {
+                        setManualOrderType('ROOM');
+                        setOrderLocation('inside');
+                        setModalOrderType('room');
+                        setManualTableNo('');
+                      }}
+                    >
+                      <i className="fas fa-hotel me-1"></i> Room (10% SC)
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn btn-sm ${manualOrderType === 'TABLE' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                      style={manualOrderType === 'TABLE' ? { backgroundColor: '#266668', borderColor: '#266668', fontWeight: 600 } : {}}
+                      onClick={() => {
+                        setManualOrderType('TABLE');
+                        setOrderLocation('outside');
+                        setModalOrderType('table');
+                        setManualTableNo('');
+                      }}
+                    >
+                      <i className="fas fa-chair me-1"></i> Table (10% SC)
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn btn-sm ${manualOrderType === 'TAKEAWAY' ? 'btn-warning text-dark fw-bold' : 'btn-outline-secondary'}`}
+                      style={manualOrderType === 'TAKEAWAY' ? { fontWeight: 700 } : {}}
+                      onClick={() => {
+                        setManualOrderType('TAKEAWAY');
+                        setOrderLocation('takeaway');
+                        setModalOrderType('table');
+                        setManualTableNo('TAKEAWAY');
+                      }}
+                    >
+                      <i className="fas fa-shopping-bag me-1"></i> Take Away (0% SC)
+                    </button>
+                  </div>
+                </div>
+
+                {manualOrderType !== 'TAKEAWAY' ? (
+                  <div className="d-flex align-items-center gap-2" style={{ minWidth: '240px' }}>
+                    <label className="fw-bold text-muted small text-nowrap mb-0">
+                      {manualOrderType === 'ROOM' ? 'Room No *:' : 'Table No *:'}
+                    </label>
+                    <select
+                      className="form-select form-select-sm"
+                      value={manualTableNo}
+                      onChange={(e) => setManualTableNo(e.target.value)}
+                      style={{ borderRadius: '6px' }}
+                    >
+                      <option value="">-- Select {manualOrderType === 'ROOM' ? 'Room' : 'Table'} --</option>
+                      {manualOrderType === 'ROOM'
+                        ? MANUAL_ROOM_OPTIONS.map(no => <option key={no} value={no}>{no}</option>)
+                        : MANUAL_TABLE_OPTIONS.map(no => <option key={no} value={no}>Table {no}</option>)
+                      }
+                    </select>
+                  </div>
+                ) : (
+                  <div className="badge bg-warning text-dark px-3 py-2 small d-flex align-items-center">
+                    <i className="fas fa-shopping-bag me-2"></i>
+                    <span><strong>0% Service Charge</strong> • Takeaway Packaging • Kitchen will pack for takeout</span>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="manual-sections-container px-4">
@@ -2131,18 +2221,9 @@ const CustomerQROrder = ({ isManual = false }) => {
                         <select className="form-control sketch-input" value={manualTableNo} onChange={(e) => setManualTableNo(e.target.value)}>
                           <option value="">Select No</option>
                           {orderLocation === 'inside' ? (
-                            [
-                              'Room 101', 'Room 102', 'Room 103',
-                              'Room 107', 'Room 108',
-                              'Room 204', 'Room 205',
-                              'Room 209', 'Room 210', 'Room 211',
-                              'Room 306',
-                              'Room 312', 'Room 313', 'Room 314',
-                              'Room 415', 'Room 416', 'Room 417',
-                              ...Array.from({ length: 8 }, (_, i) => `HB - ${String(i + 1).padStart(2, '0')}`)
-                            ].map(no => <option key={no} value={no}>{no}</option>)
+                            MANUAL_ROOM_OPTIONS.map(no => <option key={no} value={no}>{no}</option>)
                           ) : (
-                            Array.from({ length: 25 }, (_, i) => (i + 1).toString()).map(no => <option key={no} value={no}>Table {no}</option>)
+                            MANUAL_TABLE_OPTIONS.map(no => <option key={no} value={no}>Table {no}</option>)
                           )}
                         </select>
                       </div>
@@ -2199,10 +2280,10 @@ const CustomerQROrder = ({ isManual = false }) => {
           </div>
           {cart.length > 0 && (
             <div className="cart-footer p-3 border-top bg-light">
-               {isManual && manualTableNo && (
-                 <div className="badge bg-light text-dark border mb-2 p-2 w-100 text-start" style={{ fontSize: '0.85rem' }}>
-                   <i className={`fas ${manualOrderType === 'ROOM' ? 'fa-hotel' : 'fa-chair'} me-2`}></i>
-                   Assigned to: <strong>{manualOrderType === 'ROOM' ? 'Room' : 'Table'} {manualTableNo}</strong>
+               {isManual && (
+                 <div className={`badge ${manualOrderType === 'TAKEAWAY' ? 'bg-warning text-dark' : 'bg-light text-dark border'} mb-2 p-2 w-100 text-start`} style={{ fontSize: '0.85rem' }}>
+                   <i className={`fas ${manualOrderType === 'ROOM' ? 'fa-hotel' : manualOrderType === 'TAKEAWAY' ? 'fa-shopping-bag' : 'fa-chair'} me-2`}></i>
+                   Order Mode: <strong>{manualOrderType === 'TAKEAWAY' ? 'TAKE AWAY (0% Service Charge)' : `${manualOrderType === 'ROOM' ? 'Room' : 'Table'} ${manualTableNo || '(Not selected)'}`}</strong>
                  </div>
                )}
                <div className="d-flex justify-content-between fw-bold h5 mb-3"><span>Total:</span><span style={{ color: '#266668' }}>Rs. {calculateTotal()}</span></div>
