@@ -117,7 +117,7 @@ export class Invoice {
     default: 'NONE',
     nullable: true,
   })
-  discountType?: string;
+  discountType?: string | null;
 
   @Column({
     name: 'discount_value',
@@ -127,7 +127,7 @@ export class Invoice {
     default: 0,
     nullable: true,
   })
-  discountValue?: number;
+  discountValue?: number | null;
 
   @Column({
     name: 'discount_reason',
@@ -135,7 +135,7 @@ export class Invoice {
     length: 255,
     nullable: true,
   })
-  discountReason?: string;
+  discountReason?: string | null;
 
   @Column({
     name: 'total_amount',

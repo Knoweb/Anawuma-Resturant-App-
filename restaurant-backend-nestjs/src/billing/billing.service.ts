@@ -426,7 +426,7 @@ export class BillingService implements OnModuleInit {
       discountAmount: finalDiscountAmount,
       discountType: dType,
       discountValue: dVal,
-      discountReason: dto.discountReason || null,
+      discountReason: dto.discountReason ? dto.discountReason.trim() : null,
       totalAmount: finalTotal,
       invoiceStatus,
       paymentMethod: paymentMethod || PaymentMethod.NONE,
