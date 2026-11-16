@@ -133,7 +133,7 @@ const CustomerQROrder = ({ isManual = false }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCart, setShowCart] = useState(false);
   const [manualTableNo, setManualTableNo] = useState('');
-  const [manualOrderType, setManualOrderType] = useState('ROOM');
+  const [manualOrderType, setManualOrderType] = useState('TABLE');
   const [orderSuccess, setOrderSuccess] = useState(null);
   const [showStatusScreen, setShowStatusScreen] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
@@ -1356,51 +1356,75 @@ const CustomerQROrder = ({ isManual = false }) => {
             {/* Cashier Upfront Order Mode & Destination Selector */}
             <div className="manual-order-header-bar mx-4 mb-4 p-3 bg-white border rounded-3 shadow-sm">
               <div className="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                <div className="d-flex align-items-center gap-2">
-                  <span className="fw-bold text-muted small text-uppercase">
-                    <i className="fas fa-utensils me-1" style={{ color: '#266668' }}></i> Order Mode:
-                  </span>
-                  <div className="btn-group" role="group">
-                    <button
-                      type="button"
-                      className={`btn btn-sm ${manualOrderType === 'ROOM' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                      style={manualOrderType === 'ROOM' ? { backgroundColor: '#266668', borderColor: '#266668', fontWeight: 600 } : {}}
-                      onClick={() => {
-                        setManualOrderType('ROOM');
-                        setOrderLocation('inside');
-                        setModalOrderType('room');
-                        setManualTableNo('');
-                      }}
-                    >
-                      <i className="fas fa-hotel me-1"></i> Room (10% SC)
-                    </button>
-                    <button
-                      type="button"
-                      className={`btn btn-sm ${manualOrderType === 'TABLE' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                      style={manualOrderType === 'TABLE' ? { backgroundColor: '#266668', borderColor: '#266668', fontWeight: 600 } : {}}
-                      onClick={() => {
-                        setManualOrderType('TABLE');
-                        setOrderLocation('outside');
-                        setModalOrderType('table');
-                        setManualTableNo('');
-                      }}
-                    >
-                      <i className="fas fa-chair me-1"></i> Table (10% SC)
-                    </button>
-                    <button
-                      type="button"
-                      className={`btn btn-sm ${manualOrderType === 'TAKEAWAY' ? 'btn-warning text-dark fw-bold' : 'btn-outline-secondary'}`}
-                      style={manualOrderType === 'TAKEAWAY' ? { fontWeight: 700 } : {}}
-                      onClick={() => {
-                        setManualOrderType('TAKEAWAY');
-                        setOrderLocation('takeaway');
-                        setModalOrderType('table');
-                        setManualTableNo('TAKEAWAY');
-                      }}
-                    >
-                      <i className="fas fa-shopping-bag me-1"></i> Take Away (0% SC)
-                    </button>
+                <div className="d-flex flex-wrap align-items-center gap-3">
+                  <div className="d-flex align-items-center gap-2">
+                    <span className="fw-bold text-muted small text-uppercase">
+                      <i className="fas fa-utensils me-1" style={{ color: '#266668' }}></i> Order Mode:
+                    </span>
+                    <div className="btn-group" role="group">
+                      <button
+                        type="button"
+                        className={`btn btn-sm ${manualOrderType !== 'TAKEAWAY' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                        style={manualOrderType !== 'TAKEAWAY' ? { backgroundColor: '#266668', borderColor: '#266668', fontWeight: 600 } : {}}
+                        onClick={() => {
+                          const nextType = (manualOrderType === 'ROOM' || modalOrderType === 'room') ? 'ROOM' : 'TABLE';
+                          setManualOrderType(nextType);
+                          setOrderLocation(nextType === 'ROOM' ? 'inside' : 'outside');
+                          setModalOrderType(nextType === 'ROOM' ? 'room' : 'table');
+                          setManualTableNo('');
+                        }}
+                      >
+                        <i className="fas fa-utensils me-1"></i> Dine-In (10% SC)
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn btn-sm ${manualOrderType === 'TAKEAWAY' ? 'btn-warning text-dark fw-bold' : 'btn-outline-secondary'}`}
+                        style={manualOrderType === 'TAKEAWAY' ? { fontWeight: 700 } : {}}
+                        onClick={() => {
+                          setManualOrderType('TAKEAWAY');
+                          setOrderLocation('takeaway');
+                          setModalOrderType('table');
+                          setManualTableNo('TAKEAWAY');
+                        }}
+                      >
+                        <i className="fas fa-shopping-bag me-1"></i> Take Away (0% SC)
+                      </button>
+                    </div>
                   </div>
+
+                  {manualOrderType !== 'TAKEAWAY' && (
+                    <div className="d-flex align-items-center gap-2 ps-3 border-start">
+                      <span className="fw-bold text-muted small text-uppercase">Type:</span>
+                      <div className="btn-group btn-group-sm" role="group">
+                        <button
+                          type="button"
+                          className={`btn btn-sm ${manualOrderType === 'TABLE' ? 'btn-secondary text-white fw-bold' : 'btn-outline-secondary'}`}
+                          style={manualOrderType === 'TABLE' ? { backgroundColor: '#495057', borderColor: '#495057' } : {}}
+                          onClick={() => {
+                            setManualOrderType('TABLE');
+                            setOrderLocation('outside');
+                            setModalOrderType('table');
+                            setManualTableNo('');
+                          }}
+                        >
+                          <i className="fas fa-chair me-1"></i> Table
+                        </button>
+                        <button
+                          type="button"
+                          className={`btn btn-sm ${manualOrderType === 'ROOM' ? 'btn-secondary text-white fw-bold' : 'btn-outline-secondary'}`}
+                          style={manualOrderType === 'ROOM' ? { backgroundColor: '#495057', borderColor: '#495057' } : {}}
+                          onClick={() => {
+                            setManualOrderType('ROOM');
+                            setOrderLocation('inside');
+                            setModalOrderType('room');
+                            setManualTableNo('');
+                          }}
+                        >
+                          <i className="fas fa-hotel me-1"></i> Room
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {manualOrderType !== 'TAKEAWAY' ? (
@@ -1416,7 +1440,7 @@ const CustomerQROrder = ({ isManual = false }) => {
                     >
                       <option value="">-- Select {manualOrderType === 'ROOM' ? 'Room' : 'Table'} --</option>
                       {manualOrderType === 'ROOM'
-                        ? MANUAL_ROOM_OPTIONS.map(no => <option key={no} value={no}>{no}</option>)
+                        ? MANUAL_ROOM_OPTIONS.map(no => <option key={no} value={no}>Room {no}</option>)
                         : MANUAL_TABLE_OPTIONS.map(no => <option key={no} value={no}>Table {no}</option>)
                       }
                     </select>
@@ -2254,25 +2278,85 @@ const CustomerQROrder = ({ isManual = false }) => {
                  </div>
                  {/* Right Column: Order Fields */}
                  <div className="sketch-modal-right-col flex-grow-1 p-4 bg-light">
-                    <div className="mb-4">
-                      <label className="d-block mb-2 fw-bold text-muted small">ORDER LOCATION *</label>
-                      <div className="d-flex gap-2">
-                        <button className={`flex-grow-1 btn ${orderLocation === 'inside' ? 'btn-primary' : 'btn-outline-primary'}`} style={orderLocation === 'inside' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }} onClick={() => { setOrderLocation('inside'); setModalOrderType('room'); setManualOrderType('ROOM'); setManualTableNo(''); }}>IN SIDE</button>
-                        <button className={`flex-grow-1 btn ${orderLocation === 'outside' ? 'btn-primary' : 'btn-outline-primary'}`} style={orderLocation === 'outside' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }} onClick={() => { setOrderLocation('outside'); setModalOrderType('table'); setManualOrderType('TABLE'); setManualTableNo(''); }}>OUTSIDE</button>
-                        {isManual && (
-                          <button className={`flex-grow-1 btn ${orderLocation === 'takeaway' ? 'btn-warning text-dark fw-bold' : 'btn-outline-secondary'}`} onClick={() => { setOrderLocation('takeaway'); setModalOrderType('table'); setManualOrderType('TAKEAWAY'); setManualTableNo('TAKEAWAY'); }}>
-                            <i className="fas fa-shopping-bag me-1"></i> TAKE AWAY
+                    {isManual ? (
+                      <div className="mb-4">
+                        <label className="d-block mb-2 fw-bold text-muted small text-uppercase">ORDER MODE *</label>
+                        <div className="d-flex gap-2 mb-2">
+                          <button
+                            type="button"
+                            className={`flex-grow-1 btn btn-sm ${manualOrderType !== 'TAKEAWAY' ? 'btn-primary' : 'btn-outline-primary'}`}
+                            style={manualOrderType !== 'TAKEAWAY' ? { backgroundColor: '#266668', color: 'white', fontWeight: 600 } : { color: '#266668', borderColor: '#266668' }}
+                            onClick={() => {
+                              const nextType = (manualOrderType === 'ROOM' || modalOrderType === 'room') ? 'ROOM' : 'TABLE';
+                              setManualOrderType(nextType);
+                              setOrderLocation(nextType === 'ROOM' ? 'inside' : 'outside');
+                              setModalOrderType(nextType === 'ROOM' ? 'room' : 'table');
+                              setManualTableNo('');
+                            }}
+                          >
+                            <i className="fas fa-utensils me-1"></i> Dine-In (10% SC)
                           </button>
+                          <button
+                            type="button"
+                            className={`flex-grow-1 btn btn-sm ${manualOrderType === 'TAKEAWAY' ? 'btn-warning text-dark fw-bold' : 'btn-outline-secondary'}`}
+                            onClick={() => {
+                              setManualOrderType('TAKEAWAY');
+                              setOrderLocation('takeaway');
+                              setModalOrderType('table');
+                              setManualTableNo('TAKEAWAY');
+                            }}
+                          >
+                            <i className="fas fa-shopping-bag me-1"></i> Take Away (0% SC)
+                          </button>
+                        </div>
+
+                        {manualOrderType !== 'TAKEAWAY' && (
+                          <div className="d-flex gap-2 mb-2">
+                            <button
+                              type="button"
+                              className={`flex-grow-1 btn btn-sm ${manualOrderType === 'TABLE' ? 'btn-dark text-white fw-bold' : 'btn-outline-secondary'}`}
+                              style={manualOrderType === 'TABLE' ? { backgroundColor: '#495057', borderColor: '#495057' } : {}}
+                              onClick={() => {
+                                setManualOrderType('TABLE');
+                                setOrderLocation('outside');
+                                setModalOrderType('table');
+                                setManualTableNo('');
+                              }}
+                            >
+                              <i className="fas fa-chair me-1"></i> Table
+                            </button>
+                            <button
+                              type="button"
+                              className={`flex-grow-1 btn btn-sm ${manualOrderType === 'ROOM' ? 'btn-dark text-white fw-bold' : 'btn-outline-secondary'}`}
+                              style={manualOrderType === 'ROOM' ? { backgroundColor: '#495057', borderColor: '#495057' } : {}}
+                              onClick={() => {
+                                setManualOrderType('ROOM');
+                                setOrderLocation('inside');
+                                setModalOrderType('room');
+                                setManualTableNo('');
+                              }}
+                            >
+                              <i className="fas fa-hotel me-1"></i> Room
+                            </button>
+                          </div>
                         )}
                       </div>
-                    </div>
-                    {orderLocation !== 'takeaway' ? (
+                    ) : (
                       <div className="mb-4">
-                        <label className="d-block mb-2 fw-bold text-muted small">SELECT {orderLocation === 'inside' ? 'ROOM' : 'TABLE'} *</label>
+                        <label className="d-block mb-2 fw-bold text-muted small">ORDER LOCATION *</label>
+                        <div className="d-flex gap-2">
+                          <button className={`flex-grow-1 btn ${orderLocation === 'inside' ? 'btn-primary' : 'btn-outline-primary'}`} style={orderLocation === 'inside' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }} onClick={() => { setOrderLocation('inside'); setModalOrderType('room'); }}>IN SIDE</button>
+                          <button className={`flex-grow-1 btn ${orderLocation === 'outside' ? 'btn-primary' : 'btn-outline-primary'}`} style={orderLocation === 'outside' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }} onClick={() => { setOrderLocation('outside'); setModalOrderType('table'); }}>OUTSIDE</button>
+                        </div>
+                      </div>
+                    )}
+                    {manualOrderType !== 'TAKEAWAY' ? (
+                      <div className="mb-4">
+                        <label className="d-block mb-2 fw-bold text-muted small text-uppercase">SELECT {manualOrderType === 'ROOM' ? 'ROOM' : 'TABLE'} *</label>
                         <select className="form-control sketch-input" value={manualTableNo} onChange={(e) => setManualTableNo(e.target.value)}>
                           <option value="">Select No</option>
-                          {orderLocation === 'inside' ? (
-                            MANUAL_ROOM_OPTIONS.map(no => <option key={no} value={no}>{no}</option>)
+                          {manualOrderType === 'ROOM' ? (
+                            MANUAL_ROOM_OPTIONS.map(no => <option key={no} value={no}>Room {no}</option>)
                           ) : (
                             MANUAL_TABLE_OPTIONS.map(no => <option key={no} value={no}>Table {no}</option>)
                           )}
@@ -2442,7 +2526,7 @@ const CustomerQROrder = ({ isManual = false }) => {
                {isManual && (
                  <div className={`badge ${manualOrderType === 'TAKEAWAY' ? 'bg-warning text-dark' : 'bg-light text-dark border'} mb-2 p-2 w-100 text-start`} style={{ fontSize: '0.85rem' }}>
                    <i className={`fas ${manualOrderType === 'ROOM' ? 'fa-hotel' : manualOrderType === 'TAKEAWAY' ? 'fa-shopping-bag' : 'fa-chair'} me-2`}></i>
-                   Order Mode: <strong>{manualOrderType === 'TAKEAWAY' ? 'TAKE AWAY (0% Service Charge)' : `${manualOrderType === 'ROOM' ? 'Room' : 'Table'} ${manualTableNo || '(Not selected)'}`}</strong>
+                   Order Mode: <strong>{manualOrderType === 'TAKEAWAY' ? 'TAKE AWAY (0% Service Charge)' : `Dine-In • ${manualOrderType === 'ROOM' ? 'Room' : 'Table'} ${manualTableNo || '(Not selected)'} (10% SC)`}</strong>
                  </div>
                )}
                <div className="d-flex justify-content-between fw-bold h5 mb-3"><span>Total:</span><span style={{ color: '#266668' }}>Rs. {calculateTotal()}</span></div>
