@@ -135,11 +135,6 @@ export const buildKdsOrderTicketDocument = ({
   const html = `
     <div class="kds-bill-wrap">
       <div class="kds-receipt-header">
-        ${isTakeaway ? `
-          <div style="font-size:15px; font-weight:900; background:#000; color:#fff; padding:2px 4px; margin-bottom:4px; text-align:center; letter-spacing:1px;">
-            *** TAKE AWAY ***
-          </div>
-        ` : ''}
         <div class="kds-kot-title">${escapeHtml(kotHeader)}</div>
       </div>
 
@@ -436,7 +431,7 @@ export const buildAccountBillDocument = ({
       <div class="ab-meta-box">
         <div class="ab-meta-row"><span><b>Invoice No:</b></span><span>${escapeHtml(invoiceNumber || 'INV-DRAFT')}</span></div>
         <div class="ab-meta-row"><span><b>Order No(s):</b></span><span>${escapeHtml(orderNos)}</span></div>
-        <div class="ab-meta-row"><span><b>Order Mode:</b></span><span><b>${escapeHtml(isTakeaway ? 'TAKE AWAY' : 'DINE IN')}</b></span></div>
+        <div class="ab-meta-row"><span><b>Type:</b></span><span>${escapeHtml(isTakeaway ? 'Take Away' : 'Dine In')}</span></div>
         ${!isTakeaway ? `<div class="ab-meta-row"><span><b>${escapeHtml(locationLabel)}:</b></span><span>${escapeHtml(locationValue)}</span></div>` : ''}
         <div class="ab-meta-row"><span><b>Payment:</b></span><span>${escapeHtml(paymentMethod)}</span></div>
       </div>

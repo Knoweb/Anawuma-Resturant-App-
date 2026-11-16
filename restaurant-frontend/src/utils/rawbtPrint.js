@@ -131,7 +131,7 @@ export const buildKdsEscPosBytes = ({ order, formatDateTime }) => {
     chunks.push(arr);
   };
 
-  const { rawOrderNo, formattedLocation, headerLine, isTakeaway } = formatKotHeaderText(order);
+  const { rawOrderNo, formattedLocation, headerLine } = formatKotHeaderText(order);
   const divider = `${'-'.repeat(LINE_WIDTH)}\n`;
   const dateStr = formatDateTime ? formatDateTime(order?.createdAt || new Date()) : '';
   const items = Array.isArray(order?.orderItems) ? order.orderItems : [];
@@ -145,16 +145,6 @@ export const buildKdsEscPosBytes = ({ order, formatDateTime }) => {
   pushBytes(GS, 0x21, 0x00, ESC, 0x45, 0x00, ESC, 0x61, 0x00);
 
   pushText(divider);
-
-  if (isTakeaway) {
-    // Prominent Takeaway Banner (Double-Height, Center, Bold)
-    pushBytes(ESC, 0x61, 0x01, ESC, 0x45, 0x01, GS, 0x21, 0x11);
-    pushText('*** TAKE AWAY ORDER ***\n');
-    pushBytes(GS, 0x21, 0x00);
-    pushText('PACK IN TAKEAWAY BOXES\n');
-    pushBytes(ESC, 0x45, 0x00, ESC, 0x61, 0x00);
-    pushText(divider);
-  }
 
   // 2-line compact metadata
   pushText(formatPairLine(`Order: ${rawOrderNo}`, dateStr));
