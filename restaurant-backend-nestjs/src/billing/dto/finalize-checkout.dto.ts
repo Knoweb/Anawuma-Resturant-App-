@@ -35,3 +35,4 @@ export class FinalizeCheckoutDto {
   @IsString()
   discountReason?: string;
 }
+
