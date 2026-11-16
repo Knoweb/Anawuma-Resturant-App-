@@ -463,7 +463,7 @@ export class OrdersService {
     return await query.getOne();
   }
 
-  async getManualActiveAccounts(restaurantId: number, type: 'ROOM' | 'TABLE') {
+  async getManualActiveAccounts(restaurantId: number, type: 'ROOM' | 'TABLE' | 'TAKEAWAY') {
     const manualStatuses: OrderStatus[] = [
       OrderStatus.NEW,
       OrderStatus.ACCEPTED,

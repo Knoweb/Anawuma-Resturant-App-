@@ -182,7 +182,7 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.CASHIER)
   cancelAccount(
-    @Param('type') type: 'ROOM' | 'TABLE',
+    @Param('type') type: 'ROOM' | 'TABLE' | 'TAKEAWAY',
     @Param('identifier') identifier: string,
     @Request() req
   ) {
