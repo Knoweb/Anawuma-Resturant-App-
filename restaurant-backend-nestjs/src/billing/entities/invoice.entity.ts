@@ -111,6 +111,33 @@ export class Invoice {
   discountAmount: number;
 
   @Column({
+    name: 'discount_type',
+    type: 'varchar',
+    length: 20,
+    default: 'NONE',
+    nullable: true,
+  })
+  discountType?: string;
+
+  @Column({
+    name: 'discount_value',
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    default: 0,
+    nullable: true,
+  })
+  discountValue?: number;
+
+  @Column({
+    name: 'discount_reason',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  discountReason?: string;
+
+  @Column({
     name: 'total_amount',
     type: 'decimal',
     precision: 10,

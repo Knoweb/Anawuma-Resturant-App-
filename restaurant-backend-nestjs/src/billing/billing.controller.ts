@@ -13,6 +13,7 @@ import {
 import { SkipThrottle } from '@nestjs/throttler';
 import { BillingService } from './billing.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
+import { FinalizeCheckoutDto } from './dto/finalize-checkout.dto';
 import { QueryInvoicesDto } from './dto/query-invoices.dto';
 import { RecordBillActionDto } from './dto/record-bill-action.dto';
 import {
@@ -306,7 +307,7 @@ export class BillingController {
   @Post('manual/finalize')
   @Roles(...BILLING_ROLES)
   finalizeManualCheckout(
-    @Body() payload: { orderIds: number[]; identifier: string; type: 'ROOM' | 'TABLE'; paymentMethod?: PaymentMethod },
+    @Body() payload: FinalizeCheckoutDto,
     @Request() req: RequestWithUser,
   ) {
     return this.billingService.finalizeManualCheckout(

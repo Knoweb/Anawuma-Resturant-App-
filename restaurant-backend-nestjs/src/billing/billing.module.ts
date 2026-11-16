@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BillingService } from './billing.service';
 import { BillingController } from './billing.controller';
+import { PricingCalculatorService } from './pricing-calculator.service';
 import { Invoice } from './entities/invoice.entity';
 import { BillAction } from './entities/bill-action.entity';
 import { InvoiceDeleteRequest } from './entities/invoice-delete-request.entity';
@@ -14,7 +15,7 @@ import { WebsocketModule } from '../websocket/websocket.module';
     WebsocketModule,
   ],
   controllers: [BillingController],
-  providers: [BillingService],
-  exports: [BillingService],
+  providers: [BillingService, PricingCalculatorService],
+  exports: [BillingService, PricingCalculatorService],
 })
 export class BillingModule {}

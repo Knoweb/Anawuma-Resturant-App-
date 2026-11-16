@@ -275,12 +275,22 @@ export const buildAccountBillDocument = ({
   qrUrl,
   formatDateTime,
   formatTime,
+  discountAmount = 0,
+  discountType = 'NONE',
+  discountValue = 0,
+  discountReason = '',
+  finalTotalAmount = null,
 }) => {
   const safeRate = Number(rate) > 0 ? Number(rate) : 1;
   const orders = Array.isArray(account?.orders) ? account.orders : [];
   const subtotal = orders.reduce((sum, o) => sum + parseFloat(o.subtotal || 0), 0);
   const serviceCharge = orders.reduce((sum, o) => sum + parseFloat(o.serviceCharge || 0), 0);
-  const total = parseFloat(account?.totalAmount || 0);
+  const safeDiscount = Math.max(0, Number(discountAmount) || Number(account?.discountAmount) || 0);
+  const grossTotal = subtotal + serviceCharge;
+  const computedTotal = Math.max(0, grossTotal - safeDiscount);
+  const total = finalTotalAmount !== null && !isNaN(finalTotalAmount)
+    ? Number(finalTotalAmount)
+    : (safeDiscount > 0 ? computedTotal : parseFloat(account?.totalAmount || grossTotal));
   const orderNos = orders.map((o) => o.orderNo).join(', ');
   const paymentMethod = (account?.selectedPaymentMethod || 'CASH').toUpperCase();
 
@@ -425,6 +435,12 @@ export const buildAccountBillDocument = ({
           <span>Service Charge (10%):</span>
           <span>${escapeHtml(symbol)} ${(serviceCharge / safeRate).toFixed(2)}</span>
         </div>
+        ${safeDiscount > 0 ? `
+        <div class="ab-item-row" style="font-size:14px; margin-bottom:5px; font-weight:bold;">
+          <span>Discount${discountType === 'PERCENTAGE' && discountValue ? ` (${discountValue}%)` : ''}${discountReason ? ` [${escapeHtml(discountReason)}]` : ''}:</span>
+          <span>-${escapeHtml(symbol)} ${(safeDiscount / safeRate).toFixed(2)}</span>
+        </div>
+        ` : ''}
         <div class="ab-grand-total">
           <span>TOTAL DUE:</span>
           <span>${escapeHtml(symbol)} ${(total / safeRate).toFixed(2)}</span>

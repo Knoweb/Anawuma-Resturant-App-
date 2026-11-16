@@ -8,6 +8,12 @@ import { useAuthStore } from '../store/authStore';
 import { formatBillDateTime, formatBillDate, formatBillTime } from '../utils/dateUtils';
 import { printThermalDocument } from '../utils/thermalPrint';
 import { buildOrderReceiptDocument, buildAccountBillDocument } from '../utils/receiptTemplates';
+import {
+    renderDiscountSectionHtml,
+    initDiscountSectionListeners,
+    calculateDiscountBreakdown,
+    DISCOUNT_TYPES,
+} from '../components/billing/DiscountInputSection';
 import './ManualOrders.css';
 
 const ManualTableOrders = () => {
@@ -67,7 +73,7 @@ const ManualTableOrders = () => {
         await printThermalDocument(doc);
     };
 
-    const printAccountBill = async (account, id, currency = 'LKR', rate = 1, symbol = 'Rs.', invoiceNumber = null) => {
+    const printAccountBill = async (account, id, currency = 'LKR', rate = 1, symbol = 'Rs.', invoiceNumber = null, discountMeta = {}) => {
         const tableLabel = id.toString().toUpperCase().startsWith('TABLE') ? id : `TABLE-${id}`;
         const qrUrl = `${window.location.origin}/google-review-qr.jpeg`;
         const doc = buildAccountBillDocument({
@@ -84,6 +90,11 @@ const ManualTableOrders = () => {
             qrUrl,
             formatDateTime: formatBillDateTime,
             formatTime: formatBillTime,
+            discountAmount: discountMeta.discountAmount || 0,
+            discountType: discountMeta.discountType || 'NONE',
+            discountValue: discountMeta.discountValue || 0,
+            discountReason: discountMeta.discountReason || '',
+            finalTotalAmount: discountMeta.finalTotalAmount ?? null,
         });
         await printThermalDocument(doc);
     };
@@ -121,7 +132,7 @@ const ManualTableOrders = () => {
         window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`, '_blank');
     };
 
-    const finalizeCheckout = async (account, tableNo, paymentMethod = 'CASH', shouldPrint = false, printOptions = {}) => {
+    const finalizeCheckout = async (account, tableNo, paymentMethod = 'CASH', shouldPrint = false, printOptions = {}, discountPayload = {}) => {
         if (isProcessingManual) return;
         setIsProcessingManual(true);
         try {
@@ -130,7 +141,10 @@ const ManualTableOrders = () => {
                 orderIds,
                 identifier: tableNo,
                 type: 'TABLE',
-                paymentMethod
+                paymentMethod,
+                discountType: discountPayload.discountType || 'NONE',
+                discountValue: discountPayload.discountValue || 0,
+                discountReason: discountPayload.discountReason || null,
             });
 
             if (response.data) {
@@ -140,7 +154,13 @@ const ManualTableOrders = () => {
                 
                 if (shouldPrint) {
                     const { currency = 'LKR', rate = 1, symbol = 'Rs.' } = printOptions;
-                    await printAccountBill(account, tableNo, currency, rate, symbol, invoiceNumber);
+                    await printAccountBill(account, tableNo, currency, rate, symbol, invoiceNumber, {
+                        discountAmount: response.data.discountAmount,
+                        discountType: response.data.discountType,
+                        discountValue: response.data.discountValue,
+                        discountReason: response.data.discountReason,
+                        finalTotalAmount: response.data.totalAmount,
+                    });
                 }
 
                 Swal.fire({
@@ -176,21 +196,49 @@ const ManualTableOrders = () => {
         // Modal Local State
         let selectedCurrency = 'LKR';
         let currentRate = 1;
-        const totalLKR = parseFloat(account.totalAmount);
+        const subtotal = account.orders.reduce((sum, o) => sum + parseFloat(o.subtotal || 0), 0);
+        const serviceCharge = account.orders.reduce((sum, o) => sum + parseFloat(o.serviceCharge || 0), 0);
+
+        let discountState = {
+            discountType: DISCOUNT_TYPES.NONE,
+            discountValue: 0,
+            discountReason: '',
+            discountAmount: 0,
+            totalAmount: subtotal + serviceCharge,
+        };
 
         const updateInvoiceDisplay = (currency, rateValue) => {
             const rate = parseFloat(rateValue) || 1;
             const symbol = exchangeRates[currency].symbol;
-            const subtotal = account.orders.reduce((sum, o) => sum + parseFloat(o.subtotal), 0);
-            const serviceCharge = account.orders.reduce((sum, o) => sum + parseFloat(o.serviceCharge), 0);
+            const breakdown = calculateDiscountBreakdown({
+                subtotal,
+                serviceCharge,
+                discountType: discountState.discountType,
+                discountValue: discountState.discountValue,
+            });
+
+            discountState.discountAmount = breakdown.discountAmount;
+            discountState.totalAmount = breakdown.totalAmount;
 
             const subtotalEl = document.getElementById('modal-subtotal-table');
             const scEl = document.getElementById('modal-service-charge-table');
+            const discountRowEl = document.getElementById('modal-discount-row-table');
+            const discountValEl = document.getElementById('modal-discount-val-table');
             const totalEl = document.getElementById('modal-grand-total-table');
 
-            if (subtotalEl) subtotalEl.innerText = `${symbol} ${(subtotal / rate).toFixed(2)}`;
-            if (scEl) scEl.innerText = `${symbol} ${(serviceCharge / rate).toFixed(2)}`;
-            if (totalEl) totalEl.innerText = `${symbol} ${(totalLKR / rate).toFixed(2)}`;
+            if (subtotalEl) subtotalEl.innerText = `${symbol} ${(breakdown.subtotal / rate).toFixed(2)}`;
+            if (scEl) scEl.innerText = `${symbol} ${(breakdown.serviceCharge / rate).toFixed(2)}`;
+
+            if (discountRowEl && discountValEl) {
+                if (breakdown.discountAmount > 0) {
+                    discountRowEl.style.display = 'flex';
+                    discountValEl.innerText = `-${symbol} ${(breakdown.discountAmount / rate).toFixed(2)}`;
+                } else {
+                    discountRowEl.style.display = 'none';
+                }
+            }
+
+            if (totalEl) totalEl.innerText = `${symbol} ${(breakdown.totalAmount / rate).toFixed(2)}`;
         };
 
         const invoiceHtml = `
@@ -259,18 +307,24 @@ const ManualTableOrders = () => {
                     </table>
                 </div>
 
+                ${renderDiscountSectionHtml({ idPrefix: 'modal-table-discount' })}
+
                 <div class="invoice-footer border-top pt-2">
                     <div class="d-flex justify-content-between px-2 mb-1">
                         <span>Subtotal</span>
-                        <span id="modal-subtotal-table">Rs. ${parseFloat(account.orders.reduce((sum, o) => sum + parseFloat(o.subtotal), 0)).toFixed(2)}</span>
+                        <span id="modal-subtotal-table">Rs. ${parseFloat(subtotal).toFixed(2)}</span>
                     </div>
                     <div class="d-flex justify-content-between px-2 mb-1">
                         <span>Service Charge (10%)</span>
-                        <span id="modal-service-charge-table">Rs. ${parseFloat(account.orders.reduce((sum, o) => sum + parseFloat(o.serviceCharge), 0)).toFixed(2)}</span>
+                        <span id="modal-service-charge-table">Rs. ${parseFloat(serviceCharge).toFixed(2)}</span>
+                    </div>
+                    <div class="d-flex justify-content-between px-2 mb-1 text-danger fw-bold" id="modal-discount-row-table" style="display: none;">
+                        <span>Discount</span>
+                        <span id="modal-discount-val-table">-Rs. 0.00</span>
                     </div>
                     <div class="d-flex justify-content-between px-2 font-weight-bold border-top pt-1 h5">
                         <span>TOTAL DUE</span>
-                        <span id="modal-grand-total-table">Rs. ${totalLKR.toFixed(2)}</span>
+                        <span id="modal-grand-total-table">Rs. ${(subtotal + serviceCharge).toFixed(2)}</span>
                     </div>
 
                     <div class="payment-method-selector mt-4 pt-3 border-top">
@@ -346,6 +400,22 @@ const ManualTableOrders = () => {
                     currentRate = parseFloat(e.target.value) || 1;
                     updateInvoiceDisplay(selectedCurrency, currentRate);
                 });
+
+                initDiscountSectionListeners({
+                    popup,
+                    idPrefix: 'modal-table-discount',
+                    subtotal,
+                    serviceCharge,
+                    getCurrency: () => selectedCurrency,
+                    getRate: () => currentRate,
+                    getSymbol: () => exchangeRates[selectedCurrency].symbol,
+                    onChange: (b) => {
+                        discountState.discountType = b.discountType;
+                        discountState.discountValue = b.discountValue;
+                        discountState.discountReason = b.discountReason;
+                        updateInvoiceDisplay(selectedCurrency, currentRate);
+                    },
+                });
             }
         }).then((result) => {
             if (result.isConfirmed) {
@@ -355,9 +425,9 @@ const ManualTableOrders = () => {
                     currency: selectedCurrency,
                     rate: currentRate,
                     symbol,
-                });
+                }, discountState);
             } else if (result.isDenied) {
-                printAccountBill(account, tableNo, 'LKR', 1, 'Rs.');
+                printAccountBill(account, tableNo, 'LKR', 1, 'Rs.', null, discountState);
             }
         });
     };

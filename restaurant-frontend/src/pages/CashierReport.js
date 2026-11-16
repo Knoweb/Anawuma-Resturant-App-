@@ -507,8 +507,10 @@ const CashierReport = () => {
                         <th>Date &amp; Time</th>
                         <th>Item Name</th>
                         <th>Qty</th>
-                        <th>Total</th>
+                        <th>Subtotal</th>
                         <th>Service Charge</th>
+                        <th>Discount</th>
+                        <th>Total</th>
                         <th>Payment</th>
                       </tr>
                     </thead>
@@ -520,8 +522,12 @@ const CashierReport = () => {
                           <td>{fmtDT(row.createdAt)}</td>
                           <td>{row.itemName}</td>
                           <td>{row.qty}</td>
-                          <td className="fw-semibold">{fmt(parseFloat(row.lineTotal || 0) + parseFloat(row.serviceCharge || 0))}</td>
+                          <td className="fw-semibold">{fmt(row.lineTotal || 0)}</td>
                           <td>{fmt(row.serviceCharge || 0)}</td>
+                          <td className={parseFloat(row.discountAmount || 0) > 0 ? "text-danger fw-bold" : "text-muted"}>
+                            {parseFloat(row.discountAmount || 0) > 0 ? `-${fmt(row.discountAmount)}` : '–'}
+                          </td>
+                          <td className="fw-bold">{fmt(row.totalAmount || (parseFloat(row.lineTotal || 0) + parseFloat(row.serviceCharge || 0) - parseFloat(row.discountAmount || 0)))}</td>
                           <td>
                             <span className={`badge ${row.paymentMethod === 'CARD' ? 'bg-info' : 'bg-secondary'}`}>
                               {row.paymentMethod || 'CASH'}
@@ -532,17 +538,17 @@ const CashierReport = () => {
                     </tbody>
                     <tfoot>
                       <tr className="table-light report-total-row">
-                        <td colSpan="6" className="text-end py-2 border-0">Food Total:</td>
+                        <td colSpan="8" className="text-end py-2 border-0">Food Total:</td>
                         <td className="py-2 border-0">{fmt(foodTotal)}</td>
                         <td className="border-0"></td>
                       </tr>
                       <tr className="table-light report-total-row">
-                        <td colSpan="6" className="text-end py-2 border-0">Service Charge:</td>
+                        <td colSpan="8" className="text-end py-2 border-0">Service Charge:</td>
                         <td className="py-2 border-0">{fmt(svcCharge)}</td>
                         <td className="border-0"></td>
                       </tr>
                       <tr className="table-secondary report-grand-total-row">
-                        <td colSpan="6" className="text-end"><strong>Grand Total:</strong></td>
+                        <td colSpan="8" className="text-end"><strong>Grand Total:</strong></td>
                         <td><strong>{fmt(grandTotal)}</strong></td>
                         <td></td>
                       </tr>

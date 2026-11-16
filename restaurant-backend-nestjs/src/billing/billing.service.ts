@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
@@ -15,15 +16,17 @@ import { BillAction, BillActionType } from './entities/bill-action.entity';
 import { InvoiceDeleteRequest, DeleteRequestStatus } from './entities/invoice-delete-request.entity';
 import { Order, OrderStatus } from '../orders/entities/order.entity';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
+import { FinalizeCheckoutDto } from './dto/finalize-checkout.dto';
 import { QueryInvoicesDto } from './dto/query-invoices.dto';
 import {
   RecordBillActionDto,
   BillActionHistoryDto,
 } from './dto/record-bill-action.dto';
 import { WebsocketGateway } from '../websocket/websocket.gateway';
+import { PricingCalculatorService } from './pricing-calculator.service';
 
 @Injectable()
-export class BillingService {
+export class BillingService implements OnModuleInit {
   constructor(
     @InjectRepository(Invoice)
     private invoicesRepository: Repository<Invoice>,
@@ -34,7 +37,29 @@ export class BillingService {
     @InjectRepository(InvoiceDeleteRequest)
     private deleteRequestsRepository: Repository<InvoiceDeleteRequest>,
     private websocketGateway: WebsocketGateway,
+    private pricingCalculator: PricingCalculatorService,
   ) { }
+
+  async onModuleInit() {
+    try {
+      const alterQueries = [
+        "ALTER TABLE invoices ADD COLUMN discount_type VARCHAR(20) DEFAULT 'NONE'",
+        "ALTER TABLE invoices ADD COLUMN discount_value DECIMAL(10,2) DEFAULT 0.00",
+        "ALTER TABLE invoices ADD COLUMN discount_reason VARCHAR(255) NULL",
+      ];
+      for (const q of alterQueries) {
+        try {
+          await this.invoicesRepository.query(q);
+        } catch (colErr: any) {
+          if (colErr?.errno !== 1060 && !String(colErr?.message || '').includes('Duplicate column')) {
+            console.warn('Notice ensuring discount columns:', colErr?.message);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Could not run discount schema check (non-fatal):', e);
+    }
+  }
 
   private async generateInvoiceNumber(restaurantId: number): Promise<string> {
     const lastInvoice = await this.invoicesRepository
@@ -178,12 +203,7 @@ export class BillingService {
   async finalizeManualCheckout(
     restaurantId: number,
     adminId: number,
-    payload: {
-      orderIds: number[];
-      identifier: string;
-      type: 'ROOM' | 'TABLE';
-      paymentMethod?: PaymentMethod;
-    },
+    payload: FinalizeCheckoutDto,
   ): Promise<Invoice> {
     // 1. Load orders with items
     const orders = await this.ordersRepository.find({
@@ -207,7 +227,6 @@ export class BillingService {
     // 2. Aggregate financials and items
     let subtotal = 0;
     let serviceCharge = 0;
-    let totalAmount = 0;
     const aggregatedItems: any[] = [];
 
     orders.forEach((order) => {
@@ -222,7 +241,6 @@ export class BillingService {
 
       subtotal += orderSubtotal;
       serviceCharge += orderSC;
-      totalAmount += parseFloat(order.totalAmount.toString());
 
       (order.orderItems || []).forEach((item) => {
         aggregatedItems.push({
@@ -238,6 +256,15 @@ export class BillingService {
       });
     });
 
+    // Run Single Source of Truth Pricing Calculator
+    const calc = this.pricingCalculator.calculateFinalBill(
+      subtotal,
+      serviceCharge,
+      payload.discountType as any,
+      payload.discountValue || 0,
+      false, // serviceCharge is already summed amount
+    );
+
     const now = new Date();
     const invoiceNumber = await this.generateInvoiceNumber(restaurantId);
 
@@ -250,11 +277,14 @@ export class BillingService {
       roomNo: payload.type === 'ROOM' ? payload.identifier : null,
       customerName: `Manual Order (${payload.type} ${payload.identifier})`,
       orderItemsJson: aggregatedItems,
-      subtotal,
+      subtotal: calc.subtotal,
       taxAmount: 0,
-      serviceCharge,
-      discountAmount: 0,
-      totalAmount,
+      serviceCharge: calc.serviceCharge,
+      discountAmount: calc.discountAmount,
+      discountType: calc.discountType,
+      discountValue: calc.discountValue,
+      discountReason: payload.discountReason ? payload.discountReason.trim() : null,
+      totalAmount: calc.totalAmount,
       invoiceStatus: InvoiceStatus.PAID,
       isPrinted: true,
       accountantTransferStatus: AccountantTransferStatus.PENDING,
@@ -362,8 +392,28 @@ export class BillingService {
       ? parseFloat(serviceCharge.toString())
       : (order.serviceCharge ? parseFloat(order.serviceCharge.toString()) : 0);
 
-    const discount = parseFloat(discountAmount.toString());
-    const total = subtotal + tax + charge - discount;
+    // If discountType is provided, calculate using PricingCalculatorService
+    let finalDiscountAmount = 0;
+    let finalTotal = 0;
+    let dType = dto.discountType || 'NONE';
+    let dVal = dto.discountValue || 0;
+
+    if (dto.discountType && dto.discountType !== 'NONE') {
+      const calc = this.pricingCalculator.calculateFinalBill(
+        subtotal,
+        charge,
+        dto.discountType as any,
+        dto.discountValue || 0,
+        false,
+      );
+      finalDiscountAmount = calc.discountAmount;
+      finalTotal = Number((calc.totalAmount + tax).toFixed(2));
+      dType = calc.discountType;
+      dVal = calc.discountValue;
+    } else {
+      finalDiscountAmount = parseFloat((discountAmount || 0).toString());
+      finalTotal = Number(Math.max(0, subtotal + tax + charge - finalDiscountAmount).toFixed(2));
+    }
 
     const invoiceStatus = paymentMethod && paymentMethod !== PaymentMethod.NONE 
       ? InvoiceStatus.PAID 
@@ -373,8 +423,11 @@ export class BillingService {
       subtotal,
       taxAmount: tax,
       serviceCharge: charge,
-      discountAmount: discount,
-      totalAmount: total,
+      discountAmount: finalDiscountAmount,
+      discountType: dType,
+      discountValue: dVal,
+      discountReason: dto.discountReason || null,
+      totalAmount: finalTotal,
       invoiceStatus,
       paymentMethod: paymentMethod || PaymentMethod.NONE,
     });
