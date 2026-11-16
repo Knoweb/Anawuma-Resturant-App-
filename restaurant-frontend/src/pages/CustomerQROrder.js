@@ -764,6 +764,11 @@ const CustomerQROrder = ({ isManual = false }) => {
       return;
     }
 
+    if (modalExtraDescription.trim() && extraPriceNum <= 0) {
+      Swal.fire('Validation Error', 'Please enter the extra price/charge amount in Rs.', 'warning');
+      return;
+    }
+
     const item = activeItemDetail;
     const basePrice = parseFloat(item.discountedPrice || item.price);
     const cartKey = `${item.foodItemId || item.id}::${extraPriceNum.toFixed(2)}::${extraDesc.toLowerCase()}`;
@@ -982,6 +987,11 @@ const CustomerQROrder = ({ isManual = false }) => {
 
     if (extraPriceNum > 0 && !extraDesc) {
       Swal.fire('Validation Error', 'Please enter a description for the extra charge (e.g. Extra Cheese)', 'warning');
+      return;
+    }
+
+    if (modalExtraDescription.trim() && extraPriceNum <= 0) {
+      Swal.fire('Validation Error', 'Please enter the extra price/charge amount in Rs.', 'warning');
       return;
     }
 
@@ -2278,55 +2288,74 @@ const CustomerQROrder = ({ isManual = false }) => {
                       <div className="mb-4 p-3 bg-white border rounded shadow-sm">
                         <div className="d-flex justify-content-between align-items-center mb-2">
                           <label className="fw-bold text-muted small text-uppercase mb-0">
-                            <i className="fas fa-plus-circle text-success me-1"></i> Custom Add-on / Extra Charge (Rs.)
+                            <i className="fas fa-plus-circle text-success me-1"></i> Custom Add-on / Extra Charge
                           </label>
-                          {parseFloat(modalExtraPrice) > 0 && (
-                            <span className="badge bg-success text-white small" style={{ fontSize: '0.75rem' }}>
-                              +Rs. {parseFloat(modalExtraPrice).toFixed(0)} per item
-                            </span>
-                          )}
+                          <div className="d-flex align-items-center gap-2">
+                            {(modalExtraPrice || modalExtraDescription) && (
+                              <button
+                                type="button"
+                                className="btn btn-link btn-sm text-danger text-decoration-none p-0"
+                                style={{ fontSize: '0.75rem' }}
+                                onClick={() => {
+                                  setModalExtraPrice('');
+                                  setModalExtraDescription('');
+                                }}
+                              >
+                                <i className="fas fa-times me-1"></i>Clear
+                              </button>
+                            )}
+                            {parseFloat(modalExtraPrice) > 0 && (
+                              <span className="badge bg-success text-white small" style={{ fontSize: '0.75rem' }}>
+                                +Rs. {parseFloat(modalExtraPrice).toFixed(0)} per item
+                              </span>
+                            )}
+                          </div>
                         </div>
 
                         {/* Quick Preset Chips */}
                         <div className="d-flex flex-wrap gap-1 mb-2">
-                          {ADDON_PRESETS.map((preset) => (
-                            <button
-                              key={preset}
-                              type="button"
-                              className={`btn btn-sm py-0 px-2 ${modalExtraDescription === preset ? 'btn-success text-white' : 'btn-outline-secondary'}`}
-                              style={{ fontSize: '0.75rem', borderRadius: '12px' }}
-                              onClick={() => {
-                                setModalExtraDescription(preset);
-                                if (!modalExtraPrice || parseFloat(modalExtraPrice) === 0) {
-                                  setModalExtraPrice('150');
-                                }
-                              }}
-                            >
-                              + {preset}
-                            </button>
-                          ))}
+                          {ADDON_PRESETS.map((preset) => {
+                            const isSelected = modalExtraDescription === preset;
+                            return (
+                              <button
+                                key={preset}
+                                type="button"
+                                className={`btn btn-sm py-0 px-2 ${isSelected ? 'btn-success text-white' : 'btn-outline-secondary'}`}
+                                style={{ fontSize: '0.75rem', borderRadius: '12px' }}
+                                onClick={() => {
+                                  if (isSelected) {
+                                    setModalExtraDescription('');
+                                  } else {
+                                    setModalExtraDescription(preset);
+                                  }
+                                }}
+                              >
+                                + {preset}
+                              </button>
+                            );
+                          })}
                         </div>
 
                         <div className="row g-2">
-                          <div className="col-4">
+                          <div className="col-5">
                             <div className="input-group input-group-sm">
-                              <span className="input-group-text bg-light text-muted">Rs.</span>
+                              <span className="input-group-text bg-light text-muted fw-bold">Rs.</span>
                               <input
                                 type="number"
                                 min="0"
                                 step="10"
                                 className="form-control fw-bold"
-                                placeholder="0"
+                                placeholder="Enter Price"
                                 value={modalExtraPrice}
                                 onChange={(e) => setModalExtraPrice(e.target.value)}
                               />
                             </div>
                           </div>
-                          <div className="col-8">
+                          <div className="col-7">
                             <input
                               type="text"
                               className="form-control form-control-sm"
-                              placeholder="Description (e.g. Extra Cheese) *"
+                              placeholder="Description (e.g. Extra Cheese)"
                               value={modalExtraDescription}
                               onChange={(e) => setModalExtraDescription(e.target.value)}
                             />
