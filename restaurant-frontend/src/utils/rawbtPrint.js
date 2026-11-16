@@ -91,10 +91,13 @@ const wrapItemWithQty = (itemName, qtyText, width = LINE_WIDTH) => {
 
 const formatKotHeaderText = (order) => {
   const rawOrderNo = String(order?.orderNo || '-').replace(/^#/, '');
+  const isTakeaway = order?.diningType === 'TAKEAWAY' || String(order?.tableNo).toUpperCase().includes('TAKEAWAY');
   const rawLocation = order?.roomNo || order?.tableNo || '';
   let formattedLocation = '';
 
-  if (rawLocation) {
+  if (isTakeaway) {
+    formattedLocation = String(order?.tableNo).startsWith('TAKEAWAY') ? order.tableNo : 'TAKE AWAY';
+  } else if (rawLocation) {
     const trimmed = String(rawLocation).trim();
     if (/^(ROOM|TABLE)\b/i.test(trimmed)) {
       formattedLocation = trimmed;
@@ -106,7 +109,8 @@ const formatKotHeaderText = (order) => {
   return {
     rawOrderNo,
     formattedLocation,
-    headerLine: formattedLocation ? `KOT ${rawOrderNo} - ${formattedLocation}` : `KOT ${rawOrderNo}`,
+    headerLine: isTakeaway ? `KOT ${rawOrderNo} - TAKE AWAY` : (formattedLocation ? `KOT ${rawOrderNo} - ${formattedLocation}` : `KOT ${rawOrderNo}`),
+    isTakeaway,
   };
 };
 
@@ -127,7 +131,7 @@ export const buildKdsEscPosBytes = ({ order, formatDateTime }) => {
     chunks.push(arr);
   };
 
-  const { rawOrderNo, formattedLocation, headerLine } = formatKotHeaderText(order);
+  const { rawOrderNo, formattedLocation, headerLine, isTakeaway } = formatKotHeaderText(order);
   const divider = `${'-'.repeat(LINE_WIDTH)}\n`;
   const dateStr = formatDateTime ? formatDateTime(order?.createdAt || new Date()) : '';
   const items = Array.isArray(order?.orderItems) ? order.orderItems : [];
@@ -141,6 +145,16 @@ export const buildKdsEscPosBytes = ({ order, formatDateTime }) => {
   pushBytes(GS, 0x21, 0x00, ESC, 0x45, 0x00, ESC, 0x61, 0x00);
 
   pushText(divider);
+
+  if (isTakeaway) {
+    // Prominent Takeaway Banner (Double-Height, Center, Bold)
+    pushBytes(ESC, 0x61, 0x01, ESC, 0x45, 0x01, GS, 0x21, 0x11);
+    pushText('*** TAKE AWAY ORDER ***\n');
+    pushBytes(GS, 0x21, 0x00);
+    pushText('PACK IN TAKEAWAY BOXES\n');
+    pushBytes(ESC, 0x45, 0x00, ESC, 0x61, 0x00);
+    pushText(divider);
+  }
 
   // 2-line compact metadata
   pushText(formatPairLine(`Order: ${rawOrderNo}`, dateStr));

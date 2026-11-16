@@ -507,21 +507,35 @@ export class OrdersService {
 
     const orders = await query.getMany();
 
-    // Aggregate by roomNo or tableNo
+    // Aggregate by roomNo or tableNo (or individual takeaway token/customer)
     const accounts: Record<string, any> = {};
 
     orders.forEach(order => {
       const rawKey = type === 'ROOM' ? order.roomNo : (order.tableNo || 'TAKEAWAY');
       if (!rawKey) return;
 
-      // Standardize the key: uppercase, remove spaces, and strip leading zeros
-      // This makes "HB-01" match "HB - 01" or "hb 01"
-      const key = rawKey.toUpperCase().replace(/\s+/g, '').replace(/^0+/, '') || rawKey.trim();
+      const isTakeaway = order.diningType === DiningType.TAKEAWAY || rawKey.toUpperCase().includes('TAKEAWAY');
+      let key = '';
+
+      if (type === 'ROOM') {
+        key = rawKey.toUpperCase().replace(/\s+/g, '').replace(/^0+/, '') || rawKey.trim();
+      } else if (isTakeaway) {
+        // Group by Customer Name if provided, otherwise isolate by Order # so different takeaway customers never collide!
+        if (order.customerName && order.customerName.trim() && order.customerName !== 'Manual Order' && order.customerName !== 'Guest') {
+          key = `TAKEAWAY - ${order.customerName.trim().toUpperCase()}`;
+        } else {
+          const rawNo = String(order.orderNo || order.orderId || '').replace(/^#/, '');
+          key = `TAKEAWAY #${rawNo}`;
+        }
+      } else {
+        // Standard table key
+        key = rawKey.toUpperCase().replace(/\s+/g, '').replace(/^0+/, '') || rawKey.trim();
+      }
 
       if (!accounts[key]) {
         accounts[key] = {
           identifier: key,
-          diningType: order.diningType || (type === 'TAKEAWAY' ? DiningType.TAKEAWAY : DiningType.DINE_IN),
+          diningType: order.diningType || (isTakeaway ? DiningType.TAKEAWAY : DiningType.DINE_IN),
           orders: [],
           totalAmount: 0,
           itemCount: 0,
@@ -557,11 +571,23 @@ export class OrdersService {
 
     // We match by the raw identifier stored in DB
     // To be thorough, we'll try to find any order that normalizes to this identifier
-    // But for a specific cancel action, usually the frontend provides the exact string
     if (type === 'ROOM') {
       query.andWhere('order.roomNo = :identifier', { identifier });
     } else if (type === 'TAKEAWAY') {
-      query.andWhere('(order.tableNo = :identifier OR order.diningType = :takeawayType)', { identifier, takeawayType: DiningType.TAKEAWAY });
+      query.andWhere('order.diningType = :takeawayType', { takeawayType: DiningType.TAKEAWAY });
+      if (identifier.startsWith('TAKEAWAY #')) {
+        const orderNoPart = identifier.replace('TAKEAWAY #', '').trim();
+        query.andWhere('(order.orderNo = :orderNoPart OR order.orderNo = :hashOrderNo OR order.orderId = :orderIdPart)', {
+          orderNoPart,
+          hashOrderNo: `#${orderNoPart}`,
+          orderIdPart: isNaN(Number(orderNoPart)) ? 0 : Number(orderNoPart),
+        });
+      } else if (identifier.startsWith('TAKEAWAY - ')) {
+        const customerPart = identifier.replace('TAKEAWAY - ', '').trim();
+        query.andWhere('LOWER(order.customerName) = LOWER(:customerPart)', { customerPart });
+      } else {
+        query.andWhere('order.tableNo = :identifier', { identifier });
+      }
     } else {
       query.andWhere('order.tableNo = :identifier', { identifier });
     }

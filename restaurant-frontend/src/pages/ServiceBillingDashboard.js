@@ -74,9 +74,12 @@ function PrintableInvoice({ invoice, restaurantName, address, contactNumber }) {
         <div className="pi-meta">
           <span><strong>Date:</strong> {formatDateTime(invoice.createdAt)}</span>
         </div>
-        {(invoice.tableNo || invoice.roomNo) && (
+        {(invoice.tableNo || invoice.roomNo || invoice.diningType === 'TAKEAWAY') && (
           <div className="pi-meta">
-            <span><strong>{invoice.roomNo ? 'Room' : 'Table'}:</strong> {invoice.roomNo || invoice.tableNo}</span>
+            <span>
+              <strong>{invoice.diningType === 'TAKEAWAY' || String(invoice.tableNo).toUpperCase().includes('TAKEAWAY') ? 'Mode' : (invoice.roomNo ? 'Room' : 'Table')}:</strong>{' '}
+              {invoice.diningType === 'TAKEAWAY' || String(invoice.tableNo).toUpperCase().includes('TAKEAWAY') ? (String(invoice.tableNo).startsWith('TAKEAWAY') ? invoice.tableNo : 'TAKE AWAY') : (invoice.roomNo || invoice.tableNo)}
+            </span>
             {invoice.customerName && (
               <span><strong>Customer:</strong> {invoice.customerName}</span>
             )}
@@ -110,8 +113,12 @@ function PrintableInvoice({ invoice, restaurantName, address, contactNumber }) {
         {parseFloat(invoice.taxAmount) > 0 && (
           <div className="pi-total-row"><span>Tax</span><span>{formatCurrency(invoice.taxAmount)}</span></div>
         )}
-        {parseFloat(invoice.serviceCharge) > 0 && (
+        {parseFloat(invoice.serviceCharge) > 0 ? (
           <div className="pi-total-row"><span>Service Charge</span><span>{formatCurrency(invoice.serviceCharge)}</span></div>
+        ) : (
+          (invoice.diningType === 'TAKEAWAY' || String(invoice.tableNo).toUpperCase().includes('TAKEAWAY')) && (
+            <div className="pi-total-row"><span>Service Charge (0% Take Away)</span><span>Rs. 0.00</span></div>
+          )
         )}
         {parseFloat(invoice.discountAmount) > 0 && (
           <div className="pi-total-row pi-discount"><span>Discount</span><span>– {formatCurrency(invoice.discountAmount)}</span></div>
@@ -186,7 +193,13 @@ function InvoiceModal({ invoice, restaurantName, address, contactNumber, onClose
         .map((i) => `  • ${i.itemName} x${i.qty} - ${formatCurrency(i.lineTotal)}`)
         .join('\n');
 
-      const msg = `Hello ${invoice.customerName || ''} 👋\nHere is your bill for order ${invoice.orderNo || invoice.orderId}.\n\nOrder ID: ${invoice.orderNo || invoice.orderId}\nInvoice No: ${invoice.invoiceNumber}\n${invoice.roomNo ? `Room: ${invoice.roomNo}` : `Table: ${invoice.tableNo || '–'}`}\n\nItems:\n${itemLines}\n\nSubtotal: ${formatCurrency(invoice.subtotal)}\nService Charge (10%): ${formatCurrency(invoice.serviceCharge)}\n*Total: ${formatCurrency(invoice.totalAmount)}*\n\nThank you for ordering with us 🍔`;
+      const isTakeaway = invoice.diningType === 'TAKEAWAY' || String(invoice.tableNo).toUpperCase().includes('TAKEAWAY');
+      const locationLabel = isTakeaway
+        ? `Order Mode: ${String(invoice.tableNo).startsWith('TAKEAWAY') ? invoice.tableNo : 'TAKE AWAY'}`
+        : (invoice.roomNo ? `Room: ${invoice.roomNo}` : `Table: ${invoice.tableNo || '–'}`);
+      const scLabel = isTakeaway ? 'Service Charge (0% Take Away)' : 'Service Charge (10%)';
+
+      const msg = `Hello ${invoice.customerName || ''} 👋\nHere is your bill for order ${invoice.orderNo || invoice.orderId}.\n\nOrder ID: ${invoice.orderNo || invoice.orderId}\nInvoice No: ${invoice.invoiceNumber}\n${locationLabel}\n\nItems:\n${itemLines}\n\nSubtotal: ${formatCurrency(invoice.subtotal)}\n${scLabel}: ${formatCurrency(invoice.serviceCharge)}\n*Total: ${formatCurrency(invoice.totalAmount)}*\n\nThank you for ordering with us 🍔`;
 
       window.open(`https://api.whatsapp.com/send?phone=${phone.replace('+', '')}&text=${encodeURIComponent(msg)}`, '_blank');
     } catch (err) {

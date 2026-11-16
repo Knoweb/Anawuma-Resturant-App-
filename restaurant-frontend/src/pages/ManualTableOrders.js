@@ -127,9 +127,11 @@ const ManualTableOrders = () => {
         const subtotal = parseFloat(order.subtotal);
         const serviceCharge = parseFloat(order.serviceCharge);
         const total = parseFloat(order.totalAmount);
-        const locationLabel = order.roomNo ? `Room: ${order.roomNo}` : (order.tableNo ? `Table: ${order.tableNo}` : '–');
+        const isTakeaway = order.diningType === 'TAKEAWAY' || String(order.tableNo).toUpperCase().includes('TAKEAWAY');
+        const locationLabel = isTakeaway ? 'Order Mode: TAKE AWAY' : (order.roomNo ? `Room: ${order.roomNo}` : (order.tableNo ? `Table: ${order.tableNo}` : '–'));
+        const scLabel = isTakeaway ? 'Service Charge (0% Take Away)' : 'Service Charge (10%)';
 
-        const msg = `Hello Guest 👋\nHere is your bill for order #${order.orderNo}.\n\nOrder ID: ${order.orderNo}\n${locationLabel}\n\nItems:\n${itemLines}\n\nSubtotal: Rs. ${subtotal.toFixed(2)}\nService Charge (10%): Rs. ${serviceCharge.toFixed(2)}\n*Total: Rs. ${total.toFixed(2)}*\n\nThank you for ordering with us 🍔`;
+        const msg = `Hello Guest 👋\nHere is your bill for order #${order.orderNo}.\n\nOrder ID: ${order.orderNo}\n${locationLabel}\n\nItems:\n${itemLines}\n\nSubtotal: Rs. ${subtotal.toFixed(2)}\n${scLabel}: Rs. ${serviceCharge.toFixed(2)}\n*Total: Rs. ${total.toFixed(2)}*\n\nThank you for ordering with us 🍔`;
         
         window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`, '_blank');
     };
@@ -514,7 +516,7 @@ const ManualTableOrders = () => {
                 <span>Rs. ${parseFloat(order.subtotal).toFixed(0)}</span>
               </div>
               <div class="d-flex justify-content-between small text-muted">
-                <span>Service Charge (10%):</span>
+                <span>${order.diningType === 'TAKEAWAY' ? 'Service Charge (0% Take Away):' : 'Service Charge (10%):'}</span>
                 <span>Rs. ${parseFloat(order.serviceCharge).toFixed(0)}</span>
               </div>
               <div class="d-flex justify-content-between font-weight-bold mt-1" style="border-top: 1px dashed #ccc; padding-top: 5px; color: #4e73df">
@@ -526,7 +528,7 @@ const ManualTableOrders = () => {
         `).join('')}
         
         <div class="bill-summary">
-          <div class="bill-total-label">ACCUMULATED GRAND TOTAL (Inc. 10% SC)</div>
+          <div class="bill-total-label">${account.diningType === 'TAKEAWAY' ? 'ACCUMULATED GRAND TOTAL (0% SC)' : 'ACCUMULATED GRAND TOTAL (Inc. 10% SC)'}</div>
           <div class="bill-total-value">Rs. ${parseFloat(account.totalAmount).toFixed(0)}</div>
         </div>
       </div>
@@ -627,7 +629,10 @@ const ManualTableOrders = () => {
                                                         <div className="account-icon-wrapper">
                                                             <i className={`fas ${isTakeaway ? 'fa-shopping-bag text-warning' : 'fa-chair'} fa-2x`}></i>
                                                         </div>
-                                                        <div className="account-id">{isTakeaway ? (account.identifier === 'TAKEAWAY' ? 'TAKE AWAY' : `TAKE AWAY (${account.identifier})`) : `TABLE ${account.identifier}`}</div>
+                                                        <div className="account-id">{isTakeaway ? (account.identifier.startsWith('TAKEAWAY') ? account.identifier : `TAKE AWAY (${account.identifier})`) : `TABLE ${account.identifier}`}</div>
+                                                        {isTakeaway && account.orders[0]?.customerName && account.orders[0]?.customerName !== 'Manual Order' && account.orders[0]?.customerName !== 'Guest' && (
+                                                            <div className="small text-muted fw-bold mb-1"><i className="fas fa-user me-1"></i>{account.orders[0].customerName}</div>
+                                                        )}
                                                         <div className={`badge ${isTakeaway ? 'bg-warning text-dark' : 'bg-primary-soft text-primary'} order-count-badge`}>
                                                             {isTakeaway ? 'Take Away' : `${account.orders.length} Active Orders`}
                                                         </div>

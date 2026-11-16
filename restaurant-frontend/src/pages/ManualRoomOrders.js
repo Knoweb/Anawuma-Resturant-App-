@@ -153,7 +153,10 @@ const ManualRoomOrders = () => {
         const total = parseFloat(order.totalAmount);
         const roomIdentifier = order.roomNo || order.originalRoomNo || '–';
 
-        const msg = `Hello Guest 👋\nHere is your bill for order #${order.orderNo}.\n\nOrder ID: ${order.orderNo}\nRoom: ${roomIdentifier}\n\nItems:\n${itemLines}\n\nSubtotal: Rs. ${subtotal.toFixed(2)}\nService Charge (10%): Rs. ${serviceCharge.toFixed(2)}\n*Total: Rs. ${total.toFixed(2)}*\n\nThank you for ordering with us 🍔`;
+        const isTakeaway = order.diningType === 'TAKEAWAY' || String(order.tableNo).toUpperCase().includes('TAKEAWAY');
+        const scLabel = isTakeaway ? 'Service Charge (0% Take Away)' : 'Service Charge (10%)';
+
+        const msg = `Hello Guest 👋\nHere is your bill for order #${order.orderNo}.\n\nOrder ID: ${order.orderNo}\nRoom: ${roomIdentifier}\n\nItems:\n${itemLines}\n\nSubtotal: Rs. ${subtotal.toFixed(2)}\n${scLabel}: Rs. ${serviceCharge.toFixed(2)}\n*Total: Rs. ${total.toFixed(2)}*\n\nThank you for ordering with us 🍔`;
         
         window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`, '_blank');
     };
@@ -547,7 +550,7 @@ const ManualRoomOrders = () => {
                 <span>Rs. ${parseFloat(order.subtotal).toFixed(0)}</span>
               </div>
               <div class="d-flex justify-content-between small text-muted">
-                <span>Service Charge (10%):</span>
+                <span>${order.diningType === 'TAKEAWAY' ? 'Service Charge (0% Take Away):' : 'Service Charge (10%):'}</span>
                 <span>Rs. ${parseFloat(order.serviceCharge).toFixed(0)}</span>
               </div>
               <div class="d-flex justify-content-between font-weight-bold mt-1" style="border-top: 1px dashed #ccc; padding-top: 5px; color: #4e73df">
@@ -559,7 +562,7 @@ const ManualRoomOrders = () => {
         `).join('')}
         
         <div class="bill-summary">
-          <div class="bill-total-label">ACCUMULATED GRAND TOTAL (Inc. 10% SC)</div>
+          <div class="bill-total-label">${account.diningType === 'TAKEAWAY' ? 'ACCUMULATED GRAND TOTAL (0% SC)' : 'ACCUMULATED GRAND TOTAL (Inc. 10% SC)'}</div>
           <div class="bill-total-value">Rs. ${parseFloat(account.totalAmount).toFixed(0)}</div>
         </div>
       </div>

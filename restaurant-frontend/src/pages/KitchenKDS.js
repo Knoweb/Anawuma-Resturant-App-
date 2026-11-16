@@ -629,14 +629,18 @@ const KitchenKDS = () => {
 
     const subtotal = parseFloat(order.subtotal || order.totalAmount / 1.1).toFixed(2);
     const serviceCharge = parseFloat(order.serviceCharge || (order.totalAmount - order.totalAmount / 1.1)).toFixed(2);
+    const isTakeaway = order.diningType === 'TAKEAWAY' || String(order.tableNo).toUpperCase().includes('TAKEAWAY');
+    const locationLine = isTakeaway ? 'Order Mode: TAKE AWAY' : `Table: ${order.tableNo || '-'}`;
+    const scLine = isTakeaway ? `Service Charge (0% Take Away): Rs. ${serviceCharge}` : `Service Charge (10%): Rs. ${serviceCharge}`;
+
     const message =
       `Hello ${order.customerName || ''} 👋\n` +
       `Here is your bill for order ${order.orderNo}.\n\n` +
       `Order ID: ${order.orderNo}\n` +
-      `Table: ${order.tableNo || '-'}\n\n` +
+      `${locationLine}\n\n` +
       `Items:\n${itemsList}\n\n` +
       `Subtotal: Rs. ${subtotal}\n` +
-      `Service Charge (10%): Rs. ${serviceCharge}\n` +
+      `${scLine}\n` +
       `*Total: Rs. ${parseFloat(order.totalAmount).toFixed(2)}*\n\n` +
       `Thank you for ordering with us 🍔`;
 
