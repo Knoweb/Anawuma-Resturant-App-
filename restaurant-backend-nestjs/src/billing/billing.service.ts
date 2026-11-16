@@ -14,7 +14,7 @@ import {
 } from './entities/invoice.entity';
 import { BillAction, BillActionType } from './entities/bill-action.entity';
 import { InvoiceDeleteRequest, DeleteRequestStatus } from './entities/invoice-delete-request.entity';
-import { Order, OrderStatus } from '../orders/entities/order.entity';
+import { Order, OrderStatus, DiningType } from '../orders/entities/order.entity';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { FinalizeCheckoutDto } from './dto/finalize-checkout.dto';
 import { QueryInvoicesDto } from './dto/query-invoices.dto';
@@ -126,6 +126,7 @@ export class BillingService implements OnModuleInit {
       taxAmount: 0,
       serviceCharge,
       discountAmount: 0,
+      diningType: (order as any).diningType || 'DINE_IN',
       totalAmount: finalTotal,
       invoiceStatus: InvoiceStatus.PENDING,
       isPrinted: false,
@@ -256,13 +257,23 @@ export class BillingService implements OnModuleInit {
       });
     });
 
+    // Determine effective diningType: DTO override from Cashier, or infer from orders
+    const effectiveDiningType = payload.diningType 
+      || (payload.type === 'TAKEAWAY' ? DiningType.TAKEAWAY : null)
+      || (orders.every(o => o.diningType === DiningType.TAKEAWAY) ? DiningType.TAKEAWAY : DiningType.DINE_IN);
+    const isTakeaway = effectiveDiningType === DiningType.TAKEAWAY;
+
+    // If takeaway, service charge is strictly 0
+    const finalServiceCharge = isTakeaway ? 0 : serviceCharge;
+
     // Run Single Source of Truth Pricing Calculator
     const calc = this.pricingCalculator.calculateFinalBill(
       subtotal,
-      serviceCharge,
+      finalServiceCharge,
       payload.discountType as any,
       payload.discountValue || 0,
       false, // serviceCharge is already summed amount
+      effectiveDiningType,
     );
 
     const now = new Date();
@@ -273,9 +284,9 @@ export class BillingService implements OnModuleInit {
       invoiceNumber,
       orderId: orders[0].orderId, // Refer to the first order
       restaurantId,
-      tableNo: payload.type === 'TABLE' ? payload.identifier : null,
+      tableNo: payload.type === 'ROOM' ? null : payload.identifier,
       roomNo: payload.type === 'ROOM' ? payload.identifier : null,
-      customerName: `Manual Order (${payload.type} ${payload.identifier})`,
+      customerName: isTakeaway ? `Take Away Order (${payload.identifier})` : `Manual Order (${payload.type} ${payload.identifier})`,
       orderItemsJson: aggregatedItems,
       subtotal: calc.subtotal,
       taxAmount: 0,
@@ -284,6 +295,7 @@ export class BillingService implements OnModuleInit {
       discountType: calc.discountType,
       discountValue: calc.discountValue,
       discountReason: payload.discountReason ? payload.discountReason.trim() : null,
+      diningType: effectiveDiningType,
       totalAmount: calc.totalAmount,
       invoiceStatus: InvoiceStatus.PAID,
       isPrinted: true,
@@ -386,11 +398,18 @@ export class BillingService implements OnModuleInit {
 
     const tax = parseFloat(taxAmount.toString());
 
+    const effectiveDiningType = dto.diningType 
+      || (order as any).diningType 
+      || DiningType.DINE_IN;
+    const isTakeaway = effectiveDiningType === DiningType.TAKEAWAY;
+
     // If serviceCharge is explicitly provided in DTO (override), use it. 
-    // Otherwise use the one calculated at order time.
-    const charge = dto.serviceCharge !== undefined
-      ? parseFloat(serviceCharge.toString())
-      : (order.serviceCharge ? parseFloat(order.serviceCharge.toString()) : 0);
+    // Otherwise use the one calculated at order time, or 0 if takeaway.
+    const charge = isTakeaway
+      ? 0
+      : (dto.serviceCharge !== undefined
+          ? parseFloat(serviceCharge.toString())
+          : (order.serviceCharge ? parseFloat(order.serviceCharge.toString()) : 0));
 
     // If discountType is provided, calculate using PricingCalculatorService
     let finalDiscountAmount = 0;
@@ -405,6 +424,7 @@ export class BillingService implements OnModuleInit {
         dto.discountType as any,
         dto.discountValue || 0,
         false,
+        effectiveDiningType,
       );
       finalDiscountAmount = calc.discountAmount;
       finalTotal = Number((calc.totalAmount + tax).toFixed(2));
@@ -427,6 +447,7 @@ export class BillingService implements OnModuleInit {
       discountType: dType,
       discountValue: dVal,
       discountReason: dto.discountReason ? dto.discountReason.trim() : null,
+      diningType: effectiveDiningType,
       totalAmount: finalTotal,
       invoiceStatus,
       paymentMethod: paymentMethod || PaymentMethod.NONE,

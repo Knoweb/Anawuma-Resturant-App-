@@ -23,9 +23,12 @@ export const buildKdsOrderTicketDocument = ({
     .join('');
 
   const rawOrderNo = String(order?.orderNo || '-').replace(/^#/, '');
+  const isTakeaway = order?.diningType === 'TAKEAWAY' || String(order?.tableNo).toUpperCase().startsWith('TAKEAWAY');
   const rawLocation = order?.roomNo || order?.tableNo || '';
   let formattedLocation = '';
-  if (rawLocation) {
+  if (isTakeaway) {
+    formattedLocation = 'TAKE AWAY';
+  } else if (rawLocation) {
     const trimmedLoc = String(rawLocation).trim();
     if (/^(ROOM|TABLE)\b/i.test(trimmedLoc)) {
       formattedLocation = trimmedLoc;
@@ -33,9 +36,9 @@ export const buildKdsOrderTicketDocument = ({
       formattedLocation = order?.roomNo ? `Room ${trimmedLoc}` : `Table ${trimmedLoc}`;
     }
   }
-  const kotHeader = formattedLocation
-    ? `KOT ${rawOrderNo} - ${formattedLocation}`
-    : `KOT ${rawOrderNo}`;
+  const kotHeader = isTakeaway
+    ? `KOT ${rawOrderNo} - TAKE AWAY`
+    : (formattedLocation ? `KOT ${rawOrderNo} - ${formattedLocation}` : `KOT ${rawOrderNo}`);
 
   const styles = `
     #anawuma-print-root .kds-bill-wrap {
@@ -132,6 +135,11 @@ export const buildKdsOrderTicketDocument = ({
   const html = `
     <div class="kds-bill-wrap">
       <div class="kds-receipt-header">
+        ${isTakeaway ? `
+          <div style="font-size:15px; font-weight:900; background:#000; color:#fff; padding:2px 4px; margin-bottom:4px; text-align:center; letter-spacing:1px;">
+            *** TAKE AWAY ***
+          </div>
+        ` : ''}
         <div class="kds-kot-title">${escapeHtml(kotHeader)}</div>
       </div>
 
@@ -226,14 +234,15 @@ export const buildOrderReceiptDocument = ({
     }
   `;
 
+  const isTakeaway = order?.diningType === 'TAKEAWAY' || String(order?.tableNo).toUpperCase().startsWith('TAKEAWAY');
   const html = `
     <div class="rc-wrap">
       <div class="rc-header">
         <h2 style="margin:0; font-size:15px; font-weight:bold; text-transform:uppercase;">${escapeHtml(restaurantName || 'Restaurant')}</h2>
-        <p style="margin:4px 0;">Order Receipt</p>
+        <p style="margin:4px 0;">Order Receipt ${isTakeaway ? '(TAKE AWAY)' : ''}</p>
         <p style="margin:2px 0;">Order No: ${escapeHtml(order?.orderNo || '-')}</p>
         <p style="margin:2px 0;">${escapeHtml(formatDateTime(order?.createdAt))}</p>
-        ${locationLine ? `<p style="margin:2px 0;">${escapeHtml(locationLine)}</p>` : ''}
+        ${locationLine ? `<p style="margin:2px 0;">${escapeHtml(locationLine)}</p>` : (isTakeaway ? '<p style="margin:2px 0;">Type: TAKE AWAY</p>' : '')}
       </div>
       <div class="rc-items">
         ${itemsHtml}
@@ -244,8 +253,8 @@ export const buildOrderReceiptDocument = ({
           <span>${parseFloat(order?.subtotal || 0).toFixed(0)}</span>
         </div>
         <div class="rc-item-row">
-          <span>Service Charge (10%):</span>
-          <span>${parseFloat(order?.serviceCharge || 0).toFixed(0)}</span>
+          <span>Service Charge ${isTakeaway ? '(0% Take Away)' : '(10%)'}:</span>
+          <span>${isTakeaway ? '0' : parseFloat(order?.serviceCharge || 0).toFixed(0)}</span>
         </div>
         <div class="rc-total-row">
           <span>TOTAL:</span>
@@ -279,18 +288,25 @@ export const buildAccountBillDocument = ({
   discountType = 'NONE',
   discountValue = 0,
   discountReason = '',
+  diningType = 'DINE_IN',
   finalTotalAmount = null,
 }) => {
   const safeRate = Number(rate) > 0 ? Number(rate) : 1;
   const orders = Array.isArray(account?.orders) ? account.orders : [];
   const subtotal = orders.reduce((sum, o) => sum + parseFloat(o.subtotal || 0), 0);
-  const serviceCharge = orders.reduce((sum, o) => sum + parseFloat(o.serviceCharge || 0), 0);
+  const isTakeaway = diningType === 'TAKEAWAY' 
+    || account?.diningType === 'TAKEAWAY' 
+    || (orders.length > 0 && orders.every(o => o.diningType === 'TAKEAWAY'))
+    || String(locationValue).toUpperCase().startsWith('TAKEAWAY');
+
+  const rawServiceCharge = orders.reduce((sum, o) => sum + parseFloat(o.serviceCharge || 0), 0);
+  const serviceCharge = isTakeaway ? 0 : rawServiceCharge;
   const safeDiscount = Math.max(0, Number(discountAmount) || Number(account?.discountAmount) || 0);
   const grossTotal = subtotal + serviceCharge;
   const computedTotal = Math.max(0, grossTotal - safeDiscount);
   const total = finalTotalAmount !== null && !isNaN(finalTotalAmount)
     ? Number(finalTotalAmount)
-    : (safeDiscount > 0 ? computedTotal : parseFloat(account?.totalAmount || grossTotal));
+    : (safeDiscount > 0 || isTakeaway ? computedTotal : parseFloat(account?.totalAmount || grossTotal));
   const orderNos = orders.map((o) => o.orderNo).join(', ');
   const paymentMethod = (account?.selectedPaymentMethod || 'CASH').toUpperCase();
 
@@ -420,7 +436,8 @@ export const buildAccountBillDocument = ({
       <div class="ab-meta-box">
         <div class="ab-meta-row"><span><b>Invoice No:</b></span><span>${escapeHtml(invoiceNumber || 'INV-DRAFT')}</span></div>
         <div class="ab-meta-row"><span><b>Order No(s):</b></span><span>${escapeHtml(orderNos)}</span></div>
-        <div class="ab-meta-row"><span><b>${escapeHtml(locationLabel)}:</b></span><span>${escapeHtml(locationValue)}</span></div>
+        <div class="ab-meta-row"><span><b>Order Mode:</b></span><span><b>${escapeHtml(isTakeaway ? 'TAKE AWAY' : 'DINE IN')}</b></span></div>
+        ${!isTakeaway ? `<div class="ab-meta-row"><span><b>${escapeHtml(locationLabel)}:</b></span><span>${escapeHtml(locationValue)}</span></div>` : ''}
         <div class="ab-meta-row"><span><b>Payment:</b></span><span>${escapeHtml(paymentMethod)}</span></div>
       </div>
 
@@ -432,7 +449,7 @@ export const buildAccountBillDocument = ({
           <span>${escapeHtml(symbol)} ${(subtotal / safeRate).toFixed(2)}</span>
         </div>
         <div class="ab-item-row" style="font-size:14px; margin-bottom:5px;">
-          <span>Service Charge (10%):</span>
+          <span>Service Charge ${isTakeaway ? '(0% Take Away)' : '(10%)'}:</span>
           <span>${escapeHtml(symbol)} ${(serviceCharge / safeRate).toFixed(2)}</span>
         </div>
         ${safeDiscount > 0 ? `

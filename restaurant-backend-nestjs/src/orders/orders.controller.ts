@@ -27,6 +27,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../auth/enums/role.enum';
+import { DiningType } from './entities/order.entity';
 import { TableKeyGuard } from '../common/guards/table-key.guard';
 
 @Controller('orders')
@@ -46,11 +47,13 @@ export class OrdersController {
     }
 
     // Override tableNo/roomNo/orderType from the guard (more secure than client input)
+    // QR Security Guardrail: Public table/room QR scans MUST always be DINE_IN (cannot bypass service charge)
     const orderData = {
       ...createOrderDto,
       tableNo,
       roomNo,
-      orderType
+      orderType,
+      diningType: DiningType.DINE_IN,
     };
 
     return this.ordersService.create(orderData, restaurantId);
@@ -66,15 +69,18 @@ export class OrdersController {
       throw new BadRequestException('Order must contain at least one item');
     }
 
-    // Manual orders must specify tableNo or roomNo
-    if (!createOrderDto.tableNo && !createOrderDto.roomNo) {
+    // Manual orders must specify tableNo or roomNo UNLESS it is a standalone TAKEAWAY
+    const isTakeaway = createOrderDto.diningType === DiningType.TAKEAWAY;
+    if (!createOrderDto.tableNo && !createOrderDto.roomNo && !isTakeaway) {
       throw new BadRequestException('Table or Room number is required for manual orders');
     }
 
     // For manual orders from cashier dashboard, we use a distinct orderType if provided, 
     const orderData = {
       ...createOrderDto,
-      orderType: createOrderDto.orderType || 'MANUAL_CASHIER' as any
+      orderType: createOrderDto.orderType || 'MANUAL_CASHIER' as any,
+      tableNo: isTakeaway && !createOrderDto.tableNo ? 'TAKEAWAY' : createOrderDto.tableNo,
+      diningType: createOrderDto.diningType || DiningType.DINE_IN,
     };
 
     return this.ordersService.create(orderData, restaurantId, req.user.userId);
@@ -121,7 +127,7 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.CASHIER)
   getManualActiveAccounts(
-    @Param('type') type: 'ROOM' | 'TABLE',
+    @Param('type') type: 'ROOM' | 'TABLE' | 'TAKEAWAY',
     @Request() req
   ) {
     const restaurantId = req.user.restaurantId;

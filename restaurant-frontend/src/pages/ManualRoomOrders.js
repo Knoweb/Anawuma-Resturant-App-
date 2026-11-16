@@ -119,7 +119,8 @@ const ManualRoomOrders = () => {
             discountType: discountMeta.discountType || 'NONE',
             discountValue: discountMeta.discountValue || 0,
             discountReason: discountMeta.discountReason || '',
-            finalTotalAmount: discountMeta.finalTotalAmount ?? null,
+            diningType: discountMeta.diningType || account.diningType || 'DINE_IN',
+            finalTotalAmount: discountMeta.totalAmount ?? discountMeta.finalTotalAmount ?? null,
         });
         await printThermalDocument(doc);
     };
@@ -161,6 +162,7 @@ const ManualRoomOrders = () => {
         if (isProcessingManual) return;
         setIsProcessingManual(true);
         try {
+            const isTakeaway = discountPayload.diningType === 'TAKEAWAY' || account.diningType === 'TAKEAWAY';
             const orderIds = account.orders.map(o => o.orderId);
             const response = await apiClient.post('/billing/manual/finalize', {
                 orderIds,
@@ -170,6 +172,7 @@ const ManualRoomOrders = () => {
                 discountType: discountPayload.discountType || 'NONE',
                 discountValue: discountPayload.discountValue || 0,
                 discountReason: discountPayload.discountReason || null,
+                diningType: isTakeaway ? 'TAKEAWAY' : 'DINE_IN',
             });
 
             if (response.data) {
@@ -184,6 +187,7 @@ const ManualRoomOrders = () => {
                         discountType: response.data.discountType,
                         discountValue: response.data.discountValue,
                         discountReason: response.data.discountReason,
+                        diningType: response.data.diningType || (isTakeaway ? 'TAKEAWAY' : 'DINE_IN'),
                         finalTotalAmount: response.data.totalAmount,
                     });
                 }
@@ -224,35 +228,48 @@ const ManualRoomOrders = () => {
         const subtotal = account.orders.reduce((sum, o) => sum + parseFloat(o.subtotal || 0), 0);
         const serviceCharge = account.orders.reduce((sum, o) => sum + parseFloat(o.serviceCharge || 0), 0);
 
+        const initialDiningType = account.diningType 
+            || (account.orders.some(o => o.diningType === 'TAKEAWAY') ? 'TAKEAWAY' : 'DINE_IN');
+
         let discountState = {
+            diningType: initialDiningType,
             discountType: DISCOUNT_TYPES.NONE,
             discountValue: 0,
             discountReason: '',
             discountAmount: 0,
-            totalAmount: subtotal + serviceCharge,
+            serviceCharge: initialDiningType === 'TAKEAWAY' ? 0 : serviceCharge,
+            totalAmount: subtotal + (initialDiningType === 'TAKEAWAY' ? 0 : serviceCharge),
         };
 
         const updateInvoiceDisplay = (currency, rateValue) => {
             const rate = parseFloat(rateValue) || 1;
             const symbol = exchangeRates[currency].symbol;
+            const effectiveSC = discountState.diningType === 'TAKEAWAY' ? 0 : serviceCharge;
             const breakdown = calculateDiscountBreakdown({
                 subtotal,
-                serviceCharge,
+                serviceCharge: effectiveSC,
                 discountType: discountState.discountType,
                 discountValue: discountState.discountValue,
             });
 
+            discountState.serviceCharge = effectiveSC;
             discountState.discountAmount = breakdown.discountAmount;
             discountState.totalAmount = breakdown.totalAmount;
 
             const subtotalEl = document.getElementById('modal-subtotal');
+            const scLabelEl = document.getElementById('modal-service-charge-label-room');
             const scEl = document.getElementById('modal-service-charge');
             const discountRowEl = document.getElementById('modal-discount-row-room');
             const discountValEl = document.getElementById('modal-discount-val-room');
             const totalEl = document.getElementById('modal-grand-total');
 
             if (subtotalEl) subtotalEl.innerText = `${symbol} ${(breakdown.subtotal / rate).toFixed(2)}`;
-            if (scEl) scEl.innerText = `${symbol} ${(breakdown.serviceCharge / rate).toFixed(2)}`;
+            if (scLabelEl) {
+                scLabelEl.innerText = discountState.diningType === 'TAKEAWAY' ? 'Service Charge (0% Take Away)' : 'Service Charge (10%)';
+            }
+            if (scEl) {
+                scEl.innerText = discountState.diningType === 'TAKEAWAY' ? `${symbol} 0.00` : `${symbol} ${(breakdown.serviceCharge / rate).toFixed(2)}`;
+            }
 
             if (discountRowEl && discountValEl) {
                 if (breakdown.discountAmount > 0) {
@@ -332,7 +349,7 @@ const ManualRoomOrders = () => {
                     </table>
                 </div>
 
-                ${renderDiscountSectionHtml({ idPrefix: 'modal-room-discount' })}
+                ${renderDiscountSectionHtml({ idPrefix: 'modal-room-discount', initialDiningType })}
 
                 <div class="invoice-footer border-top pt-2">
                     <div class="d-flex justify-content-between px-2 mb-1">
@@ -340,8 +357,8 @@ const ManualRoomOrders = () => {
                         <span id="modal-subtotal">Rs. ${parseFloat(subtotal).toFixed(2)}</span>
                     </div>
                     <div class="d-flex justify-content-between px-2 mb-1">
-                        <span>Service Charge (10%)</span>
-                        <span id="modal-service-charge">Rs. ${parseFloat(serviceCharge).toFixed(2)}</span>
+                        <span id="modal-service-charge-label-room">${initialDiningType === 'TAKEAWAY' ? 'Service Charge (0% Take Away)' : 'Service Charge (10%)'}</span>
+                        <span id="modal-service-charge">Rs. ${parseFloat(initialDiningType === 'TAKEAWAY' ? 0 : serviceCharge).toFixed(2)}</span>
                     </div>
                     <div class="d-flex justify-content-between px-2 mb-1 text-danger fw-bold" id="modal-discount-row-room" style="display: none;">
                         <span>Discount</span>
@@ -431,13 +448,16 @@ const ManualRoomOrders = () => {
                     idPrefix: 'modal-room-discount',
                     subtotal,
                     serviceCharge,
+                    initialDiningType,
                     getCurrency: () => selectedCurrency,
                     getRate: () => currentRate,
                     getSymbol: () => exchangeRates[selectedCurrency].symbol,
                     onChange: (b) => {
+                        discountState.diningType = b.diningType;
                         discountState.discountType = b.discountType;
                         discountState.discountValue = b.discountValue;
                         discountState.discountReason = b.discountReason;
+                        discountState.serviceCharge = b.serviceCharge;
                         updateInvoiceDisplay(selectedCurrency, currentRate);
                     },
                 });

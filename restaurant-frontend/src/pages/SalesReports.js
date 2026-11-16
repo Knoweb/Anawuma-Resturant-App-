@@ -611,7 +611,7 @@ const SalesReports = () => {
                         {groupedFilteredRows.map((row, i) => (
                           <tr key={i}>
                             <td>{row.orderNo}</td>
-                            <td>{row.roomNo ? `Room ${row.roomNo}` : (row.tableNo ? `Table - ${row.tableNo}` : '–')}</td>
+                            <td>{row.diningType === 'TAKEAWAY' || String(row.tableNo).toUpperCase().startsWith('TAKEAWAY') ? <span className="badge bg-warning text-dark"><i className="fas fa-shopping-bag me-1"></i>Take Away</span> : (row.roomNo ? `Room ${row.roomNo}` : (row.tableNo ? `Table - ${row.tableNo}` : '–'))}</td>
                             <td>{fmtDT(row.createdAt)}</td>
                             <td>{row.itemName}</td>
                             <td>{row.qty}</td>

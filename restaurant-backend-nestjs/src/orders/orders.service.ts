@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In, Brackets } from 'typeorm';
-import { Order, OrderStatus, OrderType } from './entities/order.entity';
+import { Order, OrderStatus, OrderType, DiningType } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { FoodItem } from '../food-items/entities/food-item.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -119,9 +119,13 @@ export class OrdersService {
       });
     }
 
-    // Calculate service charge (10%)
-    const serviceCharge = subtotal * 0.1;
-    const totalAmount = subtotal + serviceCharge;
+    // Calculate service charge based on diningType:
+    // DINE_IN: 10% (0.10) on subtotal
+    // TAKEAWAY: 0% (Rs. 0.00)
+    const isTakeaway = createOrderDto.diningType === DiningType.TAKEAWAY;
+    const serviceCharge = isTakeaway ? 0 : Number((subtotal * 0.1).toFixed(2));
+    const totalAmount = Number((subtotal + serviceCharge).toFixed(2));
+    const effectiveDiningType = isTakeaway ? DiningType.TAKEAWAY : (createOrderDto.diningType || DiningType.DINE_IN);
 
     // Generate sequential order number starting from 1 for this restaurant
     const maxOrder = await this.ordersRepository
@@ -141,10 +145,11 @@ export class OrdersService {
     // Create order with cascade
     const order = this.ordersRepository.create({
       orderNo,
-      tableNo,
+      tableNo: isTakeaway && !tableNo ? 'TAKEAWAY' : tableNo,
       roomNo,
       originalRoomNo: roomNo,
       orderType: orderType || (roomNo ? OrderType.ROOM : OrderType.TABLE),
+      diningType: effectiveDiningType,
       customerName,
       whatsappNumber: normalizedWhatsapp,
       notes,
@@ -490,6 +495,8 @@ export class OrdersService {
 
     if (type === 'ROOM') {
       query.andWhere('order.roomNo IS NOT NULL');
+    } else if (type === 'TAKEAWAY') {
+      query.andWhere('order.diningType = :takeawayType', { takeawayType: DiningType.TAKEAWAY });
     } else {
       query.andWhere('order.tableNo IS NOT NULL');
       // Exclude identifiers that look like rooms to clean up the table view
@@ -504,7 +511,7 @@ export class OrdersService {
     const accounts: Record<string, any> = {};
 
     orders.forEach(order => {
-      const rawKey = type === 'ROOM' ? order.roomNo : order.tableNo;
+      const rawKey = type === 'ROOM' ? order.roomNo : (order.tableNo || 'TAKEAWAY');
       if (!rawKey) return;
 
       // Standardize the key: uppercase, remove spaces, and strip leading zeros
@@ -514,6 +521,7 @@ export class OrdersService {
       if (!accounts[key]) {
         accounts[key] = {
           identifier: key,
+          diningType: order.diningType || (type === 'TAKEAWAY' ? DiningType.TAKEAWAY : DiningType.DINE_IN),
           orders: [],
           totalAmount: 0,
           itemCount: 0,
@@ -533,7 +541,7 @@ export class OrdersService {
     return Object.values(accounts);
   }
 
-  async cancelByAccount(restaurantId: number, type: 'ROOM' | 'TABLE', identifier: string) {
+  async cancelByAccount(restaurantId: number, type: 'ROOM' | 'TABLE' | 'TAKEAWAY', identifier: string) {
     const activeStatuses: OrderStatus[] = [
       OrderStatus.NEW,
       OrderStatus.ACCEPTED,
@@ -552,6 +560,8 @@ export class OrdersService {
     // But for a specific cancel action, usually the frontend provides the exact string
     if (type === 'ROOM') {
       query.andWhere('order.roomNo = :identifier', { identifier });
+    } else if (type === 'TAKEAWAY') {
+      query.andWhere('(order.tableNo = :identifier OR order.diningType = :takeawayType)', { identifier, takeawayType: DiningType.TAKEAWAY });
     } else {
       query.andWhere('order.tableNo = :identifier', { identifier });
     }

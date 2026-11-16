@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 export type DiscountType = 'NONE' | 'PERCENTAGE' | 'FIXED';
+export type DiningType = 'DINE_IN' | 'TAKEAWAY';
 
 export interface FinalBillCalculation {
   subtotal: number;
@@ -10,6 +11,7 @@ export interface FinalBillCalculation {
   discountValue: number;
   discountAmount: number;
   totalAmount: number;
+  diningType: DiningType;
 }
 
 @Injectable()
@@ -18,7 +20,7 @@ export class PricingCalculatorService {
    * Single Source of Truth calculation engine for final bill calculations.
    *
    * Business Rules:
-   * 1. Service Charge is calculated on Subtotal (e.g. 10%).
+   * 1. Service Charge: DINE_IN defaults to 10% on Subtotal. TAKEAWAY is strictly 0% (Rs. 0.00).
    * 2. Gross Total = Subtotal + Service Charge.
    * 3. Discount is applied to Gross Total (Subtotal + Service Charge).
    * 4. PERCENTAGE: Gross Total * (min(100, max(0, discountValue)) / 100).
@@ -31,12 +33,16 @@ export class PricingCalculatorService {
     discountType: DiscountType = 'NONE',
     discountValue: number = 0,
     isRate: boolean = false,
+    diningType: DiningType = 'DINE_IN',
   ): FinalBillCalculation {
     const safeSubtotal = Number(Math.max(0, Number(subtotal) || 0).toFixed(2));
+    const isTakeaway = String(diningType).toUpperCase() === 'TAKEAWAY';
 
-    const serviceCharge = isRate
-      ? Number(((safeSubtotal * Math.max(0, Number(serviceChargeOrRate) || 0)) / 100).toFixed(2))
-      : Number(Math.max(0, Number(serviceChargeOrRate) || 0).toFixed(2));
+    const serviceCharge = isTakeaway
+      ? 0
+      : (isRate
+          ? Number(((safeSubtotal * Math.max(0, Number(serviceChargeOrRate) || 0)) / 100).toFixed(2))
+          : Number(Math.max(0, Number(serviceChargeOrRate) || 0).toFixed(2)));
 
     const grossTotal = Number((safeSubtotal + serviceCharge).toFixed(2));
 
@@ -65,6 +71,7 @@ export class PricingCalculatorService {
       discountValue: safeDiscountVal,
       discountAmount,
       totalAmount,
+      diningType: isTakeaway ? 'TAKEAWAY' : 'DINE_IN',
     };
   }
 }

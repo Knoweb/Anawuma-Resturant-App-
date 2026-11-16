@@ -1,5 +1,6 @@
 import { IsArray, IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { PaymentMethod } from '../entities/invoice.entity';
+import { DiningType } from '../../orders/entities/order.entity';
 
 export enum CheckoutDiscountType {
   NONE = 'NONE',
@@ -15,8 +16,12 @@ export class FinalizeCheckoutDto {
   @IsString()
   identifier: string;
 
-  @IsEnum(['ROOM', 'TABLE'])
-  type: 'ROOM' | 'TABLE';
+  @IsEnum(['ROOM', 'TABLE', 'TAKEAWAY'])
+  type: 'ROOM' | 'TABLE' | 'TAKEAWAY';
+
+  @IsOptional()
+  @IsEnum(DiningType)
+  diningType?: DiningType;
 
   @IsOptional()
   @IsEnum(PaymentMethod)

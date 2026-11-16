@@ -721,6 +721,11 @@ const KitchenKDS = () => {
                 <i className="fas fa-qrcode me-1"></i>QR Order
               </span>
             )}
+            {order.diningType === 'TAKEAWAY' && (
+              <span className="badge bg-warning text-dark ms-2 fw-bold" style={{ fontSize: '0.68em', verticalAlign: 'middle', border: '1px solid #d39e00' }}>
+                <i className="fas fa-shopping-bag me-1"></i>TAKE AWAY
+              </span>
+            )}
             {(order.tableNo || order.roomNo) && (
               <span className={`badge ${order.roomNo ? 'bg-info' : 'bg-primary'} ms-2`}>
                 <i className={`fas ${order.roomNo ? 'fa-concierge-bell' : 'fa-table'} me-1`}></i>
@@ -920,6 +925,11 @@ const KitchenKDS = () => {
                   {selectedOrder.orderType === 'MANUAL_CASHIER' && (
                     <span className="badge bg-secondary ms-2" style={{ fontSize: '0.6em', verticalAlign: 'middle' }}>
                       <i className="fas fa-user-edit me-1"></i>Manual
+                    </span>
+                  )}
+                  {selectedOrder.diningType === 'TAKEAWAY' && (
+                    <span className="badge bg-warning text-dark ms-2 fw-bold" style={{ fontSize: '0.65em', verticalAlign: 'middle' }}>
+                      <i className="fas fa-shopping-bag me-1"></i>TAKE AWAY
                     </span>
                   )}
                 </div>

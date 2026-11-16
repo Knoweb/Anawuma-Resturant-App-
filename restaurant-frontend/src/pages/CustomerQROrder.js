@@ -719,6 +719,9 @@ const CustomerQROrder = ({ isManual = false }) => {
   };
 
   const calculateServiceCharge = () => {
+    if (isManual && manualOrderType === 'TAKEAWAY') {
+      return 0;
+    }
     return calculateSubtotal() * 0.1;
   };
 
@@ -775,7 +778,7 @@ const CustomerQROrder = ({ isManual = false }) => {
       return;
     }
 
-    if (isManual && !manualTableNo.trim()) {
+    if (isManual && manualOrderType !== 'TAKEAWAY' && !manualTableNo.trim()) {
       Swal.fire('Validation Error', `Please enter a ${manualOrderType === 'ROOM' ? 'Room' : 'Table'} number`, 'warning');
       return;
     }
@@ -812,13 +815,19 @@ const CustomerQROrder = ({ isManual = false }) => {
         endpoint = '/orders/manual';
         orderPayload.orderType = 'MANUAL_CASHIER';
 
-        // Normalize: remove leading zeros if numeric (e.g., "03" -> "3")
-        const normalizedManualNo = manualTableNo.trim().replace(/^0+/, '') || manualTableNo.trim();
-
-        if (manualOrderType === 'ROOM') {
-          orderPayload.roomNo = normalizedManualNo;
+        if (manualOrderType === 'TAKEAWAY') {
+          orderPayload.diningType = 'TAKEAWAY';
+          orderPayload.tableNo = manualTableNo.trim() || 'TAKEAWAY';
         } else {
-          orderPayload.tableNo = normalizedManualNo;
+          orderPayload.diningType = 'DINE_IN';
+          // Normalize: remove leading zeros if numeric (e.g., "03" -> "3")
+          const normalizedManualNo = manualTableNo.trim().replace(/^0+/, '') || manualTableNo.trim();
+
+          if (manualOrderType === 'ROOM') {
+            orderPayload.roomNo = normalizedManualNo;
+          } else {
+            orderPayload.tableNo = normalizedManualNo;
+          }
         }
       } else {
         if (tableKey) headers['x-table-key'] = tableKey;
@@ -942,12 +951,20 @@ const CustomerQROrder = ({ isManual = false }) => {
       };
 
       const normalizedManualNo = manualTableNo.trim().replace(/^0+/, '') || manualTableNo.trim();
-      const identifier = normalizedManualNo;
-      const isRoom = modalOrderType === 'room' || manualOrderType === 'ROOM';
-      if (isRoom) {
-        orderPayload.roomNo = normalizedManualNo;
+      const isTakeaway = manualOrderType === 'TAKEAWAY';
+      const identifier = isTakeaway ? (manualTableNo.trim() || 'TAKEAWAY') : normalizedManualNo;
+      const isRoom = !isTakeaway && (modalOrderType === 'room' || manualOrderType === 'ROOM');
+
+      if (isTakeaway) {
+        orderPayload.diningType = 'TAKEAWAY';
+        orderPayload.tableNo = identifier;
       } else {
-        orderPayload.tableNo = normalizedManualNo;
+        orderPayload.diningType = 'DINE_IN';
+        if (isRoom) {
+          orderPayload.roomNo = normalizedManualNo;
+        } else {
+          orderPayload.tableNo = normalizedManualNo;
+        }
       }
 
       // 1. Place Order
@@ -2030,7 +2047,9 @@ const CustomerQROrder = ({ isManual = false }) => {
                 <span className="fw-bold text-nowrap ms-2">Rs. {calculateSubtotal().toFixed(0)}</span>
               </div>
               <div className="d-flex justify-content-between align-items-center mb-3">
-                <span className="small text-muted uppercase">Service Charge</span>
+                <span className="small text-muted uppercase">
+                  Service Charge {isManual && manualOrderType === 'TAKEAWAY' ? '(0% Take Away)' : '(10%)'}
+                </span>
                 <span className="fw-bold text-nowrap ms-2">Rs. {calculateServiceCharge().toFixed(0)}</span>
               </div>
               <div className="d-flex justify-content-between align-items-center mb-4 pt-2 border-top">
@@ -2099,28 +2118,39 @@ const CustomerQROrder = ({ isManual = false }) => {
                       <div className="d-flex gap-2">
                         <button className={`flex-grow-1 btn ${orderLocation === 'inside' ? 'btn-primary' : 'btn-outline-primary'}`} style={orderLocation === 'inside' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }} onClick={() => { setOrderLocation('inside'); setModalOrderType('room'); setManualOrderType('ROOM'); setManualTableNo(''); }}>IN SIDE</button>
                         <button className={`flex-grow-1 btn ${orderLocation === 'outside' ? 'btn-primary' : 'btn-outline-primary'}`} style={orderLocation === 'outside' ? { backgroundColor: '#266668', color: 'white' } : { color: '#266668', borderColor: '#266668' }} onClick={() => { setOrderLocation('outside'); setModalOrderType('table'); setManualOrderType('TABLE'); setManualTableNo(''); }}>OUTSIDE</button>
+                        {isManual && (
+                          <button className={`flex-grow-1 btn ${orderLocation === 'takeaway' ? 'btn-warning text-dark fw-bold' : 'btn-outline-secondary'}`} onClick={() => { setOrderLocation('takeaway'); setModalOrderType('table'); setManualOrderType('TAKEAWAY'); setManualTableNo('TAKEAWAY'); }}>
+                            <i className="fas fa-shopping-bag me-1"></i> TAKE AWAY
+                          </button>
+                        )}
                       </div>
                     </div>
-                    <div className="mb-4">
-                      <label className="d-block mb-2 fw-bold text-muted small">SELECT {orderLocation === 'inside' ? 'ROOM' : 'TABLE'} *</label>
-                      <select className="form-control sketch-input" value={manualTableNo} onChange={(e) => setManualTableNo(e.target.value)}>
-                        <option value="">Select No</option>
-                        {orderLocation === 'inside' ? (
-                          [
-                            'Room 101', 'Room 102', 'Room 103',
-                            'Room 107', 'Room 108',
-                            'Room 204', 'Room 205',
-                            'Room 209', 'Room 210', 'Room 211',
-                            'Room 306',
-                            'Room 312', 'Room 313', 'Room 314',
-                            'Room 415', 'Room 416', 'Room 417',
-                            ...Array.from({ length: 8 }, (_, i) => `HB - ${String(i + 1).padStart(2, '0')}`)
-                          ].map(no => <option key={no} value={no}>{no}</option>)
-                        ) : (
-                          Array.from({ length: 25 }, (_, i) => (i + 1).toString()).map(no => <option key={no} value={no}>Table {no}</option>)
-                        )}
-                      </select>
-                    </div>
+                    {orderLocation !== 'takeaway' ? (
+                      <div className="mb-4">
+                        <label className="d-block mb-2 fw-bold text-muted small">SELECT {orderLocation === 'inside' ? 'ROOM' : 'TABLE'} *</label>
+                        <select className="form-control sketch-input" value={manualTableNo} onChange={(e) => setManualTableNo(e.target.value)}>
+                          <option value="">Select No</option>
+                          {orderLocation === 'inside' ? (
+                            [
+                              'Room 101', 'Room 102', 'Room 103',
+                              'Room 107', 'Room 108',
+                              'Room 204', 'Room 205',
+                              'Room 209', 'Room 210', 'Room 211',
+                              'Room 306',
+                              'Room 312', 'Room 313', 'Room 314',
+                              'Room 415', 'Room 416', 'Room 417',
+                              ...Array.from({ length: 8 }, (_, i) => `HB - ${String(i + 1).padStart(2, '0')}`)
+                            ].map(no => <option key={no} value={no}>{no}</option>)
+                          ) : (
+                            Array.from({ length: 25 }, (_, i) => (i + 1).toString()).map(no => <option key={no} value={no}>Table {no}</option>)
+                          )}
+                        </select>
+                      </div>
+                    ) : (
+                      <div className="alert alert-warning py-2 px-3 small mb-4">
+                        <i className="fas fa-shopping-bag me-1"></i> <strong>Take Away:</strong> 0% Service Charge applied. Kitchen will pack in takeaway containers.
+                      </div>
+                    )}
                     <div className="mb-0">
                       <label className="d-block mb-2 fw-bold text-muted small">ORDER NOTES (OPTIONAL)</label>
                       <textarea className="form-control sketch-input" placeholder="Any special requests..." rows="4" value={modalOrderNotes} onChange={(e) => setModalOrderNotes(e.target.value)}></textarea>

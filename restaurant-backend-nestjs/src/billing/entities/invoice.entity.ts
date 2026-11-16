@@ -138,6 +138,15 @@ export class Invoice {
   discountReason?: string | null;
 
   @Column({
+    name: 'dining_type',
+    type: 'varchar',
+    length: 20,
+    default: 'DINE_IN',
+    nullable: true,
+  })
+  diningType?: string | null;
+
+  @Column({
     name: 'total_amount',
     type: 'decimal',
     precision: 10,

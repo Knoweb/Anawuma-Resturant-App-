@@ -168,6 +168,7 @@ const CashierReport = () => {
     };
 
     const formatTableRoom = (roomNo, tableNo) => {
+      if (tableNo && tableNo.trim().toUpperCase().startsWith('TAKEAWAY')) return 'Take Away';
       if (roomNo) {
         const r = roomNo.trim();
         if (r.toLowerCase().startsWith('room')) return r;
@@ -518,7 +519,7 @@ const CashierReport = () => {
                       {rows.map((row, idx) => (
                         <tr key={idx}>
                           <td><span className="badge bg-light text-dark border">{row.invoiceNumber}</span></td>
-                          <td>{row.roomNo ? `Room ${row.roomNo}` : (row.tableNo ? `Table - ${row.tableNo}` : '–')}</td>
+                          <td>{row.diningType === 'TAKEAWAY' || String(row.tableNo).toUpperCase().startsWith('TAKEAWAY') ? <span className="badge bg-warning text-dark"><i className="fas fa-shopping-bag me-1"></i>Take Away</span> : (row.roomNo ? `Room ${row.roomNo}` : (row.tableNo ? `Table - ${row.tableNo}` : '–'))}</td>
                           <td>{fmtDT(row.createdAt)}</td>
                           <td>{row.itemName}</td>
                           <td>{row.qty}</td>

@@ -30,6 +30,11 @@ export enum OrderType {
   MANUAL_CASHIER = 'MANUAL_CASHIER',
 }
 
+export enum DiningType {
+  DINE_IN = 'DINE_IN',
+  TAKEAWAY = 'TAKEAWAY',
+}
+
 
 @Entity('kitchen_orders_tbl')
 @Index(['restaurantId'])
@@ -72,6 +77,15 @@ export class Order {
     name: 'order_type',
   })
   orderType: OrderType;
+
+  @Column({
+    type: 'varchar',
+    length: 20,
+    default: DiningType.DINE_IN,
+    name: 'dining_type',
+    nullable: true,
+  })
+  diningType: DiningType;
 
   @Column({ type: 'text', nullable: true })
   notes: string;

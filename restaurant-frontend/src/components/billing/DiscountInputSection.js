@@ -67,10 +67,27 @@ export const renderDiscountSectionHtml = ({
   initialType = DISCOUNT_TYPES.NONE,
   initialValue = 0,
   initialReason = '',
+  initialDiningType = 'DINE_IN',
 }) => {
   const hasInitialDiscount = initialValue > 0;
+  const isTakeaway = initialDiningType === 'TAKEAWAY';
   return `
     <div class="discount-config-section mb-3 px-2 bg-light p-2 rounded border text-start" id="${idPrefix}-discount-wrapper">
+      <!-- Order Mode / Dining Type Selector -->
+      <div class="mb-2">
+        <label class="small fw-bold text-muted mb-1 d-block">
+          <i class="fas fa-concierge-bell text-primary me-1"></i> ORDER MODE
+        </label>
+        <div class="btn-group w-100" role="group">
+          <button type="button" id="${idPrefix}-dining-dinein-btn" class="btn btn-sm btn-outline-primary py-1 ${!isTakeaway ? 'active' : ''}" style="font-size:0.8rem;">
+            <i class="fas fa-utensils me-1"></i> Dine-In (10% SC)
+          </button>
+          <button type="button" id="${idPrefix}-dining-takeaway-btn" class="btn btn-sm btn-outline-warning text-dark py-1 ${isTakeaway ? 'active' : ''}" style="font-size:0.8rem;">
+            <i class="fas fa-shopping-bag me-1"></i> Take Away (0% SC)
+          </button>
+        </div>
+      </div>
+
       <div class="d-flex justify-content-between align-items-center mb-2">
         <label class="small fw-bold text-muted mb-0">
           <i class="fas fa-tag text-primary me-1"></i> DISCOUNT (RS.)
@@ -119,6 +136,7 @@ export const initDiscountSectionListeners = ({
   idPrefix = 'checkout',
   subtotal = 0,
   serviceCharge = 0,
+  initialDiningType = 'DINE_IN',
   getCurrency = () => 'LKR',
   getRate = () => 1,
   getSymbol = () => 'Rs.',
@@ -126,9 +144,12 @@ export const initDiscountSectionListeners = ({
 }) => {
   if (!popup) return;
 
+  let currentDiningType = initialDiningType === 'TAKEAWAY' ? 'TAKEAWAY' : 'DINE_IN';
   let currentValue = 0;
   let currentReason = '';
 
+  const dineInBtn = popup.querySelector(`#${idPrefix}-dining-dinein-btn`);
+  const takeawayBtn = popup.querySelector(`#${idPrefix}-dining-takeaway-btn`);
   const valInput = popup.querySelector(`#${idPrefix}-discount-input`);
   const clearBtn = popup.querySelector(`#${idPrefix}-clear-discount-btn`);
   const reasonSelect = popup.querySelector(`#${idPrefix}-discount-reason`);
@@ -142,10 +163,21 @@ export const initDiscountSectionListeners = ({
     currentReason = reasonSelect.value;
   }
 
-  const updateStateAndTrigger = (val, reason = currentReason) => {
+  const updateStateAndTrigger = (val = currentValue, reason = currentReason, diningType = currentDiningType) => {
     currentValue = Math.max(0, parseFloat(val) || 0);
     const currentType = currentValue > 0 ? DISCOUNT_TYPES.FIXED : DISCOUNT_TYPES.NONE;
     currentReason = reason;
+    currentDiningType = diningType;
+
+    if (dineInBtn && takeawayBtn) {
+      if (currentDiningType === 'TAKEAWAY') {
+        takeawayBtn.classList.add('active');
+        dineInBtn.classList.remove('active');
+      } else {
+        dineInBtn.classList.add('active');
+        takeawayBtn.classList.remove('active');
+      }
+    }
 
     if (badgeEl) {
       if (currentValue > 0) {
@@ -157,9 +189,12 @@ export const initDiscountSectionListeners = ({
       }
     }
 
+    // When TAKEAWAY is active, effective service charge is strictly 0
+    const effectiveServiceCharge = currentDiningType === 'TAKEAWAY' ? 0 : serviceCharge;
+
     const breakdown = calculateDiscountBreakdown({
       subtotal,
-      serviceCharge,
+      serviceCharge: effectiveServiceCharge,
       discountType: currentType,
       discountValue: currentValue,
     });
@@ -167,6 +202,8 @@ export const initDiscountSectionListeners = ({
     if (typeof onChange === 'function') {
       onChange({
         ...breakdown,
+        diningType: currentDiningType,
+        serviceCharge: effectiveServiceCharge,
         discountReason: currentReason,
         currency: getCurrency(),
         rate: getRate(),
@@ -174,6 +211,19 @@ export const initDiscountSectionListeners = ({
       });
     }
   };
+
+  // Wire dining buttons
+  if (dineInBtn) {
+    dineInBtn.addEventListener('click', () => {
+      updateStateAndTrigger(valInput ? valInput.value : 0, reasonSelect ? reasonSelect.value : '', 'DINE_IN');
+    });
+  }
+
+  if (takeawayBtn) {
+    takeawayBtn.addEventListener('click', () => {
+      updateStateAndTrigger(valInput ? valInput.value : 0, reasonSelect ? reasonSelect.value : '', 'TAKEAWAY');
+    });
+  }
 
   // Wire manual numeric input
   if (valInput) {
@@ -202,6 +252,7 @@ export const initDiscountSectionListeners = ({
 
   return {
     getCurrentState: () => ({
+      diningType: currentDiningType,
       discountType: currentValue > 0 ? DISCOUNT_TYPES.FIXED : DISCOUNT_TYPES.NONE,
       discountValue: currentValue,
       discountReason: currentReason,
@@ -215,38 +266,68 @@ export const initDiscountSectionListeners = ({
 export default function DiscountInputSection({
   subtotal = 0,
   serviceCharge = 0,
+  initialDiningType = 'DINE_IN',
   currency = 'LKR',
   symbol = 'Rs.',
   rate = 1,
   onChange,
 }) {
+  const [diningType, setDiningType] = useState(initialDiningType);
   const [discountValue, setDiscountValue] = useState(0);
   const [discountReason, setDiscountReason] = useState('');
 
   const discountType = discountValue > 0 ? DISCOUNT_TYPES.FIXED : DISCOUNT_TYPES.NONE;
+  const effectiveServiceCharge = diningType === 'TAKEAWAY' ? 0 : serviceCharge;
 
   const breakdown = useMemo(() => {
     return calculateDiscountBreakdown({
       subtotal,
-      serviceCharge,
+      serviceCharge: effectiveServiceCharge,
       discountType,
       discountValue,
     });
-  }, [subtotal, serviceCharge, discountType, discountValue]);
+  }, [subtotal, effectiveServiceCharge, discountType, discountValue]);
 
   useEffect(() => {
     if (typeof onChange === 'function') {
       onChange({
         ...breakdown,
+        diningType,
+        serviceCharge: effectiveServiceCharge,
         discountReason,
       });
     }
-  }, [breakdown, discountReason, onChange]);
+  }, [breakdown, diningType, effectiveServiceCharge, discountReason, onChange]);
 
   const safeRate = Number(rate) > 0 ? Number(rate) : 1;
 
   return (
     <div className="discount-input-section bg-light p-3 rounded border mb-3">
+      {/* Order Mode Selector */}
+      <div className="mb-2">
+        <label className="small fw-bold text-muted mb-1 d-block">
+          <i className="fas fa-concierge-bell text-primary me-1"></i> ORDER MODE
+        </label>
+        <div className="btn-group w-100" role="group">
+          <button
+            type="button"
+            className={`btn btn-sm btn-outline-primary py-1 ${diningType !== 'TAKEAWAY' ? 'active' : ''}`}
+            onClick={() => setDiningType('DINE_IN')}
+            style={{ fontSize: '0.8rem' }}
+          >
+            <i className="fas fa-utensils me-1"></i> Dine-In (10% SC)
+          </button>
+          <button
+            type="button"
+            className={`btn btn-sm btn-outline-warning text-dark py-1 ${diningType === 'TAKEAWAY' ? 'active' : ''}`}
+            onClick={() => setDiningType('TAKEAWAY')}
+            style={{ fontSize: '0.8rem' }}
+          >
+            <i className="fas fa-shopping-bag me-1"></i> Take Away (0% SC)
+          </button>
+        </div>
+      </div>
+
       <div className="d-flex justify-content-between align-items-center mb-2">
         <label className="fw-bold text-muted mb-0 small">
           <i className="fas fa-tag text-primary me-1"></i> DISCOUNT (RS.)

@@ -74,14 +74,15 @@ const ManualTableOrders = () => {
     };
 
     const printAccountBill = async (account, id, currency = 'LKR', rate = 1, symbol = 'Rs.', invoiceNumber = null, discountMeta = {}) => {
-        const tableLabel = id.toString().toUpperCase().startsWith('TABLE') ? id : `TABLE-${id}`;
+        const isTakeaway = (discountMeta.diningType || account.diningType) === 'TAKEAWAY' || id.toString().toUpperCase().startsWith('TAKEAWAY');
+        const tableLabel = isTakeaway ? 'TAKE AWAY' : (id.toString().toUpperCase().startsWith('TABLE') ? id : `TABLE-${id}`);
         const qrUrl = `${window.location.origin}/google-review-qr.jpeg`;
         const doc = buildAccountBillDocument({
             restaurantName,
             restaurantInfo,
             account,
-            summaryHeading: `BILL SUMMARY (${tableLabel})`,
-            locationLabel: 'Table',
+            summaryHeading: isTakeaway ? 'BILL SUMMARY (TAKE AWAY)' : `BILL SUMMARY (${tableLabel})`,
+            locationLabel: isTakeaway ? 'Type' : 'Table',
             locationValue: tableLabel,
             currency,
             rate,
@@ -94,7 +95,8 @@ const ManualTableOrders = () => {
             discountType: discountMeta.discountType || 'NONE',
             discountValue: discountMeta.discountValue || 0,
             discountReason: discountMeta.discountReason || '',
-            finalTotalAmount: discountMeta.finalTotalAmount ?? null,
+            diningType: isTakeaway ? 'TAKEAWAY' : 'DINE_IN',
+            finalTotalAmount: discountMeta.totalAmount ?? discountMeta.finalTotalAmount ?? null,
         });
         await printThermalDocument(doc);
     };
@@ -136,15 +138,17 @@ const ManualTableOrders = () => {
         if (isProcessingManual) return;
         setIsProcessingManual(true);
         try {
+            const isTakeaway = discountPayload.diningType === 'TAKEAWAY' || account.diningType === 'TAKEAWAY';
             const orderIds = account.orders.map(o => o.orderId);
             const response = await apiClient.post('/billing/manual/finalize', {
                 orderIds,
                 identifier: tableNo,
-                type: 'TABLE',
+                type: isTakeaway ? 'TAKEAWAY' : 'TABLE',
                 paymentMethod,
                 discountType: discountPayload.discountType || 'NONE',
                 discountValue: discountPayload.discountValue || 0,
                 discountReason: discountPayload.discountReason || null,
+                diningType: isTakeaway ? 'TAKEAWAY' : 'DINE_IN',
             });
 
             if (response.data) {
@@ -159,6 +163,7 @@ const ManualTableOrders = () => {
                         discountType: response.data.discountType,
                         discountValue: response.data.discountValue,
                         discountReason: response.data.discountReason,
+                        diningType: response.data.diningType || (isTakeaway ? 'TAKEAWAY' : 'DINE_IN'),
                         finalTotalAmount: response.data.totalAmount,
                     });
                 }
@@ -199,35 +204,48 @@ const ManualTableOrders = () => {
         const subtotal = account.orders.reduce((sum, o) => sum + parseFloat(o.subtotal || 0), 0);
         const serviceCharge = account.orders.reduce((sum, o) => sum + parseFloat(o.serviceCharge || 0), 0);
 
+        const initialDiningType = account.diningType 
+            || (account.orders.some(o => o.diningType === 'TAKEAWAY') ? 'TAKEAWAY' : 'DINE_IN');
+
         let discountState = {
+            diningType: initialDiningType,
             discountType: DISCOUNT_TYPES.NONE,
             discountValue: 0,
             discountReason: '',
             discountAmount: 0,
-            totalAmount: subtotal + serviceCharge,
+            serviceCharge: initialDiningType === 'TAKEAWAY' ? 0 : serviceCharge,
+            totalAmount: subtotal + (initialDiningType === 'TAKEAWAY' ? 0 : serviceCharge),
         };
 
         const updateInvoiceDisplay = (currency, rateValue) => {
             const rate = parseFloat(rateValue) || 1;
             const symbol = exchangeRates[currency].symbol;
+            const effectiveSC = discountState.diningType === 'TAKEAWAY' ? 0 : serviceCharge;
             const breakdown = calculateDiscountBreakdown({
                 subtotal,
-                serviceCharge,
+                serviceCharge: effectiveSC,
                 discountType: discountState.discountType,
                 discountValue: discountState.discountValue,
             });
 
+            discountState.serviceCharge = effectiveSC;
             discountState.discountAmount = breakdown.discountAmount;
             discountState.totalAmount = breakdown.totalAmount;
 
             const subtotalEl = document.getElementById('modal-subtotal-table');
+            const scLabelEl = document.getElementById('modal-service-charge-label-table');
             const scEl = document.getElementById('modal-service-charge-table');
             const discountRowEl = document.getElementById('modal-discount-row-table');
             const discountValEl = document.getElementById('modal-discount-val-table');
             const totalEl = document.getElementById('modal-grand-total-table');
 
             if (subtotalEl) subtotalEl.innerText = `${symbol} ${(breakdown.subtotal / rate).toFixed(2)}`;
-            if (scEl) scEl.innerText = `${symbol} ${(breakdown.serviceCharge / rate).toFixed(2)}`;
+            if (scLabelEl) {
+                scLabelEl.innerText = discountState.diningType === 'TAKEAWAY' ? 'Service Charge (0% Take Away)' : 'Service Charge (10%)';
+            }
+            if (scEl) {
+                scEl.innerText = discountState.diningType === 'TAKEAWAY' ? `${symbol} 0.00` : `${symbol} ${(breakdown.serviceCharge / rate).toFixed(2)}`;
+            }
 
             if (discountRowEl && discountValEl) {
                 if (breakdown.discountAmount > 0) {
@@ -307,7 +325,7 @@ const ManualTableOrders = () => {
                     </table>
                 </div>
 
-                ${renderDiscountSectionHtml({ idPrefix: 'modal-table-discount' })}
+                ${renderDiscountSectionHtml({ idPrefix: 'modal-table-discount', initialDiningType })}
 
                 <div class="invoice-footer border-top pt-2">
                     <div class="d-flex justify-content-between px-2 mb-1">
@@ -315,8 +333,8 @@ const ManualTableOrders = () => {
                         <span id="modal-subtotal-table">Rs. ${parseFloat(subtotal).toFixed(2)}</span>
                     </div>
                     <div class="d-flex justify-content-between px-2 mb-1">
-                        <span>Service Charge (10%)</span>
-                        <span id="modal-service-charge-table">Rs. ${parseFloat(serviceCharge).toFixed(2)}</span>
+                        <span id="modal-service-charge-label-table">${initialDiningType === 'TAKEAWAY' ? 'Service Charge (0% Take Away)' : 'Service Charge (10%)'}</span>
+                        <span id="modal-service-charge-table">Rs. ${parseFloat(initialDiningType === 'TAKEAWAY' ? 0 : serviceCharge).toFixed(2)}</span>
                     </div>
                     <div class="d-flex justify-content-between px-2 mb-1 text-danger fw-bold" id="modal-discount-row-table" style="display: none;">
                         <span>Discount</span>
@@ -406,13 +424,16 @@ const ManualTableOrders = () => {
                     idPrefix: 'modal-table-discount',
                     subtotal,
                     serviceCharge,
+                    initialDiningType,
                     getCurrency: () => selectedCurrency,
                     getRate: () => currentRate,
                     getSymbol: () => exchangeRates[selectedCurrency].symbol,
                     onChange: (b) => {
+                        discountState.diningType = b.diningType;
                         discountState.discountType = b.discountType;
                         discountState.discountValue = b.discountValue;
                         discountState.discountReason = b.discountReason;
+                        discountState.serviceCharge = b.serviceCharge;
                         updateInvoiceDisplay(selectedCurrency, currentRate);
                     },
                 });
@@ -594,29 +615,32 @@ const ManualTableOrders = () => {
                                             </div>
                                         </div>
                                     ) : (
-                                        accounts.map(account => (
-                                            <div
-                                                key={account.identifier}
-                                                className="account-card has-orders"
-                                                onClick={() => handleTableClick(account.identifier, account)}
-                                            >
-                                                <div className="account-card-body">
-                                                    <div className="account-icon-wrapper">
-                                                        <i className="fas fa-chair fa-2x"></i>
-                                                    </div>
-                                                    <div className="account-id">TABLE {account.identifier}</div>
-                                                    <div className="badge bg-primary-soft text-primary order-count-badge">
-                                                        {account.orders.length} Active Orders
-                                                    </div>
-                                                    <div className="account-total-amount">
-                                                        Rs. {account.totalAmount.toLocaleString()}
-                                                    </div>
-                                                    <div className="last-order-time">
-                                                        Updated: {formatBillTime(account.lastOrderAt)}
+                                        accounts.map(account => {
+                                            const isTakeaway = account.diningType === 'TAKEAWAY' || account.identifier.startsWith('TAKEAWAY');
+                                            return (
+                                                <div
+                                                    key={account.identifier}
+                                                    className="account-card has-orders"
+                                                    onClick={() => handleTableClick(account.identifier, account)}
+                                                >
+                                                    <div className="account-card-body">
+                                                        <div className="account-icon-wrapper">
+                                                            <i className={`fas ${isTakeaway ? 'fa-shopping-bag text-warning' : 'fa-chair'} fa-2x`}></i>
+                                                        </div>
+                                                        <div className="account-id">{isTakeaway ? (account.identifier === 'TAKEAWAY' ? 'TAKE AWAY' : `TAKE AWAY (${account.identifier})`) : `TABLE ${account.identifier}`}</div>
+                                                        <div className={`badge ${isTakeaway ? 'bg-warning text-dark' : 'bg-primary-soft text-primary'} order-count-badge`}>
+                                                            {isTakeaway ? 'Take Away' : `${account.orders.length} Active Orders`}
+                                                        </div>
+                                                        <div className="account-total-amount">
+                                                            Rs. {account.totalAmount.toLocaleString()}
+                                                        </div>
+                                                        <div className="last-order-time">
+                                                            Updated: {formatBillTime(account.lastOrderAt)}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        ))
+                                            );
+                                        })
                                     )}
                                 </div>
                             )}

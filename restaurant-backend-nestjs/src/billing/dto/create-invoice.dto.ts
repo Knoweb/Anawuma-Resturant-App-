@@ -1,6 +1,7 @@
 import { IsNumber, IsOptional, Min, IsEnum, IsString } from 'class-validator';
 import { PaymentMethod } from '../entities/invoice.entity';
 import { CheckoutDiscountType } from './finalize-checkout.dto';
+import { DiningType } from '../../orders/entities/order.entity';
 
 export class CreateInvoiceDto {
   @IsNumber()
@@ -37,4 +38,8 @@ export class CreateInvoiceDto {
   @IsOptional()
   @IsEnum(PaymentMethod)
   paymentMethod?: PaymentMethod;
+
+  @IsOptional()
+  @IsEnum(DiningType)
+  diningType?: DiningType;
 }
