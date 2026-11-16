@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString, IsArray, ValidateNested, Min, Max, ArrayMaxSize, IsEnum } from 'class-validator';
+import { IsInt, IsNotEmpty, IsOptional, IsString, IsArray, ValidateNested, Min, Max, ArrayMaxSize, IsEnum, IsNumber, ValidateIf, MaxLength } from 'class-validator';
 import { Type } from 'class-transformer';
 import { DiningType, OrderType } from '../entities/order.entity';
 
@@ -12,6 +12,17 @@ export class CreateOrderItemDto {
   @Min(1, { message: 'Quantity must be at least 1' })
   @Max(20, { message: 'Quantity cannot exceed 20 per item' })
   qty: number;
+
+  @IsNumber()
+  @IsOptional()
+  @Min(0, { message: 'Extra price cannot be negative' })
+  extraPrice?: number;
+
+  @ValidateIf((o) => Number(o.extraPrice) > 0)
+  @IsNotEmpty({ message: 'Description is required when extra charge is applied' })
+  @IsString()
+  @MaxLength(255)
+  extraDescription?: string;
 
   @IsString()
   @IsOptional()

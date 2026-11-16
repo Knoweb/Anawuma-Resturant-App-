@@ -48,8 +48,16 @@ export class OrdersController {
 
     // Override tableNo/roomNo/orderType from the guard (more secure than client input)
     // QR Security Guardrail: Public table/room QR scans MUST always be DINE_IN (cannot bypass service charge)
+    // and CANNOT inject custom extra charges (extraPrice is forcefully stripped to 0)
+    const sanitizedItems = (createOrderDto.items || []).map((item) => ({
+      ...item,
+      extraPrice: 0,
+      extraDescription: undefined,
+    }));
+
     const orderData = {
       ...createOrderDto,
+      items: sanitizedItems,
       tableNo,
       roomNo,
       orderType,

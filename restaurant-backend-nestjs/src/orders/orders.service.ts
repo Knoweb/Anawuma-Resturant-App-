@@ -105,14 +105,19 @@ export class OrdersService {
         });
       }
 
+      const extraPrice = Math.max(0, parseFloat(item.extraPrice?.toString() || '0'));
+      const extraDescription = extraPrice > 0 ? (item.extraDescription?.trim() || null) : null;
       const unitPrice = parseFloat(discountedPrice.toFixed(2));
-      const lineTotal = unitPrice * item.qty;
+      const effectiveUnitPrice = parseFloat((unitPrice + extraPrice).toFixed(2));
+      const lineTotal = parseFloat((effectiveUnitPrice * item.qty).toFixed(2));
       subtotal += lineTotal;
 
       orderItems.push({
         foodItemId: item.foodItemId,
         itemName: foodItem.itemName,
         unitPrice: unitPrice,
+        extraPrice: extraPrice,
+        extraDescription: extraDescription,
         qty: item.qty,
         lineTotal: lineTotal,
         notes: item.notes,

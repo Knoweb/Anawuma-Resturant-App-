@@ -107,6 +107,8 @@ const MANUAL_ROOM_OPTIONS = [
 
 const MANUAL_TABLE_OPTIONS = Array.from({ length: 25 }, (_, i) => (i + 1).toString());
 
+const ADDON_PRESETS = ['Extra Cheese', 'Extra Egg', 'Extra Meat', 'Large Portion', 'Extra Sauce'];
+
 const CustomerQROrder = ({ isManual = false }) => {
   const { tableKey, roomKey } = useParams();
   const navigate = useNavigate();
@@ -121,6 +123,8 @@ const CustomerQROrder = ({ isManual = false }) => {
   const [modalOrderType, setModalOrderType] = useState('room');
   const [orderLocation, setOrderLocation] = useState('inside');
   const [modalOrderNotes, setModalOrderNotes] = useState('');
+  const [modalExtraPrice, setModalExtraPrice] = useState('');
+  const [modalExtraDescription, setModalExtraDescription] = useState('');
   const [cart, setCart] = useState([]);
   const [customerName, setCustomerName] = useState('');
   const [whatsappNumber, setWhatsappNumber] = useState('');
@@ -561,6 +565,8 @@ const CustomerQROrder = ({ isManual = false }) => {
         onClick={() => {
           setActiveItemDetail(item);
           setModalQty(1);
+          setModalExtraPrice('');
+          setModalExtraDescription('');
         }}
       >
         <h2 className="category-title-red">{item.itemName}</h2>
@@ -640,6 +646,8 @@ const CustomerQROrder = ({ isManual = false }) => {
           e.stopPropagation();
           setActiveItemDetail(item);
           setModalQty(1);
+          setModalExtraPrice('');
+          setModalExtraDescription('');
         }}
         style={{ position: 'relative' }}
       >
@@ -708,27 +716,30 @@ const CustomerQROrder = ({ isManual = false }) => {
     }
   };
 
-  const updateCartItemQty = (foodItemId, delta) => {
-    setCart(cart.map(item =>
-      item.foodItemId === foodItemId
-        ? { ...item, qty: Math.max(1, item.qty + delta) }
-        : item
-    ).filter(item => item.qty > 0));
+  const updateCartItemQty = (cartItemKey, delta) => {
+    setCart(cart.map(item => {
+      const match = (item.cartKey || item.foodItemId) === cartItemKey || item.foodItemId === cartItemKey;
+      return match ? { ...item, qty: Math.max(1, item.qty + delta) } : item;
+    }).filter(item => item.qty > 0));
   };
 
-  const removeFromCart = (foodItemId) => {
-    setCart(cart.filter(item => item.foodItemId !== foodItemId));
+  const removeFromCart = (cartItemKey) => {
+    setCart(cart.filter(item => (item.cartKey || item.foodItemId) !== cartItemKey && item.foodItemId !== cartItemKey));
   };
 
   // eslint-disable-next-line no-unused-vars
-  const updateCartItemNotes = (foodItemId, notes) => {
-    setCart(cart.map(item =>
-      item.foodItemId === foodItemId ? { ...item, notes } : item
-    ));
+  const updateCartItemNotes = (cartItemKey, notes) => {
+    setCart(cart.map(item => {
+      const match = (item.cartKey || item.foodItemId) === cartItemKey || item.foodItemId === cartItemKey;
+      return match ? { ...item, notes } : item;
+    }));
   };
 
   const calculateSubtotal = () => {
-    return cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    return cart.reduce((sum, item) => {
+      const itemUnitPrice = parseFloat(item.price || 0) + parseFloat(item.extraPrice || 0);
+      return sum + (itemUnitPrice * item.qty);
+    }, 0);
   };
 
   const calculateServiceCharge = () => {
@@ -745,20 +756,34 @@ const CustomerQROrder = ({ isManual = false }) => {
   const addToCartFromModal = (openDrawer = false) => {
     if (!activeItemDetail) return;
 
+    const extraPriceNum = isManual ? Math.max(0, parseFloat(modalExtraPrice) || 0) : 0;
+    const extraDesc = (isManual && extraPriceNum > 0) ? modalExtraDescription.trim() : '';
+
+    if (extraPriceNum > 0 && !extraDesc) {
+      Swal.fire('Validation Error', 'Please enter a description for the extra charge (e.g. Extra Cheese)', 'warning');
+      return;
+    }
+
     const item = activeItemDetail;
-    const existingItem = cart.find(cartItem => cartItem.foodItemId === item.foodItemId);
+    const basePrice = parseFloat(item.discountedPrice || item.price);
+    const cartKey = `${item.foodItemId || item.id}::${extraPriceNum.toFixed(2)}::${extraDesc.toLowerCase()}`;
+    const existingItem = cart.find(cartItem => (cartItem.cartKey || cartItem.foodItemId) === cartKey);
 
     if (existingItem) {
       setCart(cart.map(cartItem =>
-        cartItem.foodItemId === item.foodItemId
+        (cartItem.cartKey || cartItem.foodItemId) === cartKey
           ? { ...cartItem, qty: cartItem.qty + modalQty, notes: modalOrderNotes || cartItem.notes }
           : cartItem
       ));
     } else {
       setCart([...cart, {
+        cartKey,
         foodItemId: item.foodItemId || item.id,
         name: item.itemName,
-        price: parseFloat(item.discountedPrice || item.price),
+        price: basePrice,
+        extraPrice: extraPriceNum,
+        extraDescription: extraDesc,
+        effectivePrice: basePrice + extraPriceNum,
         qty: modalQty,
         notes: modalOrderNotes || ''
       }]);
@@ -767,6 +792,8 @@ const CustomerQROrder = ({ isManual = false }) => {
     setActiveItemDetail(null);
     setModalQty(1);
     setModalOrderNotes('');
+    setModalExtraPrice('');
+    setModalExtraDescription('');
     
     if (openDrawer) {
       setShowCart(true);
@@ -814,6 +841,8 @@ const CustomerQROrder = ({ isManual = false }) => {
         items: cart.map(item => ({
           foodItemId: parseInt(item.foodItemId),
           qty: parseInt(item.qty),
+          extraPrice: parseFloat(item.extraPrice || 0),
+          extraDescription: item.extraDescription || null,
           notes: item.notes || null
         }))
       };
@@ -948,6 +977,14 @@ const CustomerQROrder = ({ isManual = false }) => {
       return;
     }
 
+    const extraPriceNum = isManual ? Math.max(0, parseFloat(modalExtraPrice) || 0) : 0;
+    const extraDesc = (isManual && extraPriceNum > 0) ? modalExtraDescription.trim() : '';
+
+    if (extraPriceNum > 0 && !extraDesc) {
+      Swal.fire('Validation Error', 'Please enter a description for the extra charge (e.g. Extra Cheese)', 'warning');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       // 0. Prepare Payload
@@ -958,6 +995,8 @@ const CustomerQROrder = ({ isManual = false }) => {
         items: [{
           foodItemId: activeItemDetail.foodItemId,
           qty: modalQty,
+          extraPrice: extraPriceNum,
+          extraDescription: extraDesc || null,
           notes: modalOrderNotes.trim() || null
         }],
         orderType: 'MANUAL_CASHIER'
@@ -1006,6 +1045,8 @@ const CustomerQROrder = ({ isManual = false }) => {
       setCart([]);
       setActiveItemDetail(null);
       setModalOrderNotes('');
+      setModalExtraPrice('');
+      setModalExtraDescription('');
 
       const target = isRoom ? '/manual-orders/rooms' : '/manual-orders/tables';
       navigate(target);
@@ -2232,6 +2273,82 @@ const CustomerQROrder = ({ isManual = false }) => {
                         <i className="fas fa-shopping-bag me-1"></i> <strong>Take Away:</strong> 0% Service Charge applied. Kitchen will pack in takeaway containers.
                       </div>
                     )}
+                    {/* Cashier-Only Extra Charge / Custom Add-ons */}
+                    {isManual && (
+                      <div className="mb-4 p-3 bg-white border rounded shadow-sm">
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                          <label className="fw-bold text-muted small text-uppercase mb-0">
+                            <i className="fas fa-plus-circle text-success me-1"></i> Custom Add-on / Extra Charge (Rs.)
+                          </label>
+                          {parseFloat(modalExtraPrice) > 0 && (
+                            <span className="badge bg-success text-white small" style={{ fontSize: '0.75rem' }}>
+                              +Rs. {parseFloat(modalExtraPrice).toFixed(0)} per item
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Quick Preset Chips */}
+                        <div className="d-flex flex-wrap gap-1 mb-2">
+                          {ADDON_PRESETS.map((preset) => (
+                            <button
+                              key={preset}
+                              type="button"
+                              className={`btn btn-sm py-0 px-2 ${modalExtraDescription === preset ? 'btn-success text-white' : 'btn-outline-secondary'}`}
+                              style={{ fontSize: '0.75rem', borderRadius: '12px' }}
+                              onClick={() => {
+                                setModalExtraDescription(preset);
+                                if (!modalExtraPrice || parseFloat(modalExtraPrice) === 0) {
+                                  setModalExtraPrice('150');
+                                }
+                              }}
+                            >
+                              + {preset}
+                            </button>
+                          ))}
+                        </div>
+
+                        <div className="row g-2">
+                          <div className="col-4">
+                            <div className="input-group input-group-sm">
+                              <span className="input-group-text bg-light text-muted">Rs.</span>
+                              <input
+                                type="number"
+                                min="0"
+                                step="10"
+                                className="form-control fw-bold"
+                                placeholder="0"
+                                value={modalExtraPrice}
+                                onChange={(e) => setModalExtraPrice(e.target.value)}
+                              />
+                            </div>
+                          </div>
+                          <div className="col-8">
+                            <input
+                              type="text"
+                              className="form-control form-control-sm"
+                              placeholder="Description (e.g. Extra Cheese) *"
+                              value={modalExtraDescription}
+                              onChange={(e) => setModalExtraDescription(e.target.value)}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Live Price Breakdown in Modal */}
+                        {activeItemDetail && (
+                          <div className="mt-2 pt-2 border-top small text-muted d-flex justify-content-between">
+                            <span>
+                              Base: Rs. {parseFloat(activeItemDetail.discountedPrice || activeItemDetail.price).toFixed(0)}
+                              {parseFloat(modalExtraPrice) > 0 ? ` + Extra: Rs. ${parseFloat(modalExtraPrice).toFixed(0)}` : ''}
+                            </span>
+                            <strong className="text-dark">
+                              Unit: Rs. {(parseFloat(activeItemDetail.discountedPrice || activeItemDetail.price) + (parseFloat(modalExtraPrice) || 0)).toFixed(0)}
+                              {' '}&times; {modalQty} = Rs. {((parseFloat(activeItemDetail.discountedPrice || activeItemDetail.price) + (parseFloat(modalExtraPrice) || 0)) * modalQty).toFixed(0)}
+                            </strong>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     <div className="mb-0">
                       <label className="d-block mb-2 fw-bold text-muted small">ORDER NOTES (OPTIONAL)</label>
                       <textarea className="form-control sketch-input" placeholder="Any special requests..." rows="4" value={modalOrderNotes} onChange={(e) => setModalOrderNotes(e.target.value)}></textarea>
@@ -2262,19 +2379,32 @@ const CustomerQROrder = ({ isManual = false }) => {
               <div className="text-center py-5 opacity-50"><i className="fas fa-shopping-basket fa-3x mb-3"></i><p>Your cart is empty</p></div>
             ) : (
               <div className="cart-items">
-                {cart.map(item => (
-                  <div key={item.foodItemId} className="p-3 border-bottom mb-2 bg-light rounded">
-                    <div className="fw-bold">{item.name}</div>
-                    <div className="d-flex justify-content-between align-items-center mt-2">
-                      <span>Rs. {item.price.toFixed(0)} x {item.qty}</span>
-                      <div className="d-flex gap-2">
-                        <button className="btn btn-sm btn-outline-secondary" onClick={() => updateCartItemQty(item.foodItemId, -1)}>-</button>
-                        <button className="btn btn-sm btn-outline-secondary" onClick={() => updateCartItemQty(item.foodItemId, 1)}>+</button>
-                        <button className="btn btn-sm btn-link text-danger" onClick={() => removeFromCart(item.foodItemId)}><i className="fas fa-trash"></i></button>
+                {cart.map(item => {
+                  const effectiveUnit = (item.price || 0) + (item.extraPrice || 0);
+                  const itemKey = item.cartKey || item.foodItemId;
+                  return (
+                    <div key={itemKey} className="p-3 border-bottom mb-2 bg-white border rounded">
+                      <div className="d-flex justify-content-between align-items-start">
+                        <div>
+                          <div className="fw-bold">{item.name}</div>
+                          {item.extraPrice > 0 && (
+                            <div className="badge bg-warning text-dark border small my-1">
+                              <i className="fas fa-plus me-1"></i>{item.extraDescription || 'Extra'}: +Rs. {parseFloat(item.extraPrice).toFixed(0)} ea
+                            </div>
+                          )}
+                          <div className="small text-muted">Rs. {effectiveUnit.toFixed(0)} &times; {item.qty}</div>
+                        </div>
+                        <div className="fw-bold text-dark ms-2">Rs. {(effectiveUnit * item.qty).toFixed(0)}</div>
+                      </div>
+                      <div className="d-flex justify-content-end align-items-center mt-2 gap-2">
+                        <button className="btn btn-sm btn-outline-secondary" onClick={() => updateCartItemQty(itemKey, -1)}>-</button>
+                        <span className="px-2 fw-bold">{item.qty}</span>
+                        <button className="btn btn-sm btn-outline-secondary" onClick={() => updateCartItemQty(itemKey, 1)}>+</button>
+                        <button className="btn btn-sm btn-link text-danger ms-2" onClick={() => removeFromCart(itemKey)}><i className="fas fa-trash"></i></button>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

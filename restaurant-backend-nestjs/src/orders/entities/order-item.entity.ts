@@ -25,6 +25,12 @@ export class OrderItem {
   @Column({ name: 'unit_price', type: 'decimal', precision: 10, scale: 2 })
   unitPrice: number;
 
+  @Column({ name: 'extra_price', type: 'decimal', precision: 10, scale: 2, default: 0 })
+  extraPrice: number;
+
+  @Column({ name: 'extra_description', type: 'varchar', length: 255, nullable: true })
+  extraDescription: string | null;
+
   @Column({ type: 'int' })
   qty: number;
 

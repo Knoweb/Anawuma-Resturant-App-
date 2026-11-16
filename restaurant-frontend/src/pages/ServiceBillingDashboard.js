@@ -99,7 +99,15 @@ function PrintableInvoice({ invoice, restaurantName, address, contactNumber }) {
         <tbody>
           {items.map((item, i) => (
             <tr key={i}>
-              <td>{item.itemName}{item.notes ? <span className="pi-note"> ({item.notes})</span> : ''}</td>
+              <td>
+                {item.itemName}
+                {item.extraDescription && (
+                  <div className="small text-muted" style={{ fontSize: '11px', paddingLeft: '4px' }}>
+                    + {item.extraDescription}{Number(item.extraPrice) > 0 ? ` (+${formatCurrency(item.extraPrice)})` : ''}
+                  </div>
+                )}
+                {item.notes ? <span className="pi-note"> ({item.notes})</span> : ''}
+              </td>
               <td className="pi-center">{item.qty}</td>
               <td className="pi-right">{formatCurrency(item.unitPrice)}</td>
               <td className="pi-right">{formatCurrency(item.lineTotal)}</td>
@@ -190,7 +198,7 @@ function InvoiceModal({ invoice, restaurantName, address, contactNumber, onClose
 
       const phone = normalizeWhatsAppNumber(invoice.whatsappNumber);
       const itemLines = (Array.isArray(invoice.orderItemsJson) ? invoice.orderItemsJson : [])
-        .map((i) => `  • ${i.itemName} x${i.qty} - ${formatCurrency(i.lineTotal)}`)
+        .map((i) => `  • ${i.itemName}${i.extraDescription ? ` (+ ${i.extraDescription})` : ''} x${i.qty} - ${formatCurrency(i.lineTotal)}`)
         .join('\n');
 
       const isTakeaway = invoice.diningType === 'TAKEAWAY' || String(invoice.tableNo).toUpperCase().includes('TAKEAWAY');
@@ -1492,7 +1500,14 @@ function ReadyOrderCard({ order, onMarkServed }) {
       <ul className="roc-items">
         {items.map((item, i) => (
           <li key={i}>
-            <span>{item.itemName}</span>
+            <span>
+              {item.itemName}
+              {item.extraDescription && (
+                <span className="badge bg-warning text-dark border ms-1" style={{ fontSize: '0.68rem' }}>
+                  +{item.extraDescription}
+                </span>
+              )}
+            </span>
             <span className="text-muted">&times;{item.qty}</span>
           </li>
         ))}

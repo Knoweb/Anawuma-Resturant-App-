@@ -782,6 +782,13 @@ const KitchenKDS = () => {
                 orderItems.map((item, index) => (
                   <li key={item.orderItemId || `${order.orderId}-${index}`} className="mb-1">
                     <strong>{item.qty || 1}x</strong> {item.itemName || item.foodItem?.itemName || 'Item'}
+                    {item.extraDescription && (
+                      <div className="item-addon mt-1">
+                        <span className="badge bg-warning text-dark border small" style={{ fontSize: '0.75rem', fontWeight: 600 }}>
+                          <i className="fas fa-plus me-1"></i>{item.extraDescription}
+                        </span>
+                      </div>
+                    )}
                     {item.notes && (
                       <div className="item-notes">
                         <i className="fas fa-sticky-note me-1"></i>
@@ -1032,6 +1039,14 @@ const KitchenKDS = () => {
                       <tr key={item.orderItemId || `${selectedOrder.orderId}-${index}`}>
                         <td>
                           <strong>{item.itemName || item.foodItem?.itemName || 'Item'}</strong>
+                          {item.extraDescription && (
+                            <div className="small text-warning-emphasis mt-1">
+                              <span className="badge bg-warning text-dark border me-1" style={{ fontSize: '0.7rem' }}>
+                                <i className="fas fa-plus me-1"></i>{item.extraDescription}
+                              </span>
+                              {Number(item.extraPrice) > 0 && <span className="text-muted small">(+Rs. {parseFloat(item.extraPrice).toFixed(2)})</span>}
+                            </div>
+                          )}
                         </td>
                         <td className="text-center">
                           <span className="badge bg-secondary">{item.qty || 1}</span>

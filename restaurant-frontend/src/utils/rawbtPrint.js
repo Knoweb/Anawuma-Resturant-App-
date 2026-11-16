@@ -165,6 +165,10 @@ export const buildKdsEscPosBytes = ({ order, formatDateTime }) => {
     const itemLines = wrapItemWithQty(name, `x${qty}`);
     itemLines.forEach((line) => pushText(line));
 
+    if (item.extraDescription) {
+      pushText(`  >> ADD-ON: ${sanitizeAscii(item.extraDescription).trim()}\n`);
+    }
+
     if (item.notes) {
       pushText(`  Note: ${sanitizeAscii(item.notes).trim()}\n`);
     }

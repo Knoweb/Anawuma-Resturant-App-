@@ -12,10 +12,13 @@ export const buildKdsOrderTicketDocument = ({
       const notes = item.notes
         ? `<div class="kds-item-note">Note: ${escapeHtml(item.notes)}</div>`
         : '';
+      const addon = item.extraDescription
+        ? `<div class="kds-item-addon" style="font-weight:bold; font-size:11px;">&gt;&gt; ADD-ON: ${escapeHtml(item.extraDescription)}</div>`
+        : '';
 
       return `
         <tr>
-          <td class="kds-td-item">${itemName}${notes}</td>
+          <td class="kds-td-item">${itemName}${addon}${notes}</td>
           <td class="kds-td-qty">x${qty}</td>
         </tr>
       `;
@@ -181,12 +184,17 @@ export const buildOrderReceiptDocument = ({
   const items = Array.isArray(order?.orderItems) ? order.orderItems : [];
   const itemsHtml = items
     .map(
-      (item) => `
-      <div class="rc-item-row">
-        <span>${escapeHtml(item.itemName || 'Item')} x${Number(item.qty || 1)}</span>
-        <span>${parseFloat(item.lineTotal || 0).toFixed(0)}</span>
-      </div>
-    `
+      (item) => {
+        const addon = item.extraDescription
+          ? `<div style="font-size:11px; color:#555; padding-left:8px;">+ ${escapeHtml(item.extraDescription)}${Number(item.extraPrice) > 0 ? ` (+Rs. ${parseFloat(item.extraPrice).toFixed(0)})` : ''}</div>`
+          : '';
+        return `
+          <div class="rc-item-row">
+            <span>${escapeHtml(item.itemName || 'Item')} x${Number(item.qty || 1)}${addon}</span>
+            <span>${parseFloat(item.lineTotal || 0).toFixed(0)}</span>
+          </div>
+        `;
+      }
     )
     .join('');
 
@@ -309,12 +317,25 @@ export const buildAccountBillDocument = ({
     .map((order) => {
       const itemsHtml = (Array.isArray(order.orderItems) ? order.orderItems : [])
         .map(
-          (item) => `
-          <div class="ab-item-row">
-            <span>${escapeHtml(item.itemName || 'Item')} x${Number(item.qty || 1)}</span>
-            <span>${escapeHtml(symbol)} ${(parseFloat(item.lineTotal || 0) / safeRate).toFixed(2)}</span>
-          </div>
-        `
+          (item) => {
+            const hasAddon = Boolean(item.extraDescription);
+            const addonHtml = hasAddon
+              ? `
+              <div class="ab-item-row" style="font-size:11px; color:#555; padding-left:12px; margin-top:-2px; margin-bottom:3px;">
+                <span>&bull; Incl. ${escapeHtml(item.extraDescription)}:</span>
+                <span>${Number(item.extraPrice) > 0 ? `+${escapeHtml(symbol)} ${(parseFloat(item.extraPrice) / safeRate).toFixed(2)} ea` : ''}</span>
+              </div>
+              `
+              : '';
+
+            return `
+              <div class="ab-item-row">
+                <span>${escapeHtml(item.itemName || 'Item')} x${Number(item.qty || 1)}</span>
+                <span>${escapeHtml(symbol)} ${(parseFloat(item.lineTotal || 0) / safeRate).toFixed(2)}</span>
+              </div>
+              ${addonHtml}
+            `;
+          }
         )
         .join('');
 
