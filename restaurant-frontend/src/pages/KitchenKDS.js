@@ -207,15 +207,7 @@ const KitchenKDS = () => {
 
       // If there are new arrivals, play sound and highlight them
       if (newArrivals.length > 0 && previousNewOrderIdsRef.current.size > 0) {
-        // Only play sound if at least one new arrival is NOT a manual cashier order
-        const hasNonManualArrival = newArrivals.some((id) => {
-          const ord = newOrdersList.find((o) => o.orderId === id);
-          return ord && ord.orderType !== 'MANUAL_CASHIER';
-        });
-
-        if (hasNonManualArrival) {
-          playNotificationSound();
-        }
+        playNotificationSound();
         
         // Add new arrivals to the highlight set
         setNewlyArrivedOrders(prev => {
@@ -286,9 +278,7 @@ const KitchenKDS = () => {
 
     const unsubscribeNew = subscribe('order:new', (order) => {
       console.log('WS: New order received, refreshing KDS...', order);
-      if (order?.orderType !== 'MANUAL_CASHIER') {
-        playNotificationSound();
-      }
+      playNotificationSound();
       fetchAllOrders();
     });
 
