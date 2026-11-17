@@ -946,7 +946,7 @@ const CustomerQROrder = ({ isManual = false }) => {
         setOrderNotes('');
         setShowCart(false);
         setManualTableNo('');
-        const target = manualOrderType === 'ROOM' ? '/manual-orders/rooms' : '/manual-orders/tables';
+        const target = manualOrderType === 'TAKEAWAY' ? '/manual-orders/takeaway' : (manualOrderType === 'ROOM' ? '/manual-orders/rooms' : '/manual-orders/tables');
         navigate(target);
       } else {
         setShowStatusScreen(true);
@@ -1073,7 +1073,7 @@ const CustomerQROrder = ({ isManual = false }) => {
       setModalExtraPrice('');
       setModalExtraDescription('');
 
-      const target = isRoom ? '/manual-orders/rooms' : '/manual-orders/tables';
+      const target = isTakeaway ? '/manual-orders/takeaway' : (isRoom ? '/manual-orders/rooms' : '/manual-orders/tables');
       navigate(target);
 
     } catch (error) {

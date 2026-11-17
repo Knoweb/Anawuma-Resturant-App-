@@ -220,6 +220,12 @@ function Sidebar() {
                     Room Orders
                   </Link>
                 </li>
+                <li className={isActive('/manual-orders/takeaway')}>
+                  <Link to="/manual-orders/takeaway">
+                    <i className="fas fa-shopping-bag me-2"></i>
+                    Take Away Orders
+                  </Link>
+                </li>
                 <li className={isActive('/manual-orders/transfer')}>
                   <Link to="/manual-orders/transfer">
                     <i className="fas fa-exchange-alt me-2"></i>

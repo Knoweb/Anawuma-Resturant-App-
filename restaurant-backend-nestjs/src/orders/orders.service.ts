@@ -500,10 +500,16 @@ export class OrdersService {
 
     if (type === 'ROOM') {
       query.andWhere('order.roomNo IS NOT NULL');
+      query.andWhere('order.diningType != :takeawayType', { takeawayType: DiningType.TAKEAWAY });
     } else if (type === 'TAKEAWAY') {
-      query.andWhere('order.diningType = :takeawayType', { takeawayType: DiningType.TAKEAWAY });
+      query.andWhere('(order.diningType = :takeawayType OR order.tableNo = :takeawayTable)', {
+        takeawayType: DiningType.TAKEAWAY,
+        takeawayTable: 'TAKEAWAY',
+      });
     } else {
       query.andWhere('order.tableNo IS NOT NULL');
+      query.andWhere('order.diningType != :takeawayType', { takeawayType: DiningType.TAKEAWAY });
+      query.andWhere('order.tableNo != :takeawayTable', { takeawayTable: 'TAKEAWAY' });
       // Exclude identifiers that look like rooms to clean up the table view
       query.andWhere('order.tableNo NOT LIKE :roomPattern', { roomPattern: '%ROOM%' });
       query.andWhere('order.tableNo NOT LIKE :svPattern', { svPattern: 'SV%' });
