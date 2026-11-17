@@ -185,13 +185,33 @@ export const buildOrderReceiptDocument = ({
   const itemsHtml = items
     .map(
       (item) => {
-        const addon = item.extraDescription
-          ? `<div style="font-size:11px; color:#555; padding-left:8px;">+ ${escapeHtml(item.extraDescription)}${Number(item.extraPrice) > 0 ? ` (+Rs. ${parseFloat(item.extraPrice).toFixed(0)})` : ''}</div>`
-          : '';
+        const qty = Number(item.qty || 1);
+        const extraPrice = parseFloat(item.extraPrice || 0);
+        const rawBaseUnitPrice = parseFloat(item.unitPrice || 0);
+        const hasExtra = extraPrice > 0;
+        const extraTotal = extraPrice * qty;
+        const baseUnitPrice = rawBaseUnitPrice > 0
+          ? rawBaseUnitPrice
+          : Math.max(0, (parseFloat(item.lineTotal || 0) / (qty || 1)) - extraPrice);
+        const baseTotal = baseUnitPrice * qty;
+
+        if (hasExtra) {
+          return `
+            <div class="rc-item-row">
+              <span>${escapeHtml(item.itemName || 'Item')} x${qty}</span>
+              <span>${baseTotal.toFixed(0)}</span>
+            </div>
+            <div class="rc-item-row rc-addon-row" style="font-size:12px; color:#111; padding-left:12px; margin-top:-2px; margin-bottom:4px;">
+              <span>+ ${escapeHtml(item.extraDescription || 'Extra')} x${qty}</span>
+              <span>${extraTotal.toFixed(0)}</span>
+            </div>
+          `;
+        }
+
         return `
           <div class="rc-item-row">
-            <span>${escapeHtml(item.itemName || 'Item')} x${Number(item.qty || 1)}${addon}</span>
-            <span>${parseFloat(item.lineTotal || 0).toFixed(0)}</span>
+            <span>${escapeHtml(item.itemName || 'Item')} x${qty}</span>
+            <span>${parseFloat(item.lineTotal || (baseUnitPrice * qty)).toFixed(0)}</span>
           </div>
         `;
       }
@@ -318,22 +338,34 @@ export const buildAccountBillDocument = ({
       const itemsHtml = (Array.isArray(order.orderItems) ? order.orderItems : [])
         .map(
           (item) => {
-            const hasAddon = Boolean(item.extraDescription);
-            const addonHtml = hasAddon
-              ? `
-              <div class="ab-item-row" style="font-size:11px; color:#555; padding-left:12px; margin-top:-2px; margin-bottom:3px;">
-                <span>&bull; Incl. ${escapeHtml(item.extraDescription)}:</span>
-                <span>${Number(item.extraPrice) > 0 ? `+${escapeHtml(symbol)} ${(parseFloat(item.extraPrice) / safeRate).toFixed(2)} ea` : ''}</span>
-              </div>
-              `
-              : '';
+            const qty = Number(item.qty || 1);
+            const extraPrice = parseFloat(item.extraPrice || 0);
+            const rawBaseUnitPrice = parseFloat(item.unitPrice || 0);
+            const hasExtra = extraPrice > 0;
+            const extraTotal = extraPrice * qty;
+            const baseUnitPrice = rawBaseUnitPrice > 0
+              ? rawBaseUnitPrice
+              : Math.max(0, (parseFloat(item.lineTotal || 0) / (qty || 1)) - extraPrice);
+            const baseTotal = baseUnitPrice * qty;
+
+            if (hasExtra) {
+              return `
+                <div class="ab-item-row">
+                  <span>${escapeHtml(item.itemName || 'Item')} x${qty}</span>
+                  <span>${escapeHtml(symbol)} ${(baseTotal / safeRate).toFixed(2)}</span>
+                </div>
+                <div class="ab-item-row" style="font-size:11px; color:#111; padding-left:12px; margin-top:-2px; margin-bottom:3px;">
+                  <span>+ ${escapeHtml(item.extraDescription || 'Extra')} x${qty}</span>
+                  <span>${escapeHtml(symbol)} ${(extraTotal / safeRate).toFixed(2)}</span>
+                </div>
+              `;
+            }
 
             return `
               <div class="ab-item-row">
-                <span>${escapeHtml(item.itemName || 'Item')} x${Number(item.qty || 1)}</span>
-                <span>${escapeHtml(symbol)} ${(parseFloat(item.lineTotal || 0) / safeRate).toFixed(2)}</span>
+                <span>${escapeHtml(item.itemName || 'Item')} x${qty}</span>
+                <span>${escapeHtml(symbol)} ${(parseFloat(item.lineTotal || (baseUnitPrice * qty)) / safeRate).toFixed(2)}</span>
               </div>
-              ${addonHtml}
             `;
           }
         )

@@ -97,22 +97,41 @@ function PrintableInvoice({ invoice, restaurantName, address, contactNumber }) {
           </tr>
         </thead>
         <tbody>
-          {items.map((item, i) => (
-            <tr key={i}>
-              <td>
-                {item.itemName}
-                {item.extraDescription && (
-                  <div className="small text-muted" style={{ fontSize: '11px', paddingLeft: '4px' }}>
-                    + {item.extraDescription}{Number(item.extraPrice) > 0 ? ` (+${formatCurrency(item.extraPrice)})` : ''}
-                  </div>
+          {items.map((item, i) => {
+            const qty = Number(item.qty || 1);
+            const extraPrice = parseFloat(item.extraPrice || 0);
+            const rawBaseUnitPrice = parseFloat(item.unitPrice || 0);
+            const hasExtra = extraPrice > 0;
+            const extraTotal = extraPrice * qty;
+            const baseUnitPrice = rawBaseUnitPrice > 0
+              ? rawBaseUnitPrice
+              : Math.max(0, (parseFloat(item.lineTotal || 0) / (qty || 1)) - extraPrice);
+            const baseTotal = baseUnitPrice * qty;
+
+            return (
+              <React.Fragment key={i}>
+                <tr>
+                  <td>
+                    {item.itemName}
+                    {item.notes ? <span className="pi-note"> ({item.notes})</span> : ''}
+                  </td>
+                  <td className="pi-center">{qty}</td>
+                  <td className="pi-right">{formatCurrency(baseUnitPrice)}</td>
+                  <td className="pi-right">{formatCurrency(baseTotal)}</td>
+                </tr>
+                {hasExtra && (
+                  <tr style={{ background: '#fdfdfd' }}>
+                    <td style={{ paddingLeft: '16px', fontSize: '11px', color: '#444' }}>
+                      + {item.extraDescription || 'Extra'}
+                    </td>
+                    <td className="pi-center" style={{ fontSize: '11px', color: '#444' }}>{qty}</td>
+                    <td className="pi-right" style={{ fontSize: '11px', color: '#444' }}>{formatCurrency(extraPrice)}</td>
+                    <td className="pi-right" style={{ fontSize: '11px', color: '#444' }}>{formatCurrency(extraTotal)}</td>
+                  </tr>
                 )}
-                {item.notes ? <span className="pi-note"> ({item.notes})</span> : ''}
-              </td>
-              <td className="pi-center">{item.qty}</td>
-              <td className="pi-right">{formatCurrency(item.unitPrice)}</td>
-              <td className="pi-right">{formatCurrency(item.lineTotal)}</td>
-            </tr>
-          ))}
+              </React.Fragment>
+            );
+          })}
         </tbody>
       </table>
 
@@ -198,7 +217,22 @@ function InvoiceModal({ invoice, restaurantName, address, contactNumber, onClose
 
       const phone = normalizeWhatsAppNumber(invoice.whatsappNumber);
       const itemLines = (Array.isArray(invoice.orderItemsJson) ? invoice.orderItemsJson : [])
-        .map((i) => `  • ${i.itemName}${i.extraDescription ? ` (+ ${i.extraDescription})` : ''} x${i.qty} - ${formatCurrency(i.lineTotal)}`)
+        .map((i) => {
+          const qty = Number(i.qty || 1);
+          const extraPrice = parseFloat(i.extraPrice || 0);
+          const rawBaseUnitPrice = parseFloat(i.unitPrice || 0);
+          const hasExtra = extraPrice > 0;
+          const extraTotal = extraPrice * qty;
+          const baseUnitPrice = rawBaseUnitPrice > 0
+            ? rawBaseUnitPrice
+            : Math.max(0, (parseFloat(i.lineTotal || 0) / (qty || 1)) - extraPrice);
+          const baseTotal = baseUnitPrice * qty;
+
+          if (hasExtra) {
+            return `  • ${i.itemName} x${qty} - ${formatCurrency(baseTotal)}\n    ↳ + ${i.extraDescription || 'Extra'} x${qty} - ${formatCurrency(extraTotal)}`;
+          }
+          return `  • ${i.itemName} x${qty} - ${formatCurrency(i.lineTotal || baseTotal)}`;
+        })
         .join('\n');
 
       const isTakeaway = invoice.diningType === 'TAKEAWAY' || String(invoice.tableNo).toUpperCase().includes('TAKEAWAY');

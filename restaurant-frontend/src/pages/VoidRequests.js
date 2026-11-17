@@ -207,13 +207,34 @@ function VoidRequests() {
                   </tr>
                 </thead>
                 <tbody>
-                  {items.map((item, i) => (
-                    <tr key={i}>
-                      <td>{item.itemName}</td>
-                      <td>{item.qty}</td>
-                      <td>{formatCurrency(item.lineTotal)}</td>
-                    </tr>
-                  ))}
+                  {items.map((item, i) => {
+                    const qty = Number(item.qty || 1);
+                    const extraPrice = parseFloat(item.extraPrice || 0);
+                    const rawBaseUnitPrice = parseFloat(item.unitPrice || 0);
+                    const hasExtra = extraPrice > 0;
+                    const extraTotal = extraPrice * qty;
+                    const baseUnitPrice = rawBaseUnitPrice > 0
+                      ? rawBaseUnitPrice
+                      : Math.max(0, (parseFloat(item.lineTotal || 0) / (qty || 1)) - extraPrice);
+                    const baseTotal = baseUnitPrice * qty;
+
+                    return (
+                      <React.Fragment key={i}>
+                        <tr>
+                          <td>{item.itemName}</td>
+                          <td>{qty}</td>
+                          <td>{formatCurrency(baseTotal)}</td>
+                        </tr>
+                        {hasExtra && (
+                          <tr className="table-light">
+                            <td className="ps-3 text-muted small">+ {item.extraDescription || 'Extra'}</td>
+                            <td className="text-muted small">{qty}</td>
+                            <td className="text-muted small">{formatCurrency(extraTotal)}</td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
                 </tbody>
               </table>
 
