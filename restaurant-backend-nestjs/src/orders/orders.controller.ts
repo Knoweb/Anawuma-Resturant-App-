@@ -136,10 +136,12 @@ export class OrdersController {
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.CASHIER)
   getManualActiveAccounts(
     @Param('type') type: 'ROOM' | 'TABLE' | 'TAKEAWAY',
+    @Query('includePreparing') includePreparing: string,
     @Request() req
   ) {
     const restaurantId = req.user.restaurantId;
-    return this.ordersService.getManualActiveAccounts(restaurantId, type);
+    const shouldIncludePreparing = includePreparing === 'true' || includePreparing === '1';
+    return this.ordersService.getManualActiveAccounts(restaurantId, type, shouldIncludePreparing);
   }
 
   // Public endpoint for customers to track their order

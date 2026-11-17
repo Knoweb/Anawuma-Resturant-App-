@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import apiClient from '../api/apiClient';
 import Sidebar from '../components/common/Sidebar';
 import Navbar from '../components/common/Navbar';
@@ -21,6 +21,8 @@ const ManualTakeawayOrders = () => {
     const [accounts, setAccounts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isProcessingManual, setIsProcessingManual] = useState(false);
+    const [activeTab, setActiveTab] = useState('ready'); // 'ready' (SERVED) vs 'kitchen' (includePreparing)
+    const [searchParams, setSearchParams] = useSearchParams();
     const user = useAuthStore(state => state.user);
     const restaurantName = user?.restaurantName || user?.restaurant?.restaurantName || 'Restaurant';
     const [restaurantInfo, setRestaurantInfo] = useState(null);
@@ -38,14 +40,19 @@ const ManualTakeawayOrders = () => {
         }
     }, [user?.restaurantId]);
 
-    const fetchAccounts = async () => {
+    const fetchAccounts = async (tabToFetch = activeTab) => {
         try {
             setLoading(true);
-            const response = await apiClient.get('/orders/manual-accounts/TAKEAWAY');
-            setAccounts(response.data);
+            const includePreparing = tabToFetch === 'kitchen';
+            const response = await apiClient.get('/orders/manual-accounts/TAKEAWAY', {
+                params: { includePreparing: includePreparing ? 'true' : 'false' }
+            });
+            setAccounts(response.data || []);
+            return response.data || [];
         } catch (error) {
             console.error('Error fetching takeaway accounts:', error);
             Swal.fire('Error', 'Failed to fetch takeaway orders', 'error');
+            return [];
         } finally {
             setLoading(false);
         }
@@ -54,16 +61,36 @@ const ManualTakeawayOrders = () => {
     const { subscribe } = useWebSocket();
 
     useEffect(() => {
-        fetchAccounts();
+        fetchAccounts(activeTab);
 
         // Listen for real-time dashboard refreshes
         const unsubscribe = subscribe('dashboard:refresh', () => {
             console.log('🔄 Dashboard refresh received for takeaway accounts');
-            fetchAccounts();
+            fetchAccounts(activeTab);
         });
 
         return () => unsubscribe();
-    }, [subscribe]);
+    }, [subscribe, activeTab]);
+
+    // Automatically open invoice settlement modal if openOrderId parameter is provided in URL
+    useEffect(() => {
+        const openId = searchParams.get('openOrderId');
+        if (!openId || loading || accounts.length === 0) return;
+
+        const targetAccount = accounts.find(acc =>
+            acc.orders?.some(o => String(o.orderId) === String(openId) || String(o.orderNo) === String(openId))
+        );
+
+        if (targetAccount) {
+            // Remove openOrderId from URL to avoid re-triggering on subsequent actions
+            const nextParams = new URLSearchParams(searchParams);
+            nextParams.delete('openOrderId');
+            setSearchParams(nextParams, { replace: true });
+
+            // Automatically open invoice settlement modal
+            showInvoiceModal(targetAccount, targetAccount.identifier);
+        }
+    }, [searchParams, accounts, loading]);
 
     const printOrder = async (order, identifier = null) => {
         const doc = buildOrderReceiptDocument({
@@ -619,6 +646,30 @@ const ManualTakeawayOrders = () => {
                                 </div>
                             </div>
 
+                            {/* Tab Filters */}
+                            <div className="d-flex align-items-center gap-2 mb-4">
+                                <button
+                                    className={`btn btn-sm rounded-pill px-3 fw-bold ${activeTab === 'ready' ? 'btn-success text-white shadow-sm' : 'btn-outline-secondary'}`}
+                                    onClick={() => {
+                                        setActiveTab('ready');
+                                        fetchAccounts('ready');
+                                    }}
+                                >
+                                    <i className="fas fa-check-double me-1"></i> Ready to Settle (Served)
+                                    {activeTab === 'ready' && <span className="badge bg-white text-success ms-2">{accounts.length}</span>}
+                                </button>
+                                <button
+                                    className={`btn btn-sm rounded-pill px-3 fw-bold ${activeTab === 'kitchen' ? 'btn-warning text-dark shadow-sm' : 'btn-outline-secondary'}`}
+                                    onClick={() => {
+                                        setActiveTab('kitchen');
+                                        fetchAccounts('kitchen');
+                                    }}
+                                >
+                                    <i className="fas fa-fire me-1"></i> In Kitchen (Preparing / Pre-Pay)
+                                    {activeTab === 'kitchen' && <span className="badge bg-dark text-warning ms-2">{accounts.length}</span>}
+                                </button>
+                            </div>
+
                             {loading ? (
                                 <div className="text-center py-5">
                                     <div className="spinner-border text-primary" role="status">
@@ -631,8 +682,16 @@ const ManualTakeawayOrders = () => {
                                         <div className="col-12 mt-5">
                                             <div className="text-center py-5 rounded-3 bg-white shadow-sm border border-dashed">
                                                 <i className="fas fa-shopping-bag fa-4x text-muted opacity-25 mb-3"></i>
-                                                <h4 className="text-muted">No Active Take Away Orders</h4>
-                                                <p className="text-muted small">Walk-in takeaway orders placed via the Cashier POS will appear here for pickup and settlement.</p>
+                                                <h4 className="text-muted">
+                                                    {activeTab === 'ready' 
+                                                        ? 'No Take Away Orders Waiting for Settlement'
+                                                        : 'No Take Away Orders in Kitchen'}
+                                                </h4>
+                                                <p className="text-muted small">
+                                                    {activeTab === 'ready'
+                                                        ? 'Orders served at the counter will appear here for payment settlement.'
+                                                        : 'Orders currently being prepared in the kitchen will appear here.'}
+                                                </p>
                                                 <button 
                                                     className="btn btn-success btn-sm rounded-pill px-4 mt-2"
                                                     onClick={() => navigate('/cashier/manual-order')}
@@ -647,6 +706,7 @@ const ManualTakeawayOrders = () => {
                                             const custName = firstOrder?.customerName && firstOrder.customerName !== 'Manual Order' && firstOrder.customerName !== 'Guest'
                                                 ? firstOrder.customerName
                                                 : null;
+                                            const orderStatus = firstOrder?.status;
 
                                             return (
                                                 <div
@@ -665,8 +725,15 @@ const ManualTakeawayOrders = () => {
                                                                 <i className="fas fa-user me-1"></i>{custName}
                                                             </div>
                                                         )}
-                                                        <div className="badge bg-warning text-dark order-count-badge">
-                                                            {account.orders.length === 1 ? '1 Take Away Ticket' : `${account.orders.length} Tickets`}
+                                                        <div className="d-flex justify-content-center align-items-center gap-1 mb-2">
+                                                            <div className="badge bg-warning text-dark order-count-badge mb-0">
+                                                                {account.orders.length === 1 ? '1 Ticket' : `${account.orders.length} Tickets`}
+                                                            </div>
+                                                            {orderStatus && (
+                                                                <div className={`badge ${orderStatus === 'SERVED' ? 'bg-success' : (orderStatus === 'READY' ? 'bg-info' : 'bg-secondary')} order-count-badge mb-0`}>
+                                                                    {orderStatus}
+                                                                </div>
+                                                            )}
                                                         </div>
                                                         <div className="account-total-amount text-success">
                                                             Rs. {account.totalAmount.toLocaleString()}

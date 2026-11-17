@@ -1321,20 +1321,29 @@ const ServiceBillingDashboard = ({
                   </div>
                 ) : (
                   <div className="ready-orders-grid">
-                    {readyOrders.map((order) => (
-                      <ReadyOrderCard
-                        key={order.orderId}
-                        order={order}
-                        onMarkServed={async () => {
-                          try {
-                            await apiClient.patch(`/orders/${order.orderId}/status`, { status: 'SERVED' });
-                            fetchReadyOrders();
-                          } catch (err) {
-                            showToast(err?.response?.data?.message || 'Failed to mark as served', 'error');
-                          }
-                        }}
-                      />
-                    ))}
+                    {readyOrders.map((order) => {
+                      const isTakeaway = order.diningType === 'TAKEAWAY' || String(order.tableNo).toUpperCase().includes('TAKEAWAY');
+                      return (
+                        <ReadyOrderCard
+                          key={order.orderId}
+                          order={order}
+                          isTakeaway={isTakeaway}
+                          onMarkServed={async () => {
+                            try {
+                              await apiClient.patch(`/orders/${order.orderId}/status`, { status: 'SERVED' });
+                              fetchReadyOrders();
+                              if (isTakeaway) {
+                                navigate(`/manual-orders/takeaway?openOrderId=${order.orderId}`);
+                              } else {
+                                showToast(`Order #${order.orderNo} marked as Served`, 'success');
+                              }
+                            } catch (err) {
+                              showToast(err?.response?.data?.message || 'Failed to mark as served', 'error');
+                            }
+                          }}
+                        />
+                      );
+                    })}
                   </div>
                 )}
               </section>
@@ -1515,20 +1524,44 @@ const ServiceBillingDashboard = ({
 // Ready Order Card sub-component
 // ---------------------------------------------------------------------------
 
-function ReadyOrderCard({ order, onMarkServed }) {
+function ReadyOrderCard({ order, onMarkServed, isTakeaway }) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const items = order.orderItems || [];
   const age = getOrderAge(order.createdAt);
+  const takeaway = isTakeaway ?? (order.diningType === 'TAKEAWAY' || String(order.tableNo).toUpperCase().includes('TAKEAWAY'));
+
+  const handleAction = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await onMarkServed();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <div className="ready-order-card">
+    <div className="ready-order-card" style={takeaway ? { borderTop: '4px solid #f6c23e' } : {}}>
       <div className="roc-header">
-        <span className="roc-order-no">{order.orderNo}</span>
+        <span className="roc-order-no">#{order.orderNo}</span>
         <span className="roc-age text-muted">{age}</span>
-        <span className="badge bg-success ms-auto">READY</span>
+        {takeaway ? (
+          <span className="badge bg-warning text-dark ms-auto fw-bold" style={{ fontSize: '0.75rem' }}>
+            <i className="fas fa-shopping-bag me-1"></i>TAKE AWAY
+          </span>
+        ) : (
+          <span className="badge bg-success ms-auto">READY</span>
+        )}
       </div>
       <div className="roc-meta">
-        {order.roomNo && <span><i className="fas fa-concierge-bell me-1"></i>Room {order.roomNo}</span>}
-        {order.tableNo && <span><i className="fas fa-chair me-1"></i>Table - {order.tableNo}</span>}
+        {takeaway ? (
+          <span className="badge bg-light text-dark border"><i className="fas fa-box me-1 text-warning"></i>Takeaway Pack</span>
+        ) : (
+          <>
+            {order.roomNo && <span><i className="fas fa-concierge-bell me-1"></i>Room {order.roomNo}</span>}
+            {order.tableNo && <span><i className="fas fa-chair me-1"></i>Table - {order.tableNo}</span>}
+          </>
+        )}
         {order.customerName && <span><i className="fas fa-user me-1"></i>{order.customerName}</span>}
       </div>
       <ul className="roc-items">
@@ -1548,8 +1581,25 @@ function ReadyOrderCard({ order, onMarkServed }) {
       </ul>
       <div className="roc-total">{formatCurrency(order.totalAmount)}</div>
       <div className="roc-actions">
-        <button className="btn btn-primary btn-sm flex-grow-1" onClick={onMarkServed}>
-          <i className="fas fa-concierge-bell me-1"></i>Served
+        <button
+          className={`btn ${takeaway ? 'btn-warning text-dark fw-bold' : 'btn-primary'} btn-sm flex-grow-1`}
+          onClick={handleAction}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <>
+              <span className="spinner-border spinner-border-sm me-1" role="status"></span>
+              Updating...
+            </>
+          ) : takeaway ? (
+            <>
+              <i className="fas fa-check-double me-1"></i>Handover & Settle
+            </>
+          ) : (
+            <>
+              <i className="fas fa-concierge-bell me-1"></i>Served
+            </>
+          )}
         </button>
       </div>
     </div>

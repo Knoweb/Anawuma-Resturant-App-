@@ -468,7 +468,7 @@ export class OrdersService {
     return await query.getOne();
   }
 
-  async getManualActiveAccounts(restaurantId: number, type: 'ROOM' | 'TABLE' | 'TAKEAWAY') {
+  async getManualActiveAccounts(restaurantId: number, type: 'ROOM' | 'TABLE' | 'TAKEAWAY', includePreparing: boolean = false) {
     const manualStatuses: OrderStatus[] = [
       OrderStatus.NEW,
       OrderStatus.ACCEPTED,
@@ -481,7 +481,19 @@ export class OrdersService {
       .createQueryBuilder('order')
       .leftJoinAndSelect('order.orderItems', 'orderItems')
       .where('order.restaurantId = :restaurantId', { restaurantId })
-      .andWhere(
+      .andWhere('order.status NOT IN (:...excludedStatuses)', {
+        excludedStatuses: [OrderStatus.CANCELLED, OrderStatus.COMPLETED],
+      });
+
+    // Hide extremely old data (older than 7 days) to keep dashboard clean
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    query.andWhere('order.createdAt >= :sevenDaysAgo', { sevenDaysAgo });
+
+    if (type === 'ROOM') {
+      query.andWhere('order.roomNo IS NOT NULL');
+      query.andWhere('order.diningType != :takeawayType', { takeawayType: DiningType.TAKEAWAY });
+      query.andWhere(
         new Brackets((qb) => {
           qb.where(
             '(order.orderType = :manualType AND order.status IN (:...manualStatuses))',
@@ -492,20 +504,18 @@ export class OrdersService {
           );
         })
       );
-
-    // Hide extremely old data (older than 7 days) to keep dashboard clean
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    query.andWhere('order.createdAt >= :sevenDaysAgo', { sevenDaysAgo });
-
-    if (type === 'ROOM') {
-      query.andWhere('order.roomNo IS NOT NULL');
-      query.andWhere('order.diningType != :takeawayType', { takeawayType: DiningType.TAKEAWAY });
     } else if (type === 'TAKEAWAY') {
       query.andWhere('(order.diningType = :takeawayType OR order.tableNo = :takeawayTable)', {
         takeawayType: DiningType.TAKEAWAY,
         takeawayTable: 'TAKEAWAY',
       });
+      if (!includePreparing) {
+        // By default, only show SERVED takeaway orders ready for payment settlement and handover
+        query.andWhere('order.status = :servedStatus', { servedStatus: OrderStatus.SERVED });
+      } else {
+        // In-kitchen / advance pre-pay tab: show active preparing orders
+        query.andWhere('order.status IN (:...manualStatuses)', { manualStatuses });
+      }
     } else {
       query.andWhere('order.tableNo IS NOT NULL');
       query.andWhere('order.diningType != :takeawayType', { takeawayType: DiningType.TAKEAWAY });
@@ -514,6 +524,17 @@ export class OrdersService {
       query.andWhere('order.tableNo NOT LIKE :roomPattern', { roomPattern: '%ROOM%' });
       query.andWhere('order.tableNo NOT LIKE :svPattern', { svPattern: 'SV%' });
       query.andWhere('order.tableNo NOT LIKE :hbPattern', { hbPattern: 'HB%' });
+      query.andWhere(
+        new Brackets((qb) => {
+          qb.where(
+            '(order.orderType = :manualType AND order.status IN (:...manualStatuses))',
+            { manualType: OrderType.MANUAL_CASHIER, manualStatuses }
+          ).orWhere(
+            '((order.orderType IS NULL OR order.orderType != :manualType) AND order.status = :servedStatus)',
+            { manualType: OrderType.MANUAL_CASHIER, servedStatus: OrderStatus.SERVED }
+          );
+        })
+      );
     }
 
     const orders = await query.getMany();

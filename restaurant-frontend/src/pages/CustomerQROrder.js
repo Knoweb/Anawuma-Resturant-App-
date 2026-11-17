@@ -934,20 +934,36 @@ const CustomerQROrder = ({ isManual = false }) => {
         // 4. Mark as Printed
         await apiClient.patch(`/billing/invoices/${invoiceResponse.data.invoiceId}/mark-printed`);
 
-        Swal.fire({
-          title: 'Order Completed',
-          text: `Order ${createdOrder.orderNo} placed, bill generated and ready for print.`,
-          icon: 'success',
-          timer: 3000,
-          showConfirmButton: true
-        });
+        if (manualOrderType === 'TAKEAWAY') {
+          Swal.fire({
+            title: 'Take Away Order Placed',
+            text: `Take Away Order #${createdOrder.orderNo} sent to Kitchen KDS. You will be notified in Ready Orders once prepared.`,
+            icon: 'success',
+            timer: 3500,
+            showConfirmButton: true
+          });
 
-        setCart([]);
-        setOrderNotes('');
-        setShowCart(false);
-        setManualTableNo('');
-        const target = manualOrderType === 'TAKEAWAY' ? '/manual-orders/takeaway' : (manualOrderType === 'ROOM' ? '/manual-orders/rooms' : '/manual-orders/tables');
-        navigate(target);
+          setCart([]);
+          setOrderNotes('');
+          setShowCart(false);
+          setManualTableNo('');
+          navigate('/cashier/dashboard/queue');
+        } else {
+          Swal.fire({
+            title: 'Order Completed',
+            text: `Order ${createdOrder.orderNo} placed, bill generated and ready for print.`,
+            icon: 'success',
+            timer: 3000,
+            showConfirmButton: true
+          });
+
+          setCart([]);
+          setOrderNotes('');
+          setShowCart(false);
+          setManualTableNo('');
+          const target = manualOrderType === 'ROOM' ? '/manual-orders/rooms' : '/manual-orders/tables';
+          navigate(target);
+        }
       } else {
         setShowStatusScreen(true);
         setCart([]);
@@ -1058,23 +1074,40 @@ const CustomerQROrder = ({ isManual = false }) => {
       await apiClient.patch(`/billing/invoices/${invoiceResponse.data.invoiceId}/mark-printed`);
 
       // Success UI
-      Swal.fire({
-        title: 'Order Completed',
-        text: `Order ${orderData.orderNo} placed, bill generated and ${isTakeaway ? 'marked for Take Away (0% SC)' : `assigned to ${isRoom ? 'room' : 'table'}`}.`,
-        icon: 'success',
-        timer: 3000,
-        showConfirmButton: true
-      });
+      if (isTakeaway) {
+        Swal.fire({
+          title: 'Take Away Order Placed',
+          text: `Take Away Order #${orderData.orderNo} sent to Kitchen KDS. You will be notified in Ready Orders once prepared.`,
+          icon: 'success',
+          timer: 3500,
+          showConfirmButton: true
+        });
 
-      setOrderSuccess(orderData);
-      setCart([]);
-      setActiveItemDetail(null);
-      setModalOrderNotes('');
-      setModalExtraPrice('');
-      setModalExtraDescription('');
+        setOrderSuccess(orderData);
+        setCart([]);
+        setActiveItemDetail(null);
+        setModalOrderNotes('');
+        setModalExtraPrice('');
+        setModalExtraDescription('');
+        navigate('/cashier/dashboard/queue');
+      } else {
+        Swal.fire({
+          title: 'Order Completed',
+          text: `Order ${orderData.orderNo} placed, bill generated and assigned to ${isRoom ? 'room' : 'table'}.`,
+          icon: 'success',
+          timer: 3000,
+          showConfirmButton: true
+        });
 
-      const target = isTakeaway ? '/manual-orders/takeaway' : (isRoom ? '/manual-orders/rooms' : '/manual-orders/tables');
-      navigate(target);
+        setOrderSuccess(orderData);
+        setCart([]);
+        setActiveItemDetail(null);
+        setModalOrderNotes('');
+        setModalExtraPrice('');
+        setModalExtraDescription('');
+        const target = isRoom ? '/manual-orders/rooms' : '/manual-orders/tables';
+        navigate(target);
+      }
 
     } catch (error) {
       console.error('Quick Order error:', error);
