@@ -482,7 +482,7 @@ export class OrdersService {
       .leftJoinAndSelect('order.orderItems', 'orderItems')
       .where('order.restaurantId = :restaurantId', { restaurantId })
       .andWhere('order.status NOT IN (:...excludedStatuses)', {
-        excludedStatuses: [OrderStatus.CANCELLED, OrderStatus.COMPLETED],
+        excludedStatuses: [OrderStatus.CANCELLED, OrderStatus.BILLED],
       });
 
     // Hide extremely old data (older than 7 days) to keep dashboard clean

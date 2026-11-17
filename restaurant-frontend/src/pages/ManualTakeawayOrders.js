@@ -323,15 +323,15 @@ const ManualTakeawayOrders = () => {
                         <tbody>
                              ${account.orders.map(order => `
                                 ${order.orderItems.map(item => {
-                                    const qty = Number(item.qty || 1);
-                                    const extraPrice = parseFloat(item.extraPrice || 0);
-                                    const rawBasePrice = parseFloat(item.unitPrice || 0);
-                                    const basePrice = rawBasePrice > 0 ? rawBasePrice : Math.max(0, (parseFloat(item.lineTotal || 0) / qty) - extraPrice);
-                                    const baseTotal = basePrice * qty;
-                                    const extraTotal = extraPrice * qty;
+            const qty = Number(item.qty || 1);
+            const extraPrice = parseFloat(item.extraPrice || 0);
+            const rawBasePrice = parseFloat(item.unitPrice || 0);
+            const basePrice = rawBasePrice > 0 ? rawBasePrice : Math.max(0, (parseFloat(item.lineTotal || 0) / qty) - extraPrice);
+            const baseTotal = basePrice * qty;
+            const extraTotal = extraPrice * qty;
 
-                                    if (extraPrice > 0) {
-                                        return `
+            if (extraPrice > 0) {
+                return `
                                             <tr>
                                                 <td class="text-start small">${item.itemName}</td>
                                                 <td class="text-center small">${qty}</td>
@@ -343,16 +343,16 @@ const ManualTakeawayOrders = () => {
                                                 <td class="text-end">Rs. ${extraTotal.toFixed(0)}</td>
                                             </tr>
                                         `;
-                                    }
+            }
 
-                                    return `
+            return `
                                         <tr>
                                             <td class="text-start small">${item.itemName}</td>
                                             <td class="text-center small">${qty}</td>
                                             <td class="text-end small">Rs. ${parseFloat(item.lineTotal || baseTotal).toFixed(0)}</td>
                                         </tr>
                                     `;
-                                }).join('')}
+        }).join('')}
                             `).join('')}
                         </tbody>
                     </table>
@@ -534,15 +534,15 @@ const ManualTakeawayOrders = () => {
             ` : ''}
             <div class="item-list">
               ${order.orderItems.map(item => {
-                const qty = Number(item.qty || 1);
-                const extraPrice = parseFloat(item.extraPrice || 0);
-                const rawBasePrice = parseFloat(item.unitPrice || 0);
-                const basePrice = rawBasePrice > 0 ? rawBasePrice : Math.max(0, (parseFloat(item.lineTotal || 0) / qty) - extraPrice);
-                const baseTotal = basePrice * qty;
-                const extraTotal = extraPrice * qty;
+            const qty = Number(item.qty || 1);
+            const extraPrice = parseFloat(item.extraPrice || 0);
+            const rawBasePrice = parseFloat(item.unitPrice || 0);
+            const basePrice = rawBasePrice > 0 ? rawBasePrice : Math.max(0, (parseFloat(item.lineTotal || 0) / qty) - extraPrice);
+            const baseTotal = basePrice * qty;
+            const extraTotal = extraPrice * qty;
 
-                if (extraPrice > 0) {
-                    return `
+            if (extraPrice > 0) {
+                return `
                       <div class="item-row">
                         <span class="item-name">${item.itemName} <small class="text-muted">x${qty}</small></span>
                         <span class="item-price">Rs. ${baseTotal.toFixed(0)}</span>
@@ -552,15 +552,15 @@ const ManualTakeawayOrders = () => {
                         <span>Rs. ${extraTotal.toFixed(0)}</span>
                       </div>
                     `;
-                }
+            }
 
-                return `
+            return `
                   <div class="item-row">
                     <span class="item-name">${item.itemName} <small class="text-muted">x${qty}</small></span>
                     <span class="item-price">Rs. ${parseFloat(item.lineTotal || baseTotal).toFixed(0)}</span>
                   </div>
                 `;
-              }).join('')}
+        }).join('')}
             </div>
             <div class="order-group-footer">
               <div class="d-flex justify-content-between small text-muted">
@@ -634,7 +634,7 @@ const ManualTakeawayOrders = () => {
                                     <p className="text-muted small mb-0">Active walk-in takeaway orders awaiting pickup or bill settlement (0% Service Charge)</p>
                                 </div>
                                 <div className="d-flex gap-2">
-                                    <button 
+                                    <button
                                         className="btn btn-warning btn-sm rounded-pill shadow-sm fw-bold px-3 text-dark"
                                         onClick={() => navigate('/cashier/manual-order')}
                                     >
@@ -683,7 +683,7 @@ const ManualTakeawayOrders = () => {
                                             <div className="text-center py-5 rounded-3 bg-white shadow-sm border border-dashed">
                                                 <i className="fas fa-shopping-bag fa-4x text-muted opacity-25 mb-3"></i>
                                                 <h4 className="text-muted">
-                                                    {activeTab === 'ready' 
+                                                    {activeTab === 'ready'
                                                         ? 'No Take Away Orders Waiting for Settlement'
                                                         : 'No Take Away Orders in Kitchen'}
                                                 </h4>
@@ -692,7 +692,7 @@ const ManualTakeawayOrders = () => {
                                                         ? 'Orders served at the counter will appear here for payment settlement.'
                                                         : 'Orders currently being prepared in the kitchen will appear here.'}
                                                 </p>
-                                                <button 
+                                                <button
                                                     className="btn btn-success btn-sm rounded-pill px-4 mt-2"
                                                     onClick={() => navigate('/cashier/manual-order')}
                                                 >
