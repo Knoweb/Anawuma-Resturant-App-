@@ -567,6 +567,11 @@ const CustomerQROrder = ({ isManual = false }) => {
           setModalQty(1);
           setModalExtraPrice('');
           setModalExtraDescription('');
+          if (isManual && manualOrderType === 'TAKEAWAY') {
+            setOrderLocation('takeaway');
+            setModalOrderType('table');
+            setManualTableNo('TAKEAWAY');
+          }
         }}
       >
         <h2 className="category-title-red">{item.itemName}</h2>
@@ -627,6 +632,11 @@ const CustomerQROrder = ({ isManual = false }) => {
                 e.stopPropagation(); 
                 setActiveItemDetail(item);
                 setModalQty(1);
+                if (isManual && manualOrderType === 'TAKEAWAY') {
+                  setOrderLocation('takeaway');
+                  setModalOrderType('table');
+                  setManualTableNo('TAKEAWAY');
+                }
               }}
             >
               Order Now
@@ -648,6 +658,11 @@ const CustomerQROrder = ({ isManual = false }) => {
           setModalQty(1);
           setModalExtraPrice('');
           setModalExtraDescription('');
+          if (isManual && manualOrderType === 'TAKEAWAY') {
+            setOrderLocation('takeaway');
+            setModalOrderType('table');
+            setManualTableNo('TAKEAWAY');
+          }
         }}
         style={{ position: 'relative' }}
       >
@@ -2230,31 +2245,52 @@ const CustomerQROrder = ({ isManual = false }) => {
                  {/* Right Column: Order Fields */}
                  <div className="sketch-modal-right-col flex-grow-1 p-4 bg-light">
                     <div className="mb-4">
-                      <label className="d-block mb-2 fw-bold text-muted small text-uppercase">ORDER LOCATION *</label>
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <label className="fw-bold text-muted small text-uppercase mb-0">ORDER LOCATION *</label>
+                        {isManual && manualOrderType === 'TAKEAWAY' && (
+                          <span className="badge bg-warning text-dark border small" style={{ fontSize: '0.72rem' }}>
+                            <i className="fas fa-lock me-1"></i> Locked to Take Away
+                          </span>
+                        )}
+                      </div>
                       <div className="d-flex gap-2">
                         <button
                           type="button"
+                          disabled={isManual && manualOrderType === 'TAKEAWAY'}
                           className={`flex-grow-1 btn ${orderLocation === 'inside' ? 'btn-primary' : 'btn-outline-primary'}`}
-                          style={orderLocation === 'inside' ? { backgroundColor: '#266668', color: 'white', fontWeight: 600 } : { color: '#266668', borderColor: '#266668' }}
+                          style={
+                            isManual && manualOrderType === 'TAKEAWAY'
+                              ? { opacity: 0.35, cursor: 'not-allowed', borderColor: '#ccc', color: '#888' }
+                              : (orderLocation === 'inside' ? { backgroundColor: '#266668', color: 'white', fontWeight: 600 } : { color: '#266668', borderColor: '#266668' })
+                          }
                           onClick={() => {
+                            if (isManual && manualOrderType === 'TAKEAWAY') return;
                             setOrderLocation('inside');
                             setModalOrderType('room');
                             setManualOrderType('ROOM');
                             if (manualTableNo === 'TAKEAWAY') setManualTableNo('');
                           }}
+                          title={isManual && manualOrderType === 'TAKEAWAY' ? 'Order is set to Take Away at the top header' : 'Room Order'}
                         >
                           <i className="fas fa-hotel me-1"></i> IN SIDE
                         </button>
                         <button
                           type="button"
+                          disabled={isManual && manualOrderType === 'TAKEAWAY'}
                           className={`flex-grow-1 btn ${orderLocation === 'outside' ? 'btn-primary' : 'btn-outline-primary'}`}
-                          style={orderLocation === 'outside' ? { backgroundColor: '#266668', color: 'white', fontWeight: 600 } : { color: '#266668', borderColor: '#266668' }}
+                          style={
+                            isManual && manualOrderType === 'TAKEAWAY'
+                              ? { opacity: 0.35, cursor: 'not-allowed', borderColor: '#ccc', color: '#888' }
+                              : (orderLocation === 'outside' ? { backgroundColor: '#266668', color: 'white', fontWeight: 600 } : { color: '#266668', borderColor: '#266668' })
+                          }
                           onClick={() => {
+                            if (isManual && manualOrderType === 'TAKEAWAY') return;
                             setOrderLocation('outside');
                             setModalOrderType('table');
                             setManualOrderType('TABLE');
                             if (manualTableNo === 'TAKEAWAY') setManualTableNo('');
                           }}
+                          title={isManual && manualOrderType === 'TAKEAWAY' ? 'Order is set to Take Away at the top header' : 'Table Order'}
                         >
                           <i className="fas fa-chair me-1"></i> OUTSIDE
                         </button>
@@ -2273,6 +2309,12 @@ const CustomerQROrder = ({ isManual = false }) => {
                           </button>
                         )}
                       </div>
+                      {isManual && manualOrderType === 'TAKEAWAY' && (
+                        <div className="small text-muted mt-2 d-flex align-items-center" style={{ fontSize: '0.78rem' }}>
+                          <i className="fas fa-lock text-warning me-1"></i>
+                          <span>Order Mode is set to <strong>Take Away (0% SC)</strong> from the top bar. (Location locked)</span>
+                        </div>
+                      )}
                     </div>
 
                     {orderLocation !== 'takeaway' && manualOrderType !== 'TAKEAWAY' ? (
