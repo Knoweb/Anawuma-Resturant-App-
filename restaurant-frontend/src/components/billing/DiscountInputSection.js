@@ -68,11 +68,13 @@ export const renderDiscountSectionHtml = ({
   initialValue = 0,
   initialReason = '',
   initialDiningType = 'DINE_IN',
+  hideDiningType = false,
 }) => {
   const hasInitialDiscount = initialValue > 0;
   const isTakeaway = initialDiningType === 'TAKEAWAY';
   return `
     <div class="discount-config-section mb-3 px-2 bg-light p-2 rounded border text-start" id="${idPrefix}-discount-wrapper">
+      ${!hideDiningType ? `
       <!-- Order Mode / Dining Type Selector -->
       <div class="mb-2">
         <label class="small fw-bold text-muted mb-1 d-block">
@@ -87,6 +89,7 @@ export const renderDiscountSectionHtml = ({
           </button>
         </div>
       </div>
+      ` : ''}
 
       <div class="d-flex justify-content-between align-items-center mb-2">
         <label class="small fw-bold text-muted mb-0">

@@ -358,7 +358,7 @@ const ManualTakeawayOrders = () => {
                     </table>
                 </div>
 
-                ${renderDiscountSectionHtml({ idPrefix: 'modal-takeaway-discount', initialDiningType: 'TAKEAWAY' })}
+                ${renderDiscountSectionHtml({ idPrefix: 'modal-takeaway-discount', initialDiningType: 'TAKEAWAY', hideDiningType: true })}
 
                 <div class="invoice-footer border-top pt-2">
                     <div class="d-flex justify-content-between px-2 mb-1">

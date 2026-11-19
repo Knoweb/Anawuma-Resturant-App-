@@ -352,7 +352,7 @@ const ManualRoomOrders = () => {
                     </table>
                 </div>
 
-                ${renderDiscountSectionHtml({ idPrefix: 'modal-room-discount', initialDiningType })}
+                ${renderDiscountSectionHtml({ idPrefix: 'modal-room-discount', initialDiningType, hideDiningType: true })}
 
                 <div class="invoice-footer border-top pt-2">
                     <div class="d-flex justify-content-between px-2 mb-1">
