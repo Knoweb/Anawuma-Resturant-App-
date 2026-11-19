@@ -215,10 +215,10 @@ export class OrdersService {
     // Date range filter
     if (from || to) {
       const startDate = from
-        ? new Date(`${from}T00:00:00.000Z`)
+        ? new Date(`${from}T00:00:00.000+05:30`)
         : new Date('1970-01-01');
       const endDate = to
-        ? new Date(`${to}T23:59:59.999Z`)
+        ? new Date(`${to}T23:59:59.999+05:30`)
         : new Date('2099-12-31');
 
       query.andWhere('order.createdAt BETWEEN :startDate AND :endDate', {

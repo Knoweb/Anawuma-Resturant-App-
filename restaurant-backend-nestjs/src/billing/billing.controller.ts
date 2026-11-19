@@ -165,7 +165,7 @@ export class BillingController {
   ) {
     return this.billingService.sendTransactionsToAccountant(
       req.user.restaurantId,
-      req.user.id,
+      req.user.userId || req.user.id,
       dto,
     );
   }
@@ -214,7 +214,7 @@ export class BillingController {
   ) {
     return this.billingService.acceptTransactionsByAccountant(
       req.user.restaurantId,
-      req.user.id,
+      req.user.userId || req.user.id,
       dto,
     );
   }
@@ -350,7 +350,7 @@ export class BillingController {
     return this.billingService.recordBillAction(
       dto,
       req.user.restaurantId,
-      req.user.id,
+      req.user.userId || req.user.id,
       ipAddress,
     );
   }

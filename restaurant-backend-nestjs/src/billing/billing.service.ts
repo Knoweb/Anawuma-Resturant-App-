@@ -305,9 +305,9 @@ export class BillingService implements OnModuleInit {
       totalAmount: calc.totalAmount,
       invoiceStatus: InvoiceStatus.PAID,
       isPrinted: true,
-      accountantTransferStatus: AccountantTransferStatus.PENDING,
-      sentToAccountantAt: now,
-      sentToAccountantByAdminId: adminId,
+      accountantTransferStatus: AccountantTransferStatus.NONE,
+      sentToAccountantAt: null,
+      sentToAccountantByAdminId: null,
       createdByAdminId: adminId,
       paymentMethod: payload.paymentMethod || PaymentMethod.CASH,
     });
@@ -332,9 +332,14 @@ export class BillingService implements OnModuleInit {
     startDate: Date;
     endDate: Date;
   } {
-    const dateLabel = date || new Date().toISOString().slice(0, 10);
-    const startDate = new Date(`${dateLabel}T00:00:00.000`);
-    const endDate = new Date(`${dateLabel}T23:59:59.999`);
+    let dateLabel = date;
+    if (!dateLabel) {
+      const now = new Date();
+      const slDate = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);
+      dateLabel = slDate.toISOString().slice(0, 10);
+    }
+    const startDate = new Date(`${dateLabel}T00:00:00.000+05:30`);
+    const endDate = new Date(`${dateLabel}T23:59:59.999+05:30`);
 
     if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
       throw new BadRequestException('Invalid date format. Use YYYY-MM-DD.');
@@ -936,10 +941,10 @@ export class BillingService implements OnModuleInit {
 
     if (from || to) {
       const startDate = from
-        ? new Date(`${from}T00:00:00.000Z`)
+        ? new Date(`${from}T00:00:00.000+05:30`)
         : new Date('1970-01-01');
       const endDate = to
-        ? new Date(`${to}T23:59:59.999Z`)
+        ? new Date(`${to}T23:59:59.999+05:30`)
         : new Date('2099-12-31');
       query.andWhere('invoice.createdAt BETWEEN :startDate AND :endDate', {
         startDate,
