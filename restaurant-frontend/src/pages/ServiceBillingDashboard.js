@@ -47,6 +47,32 @@ function getOrderAge(createdAt) {
   return `${h}h ${m}m ago`;
 }
 
+function renderLocationBadge(inv) {
+  if (!inv) return '–';
+  if (inv.diningType === 'TAKEAWAY' || (inv.tableNo && String(inv.tableNo).startsWith('TAKEAWAY'))) {
+    return (
+      <span className="badge bg-warning text-dark">
+        <i className="fas fa-shopping-bag me-1"></i>Take Away
+      </span>
+    );
+  }
+  if (inv.roomNo) {
+    return (
+      <span className="badge bg-secondary">
+        <i className="fas fa-bed me-1"></i>Room {inv.roomNo}
+      </span>
+    );
+  }
+  if (inv.tableNo) {
+    return (
+      <span>
+        <i className="fas fa-chair me-1 text-muted"></i>Table {inv.tableNo}
+      </span>
+    );
+  }
+  return '–';
+}
+
 // ---------------------------------------------------------------------------
 // Printable Invoice component (rendered off-screen, triggered by window.print)
 // ---------------------------------------------------------------------------
@@ -1258,7 +1284,7 @@ const ServiceBillingDashboard = ({
                           </th>
                           <th>Invoice No</th>
                           <th>Order No</th>
-                          <th>TABLE / ROOM</th>
+                          <th>Type / Location</th>
                           <th>Total</th>
                           <th>Paid At</th>
                           <th>Transfer Status</th>
@@ -1281,7 +1307,7 @@ const ServiceBillingDashboard = ({
                               </td>
                               <td><code>{inv.invoiceNumber}</code></td>
                               <td>{inv.orderNo || inv.orderId}</td>
-                              <td>{inv.roomNo ? `Room ${inv.roomNo}` : (inv.tableNo ? `Table - ${inv.tableNo}` : '–')}</td>
+                              <td>{renderLocationBadge(inv)}</td>
                               <td>{formatCurrency(inv.totalAmount)}</td>
                               <td>{formatDateTime(inv.updatedAt)}</td>
                               <td>
@@ -1413,7 +1439,7 @@ const ServiceBillingDashboard = ({
                       <thead>
                         <tr>
                           <th>Invoice No</th>
-                          <th>TABLE / ROOM</th>
+                          <th>Type / Location</th>
                           <th>Customer</th>
                           <th>Total</th>
                           <th>Status</th>
@@ -1425,7 +1451,7 @@ const ServiceBillingDashboard = ({
                         {invoices.map((inv) => (
                           <tr key={inv.invoiceId}>
                             <td><code>{inv.invoiceNumber}</code></td>
-                            <td>{inv.roomNo ? `Room ${inv.roomNo}` : (inv.tableNo ? `Table - ${inv.tableNo}` : '–')}</td>
+                            <td>{renderLocationBadge(inv)}</td>
                             <td>{inv.customerName || '–'}</td>
                             <td>{formatCurrency(inv.totalAmount)}</td>
                             <td>

@@ -28,6 +28,32 @@ const formatDateTime = (value) => {
   });
 };
 
+const renderLocationBadge = (invoice) => {
+  if (!invoice) return '-';
+  if (invoice.diningType === 'TAKEAWAY' || (invoice.tableNo && String(invoice.tableNo).startsWith('TAKEAWAY'))) {
+    return (
+      <span className="badge bg-warning text-dark">
+        <i className="fas fa-shopping-bag me-1"></i>Take Away
+      </span>
+    );
+  }
+  if (invoice.roomNo) {
+    return (
+      <span className="badge bg-secondary">
+        <i className="fas fa-bed me-1"></i>Room {invoice.roomNo}
+      </span>
+    );
+  }
+  if (invoice.tableNo) {
+    return (
+      <span>
+        <i className="fas fa-chair me-1 text-muted"></i>Table {invoice.tableNo}
+      </span>
+    );
+  }
+  return '-';
+};
+
 function AccountantDashboard() {
   const { user } = useAuthStore();
   const { subscribe, connected } = useWebSocket();
@@ -523,7 +549,7 @@ function AccountantDashboard() {
                                 </th>
                                 <th>Invoice</th>
                                 <th>Order</th>
-                                <th>Table</th>
+                                <th>Type / Location</th>
                                 <th>Customer</th>
                                 <th>Total</th>
                                 <th>Payment</th>
@@ -542,7 +568,7 @@ function AccountantDashboard() {
                                   </td>
                                   <td><code>{invoice.invoiceNumber}</code></td>
                                   <td>{invoice.orderNo || invoice.orderId}</td>
-                                  <td>{invoice.tableNo || '-'}</td>
+                                  <td>{renderLocationBadge(invoice)}</td>
                                   <td>{invoice.customerName || '-'}</td>
                                   <td>{formatCurrency(invoice.totalAmount)}</td>
                                   <td>
@@ -604,7 +630,7 @@ function AccountantDashboard() {
                               <tr>
                                 <th>Invoice</th>
                                 <th>Order</th>
-                                <th>Table</th>
+                                <th>Type / Location</th>
                                 <th>Customer</th>
                                 <th>Total</th>
                                 <th>Payment</th>
@@ -616,7 +642,7 @@ function AccountantDashboard() {
                                 <tr key={invoice.invoiceId}>
                                   <td><code>{invoice.invoiceNumber}</code></td>
                                   <td>{invoice.orderNo || invoice.orderId}</td>
-                                  <td>{invoice.tableNo || '-'}</td>
+                                  <td>{renderLocationBadge(invoice)}</td>
                                   <td>{invoice.customerName || '-'}</td>
                                   <td>{formatCurrency(invoice.totalAmount)}</td>
                                   <td>
