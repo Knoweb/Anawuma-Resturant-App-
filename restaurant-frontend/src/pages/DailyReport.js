@@ -4,6 +4,7 @@ import Navbar from '../components/common/Navbar';
 import apiClient from '../api/apiClient';
 import Swal from 'sweetalert2';
 import { clearThermalPrintMode } from '../utils/thermalPrint';
+import { getLocalDateString } from '../utils/dateUtils';
 import './DailyReport.css';
 
 function DailyReport() {
@@ -169,7 +170,7 @@ function DailyReport() {
                     className="form-control"
                     value={selectedDate}
                     onChange={(e) => setSelectedDate(e.target.value)}
-                    max={new Date().toISOString().split('T')[0]}
+                    max={getLocalDateString()}
                   />
                 </div>
                 <div className="filter-group">

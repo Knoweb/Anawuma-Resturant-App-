@@ -64,3 +64,17 @@ export const formatBillDate = (dateVal) => {
   });
 };
 
+/**
+ * Returns YYYY-MM-DD for a date in local calendar time (avoids UTC day rollover).
+ * Example output: "2026-11-20"
+ */
+export const getLocalDateString = (d = new Date()) => {
+  const date = d instanceof Date ? d : new Date(d);
+  if (isNaN(date.getTime())) return '';
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import apiClient from '../../api/apiClient';
 import Swal from 'sweetalert2';
+import { getLocalDateString } from '../../utils/dateUtils';
 
 function LiveOrdersQueue() {
   const [orders, setOrders] = useState([]);
@@ -8,8 +9,8 @@ function LiveOrdersQueue() {
 
   const fetchOrders = useCallback(async () => {
     try {
-      // Get today's date in YYYY-MM-DD format
-      const today = new Date().toISOString().split('T')[0];
+      // Get today's date in local YYYY-MM-DD format
+      const today = getLocalDateString();
       const response = await apiClient.get('/orders', {
         params: { from: today, to: today }
       });
