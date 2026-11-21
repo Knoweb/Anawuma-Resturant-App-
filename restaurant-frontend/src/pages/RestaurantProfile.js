@@ -153,12 +153,17 @@ function RestaurantProfile() {
       showCancelButton: true,
       confirmButtonText: 'Add Role',
       preConfirm: () => {
-        const email = document.getElementById('swal-input-email').value;
+        const email = document.getElementById('swal-input-email').value.trim();
         const password = document.getElementById('swal-input-password').value;
         const role = document.getElementById('swal-input-role').value;
 
         if (!email || !password || !role) {
           Swal.showValidationMessage('Please fill in all fields');
+          return false;
+        }
+
+        if (password.length < 6) {
+          Swal.showValidationMessage('Password must be at least 6 characters long');
           return false;
         }
 
@@ -176,7 +181,7 @@ function RestaurantProfile() {
         fetchData();
       } catch (error) {
         const msg = error.response?.data?.message;
-        const text = Array.isArray(msg) ? msg.join('\\n') : (msg || 'Failed to add role.');
+        const text = Array.isArray(msg) ? msg.join('\n') : (msg || 'Failed to add role.');
         Swal.fire('Error!', text, 'error');
       }
     }

@@ -277,6 +277,8 @@ export class AuthService {
    * Create a new admin (Super Admin can create any, Restaurant Admin can only create their own staff)
    */
   async createAdmin(createAdminDto: CreateAdminDto, ownerRestaurantId?: number): Promise<Admin> {
+    const email = (createAdminDto.email || '').trim().toLowerCase();
+
     // If ownerRestaurantId is provided (called by a restaurant owner), enforce it
     if (ownerRestaurantId) {
       createAdminDto.restaurantId = ownerRestaurantId;
@@ -287,10 +289,11 @@ export class AuthService {
       }
     }
 
-    // Check if email already exists
-    const existingAdmin = await this.adminRepository.findOne({
-      where: { email: createAdminDto.email },
-    });
+    // Check if email already exists (case-insensitive)
+    const existingAdmin = await this.adminRepository
+      .createQueryBuilder('admin')
+      .where('LOWER(admin.email) = :email', { email })
+      .getOne();
 
     if (existingAdmin) {
       throw new ConflictException('Email already exists');
@@ -301,7 +304,7 @@ export class AuthService {
 
     // Create admin
     const admin = this.adminRepository.create({
-      email: createAdminDto.email,
+      email,
       password: hashedPassword,
       role: createAdminDto.role,
       restaurantId: createAdminDto.restaurantId,

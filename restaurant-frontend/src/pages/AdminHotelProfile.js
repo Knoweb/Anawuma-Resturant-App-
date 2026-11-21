@@ -247,15 +247,18 @@ function AdminHotelProfile() {
       title: 'Add New Role',
       html: `
         <div style="text-align: left;">
-          <label style="display: block; margin-bottom: 5px;">Email</label>
-          <input id="swal-input-email" class="swal2-input" placeholder="Email" type="email">
-          <label style="display: block; margin-bottom: 5px; margin-top: 15px;">Password</label>
-          <input id="swal-input-password" class="swal2-input" placeholder="Password" type="password">
-          <select id="swal-input-role" class="swal2-input" style="width: 100%; box-sizing: border-box;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 600;">Email</label>
+          <input id="swal-input-email" class="swal2-input" placeholder="Staff email" type="email" style="margin: 0 0 15px 0; width: 100%; box-sizing: border-box;">
+          
+          <label style="display: block; margin-bottom: 5px; font-weight: 600;">Password</label>
+          <input id="swal-input-password" class="swal2-input" placeholder="Password (min 6 characters)" type="password" style="margin: 0 0 15px 0; width: 100%; box-sizing: border-box;">
+          
+          <label style="display: block; margin-bottom: 5px; font-weight: 600;">Role</label>
+          <select id="swal-input-role" class="swal2-input" style="margin: 0; width: 100%; box-sizing: border-box;">
+            ${(restaurant.enableCashier ?? true) ? '<option value="cashier">Cashier</option>' : ''}
+            ${(restaurant.enableKds ?? true) ? '<option value="kitchen">Kitchen</option>' : ''}
+            ${(restaurant.enableAccountant ?? true) ? '<option value="accountant">Accountant</option>' : ''}
             ${restaurant.enableSteward ? '<option value="steward">Steward</option>' : ''}
-            ${restaurant.enableKds ? '<option value="kitchen">Kitchen</option>' : ''}
-            ${restaurant.enableCashier ? '<option value="cashier">Cashier</option>' : ''}
-            ${restaurant.enableAccountant ? '<option value="accountant">Accountant</option>' : ''}
             ${restaurant.enableHousekeeping ? '<option value="housekeeper">Housekeeper</option>' : ''}
           </select>
         </div>
@@ -264,16 +267,31 @@ function AdminHotelProfile() {
       showCancelButton: true,
       confirmButtonText: 'Add Role',
       preConfirm: () => {
-        const email = document.getElementById('swal-input-email').value;
+        const email = document.getElementById('swal-input-email').value.trim();
         const password = document.getElementById('swal-input-password').value;
         const role = document.getElementById('swal-input-role').value;
 
-        if (!email || !password || !role) {
-          Swal.showValidationMessage('Please fill in all fields');
+        if (!email) {
+          Swal.showValidationMessage('Please enter an email address');
           return false;
         }
 
-        return { email, password, role };
+        if (!password) {
+          Swal.showValidationMessage('Please enter a password');
+          return false;
+        }
+
+        if (password.length < 6) {
+          Swal.showValidationMessage('Password must be at least 6 characters long');
+          return false;
+        }
+
+        if (!role) {
+          Swal.showValidationMessage('Please select a role');
+          return false;
+        }
+
+        return { email, password, role, restaurantId: id ? parseInt(id) : undefined };
       }
     });
 
@@ -283,7 +301,9 @@ function AdminHotelProfile() {
         Swal.fire('Success!', 'New role added successfully.', 'success');
         fetchData();
       } catch (error) {
-        Swal.fire('Error!', error.response?.data?.message || 'Failed to add role.', 'error');
+        const msg = error.response?.data?.message;
+        const text = Array.isArray(msg) ? msg.join('\n') : (msg || 'Failed to add role.');
+        Swal.fire('Error!', text, 'error');
       }
     }
   };

@@ -6,24 +6,22 @@ import {
   IsIn,
   IsNumber,
   IsOptional,
-  Matches,
 } from 'class-validator';
 
 export class CreateAdminDto {
-  @IsEmail()
-  @IsNotEmpty()
+  @IsEmail({}, { message: 'Please enter a valid email address' })
+  @IsNotEmpty({ message: 'Email is required' })
   email: string;
 
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(8, { message: 'Password must be at least 8 characters long' })
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, {
-    message: 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
-  })
+  @IsString({ message: 'Password must be text' })
+  @IsNotEmpty({ message: 'Password is required' })
+  @MinLength(6, { message: 'Password must be at least 6 characters long' })
   password: string;
 
-  @IsIn(['admin', 'super_admin', 'housekeeper', 'kitchen', 'cashier', 'accountant', 'steward'])
-  @IsNotEmpty()
+  @IsIn(['admin', 'super_admin', 'housekeeper', 'kitchen', 'cashier', 'accountant', 'steward'], {
+    message: 'Invalid role selected',
+  })
+  @IsNotEmpty({ message: 'Role is required' })
   role:
     | 'admin'
     | 'super_admin'
